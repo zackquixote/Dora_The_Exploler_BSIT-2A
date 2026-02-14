@@ -13,6 +13,8 @@ $('#addUserForm').on('submit', function (e) {
         method: 'POST',
         data: $(this).serialize(),
         dataType: 'json',
+
+
         success: function (response) {
             if (response.status === 'success') {
                 $('#AddNewModal').modal('hide');
