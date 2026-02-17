@@ -6,9 +6,9 @@ use App\Models\UserModel;
 use CodeIgniter\Controller;
 use App\Models\LogModel;
 use App\Models\PersonModel;
+
 class Person extends Controller
 {
-
     public function index(){
         $model = new PersonModel();
         $data['person'] = $model->findAll();
@@ -26,41 +26,34 @@ class Person extends Controller
             'name'       => $name,
             'bday'      => $bday
         ];
-        
-        if ($userModel->insert($data)) {
+
+        if ($userModel->insert($data) !== false) {
             $logModel->addLog('New Person has been added: ' . $name, 'ADD');
             return $this->response->setJSON(['status' => 'success']);
         } else {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to save user']);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to save person']);
         }
     }
 
     public function update(){
         $model = new UserModel();
         $logModel = new LogModel();
-        $personId = $this->request->getPost('id');
+        $userId = $this->request->getPost('id');
         $name = $this->request->getPost('name');
         $bday = $this->request->getPost('bday');
-       
-  
-    
 
-   
         $userData = [
             'name'       => $name,
-            'bday'      => $bday
-           
+            'bday'      => $bday,
         ];
-
-       
 
         $updated = $model->update($userId, $userData);
 
         if ($updated) {
-            $logModel->addLog('New User has been apdated: ' . $name, 'UPDATED');
+            $logModel->addLog('New Person has been apdated: ' . $name, 'UPDATED');
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'User updated successfully.'
+                'message' => 'Person updated successfully.'
             ]);
         } else {
             return $this->response->setJSON([
@@ -71,7 +64,7 @@ class Person extends Controller
     }
 
     public function edit($id){
-        $model = new UserModel();
+        $model = new PersonModel();
     $user = $model->find($id); // Fetch user by ID
 
     if ($user) {
@@ -81,21 +74,27 @@ class Person extends Controller
     }
 }
 
-public function delete($id){
-    $model = new UserModel();
+public function delete($id = null){
+    $model = new PersonModel();
     $logModel = new LogModel();
-    $user = $model->find($id);
-    if (!$user) {
-        return $this->response->setJSON(['success' => false, 'message' => 'User not found.']);
+    
+    // Get deletion criteria from request (either id or name)
+    $deleteId = $id ?? $this->request->getPost('id');
+    $deleteName = $this->request->getPost('name');
+    
+    // Validate that we have something to delete by
+    if (!$deleteId && !$deleteName) {
+        return $this->response->setJSON(['success' => false, 'message' => 'No ID or name provided.']);
     }
-
-    $deleted = $model->delete($id);
-
+    
+    // Delete by ID or name
+    $deleted = $deleteId ? $model->delete($deleteId) : $model->where('name', $deleteName)->delete();
+    
     if ($deleted) {
-        $logModel->addLog('Delete user', 'DELETED');
-        return $this->response->setJSON(['success' => true, 'message' => 'User deleted successfully.']);
+        $logModel->addLog('Person deleted: ' . ($deleteName ?? $deleteId), 'DELETE');
+        return $this->response->setJSON(['success' => true, 'message' => 'Person deleted successfully.']);
     } else {
-        return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete user.']);
+        return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete person.']);
     }
 }
 

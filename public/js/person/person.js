@@ -13,21 +13,18 @@ $('#addUserForm').on('submit', function (e) {
         method: 'POST',
         data: $(this).serialize(),
         dataType: 'json',
-
-
         success: function (response) {
             if (response.status === 'success') {
                 $('#AddNewModal').modal('hide');
                 $('#addUserForm')[0].reset();
-                showToast('success', 'User added successfully!');
+                showToast('success', 'Person added successfully!');
                 setTimeout(() => {
                     location.reload();
                 }, 1000); 
             } else {
-                showToast('error', response.message || 'Failed to add user.');
+                showToast('error', response.message || 'Failed to add person.');
             }
         },
-
         error: function () {
             showToast('error', 'An error occurred.');
         }
@@ -45,14 +42,13 @@ $(document).on('click', '.edit-btn', function () {
             $('#editUserModal #name').val(response.data.name);
             $('#editUserModal #userId').val(response.data.id);
             $('#editUserModal #bday').val(response.data.bday);
-          
             $('#editUserModal').modal('show');
         } else {
-            alert('Error fetching user data');
+            alert('Error fetching person data');
         }
     },
     error: function () {
-        alert('Error fetching user data');
+        alert('Error fetching person data');
     }
 });
 });
@@ -63,14 +59,14 @@ $(document).ready(function () {
         e.preventDefault(); 
 
         $.ajax({
-            url: baseUrl + 'users/update',
+            url: baseUrl + 'person/update',
             method: 'POST',
             data: $(this).serialize(),
             dataType: 'json',
             success: function (response) {
                 if (response.success) {
                     $('#editUserModal').modal('hide');
-                    showToast('success', 'User Updated successfully!');
+                    showToast('success', 'Person Updated successfully!');
                     setTimeout(() => location.reload(), 1000);
                 } else {
                     alert('Error updating: ' + (response.message || 'Unknown error'));
@@ -89,9 +85,9 @@ $(document).on('click', '.deleteUserBtn', function () {
     const csrfName = $('meta[name="csrf-name"]').attr('content');
     const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-    if (confirm('Are you sure you want to delete this user?')) {
+    if (confirm('Are you sure you want to delete this person?')) {
         $.ajax({
-            url: baseUrl + 'users/delete/' + userId,
+            url: baseUrl + 'person/delete/' + userId,
             method: 'POST', 
             data: {
                 _method: 'DELETE',
@@ -99,7 +95,7 @@ $(document).on('click', '.deleteUserBtn', function () {
             },
             success: function (response) {
                 if (response.success) {
-                    showToast('success', 'Users deleted successfully.');
+                    showToast('success', 'Person deleted successfully.');
                     setTimeout(() => location.reload(), 1000);
                 } else {
                     alert(response.message || 'Failed to delete.');
@@ -132,7 +128,7 @@ $(document).ready(function () {
         { data: 'row_number' },
         { data: 'id', visible: false },
         { data: 'name' },
-       { data : 'bday'},
+        { data: 'bday' },
         {
             data: null,
             orderable: false,
