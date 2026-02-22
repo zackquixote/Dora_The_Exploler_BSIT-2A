@@ -37,10 +37,10 @@ class Person extends Controller
     }
 
 //error handling for update, if id is not found, return error message
-public function update(){
-    $model = new PersonModel();
+ public function update(){
+    $model = new PersonModel(); 
     $logModel = new LogModel();
- 
+
     $userId = $this->request->getPost('id');
 
     $data = [
@@ -48,23 +48,29 @@ public function update(){
         'bday' => $this->request->getPost('bday'),
     ];
 
-    $updated = $model->update($userId, $data); // id targets the row, data only updates name & bday
+    if ($model->update($userId, $data)) {
+        $logModel->addLog('Person updated: ' . $data['name'], 'UPDATED');
 
-    if ($updated) {
-        $logModel->addLog('Person updated: ' . $data['name'], 'EDIT');
-        return $this->response->setJSON(['success' => true, 'message' => 'Person updated successfully.']);
-    } else {
-        return $this->response->setJSON(['success' => false, 'message' => 'Failed to update person.']);
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Person updated successfully.'
+        ]);
     }
+
+    return $this->response->setJSON([
+        'success' => false,
+        'message' => 'Error updating person.'
+    ]);
 }
 
-public function edit($name){
+    public function edit($id){
         $model = new PersonModel();
-    $person = $model->where('name', $name)->first(); // Fetch user by by name
-    if ($person) {
-        return $this->response->setJSON(['data' => $person]); // Return user data as JSON
+    $user = $model->find($id); // Fetch user by ID
+
+    if ($user) {
+        return $this->response->setJSON(['data' => $user]); // Return user data as JSON
     } else {
-        return $this->response->setStatusCode(404)->setJSON(['error' => 'person not found']);
+        return $this->response->setStatusCode(404)->setJSON(['error' => 'User not found']);
     }
 }
 
