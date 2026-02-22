@@ -15,6 +15,7 @@ class Person extends Controller
         return view('person/index', $data);
     }
 
+//working on this one
     public function save(){
         $name = $this->request->getPost('name');
         $bday = $this->request->getPost('bday');
@@ -35,71 +36,58 @@ class Person extends Controller
         }
     }
 
-    public function update(){
-        $model = new UserModel();
-        $logModel = new LogModel();
-        $userId = $this->request->getPost('id');
-        $name = $this->request->getPost('name');
-        $bday = $this->request->getPost('bday');
+//error handling for update, if id is not found, return error message
+public function update(){
+    $model = new PersonModel();
+    $logModel = new LogModel();
+ 
+    $userId = $this->request->getPost('id');
 
-        $userData = [
-            'name'       => $name,
-            'bday'      => $bday,
-        ];
+    $data = [
+        'name' => $this->request->getPost('name'),
+        'bday' => $this->request->getPost('bday'),
+    ];
 
-        $updated = $model->update($userId, $userData);
+    $updated = $model->update($userId, $data); // id targets the row, data only updates name & bday
 
-        if ($updated) {
-            $logModel->addLog('New Person has been apdated: ' . $name, 'UPDATED');
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Person updated successfully.'
-            ]);
-        } else {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Error updating user.'
-            ]);
-        }
-    }
-
-    public function edit($id){
-        $model = new PersonModel();
-    $user = $model->find($id); // Fetch user by ID
-
-    if ($user) {
-        return $this->response->setJSON(['data' => $user]); // Return user data as JSON
+    if ($updated) {
+        $logModel->addLog('Person updated: ' . $data['name'], 'EDIT');
+        return $this->response->setJSON(['success' => true, 'message' => 'Person updated successfully.']);
     } else {
-        return $this->response->setStatusCode(404)->setJSON(['error' => 'User not found']);
+        return $this->response->setJSON(['success' => false, 'message' => 'Failed to update person.']);
     }
 }
 
-public function delete($id = null){
+public function edit($name){
+        $model = new PersonModel();
+    $person = $model->where('name', $name)->first(); // Fetch user by by name
+    if ($person) {
+        return $this->response->setJSON(['data' => $person]); // Return user data as JSON
+    } else {
+        return $this->response->setStatusCode(404)->setJSON(['error' => 'person not found']);
+    }
+}
+
+//error handling for delete, if name is not found, return error message
+public function delete($name){
     $model = new PersonModel();
     $logModel = new LogModel();
-    
-    // Get deletion criteria from request (either id or name)
-    $deleteId = $id ?? $this->request->getPost('id');
-    $deleteName = $this->request->getPost('name');
-    
-    // Validate that we have something to delete by
-    if (!$deleteId && !$deleteName) {
-        return $this->response->setJSON(['success' => false, 'message' => 'No ID or name provided.']);
-    }
-    
-    // Delete by ID or name
-    $deleted = $deleteId ? $model->delete($deleteId) : $model->where('name', $deleteName)->delete();
-    
+
+    $deleteName = $name ?? $this->request->getPost('name'); // one variable is enough
+
+    $deleted = $model->where('name', $deleteName)->delete();
+
     if ($deleted) {
-        $logModel->addLog('Person deleted: ' . ($deleteName ?? $deleteId), 'DELETE');
+        $logModel->addLog('Person deleted: ' . $deleteName, 'DELETE');
         return $this->response->setJSON(['success' => true, 'message' => 'Person deleted successfully.']);
     } else {
         return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete person.']);
     }
 }
 
-public function fetchRecords()
-{
+
+//working on this one
+public function fetchRecords(){
     $request = service('request');
     $model = new \App\Models\PersonModel();
 
@@ -124,5 +112,4 @@ public function fetchRecords()
         'data' => $data,
     ]);
 }
-
 }
