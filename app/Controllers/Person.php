@@ -74,23 +74,29 @@ class Person extends Controller
     }
 }
 
-//error handling for delete, if name is not found, return error message
-public function delete($name){
+public function delete($id = null){
     $model = new PersonModel();
     $logModel = new LogModel();
-
-    $deleteName = $name ?? $this->request->getPost('name'); // one variable is enough
-
-    $deleted = $model->where('name', $deleteName)->delete();
-
+    
+    // Get deletion criteria from request (either id or name)
+    $deleteId = $id ?? $this->request->getPost('id');
+    $deleteName = $this->request->getPost('name');
+    
+    // Validate that we have something to delete by
+    if (!$deleteId && !$deleteName) {
+        return $this->response->setJSON(['success' => false, 'message' => 'No ID or name provided.']);
+    }
+    
+    // Delete by ID or name
+    $deleted = $deleteId ? $model->delete($deleteId) : $model->where('name', $deleteName)->delete();
+    
     if ($deleted) {
-        $logModel->addLog('Person deleted: ' . $deleteName, 'DELETE');
+        $logModel->addLog('Person deleted: ' . ($deleteName ?? $deleteId), 'DELETE');
         return $this->response->setJSON(['success' => true, 'message' => 'Person deleted successfully.']);
     } else {
         return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete person.']);
     }
 }
-
 
 //working on this one
 public function fetchRecords(){
