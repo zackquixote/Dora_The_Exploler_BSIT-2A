@@ -11,7 +11,10 @@ class Auth extends BaseController
     public function index()
     {
         if (session()->get('logged_in')) {
-            return redirect()->to('/dashboard');
+            $role = session()->get('role');
+            return $role === 'admin'
+                ? redirect()->to('/admin/dashboard')
+                : redirect()->to('/staff/dashboard');
         }
 
         // Check if lockout expiry is active
@@ -30,11 +33,11 @@ class Auth extends BaseController
         return view('login', ['lockout' => $lockout]);
     }
 
-   public function auth()
-{
-    $session = session();
-    $model = new UserModel();
-    $db = \Config\Database::connect();
+    public function auth()
+    {
+        $session = session();
+        $model = new UserModel();
+        $db = \Config\Database::connect();
 
     // Sanitize input
     $email = filter_var($this->request->getPost('email'), FILTER_SANITIZE_EMAIL);
