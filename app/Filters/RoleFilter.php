@@ -1,10 +1,11 @@
 <?php
 namespace App\Filters;
-use CodeIgniter\HTTP\RequestInterface; 
+
+use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Filters\FilterInterface;
 
-class RoleFilter implements FilterInterface  // ← renamed to RoleFilter (no 's')
+class RoleFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
@@ -15,15 +16,11 @@ class RoleFilter implements FilterInterface  // ← renamed to RoleFilter (no 's
         $role = session()->get('role');
 
         if ($arguments && in_array($role, $arguments)) {
-            return; // Role matches, allow access
+            return; 
         }
 
-        // Role doesn't match
         return redirect()->to('/login')->with('error', 'Access denied.');
     }
 
-    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-    {
-        // No post-processing needed
-    }
+    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null) {}
 }

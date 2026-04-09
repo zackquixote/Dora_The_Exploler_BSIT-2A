@@ -16,8 +16,9 @@ class Login extends BaseController
         return redirect()->to('/dashboard');
     }
 
+
     public function dashboard()
     {
-        return view('adminlte_view'); // make sure this file exists in app/Views
+        return view('adminlte_view'); 
     }
 }

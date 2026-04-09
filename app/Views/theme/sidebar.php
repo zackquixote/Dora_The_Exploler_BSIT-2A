@@ -31,8 +31,8 @@
 .nav-sidebar .nav-link.active {
     background: linear-gradient(
         to right,
-        rgba(255, 165, 0, 0.05),   /* extremely light orange */
-        rgba(255, 165, 0, 0.01)    /* almost invisible */
+        rgba(255, 165, 0, 0.05),
+        rgba(255, 165, 0, 0.01)
     ) !important;
     box-shadow: none !important;
 }
@@ -64,9 +64,8 @@ body.dark-mode .main-sidebar .nav-icon {
 /* Active or hovered link */
 body.dark-mode .main-sidebar .nav-link.active,
 body.dark-mode .main-sidebar .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important; /* slightly lighter bg on hover/active */
+    background-color: rgba(255, 255, 255, 0.1) !important;
 }
-
 </style>
 
 
@@ -82,7 +81,7 @@ body.dark-mode .main-sidebar .nav-link:hover {
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
        <li class="nav-item">
-        <a href="<?= base_url('dashboard') ?>" class="nav-link <?= is_active(1, 'dashboard') ?>">
+        <a href="<?= base_url(session()->get('role') . '/dashboard') ?>" class="nav-link <?= is_active(1, 'dashboard') ?>">
          <i class="nav-icon fas fa-tachometer-alt"></i>
          <p>Dashboard</p>
        </a>

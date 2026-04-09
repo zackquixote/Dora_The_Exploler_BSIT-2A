@@ -1,5 +1,6 @@
 <?php
 namespace App\Controllers\Admin;
+
 use App\Controllers\BaseController;
 
 class Dashboard extends BaseController
@@ -10,6 +11,6 @@ class Dashboard extends BaseController
             return redirect()->to('/login');
         }
 
-        return view('admin/index');
+        return view('admin/dashboard');
     }
 }
