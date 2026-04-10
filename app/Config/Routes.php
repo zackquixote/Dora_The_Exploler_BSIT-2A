@@ -18,7 +18,7 @@ $routes->group('staff', ['namespace' => 'App\Controllers\Staff'], function($rout
 
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function($routes) {
     $routes->get('dashboard', 'Dashboard::index'); // ← ::index
-});
+}); 
 
 // User Accounts Routes
 $routes->get('/staff/users', 'Users::index');

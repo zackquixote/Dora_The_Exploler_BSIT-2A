@@ -1,0 +1,12 @@
+aa3f67b Quen1234 javyenkim@gmail.com fix: resolve redirect loop and routing issues for role-based dashboard navigation
+ba01b80 Quen1234 javyenkim@gmail.com feat: add role-based access control for admin and staff
+9595917 zackquixote lourdianrentinoakol@gmail.com lourd ian fix delete
+05a2d3b AGAmonADMIN agaporplayer@email.com Agapor:Added Update part
+740b54c zackquixote lourdianrentinoakol@gmail.com Initial commit
+e8e22b0 joefredalvior javyenkim@gmail.com save, read(fetchall) are working
+ba1ce06 joefredalvior lourdianrentinoakol@gmail.com save in controller is working
+f704dbd joefredalvior lourdianrentinoakol@gmail.com error index
+0f87865 joefredalvior lourdianrentinoakol@gmail.com first commit
+d094f41 joefredalvior lourdianrentinoakol@gmail.com first commit
+83f52d7 joefredalvior lourdianrentinoakol@gmail.com first commit
+d272568 Glenn Azuelo glenn@localhost.localdomain Initial COmmit
