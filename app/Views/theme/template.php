@@ -172,4 +172,3 @@ themeToggle.addEventListener('click', function(e){
         localStorage.setItem('adminlteTheme','dark');
     }
 });
-</script>

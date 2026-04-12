@@ -13,11 +13,11 @@ class Resident extends BaseController
 
     public function __construct()
     {
-        $this->residentModel = new ResidentModel();
+        $this->residentModel  = new ResidentModel();
         $this->householdModel = new HouseholdModel();
     }
 
-    // ─── VIEWS ───────────────────────────────────────────────────────────────
+    // ───────────────────────── VIEW ─────────────────────────
 
     public function index()
     {
@@ -30,55 +30,41 @@ class Resident extends BaseController
         ]);
     }
 
-    public function create()
-    {
-        if (!session()->get('logged_in')) {
-            return redirect()->to('/login');
-        }
-
-        return view('Staff/create', [
-            'title' => 'Add New Resident'
-        ]);
-    }
-
-    public function edit($id)
-    {
-        if (!session()->get('logged_in')) {
-            return redirect()->to('/login');
-        }
-
-        $resident = $this->residentModel->find($id);
-        if (!$resident) {
-            return redirect()->to(base_url('residents'))->with('error', 'Resident not found.');
-        }
-
-        return view('Staff/edit', [
-            'title'    => 'Edit Resident',
-            'resident' => $resident
-        ]);
-    }
-
-    // ─── AJAX: DATATABLES LIST ────────────────────────────────────────────────
+    // ───────────────────────── DATATABLE LIST ─────────────────────────
 
     public function list()
     {
         if (!session()->get('logged_in')) {
-            return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
+            return $this->response->setStatusCode(401)
+                ->setJSON(['error' => 'Unauthorized']);
         }
 
-        $draw        = intval($this->request->getPost('draw') ?? 1);
-        $start       = intval($this->request->getPost('start') ?? 0);
-        $length      = intval($this->request->getPost('length') ?? 10);
-        $searchValue = $this->request->getPost('search')['value'] ?? '';
+        $request = $this->request;
 
-        $db      = \Config\Database::connect();
+        $draw   = (int) ($request->getPost('draw') ?? 1);
+        $start  = (int) ($request->getPost('start') ?? 0);
+        $length = (int) ($request->getPost('length') ?? 10);
+
+        $searchValue = $request->getPost('search')['value'] ?? '';
+
+        $db = \Config\Database::connect();
+
+        // BASE QUERY
         $builder = $db->table('residents r');
         $builder->select('r.*, h.household_no, h.address AS household_address');
         $builder->join('households h', 'h.id = r.household_id', 'left');
         $builder->where('r.status', 'active');
 
+        // TOTAL RECORDS (NO SEARCH)
+        $totalRecords = $db->table('residents')
+            ->where('status', 'active')
+            ->countAllResults();
+
+        // SEARCH FILTER (CLONE BUILDER SAFELY)
+        $filteredBuilder = clone $builder;
+
         if (!empty($searchValue)) {
-            $builder->groupStart()
+            $filteredBuilder->groupStart()
                 ->like('r.first_name', $searchValue)
                 ->orLike('r.last_name', $searchValue)
                 ->orLike('r.middle_name', $searchValue)
@@ -87,11 +73,29 @@ class Resident extends BaseController
                 ->groupEnd();
         }
 
-        $totalRecords    = $db->table('residents')->where('status', 'active')->countAllResults();
-        $filteredRecords = $builder->countAllResults(false);
+        $filteredRecords = $filteredBuilder->countAllResults();
 
-        $builder->orderBy('r.id', 'DESC')->limit($length, $start);
-        $data = $builder->get()->getResultArray();
+        // DATA QUERY (FRESH BUILDER)
+        $dataBuilder = $db->table('residents r');
+        $dataBuilder->select('r.*, h.household_no, h.address AS household_address');
+        $dataBuilder->join('households h', 'h.id = r.household_id', 'left');
+        $dataBuilder->where('r.status', 'active');
+
+        if (!empty($searchValue)) {
+            $dataBuilder->groupStart()
+                ->like('r.first_name', $searchValue)
+                ->orLike('r.last_name', $searchValue)
+                ->orLike('r.middle_name', $searchValue)
+                ->orLike('r.contact_number', $searchValue)
+                ->orLike('h.household_no', $searchValue)
+                ->groupEnd();
+        }
+
+        $data = $dataBuilder
+            ->orderBy('r.id', 'DESC')
+            ->limit($length, $start)
+            ->get()
+            ->getResultArray();
 
         return $this->response->setJSON([
             'draw'            => $draw,
@@ -101,7 +105,7 @@ class Resident extends BaseController
         ]);
     }
 
-    // ─── AJAX: HOUSEHOLDS DROPDOWN ────────────────────────────────────────────
+    // ───────────────────────── HOUSEHOLDS ─────────────────────────
 
     public function households()
     {
@@ -110,10 +114,14 @@ class Resident extends BaseController
             ->orderBy('household_no', 'ASC')
             ->findAll();
 
-        return $this->response->setJSON(['status' => 'success', 'data' => $households]);
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data'   => $households,
+            'csrf_hash' => csrf_hash()
+        ]);
     }
 
-    // ─── AJAX: STORE (CREATE) ─────────────────────────────────────────────────
+    // ───────────────────────── STORE ─────────────────────────
 
     public function store()
     {
@@ -130,6 +138,7 @@ class Resident extends BaseController
                 'status'  => 'error',
                 'message' => 'Validation failed.',
                 'errors'  => $this->validator->getErrors(),
+                'csrf_hash' => csrf_hash()
             ]);
         }
 
@@ -150,54 +159,62 @@ class Resident extends BaseController
             'registered_by'        => session()->get('user_id') ?? 1,
         ];
 
-        if ($this->residentModel->insert($data)) {
-            return $this->response->setJSON([
-                'status'  => 'success',
+        return $this->residentModel->insert($data)
+            ? $this->response->setJSON([
+                'status' => 'success',
                 'message' => 'Resident added successfully.',
+                'csrf_hash' => csrf_hash()
+            ])
+            : $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to save resident.',
+                'csrf_hash' => csrf_hash()
+            ]);
+    }
+
+    // ───────────────────────── SHOW ─────────────────────────
+
+    public function show($id)
+    {
+        $db = \Config\Database::connect();
+
+        $resident = $db->table('residents r')
+            ->select('r.*, h.household_no, h.address AS household_address')
+            ->join('households h', 'h.id = r.household_id', 'left')
+            ->where('r.id', $id)
+            ->get()
+            ->getRowArray();
+
+        if (!$resident) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Resident not found',
+                'csrf_hash' => csrf_hash()
             ]);
         }
 
         return $this->response->setJSON([
-            'status'  => 'error',
-            'message' => 'Failed to save resident.',
-            'errors'  => $this->residentModel->errors(),
+            'status' => 'success',
+            'data'   => $resident,
+            'csrf_hash' => csrf_hash()
         ]);
     }
 
-    // ─── AJAX: SHOW (GET ONE) ─────────────────────────────────────────────────
-
-    public function show($id)
-    {
-        $db      = \Config\Database::connect();
-        $builder = $db->table('residents r');
-        $builder->select('r.*, h.household_no, h.address AS household_address');
-        $builder->join('households h', 'h.id = r.household_id', 'left');
-        $builder->where('r.id', $id);
-        $resident = $builder->get()->getRowArray();
-
-        if (!$resident) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Resident not found.']);
-        }
-
-        return $this->response->setJSON(['status' => 'success', 'data' => $resident]);
-    }
-
-    // ─── AJAX: UPDATE ─────────────────────────────────────────────────────────
+    // ───────────────────────── UPDATE ─────────────────────────
 
     public function update($id)
     {
-        $rules = [
-            'first_name' => 'required|min_length[2]|max_length[100]',
-            'last_name'  => 'required|min_length[2]|max_length[100]',
+        if (!$this->validate([
+            'first_name' => 'required|min_length[2]',
+            'last_name'  => 'required|min_length[2]',
             'birthdate'  => 'required|valid_date',
             'sex'        => 'required|in_list[male,female]',
-        ];
-
-        if (!$this->validate($rules)) {
+        ])) {
             return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Validation failed.',
-                'errors'  => $this->validator->getErrors(),
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $this->validator->getErrors(),
+                'csrf_hash' => csrf_hash()
             ]);
         }
 
@@ -216,27 +233,33 @@ class Resident extends BaseController
             'is_senior_citizen'    => $this->request->getPost('is_senior_citizen') ? 1 : 0,
         ];
 
-        if ($this->residentModel->update($id, $data)) {
-            return $this->response->setJSON([
-                'status'  => 'success',
-                'message' => 'Resident updated successfully.',
+        return $this->residentModel->update($id, $data)
+            ? $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Resident updated successfully',
+                'csrf_hash' => csrf_hash()
+            ])
+            : $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Update failed',
+                'csrf_hash' => csrf_hash()
             ]);
-        }
-
-        return $this->response->setJSON([
-            'status'  => 'error',
-            'message' => 'Update failed.',
-            'errors'  => $this->residentModel->errors(),
-        ]);
     }
 
-    // ─── AJAX: DELETE ─────────────────────────────────────────────────────────
+    // ───────────────────────── DELETE ─────────────────────────
 
     public function delete($id)
     {
-        if ($this->residentModel->delete($id)) {
-            return $this->response->setJSON(['status' => 'success', 'message' => 'Resident deleted.']);
-        }
-        return $this->response->setJSON(['status' => 'error', 'message' => 'Delete failed.']);
+        return $this->residentModel->delete($id)
+            ? $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Resident deleted',
+                'csrf_hash' => csrf_hash()
+            ])
+            : $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Delete failed',
+                'csrf_hash' => csrf_hash()
+            ]);
     }
 }

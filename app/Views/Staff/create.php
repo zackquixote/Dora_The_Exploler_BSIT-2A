@@ -110,12 +110,6 @@
                   <input type="text" name="contact_number" class="form-control" placeholder="0912 345 6789" value="<?= old('contact_number') ?>">
                 </div>
 
-                <div class="form-group">
-                  <label>Occupation</label>
-                  <input type="text" name="occupation" class="form-control" placeholder="e.g. Teacher, Driver" value="<?= old('occupation') ?>">
-                </div>
-              </div>
-            </div>
 
             <hr>
             
