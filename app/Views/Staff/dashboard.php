@@ -14,29 +14,252 @@
   <?= view('theme/sidebar') ?>
 
   <div class="content-wrapper" style="background:#f4f6f9;">
+
+    <!-- Content Header -->
     <div class="content-header">
       <div class="container-fluid">
-        <h1 class="m-0">Staff Dashboard</h1>
-      </div>
-    </div>
-    <div class="content">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-lg-4 col-6">
-            <div class="small-box bg-success">
-              <div class="inner"><h3>--</h3><p>Person Records</p></div>
-              <div class="icon"><i class="fas fa-id-card"></i></div>
-            </div>
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0">
+              <i class="fas fa-tachometer-alt mr-2 text-primary"></i>
+              Staff Dashboard
+            </h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
           </div>
         </div>
       </div>
     </div>
+    <!-- /.content-header -->
+
+    <!-- Main Content -->
+    <div class="content">
+      <div class="container-fluid">
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- STATS ROW                              -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="row">
+
+          <!-- Total Residents -->
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+              <div class="inner">
+                <h3><?= $totalResidents ?? 0 ?></h3>
+                <p>Total Residents</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <a href="<?= base_url('residents') ?>" class="small-box-footer">
+                More info <i class="fas fa-arrow-circle-right"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Total Households -->
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+              <div class="inner">
+                <h3><?= $totalHouseholds ?? 0 ?></h3>
+                <p>Total Households</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-home"></i>
+              </div>
+              <a href="<?= base_url('households') ?>" class="small-box-footer">
+                More info <i class="fas fa-arrow-circle-right"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Pending Certificates -->
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+              <div class="inner">
+                <h3><?= $pendingCerts ?? 0 ?></h3>
+                <p>Pending Certificates</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-file-invoice"></i>
+              </div>
+              <a href="<?= base_url('certificates') ?>" class="small-box-footer">
+                More info <i class="fas fa-arrow-circle-right"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Blotter Records -->
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-danger">
+              <div class="inner">
+                <h3><?= $blotterCount ?? 0 ?></h3>
+                <p>Blotter Records</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <a href="<?= base_url('blotters') ?>" class="small-box-footer">
+                More info <i class="fas fa-arrow-circle-right"></i>
+              </a>
+            </div>
+          </div>
+
+        </div>
+        <!-- /.STATS ROW -->
+
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- MAIN ROW: Activity + Quick Actions     -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="row">
+
+          <!-- LEFT: Recent Activity -->
+          <div class="col-md-8">
+            <div class="card card-default">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-bullhorn mr-1"></i> Recent Activity
+                </h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <!-- /.card-header -->
+
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table m-0 table-striped">
+                    <thead>
+                      <tr>
+                        <th width="15%">Type</th>
+                        <th>Details</th>
+                        <th width="20%">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+
+                      <!-- Latest Blotters -->
+                      <?php if (!empty($latestBlotters)): ?>
+                        <?php foreach ($latestBlotters as $blotter): ?>
+                        <tr>
+                          <td><span class="badge badge-danger">Blotter</span></td>
+                          <td><?= esc($blotter['complainant']) ?> vs <?= esc($blotter['respondent']) ?></td>
+                          <td><small class="text-muted"><?= date('M d, Y', strtotime($blotter['created_at'])) ?></small></td>
+                        </tr>
+                        <?php endforeach; ?>
+                      <?php endif; ?>
+
+                      <!-- Latest Certificates -->
+                      <?php if (!empty($latestCerts)): ?>
+                        <?php foreach ($latestCerts as $cert): ?>
+                        <tr>
+                          <td><span class="badge badge-info">Certificate</span></td>
+                          <td><?= esc($cert['type']) ?> — <?= esc($cert['resident_name']) ?></td>
+                          <td><small class="text-muted"><?= date('M d, Y', strtotime($cert['created_at'])) ?></small></td>
+                        </tr>
+                        <?php endforeach; ?>
+                      <?php endif; ?>
+
+                      <!-- Empty State -->
+                      <?php if (empty($latestBlotters) && empty($latestCerts)): ?>
+                        <tr>
+                          <td colspan="3" class="text-center p-4 text-muted">
+                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                            No recent activity found.
+                          </td>
+                        </tr>
+                      <?php endif; ?>
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- /.card-body -->
+
+              <div class="card-footer text-center">
+                <a href="#" class="text-uppercase text-sm">View All Activity</a>
+              </div>
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col-md-8 -->
+
+
+          <!-- RIGHT: Quick Actions -->
+          <div class="col-md-4">
+            <div class="card card-success card-outline">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-bolt mr-1"></i> Quick Actions
+                </h3>
+              </div>
+              <div class="card-body">
+                <p class="text-muted mb-3">What do you want to do today?</p>
+
+                <!-- ✅ Goes to Residents page and auto-opens Add Modal -->
+                <a href="<?= base_url('residents') ?>#addNew" class="btn btn-primary btn-block mb-2">
+                  <i class="fas fa-user-plus mr-2"></i> Add New Resident
+                </a>
+
+                <!-- ✅ Goes to Residents list -->
+                <a href="<?= base_url('residents') ?>" class="btn btn-info btn-block mb-2">
+                  <i class="fas fa-users mr-2"></i> View All Residents
+                </a>
+
+                <a href="<?= base_url('certificates/create') ?>" class="btn btn-success btn-block mb-2">
+                  <i class="fas fa-file-alt mr-2"></i> Issue Certificate
+                </a>
+
+                <a href="<?= base_url('blotters/create') ?>" class="btn btn-danger btn-block">
+                  <i class="fas fa-gavel mr-2"></i> Record Blotter
+                </a>
+
+              </div>
+            </div>
+
+            <!-- Logged-in Staff Info Card -->
+            <div class="card card-default">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-user-circle mr-1"></i> Logged In As
+                </h3>
+              </div>
+              <div class="card-body text-center">
+                <i class="fas fa-user-tie fa-3x text-secondary mb-2"></i>
+                <h5 class="mb-0"><?= esc(session()->get('name') ?? 'Staff User') ?></h5>
+                <small class="text-muted"><?= esc(session()->get('role') ?? 'Staff') ?></small>
+                <hr>
+                <a href="<?= base_url('logout') ?>" class="btn btn-sm btn-outline-danger">
+                  <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                </a>
+              </div>
+            </div>
+
+          </div>
+          <!-- /.col-md-4 -->
+
+        </div>
+        <!-- /.MAIN ROW -->
+
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content -->
   </div>
+  <!-- /.content-wrapper -->
 
   <footer class="main-footer text-center">
-    <strong>BMIS &copy; <?= date('Y') ?></strong>
+    <strong>BMIS &copy; <?= date('Y') ?></strong> — Barangay Management Information System
   </footer>
+
 </div>
+<!-- /.wrapper -->
 
 <script src="<?= base_url('assets/adminlte/plugins/jquery/jquery.min.js') ?>"></script>
 <script src="<?= base_url('assets/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
