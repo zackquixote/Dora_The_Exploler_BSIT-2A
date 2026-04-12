@@ -6,49 +6,66 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-// ─── Auth ────────────────────────────────────────────
-$routes->get('/',         'Auth::index');
-$routes->get('/login',    'Auth::index');
-$routes->post('/auth',    'Auth::auth');
-$routes->get('/logout',   'Auth::logout');
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+$routes->get('/',      'Auth::index');
+$routes->get('login',  'Auth::index');
+$routes->post('auth',  'Auth::auth');
+$routes->get('logout', 'Auth::logout');
 
-// ─── Staff ───────────────────────────────────────────
-$routes->group('staff', ['namespace' => 'App\Controllers\Staff'], function($routes) {
+// ─── Staff Dashboard ──────────────────────────────────────────────────────────
+$routes->group('staff', ['namespace' => 'App\Controllers\Staff'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
 });
 
-// ─── Admin ───────────────────────────────────────────
-$routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function($routes) {
+// ─── Admin Dashboard ──────────────────────────────────────────────────────────
+$routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
 });
 
-// ─── Residents (Staff\Resident) ───────────────────────
-$routes->group('residents', ['namespace' => 'App\Controllers\Staff'], function($routes) {
-    $routes->get('',                'Resident::index');
-    $routes->get('list',            'Resident::list');
-    $routes->post('store',          'Resident::store');
-    $routes->get('show/(:num)',     'Resident::show/$1');
-    $routes->post('update/(:num)',  'Resident::update/$1');
-    $routes->get('delete/(:num)',   'Resident::delete/$1');
+// ─── Staff Residents ──────────────────────────────────────────────────────────
+$routes->group('staff/resident', ['namespace' => 'App\Controllers\Staff'], function ($routes) {
+    $routes->get('/',              'Resident::index');
+    $routes->post('list',          'Resident::list');        // FIX: was GET, must be POST
+    $routes->get('households',     'Resident::households');
+    $routes->post('store',         'Resident::store');
+    $routes->get('show/(:num)',    'Resident::show/$1');
+    $routes->post('update/(:num)', 'Resident::update/$1');
+    $routes->post('delete/(:num)', 'Resident::delete/$1');
 });
-$routes->get('test-resident', function() {
-    return new \App\Controllers\Staff\Resident();
+
+// Alias so base_url('residents') works as a shortcut to the index page
+$routes->get('residents', 'Staff\Resident::index');
+
+// ─── Households ───────────────────────────────────────────────────────────────
+$routes->group('households', function ($routes) {
+    $routes->get('/',              'HouseholdController::index');
+    $routes->post('list',          'HouseholdController::list');
+    $routes->post('store',         'HouseholdController::store');
+    $routes->get('show/(:num)',    'HouseholdController::show/$1');
+    $routes->post('update/(:num)', 'HouseholdController::update/$1');
+    $routes->post('delete/(:num)', 'HouseholdController::delete/$1');
+    $routes->get('residentsOptions', 'HouseholdController::residentsOptions');
 });
-// ─── Users ───────────────────────────────────────────
-$routes->get('/staff/users',                        'Users::index');
-$routes->post('/staff/save',                        'Users::save');
-$routes->get('/staff/users/edit/(:segment)',        'Users::edit/$1');
-$routes->post('/staff/users/update',                'Users::update');
-$routes->delete('/staff/users/delete/(:num)',       'Users::delete/$1');
-$routes->post('/staff/users/fetchRecords',          'Users::fetchRecords');
 
-// ─── Person ──────────────────────────────────────────
-$routes->get('/person',                     'Person::index');
-$routes->post('/person/save',               'Person::save');
-$routes->get('/person/edit/(:segment)',     'Person::edit/$1');
-$routes->post('/person/update',             'Person::update');
-$routes->delete('/person/delete/(:num)',    'Person::delete/$1');
-$routes->post('/person/fetchRecords',       'Person::fetchRecords');
+// ─── Person ───────────────────────────────────────────────────────────────────
+$routes->group('person', function ($routes) {
+    $routes->get('/',                  'Person::index');
+    $routes->post('save',              'Person::save');
+    $routes->get('edit/(:segment)',    'Person::edit/$1');
+    $routes->post('update',            'Person::update');
+    $routes->delete('delete/(:num)',   'Person::delete/$1');
+    $routes->post('fetchRecords',      'Person::fetchRecords');
+});
 
-// ─── Logs ────────────────────────────────────────────
-$routes->get('/log', 'Logs::log');
+// ─── Staff Users ──────────────────────────────────────────────────────────────
+$routes->group('staff/users', function ($routes) {
+    $routes->get('/',                'Users::index');
+    $routes->post('save',            'Users::save');
+    $routes->get('edit/(:segment)',  'Users::edit/$1');
+    $routes->post('update',          'Users::update');
+    $routes->delete('delete/(:num)', 'Users::delete/$1');
+    $routes->post('fetchRecords',    'Users::fetchRecords');
+});
+
+// ─── Logs ─────────────────────────────────────────────────────────────────────
+$routes->get('log', 'Logs::log');

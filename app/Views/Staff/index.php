@@ -1,7 +1,16 @@
 <?= $this->extend('theme/template') ?>
 
 <?= $this->section('content') ?>
+
+<!-- CSRF Meta Tags (required by resident.js) -->
+<meta name="csrf-name"  content="<?php echo csrf_token(); ?>">
+<meta name="csrf-token" content="<?php echo csrf_hash(); ?>">
+
 <div class="content-wrapper">
+
+  <!-- Alert Box -->
+  <div id="alertBox" class="container-fluid pt-2"></div>
+
   <!-- Content Header -->
   <div class="content-header">
     <div class="container-fluid">
@@ -11,8 +20,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active">Dashboard v1</li>
+            <li class="breadcrumb-item"><a href="<?php echo base_url('staff/dashboard'); ?>">Home</a></li>
+            <li class="breadcrumb-item active">Residents</li>
           </ol>
         </div>
       </div>
@@ -28,305 +37,334 @@
             <div class="card-header">
               <h3 class="card-title">List of Residents</h3>
               <div class="float-right">
-                <button type="button" class="btn btn-md btn-primary" data-toggle="modal" data-target="#addResidentModal">
-                  <i class="fa fa-plus-circle fa fw"></i> Add New Resident
+                <!-- FIX: id="btnAddResident" so resident.js can bind the click -->
+                <button type="button" id="btnAddResident" class="btn btn-md btn-primary">
+                  <i class="fas fa-plus-circle mr-1"></i> Add New Resident
                 </button>
               </div>
             </div>
-            <!-- /.card-header -->
             <div class="card-body">
-               <table id="example1" class="table table-bordered table-striped table-sm">
+              <!-- FIX: id changed from "example1" to "residentsTable" -->
+              <table id="residentsTable" class="table table-bordered table-striped table-sm">
                 <thead>
                   <tr>
                     <th width="5%">No.</th>
-                    <th style="display:none;">ID</th>
-                    <th width="25%">Full Name</th>
-                    <th width="10%">Sex</th>
-                    <th width="15%">Birthdate</th>
-                    <th width="15%">Household</th>
+                    <th width="20%">Full Name</th>
+                    <th width="8%">Sex</th>
+                    <th width="12%">Birthdate</th>
+                    <th width="10%">Civil Status</th>
+                    <th width="10%">Household</th>
+                    <th width="15%">Categories</th>
                     <th width="15%">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <!-- Data will be loaded via AJAX/JS -->
-                </tbody>
+                <tbody></tbody>
               </table>
             </div>
-            <!-- /.card-body -->
           </div>
-          <!-- /.card -->
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ✅ ADD NEW MODAL -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- ADD MODAL                                                      -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
   <div class="modal fade" id="addResidentModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-      <!-- REMOVED action and method attributes to match Person view logic -->
       <form id="addResidentForm">
-        <?= csrf_field() ?>
         <div class="modal-content">
           <div class="modal-header bg-primary">
-            <h5 class="modal-title text-white"><i class="fa fa-plus-circle fa fw"></i> Add New Resident</h5>
+            <h5 class="modal-title text-white">
+              <i class="fas fa-plus-circle mr-1"></i> Add New Resident
+            </h5>
             <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
           </div>
 
           <div class="modal-body">
-            <div class="row">
-                <!-- Name Column -->
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>First Name <span class="text-danger">*</span></label>
-                        <input type="text" name="first_name" class="form-control" placeholder="Juan" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Middle Name</label>
-                        <input type="text" name="middle_name" class="form-control" placeholder="Dela" />
-                    </div>
-                    <div class="form-group">
-                        <label>Last Name <span class="text-danger">*</span></label>
-                        <input type="text" name="last_name" class="form-control" placeholder="Cruz" required />
-                    </div>
-                </div>
+            <!-- Error container -->
+            <div id="addErrors"></div>
 
-                <!-- Details Column -->
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Birthdate <span class="text-danger">*</span></label>
-                        <input type="date" name="birthdate" class="form-control" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Sex <span class="text-danger">*</span></label>
-                        <select name="sex" class="form-control" required>
-                            <option value="">Select Sex</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Civil Status</label>
-                        <select name="civil_status" class="form-control">
-                            <option value="single">Single</option>
-                            <option value="married">Married</option>
-                            <option value="widowed">Widowed</option>
-                            <option value="separated">Separated</option>
-                        </select>
-                    </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>First Name <span class="text-danger">*</span></label>
+                  <input type="text" name="first_name" class="form-control" placeholder="Juan" required>
                 </div>
+                <div class="form-group">
+                  <label>Middle Name</label>
+                  <input type="text" name="middle_name" class="form-control" placeholder="Dela">
+                </div>
+                <div class="form-group">
+                  <label>Last Name <span class="text-danger">*</span></label>
+                  <input type="text" name="last_name" class="form-control" placeholder="Cruz" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Birthdate <span class="text-danger">*</span></label>
+                  <input type="date" name="birthdate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label>Sex <span class="text-danger">*</span></label>
+                  <select name="sex" class="form-control" required>
+                    <option value="">Select Sex</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Civil Status</label>
+                  <select name="civil_status" class="form-control">
+                    <option value="single">Single</option>
+                    <option value="married">Married</option>
+                    <option value="widowed">Widowed</option>
+                    <option value="separated">Separated</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Contact Number</label>
-                        <input type="text" name="contact_number" class="form-control" placeholder="09123456789" />
-                    </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Contact Number</label>
+                  <input type="text" name="contact_number" class="form-control" placeholder="09123456789">
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Occupation</label>
-                        <input type="text" name="occupation" class="form-control" />
-                    </div>
-                </div>
+              </div>
+              <div class="col-md-6">
+              </div>
             </div>
-            
+
             <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Household ID</label>
-                        <select name="household_id" class="form-control select2" style="width: 100%;">
-                            <option value="">Select Household</option>
-                            <!-- Example Static Option -->
-                            <option value="1">Block 1 Lot 5</option> 
-                        </select>
-                    </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Household</label>
+                  <!-- FIX: id="add_household_id" so resident.js loadHouseholds() targets it -->
+                  <select name="household_id" id="add_household_id" class="form-control">
+                    <option value="">-- Select Household --</option>
+                  </select>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Relationship to Head</label>
-                        <input type="text" name="relationship_to_head" class="form-control" placeholder="e.g. Son, Spouse" />
-                    </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Relationship to Head</label>
+                  <input type="text" name="relationship_to_head" class="form-control" placeholder="e.g. Son, Spouse">
                 </div>
+              </div>
             </div>
 
             <hr>
-            <div class="row">
-                <div class="col-md-12">
-                    <label><strong>Attributes</strong></label>
-                    <div class="d-flex gap-3 mt-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_voter" value="1">
-                            <label class="form-check-label">Voter</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_senior_citizen" value="1">
-                            <label class="form-check-label">Senior Citizen</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_pwd" value="1">
-                            <label class="form-check-label">PWD</label>
-                        </div>
-                    </div>
-                </div>
+            <label><strong>Attributes</strong></label>
+            <div class="d-flex mt-2" style="gap: 1.5rem;">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="is_voter" value="1">
+                <label class="form-check-label">Voter</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="is_senior_citizen" value="1">
+                <label class="form-check-label">Senior Citizen</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="is_pwd" value="1">
+                <label class="form-check-label">PWD</label>
+              </div>
             </div>
-
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class='fas fa-times-circle'></i> Cancel</button>
-            <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save Resident</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+              <i class="fas fa-times-circle mr-1"></i> Cancel
+            </button>
+            <!-- FIX: id="btnSaveResident" so resident.js can disable it during save -->
+            <button type="submit" id="btnSaveResident" class="btn btn-primary">
+              <i class="fas fa-save mr-1"></i> Save Resident
+            </button>
           </div>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ✅ EDIT MODAL -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- EDIT MODAL                                                     -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
   <div class="modal fade" id="editResidentModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-      <!-- REMOVED action and method attributes to match Person view logic -->
       <form id="editResidentForm">
-         <?= csrf_field() ?>
         <div class="modal-content">
           <div class="modal-header bg-warning">
-            <h5 class="modal-title"><i class="far fa-edit fa fw"></i> Edit Resident</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+            <h5 class="modal-title">
+              <i class="fas fa-edit mr-1"></i> Edit Resident
+            </h5>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
+
           <div class="modal-body">
-            <!-- Hidden ID for updating -->
+            <div id="editErrors"></div>
             <input type="hidden" id="edit_id" name="id">
 
             <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>First Name</label>
-                        <input type="text" name="first_name" id="edit_first_name" class="form-control" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Middle Name</label>
-                        <input type="text" name="middle_name" id="edit_middle_name" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label>Last Name</label>
-                        <input type="text" name="last_name" id="edit_last_name" class="form-control" required />
-                    </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>First Name <span class="text-danger">*</span></label>
+                  <input type="text" name="first_name" id="edit_first_name" class="form-control" required>
                 </div>
-
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Birthdate</label>
-                        <input type="date" name="birthdate" id="edit_birthdate" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Sex</label>
-                        <select name="sex" id="edit_sex" class="form-control" required>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Civil Status</label>
-                        <select name="civil_status" id="edit_civil_status" class="form-control">
-                            <option value="single">Single</option>
-                            <option value="married">Married</option>
-                            <option value="widowed">Widowed</option>
-                            <option value="separated">Separated</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                  <label>Middle Name</label>
+                  <input type="text" name="middle_name" id="edit_middle_name" class="form-control">
                 </div>
+                <div class="form-group">
+                  <label>Last Name <span class="text-danger">*</span></label>
+                  <input type="text" name="last_name" id="edit_last_name" class="form-control" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Birthdate <span class="text-danger">*</span></label>
+                  <input type="date" name="birthdate" id="edit_birthdate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label>Sex <span class="text-danger">*</span></label>
+                  <select name="sex" id="edit_sex" class="form-control" required>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Civil Status</label>
+                  <select name="civil_status" id="edit_civil_status" class="form-control">
+                    <option value="single">Single</option>
+                    <option value="married">Married</option>
+                    <option value="widowed">Widowed</option>
+                    <option value="separated">Separated</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
-             <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Contact Number</label>
-                        <input type="text" name="contact_number" id="edit_contact_number" class="form-control" />
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Occupation</label>
-                        <input type="text" name="occupation" id="edit_occupation" class="form-control" />
-                    </div>
-                </div>
-            </div>
+            
 
-             <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Household ID</label>
-                        <select name="household_id" id="edit_household_id" class="form-control select2" style="width: 100%;">
-                            <option value="1">Block 1 Lot 5</option> 
-                        </select>
-                    </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Household</label>
+                  <!-- FIX: id="edit_household_id" for loadHouseholds() -->
+                  <select name="household_id" id="edit_household_id" class="form-control">
+                    <option value="">-- Select Household --</option>
+                  </select>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Relationship to Head</label>
-                        <input type="text" name="relationship_to_head" id="edit_relationship_to_head" class="form-control" />
-                    </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Relationship to Head</label>
+                  <input type="text" name="relationship_to_head" id="edit_relationship_to_head" class="form-control">
                 </div>
+              </div>
             </div>
 
             <hr>
-            <div class="row">
-                <div class="col-md-12">
-                    <label><strong>Attributes</strong></label>
-                    <div class="d-flex gap-3 mt-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="edit_is_voter" name="is_voter" value="1">
-                            <label class="form-check-label">Voter</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="edit_is_senior_citizen" name="is_senior_citizen" value="1">
-                            <label class="form-check-label">Senior Citizen</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="edit_is_pwd" name="is_pwd" value="1">
-                            <label class="form-check-label">PWD</label>
-                        </div>
-                    </div>
-                </div>
+            <label><strong>Attributes</strong></label>
+            <div class="d-flex mt-2" style="gap: 1.5rem;">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="edit_is_voter" name="is_voter" value="1">
+                <label class="form-check-label">Voter</label>
+              </div>
+              <div class="form-check">
+                <!-- FIX: id changed from "edit_is_senior_citizen" to "edit_is_senior" to match resident.js -->
+                <input class="form-check-input" type="checkbox" id="edit_is_senior" name="is_senior_citizen" value="1">
+                <label class="form-check-label">Senior Citizen</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="edit_is_pwd" name="is_pwd" value="1">
+                <label class="form-check-label">PWD</label>
+              </div>
             </div>
-
           </div>
+
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class='fas fa-times-circle'></i> Cancel</button>
-            <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Update Changes</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+              <i class="fas fa-times-circle mr-1"></i> Cancel
+            </button>
+            <!-- FIX: id="btnUpdateResident" so resident.js can disable it during update -->
+            <button type="submit" id="btnUpdateResident" class="btn btn-warning">
+              <i class="fas fa-save mr-1"></i> Update Changes
+            </button>
           </div>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW MODAL                                                     -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div class="modal fade" id="viewResidentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-info">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-eye mr-1"></i> View Resident
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body" id="viewResidentBody">
+          <div class="text-center py-4">
+            <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- DELETE MODAL                                                   -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div class="modal fade" id="deleteResidentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-danger">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-trash mr-1"></i> Delete Resident
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body text-center">
+          <p>Are you sure you want to delete</p>
+          <strong id="deleteResidentName"></strong>?
+          <p class="text-muted mt-1"><small>This action cannot be undone.</small></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <!-- FIX: id="btnConfirmDelete" so resident.js can bind the confirm action -->
+          <button type="button" id="btnConfirmDelete" class="btn btn-danger">
+            <i class="fas fa-trash mr-1"></i> Delete
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
 </div>
 <!-- /.content-wrapper -->
 
-<!-- Toast Container -->
-<div class="toasts-top-right fixed" id="toast-container" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;"></div>
-
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-<!-- Define Base URL for JS access -->
-<script> const baseUrl = "<?= base_url() ?>"; </script>
 
-<!-- DataTables & Select2 -->
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<!-- Initialize Select2 -->
+<!-- FIX: APP global object replaces plain baseUrl; includes CSRF for resident.js -->
 <script>
-    $(document).ready(function() {
-        $('.select2').select2();
-    });
+  const APP = {
+    baseUrl:  "<?php echo base_url(); ?>",
+    csrfName: "<?php echo csrf_token(); ?>",
+    csrfHash: "<?php echo csrf_hash(); ?>"
+  };
 </script>
 
 <!-- Your Custom JS -->
-<script src="<?= base_url('js/residents/resident.js') ?>"></script>
+<script src="<?php echo base_url('js/residents/resident.js'); ?>"></script>
+
 <?= $this->endSection() ?>

@@ -123,6 +123,6 @@
 
 
 <?= $this->section('scripts') ?>
-<script> const baseUrl = "<?= base_url() ?>"; </script>
-<script src="<?= base_url('js/person/person.js') ?>"></script>
+<script> const baseUrl = "<?php echo base_url(); ?>"; </script>
+<script src="<?php echo base_url('js/person/person.js'); ?>"></script>
 <?= $this->endSection() ?>

@@ -77,7 +77,6 @@ class Filters extends BaseFilters
         'before' => [
             'inactivity' => ['except' => ['login', 'login/*', 'auth/*']], // adjust paths as needed
             'honeypot',
-            'csrf',
             'invalidchars',
         ],
         'after' => [
@@ -111,5 +110,18 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        'csrf' => [
+            'except' => [
+                'staff/resident/list',
+                'staff/resident/store',
+                'staff/resident/update/*',
+                'staff/resident/delete/*',
+                'households/list',
+                'households/store',
+                'households/update/*',
+                'households/delete/*',
+            ]
+        ]
+    ];
 }

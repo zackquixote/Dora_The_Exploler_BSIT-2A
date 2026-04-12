@@ -76,6 +76,15 @@ body.dark-mode .main-sidebar .nav-link:hover { background-color: rgba(255,255,25
           </a>
         </li>
 
+        <!-- Households -->
+        <li class="nav-item">
+          <a href="<?= base_url('households') ?>"
+             class="nav-link <?= $isActive('households') ?>">
+            <i class="nav-icon fas fa-home"></i>
+            <p>Households</p>
+          </a>
+        </li>
+
         <!-- Person -->
         <li class="nav-item">
           <a href="<?= base_url('person') ?>"
