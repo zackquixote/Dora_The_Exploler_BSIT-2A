@@ -99,10 +99,10 @@
                   <label>House Type</label>
                   <select name="house_type" class="form-control">
                     <option value="">-- Select Type --</option>
-                    <option value="concrete">Concrete</option>
-                    <option value="wooden">Wooden</option>
-                    <option value="mixed">Mixed</option>
-                    <option value="bamboo">Bamboo</option>
+                    <option value="Concrete">Concrete</option>
+                    <option value="Semi-Concrete">Semi-Concrete</option>
+                    <option value="Wood">Wood</option>
+                    <option value="Light Materials">Light Materials</option>
                   </select>
                 </div>
               </div>
@@ -166,10 +166,10 @@
                   <label>House Type</label>
                   <select name="house_type" id="edit_house_type" class="form-control">
                     <option value="">-- Select Type --</option>
-                    <option value="concrete">Concrete</option>
-                    <option value="wooden">Wooden</option>
-                    <option value="mixed">Mixed</option>
-                    <option value="bamboo">Bamboo</option>
+                    <option value="Concrete">Concrete</option>
+                    <option value="Semi-Concrete">Semi-Concrete</option>
+                    <option value="Wood">Wood</option>
+                    <option value="Light Materials">Light Materials</option>
                   </select>
                 </div>
               </div>
@@ -241,12 +241,13 @@
 </div>
 
 <?= $this->endSection() ?>
+
 <?= $this->section('scripts') ?>
 
 <script>
     const BASE = "<?php echo base_url(); ?>";
 </script>
 
-<script>
-    <script src="<?php echo base_url('js/households/household.js'); ?>"></script>
-</script>
+<script src="<?php echo base_url('js/households/household.js'); ?>"></script>
+
+<?= $this->endSection() ?>

@@ -39,56 +39,50 @@ class Resident extends BaseController
                 ->setJSON(['error' => 'Unauthorized']);
         }
 
-        $request = $this->request;
-
-        $draw   = (int) ($request->getPost('draw') ?? 1);
-        $start  = (int) ($request->getPost('start') ?? 0);
-        $length = (int) ($request->getPost('length') ?? 10);
-
-        $searchValue = $request->getPost('search')['value'] ?? '';
+        $draw   = (int) ($this->request->getPost('draw')   ?? 1);
+        $start  = (int) ($this->request->getPost('start')  ?? 0);
+        $length = (int) ($this->request->getPost('length') ?? 10);
+        $searchValue = $this->request->getPost('search')['value'] ?? '';
 
         $db = \Config\Database::connect();
 
-        // BASE QUERY
-        $builder = $db->table('residents r');
-        $builder->select('r.*, h.household_no, h.address AS household_address');
-        $builder->join('households h', 'h.id = r.household_id', 'left');
-        $builder->where('r.status', 'active');
-
-        // TOTAL RECORDS (NO SEARCH)
+        // Total active residents (no filters)
         $totalRecords = $db->table('residents')
             ->where('status', 'active')
             ->countAllResults();
 
-        // SEARCH FILTER (CLONE BUILDER SAFELY)
-        $filteredBuilder = clone $builder;
+        // Filtered count
+        $filteredBuilder = $db->table('residents r');
+        $filteredBuilder->select('r.id');
+        $filteredBuilder->join('households h', 'h.id = r.household_id', 'left');
+        $filteredBuilder->where('r.status', 'active');
 
         if (!empty($searchValue)) {
             $filteredBuilder->groupStart()
-                ->like('r.first_name', $searchValue)
-                ->orLike('r.last_name', $searchValue)
-                ->orLike('r.middle_name', $searchValue)
+                ->like('r.first_name',     $searchValue)
+                ->orLike('r.last_name',    $searchValue)
+                ->orLike('r.middle_name',  $searchValue)
                 ->orLike('r.contact_number', $searchValue)
                 ->orLike('h.household_no', $searchValue)
-                ->groupEnd();
+            ->groupEnd();
         }
 
         $filteredRecords = $filteredBuilder->countAllResults();
 
-        // DATA QUERY (FRESH BUILDER)
+        // Data query
         $dataBuilder = $db->table('residents r');
-        $dataBuilder->select('r.*, h.household_no, h.address AS household_address');
+        $dataBuilder->select('r.*, h.household_no, h.street_address AS household_address');
         $dataBuilder->join('households h', 'h.id = r.household_id', 'left');
         $dataBuilder->where('r.status', 'active');
 
         if (!empty($searchValue)) {
             $dataBuilder->groupStart()
-                ->like('r.first_name', $searchValue)
-                ->orLike('r.last_name', $searchValue)
-                ->orLike('r.middle_name', $searchValue)
+                ->like('r.first_name',     $searchValue)
+                ->orLike('r.last_name',    $searchValue)
+                ->orLike('r.middle_name',  $searchValue)
                 ->orLike('r.contact_number', $searchValue)
                 ->orLike('h.household_no', $searchValue)
-                ->groupEnd();
+            ->groupEnd();
         }
 
         $data = $dataBuilder
@@ -102,10 +96,11 @@ class Resident extends BaseController
             'recordsTotal'    => $totalRecords,
             'recordsFiltered' => $filteredRecords,
             'data'            => $data,
+            'csrf_hash'       => csrf_hash(),
         ]);
     }
 
-    // ───────────────────────── HOUSEHOLDS ─────────────────────────
+    // ───────────────────────── HOUSEHOLDS DROPDOWN ─────────────────────────
 
     public function households()
     {
@@ -115,9 +110,9 @@ class Resident extends BaseController
             ->findAll();
 
         return $this->response->setJSON([
-            'status' => 'success',
-            'data'   => $households,
-            'csrf_hash' => csrf_hash()
+            'status'    => 'success',
+            'data'      => $households,
+            'csrf_hash' => csrf_hash(),
         ]);
     }
 
@@ -125,51 +120,61 @@ class Resident extends BaseController
 
     public function store()
     {
+        // Validation — household_id is optional (permit_empty)
         $rules = [
             'first_name'   => 'required|min_length[2]|max_length[100]',
             'last_name'    => 'required|min_length[2]|max_length[100]',
             'birthdate'    => 'required|valid_date',
             'sex'          => 'required|in_list[male,female]',
-            'household_id' => 'required|integer',
+            'household_id' => 'permit_empty|integer',   // ← was required|integer
         ];
 
         if (!$this->validate($rules)) {
             return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Validation failed.',
-                'errors'  => $this->validator->getErrors(),
-                'csrf_hash' => csrf_hash()
+                'status'    => 'error',
+                'message'   => 'Validation failed.',
+                'errors'    => $this->validator->getErrors(),
+                'csrf_hash' => csrf_hash(),
             ]);
         }
 
+        $householdId = $this->request->getPost('household_id');
+
         $data = [
-            'household_id'         => $this->request->getPost('household_id'),
+            'household_id'         => !empty($householdId) ? (int) $householdId : null,
             'first_name'           => $this->request->getPost('first_name'),
-            'middle_name'          => $this->request->getPost('middle_name'),
+            'middle_name'          => $this->request->getPost('middle_name')       ?: null,
             'last_name'            => $this->request->getPost('last_name'),
             'birthdate'            => $this->request->getPost('birthdate'),
             'sex'                  => $this->request->getPost('sex'),
-            'civil_status'         => $this->request->getPost('civil_status'),
-            'contact_number'       => $this->request->getPost('contact_number'),
-            'relationship_to_head' => $this->request->getPost('relationship_to_head'),
-            'is_voter'             => $this->request->getPost('is_voter') ? 1 : 0,
-            'is_pwd'               => $this->request->getPost('is_pwd') ? 1 : 0,
+            'civil_status'         => $this->request->getPost('civil_status')      ?: null,
+            'contact_number'       => $this->request->getPost('contact_number')    ?: null,
+            'relationship_to_head' => $this->request->getPost('relationship_to_head') ?: null,
+            'is_voter'             => $this->request->getPost('is_voter')          ? 1 : 0,
+            'is_pwd'               => $this->request->getPost('is_pwd')            ? 1 : 0,
             'is_senior_citizen'    => $this->request->getPost('is_senior_citizen') ? 1 : 0,
             'status'               => 'active',
             'registered_by'        => session()->get('user_id') ?? 1,
         ];
 
-        return $this->residentModel->insert($data)
-            ? $this->response->setJSON([
-                'status' => 'success',
-                'message' => 'Resident added successfully.',
-                'csrf_hash' => csrf_hash()
-            ])
-            : $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Failed to save resident.',
-                'csrf_hash' => csrf_hash()
+        $inserted = $this->residentModel->insert($data, true); // true = return insert ID
+
+        if ($inserted) {
+            return $this->response->setJSON([
+                'status'    => 'success',
+                'message'   => 'Resident added successfully.',
+                'id'        => $inserted,
+                'csrf_hash' => csrf_hash(),
             ]);
+        }
+
+        // If insert returned false, grab model errors for debugging
+        return $this->response->setJSON([
+            'status'    => 'error',
+            'message'   => 'Failed to save resident.',
+            'errors'    => $this->residentModel->errors(),
+            'csrf_hash' => csrf_hash(),
+        ]);
     }
 
     // ───────────────────────── SHOW ─────────────────────────
@@ -179,7 +184,7 @@ class Resident extends BaseController
         $db = \Config\Database::connect();
 
         $resident = $db->table('residents r')
-            ->select('r.*, h.household_no, h.address AS household_address')
+            ->select('r.*, h.household_no, h.street_address AS household_address')
             ->join('households h', 'h.id = r.household_id', 'left')
             ->where('r.id', $id)
             ->get()
@@ -187,16 +192,16 @@ class Resident extends BaseController
 
         if (!$resident) {
             return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Resident not found',
-                'csrf_hash' => csrf_hash()
+                'status'    => 'error',
+                'message'   => 'Resident not found.',
+                'csrf_hash' => csrf_hash(),
             ]);
         }
 
         return $this->response->setJSON([
-            'status' => 'success',
-            'data'   => $resident,
-            'csrf_hash' => csrf_hash()
+            'status'    => 'success',
+            'data'      => $resident,
+            'csrf_hash' => csrf_hash(),
         ]);
     }
 
@@ -204,62 +209,72 @@ class Resident extends BaseController
 
     public function update($id)
     {
-        if (!$this->validate([
-            'first_name' => 'required|min_length[2]',
-            'last_name'  => 'required|min_length[2]',
-            'birthdate'  => 'required|valid_date',
-            'sex'        => 'required|in_list[male,female]',
-        ])) {
+        $rules = [
+            'first_name'   => 'required|min_length[2]',
+            'last_name'    => 'required|min_length[2]',
+            'birthdate'    => 'required|valid_date',
+            'sex'          => 'required|in_list[male,female]',
+            'household_id' => 'permit_empty|integer',
+        ];
+
+        if (!$this->validate($rules)) {
             return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $this->validator->getErrors(),
-                'csrf_hash' => csrf_hash()
+                'status'    => 'error',
+                'message'   => 'Validation failed.',
+                'errors'    => $this->validator->getErrors(),
+                'csrf_hash' => csrf_hash(),
             ]);
         }
 
+        $householdId = $this->request->getPost('household_id');
+
         $data = [
-            'household_id'         => $this->request->getPost('household_id') ?: null,
+            'household_id'         => !empty($householdId) ? (int) $householdId : null,
             'first_name'           => $this->request->getPost('first_name'),
-            'middle_name'          => $this->request->getPost('middle_name'),
+            'middle_name'          => $this->request->getPost('middle_name')       ?: null,
             'last_name'            => $this->request->getPost('last_name'),
             'birthdate'            => $this->request->getPost('birthdate'),
             'sex'                  => $this->request->getPost('sex'),
-            'civil_status'         => $this->request->getPost('civil_status'),
-            'contact_number'       => $this->request->getPost('contact_number'),
-            'relationship_to_head' => $this->request->getPost('relationship_to_head'),
-            'is_voter'             => $this->request->getPost('is_voter') ? 1 : 0,
-            'is_pwd'               => $this->request->getPost('is_pwd') ? 1 : 0,
+            'civil_status'         => $this->request->getPost('civil_status')      ?: null,
+            'contact_number'       => $this->request->getPost('contact_number')    ?: null,
+            'relationship_to_head' => $this->request->getPost('relationship_to_head') ?: null,
+            'is_voter'             => $this->request->getPost('is_voter')          ? 1 : 0,
+            'is_pwd'               => $this->request->getPost('is_pwd')            ? 1 : 0,
             'is_senior_citizen'    => $this->request->getPost('is_senior_citizen') ? 1 : 0,
         ];
 
-        return $this->residentModel->update($id, $data)
-            ? $this->response->setJSON([
-                'status' => 'success',
-                'message' => 'Resident updated successfully',
-                'csrf_hash' => csrf_hash()
-            ])
-            : $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Update failed',
-                'csrf_hash' => csrf_hash()
+        if ($this->residentModel->update($id, $data)) {
+            return $this->response->setJSON([
+                'status'    => 'success',
+                'message'   => 'Resident updated successfully.',
+                'csrf_hash' => csrf_hash(),
             ]);
+        }
+
+        return $this->response->setJSON([
+            'status'    => 'error',
+            'message'   => 'Update failed.',
+            'errors'    => $this->residentModel->errors(),
+            'csrf_hash' => csrf_hash(),
+        ]);
     }
 
     // ───────────────────────── DELETE ─────────────────────────
 
     public function delete($id)
     {
-        return $this->residentModel->delete($id)
-            ? $this->response->setJSON([
-                'status' => 'success',
-                'message' => 'Resident deleted',
-                'csrf_hash' => csrf_hash()
-            ])
-            : $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Delete failed',
-                'csrf_hash' => csrf_hash()
+        if ($this->residentModel->delete($id)) {
+            return $this->response->setJSON([
+                'status'    => 'success',
+                'message'   => 'Resident deleted successfully.',
+                'csrf_hash' => csrf_hash(),
             ]);
+        }
+
+        return $this->response->setJSON([
+            'status'    => 'error',
+            'message'   => 'Delete failed.',
+            'csrf_hash' => csrf_hash(),
+        ]);
     }
 }

@@ -23,9 +23,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
 });
 
 // ─── Staff Residents ──────────────────────────────────────────────────────────
-$routes->group('staff/resident', ['namespace' => 'App\Controllers\Staff'], function ($routes) {
+$routes->group('staff/residents', ['namespace' => 'App\Controllers\Staff'], function ($routes) {
     $routes->get('/',              'Resident::index');
-    $routes->post('list',          'Resident::list');        // FIX: was GET, must be POST
+    $routes->post('list',          'Resident::list');
     $routes->get('households',     'Resident::households');
     $routes->post('store',         'Resident::store');
     $routes->get('show/(:num)',    'Resident::show/$1');
@@ -33,28 +33,30 @@ $routes->group('staff/resident', ['namespace' => 'App\Controllers\Staff'], funct
     $routes->post('delete/(:num)', 'Resident::delete/$1');
 });
 
-// Alias so base_url('residents') works as a shortcut to the index page
+// Shortcut alias
 $routes->get('residents', 'Staff\Resident::index');
 
 // ─── Households ───────────────────────────────────────────────────────────────
 $routes->group('households', function ($routes) {
-    $routes->get('/',              'HouseholdController::index');
-    $routes->post('list',          'HouseholdController::list');
-    $routes->post('store',         'HouseholdController::store');
-    $routes->get('show/(:num)',    'HouseholdController::show/$1');
-    $routes->post('update/(:num)', 'HouseholdController::update/$1');
-    $routes->post('delete/(:num)', 'HouseholdController::delete/$1');
-    $routes->get('residentsOptions', 'HouseholdController::residentsOptions');
+    $routes->get('/',                        'HouseholdController::index');
+    $routes->post('list',                    'HouseholdController::list');
+    $routes->post('store',                   'HouseholdController::store');
+    $routes->get('show/(:num)',              'HouseholdController::show/$1');
+    $routes->post('update/(:num)',           'HouseholdController::update/$1');
+    $routes->post('delete/(:num)',           'HouseholdController::delete/$1');
+    $routes->get('options',                  'HouseholdController::options');
+    $routes->get('residents-options',        'HouseholdController::residentsOptions');
+    $routes->get('residents-options/(:num)', 'HouseholdController::residentsOptions/$1');
 });
 
 // ─── Person ───────────────────────────────────────────────────────────────────
 $routes->group('person', function ($routes) {
-    $routes->get('/',                  'Person::index');
-    $routes->post('save',              'Person::save');
-    $routes->get('edit/(:segment)',    'Person::edit/$1');
-    $routes->post('update',            'Person::update');
-    $routes->delete('delete/(:num)',   'Person::delete/$1');
-    $routes->post('fetchRecords',      'Person::fetchRecords');
+    $routes->get('/',                'Person::index');
+    $routes->post('save',            'Person::save');
+    $routes->get('edit/(:segment)',  'Person::edit/$1');
+    $routes->post('update',          'Person::update');
+    $routes->delete('delete/(:num)', 'Person::delete/$1');
+    $routes->post('fetchRecords',    'Person::fetchRecords');
 });
 
 // ─── Staff Users ──────────────────────────────────────────────────────────────
@@ -66,6 +68,7 @@ $routes->group('staff/users', function ($routes) {
     $routes->delete('delete/(:num)', 'Users::delete/$1');
     $routes->post('fetchRecords',    'Users::fetchRecords');
 });
+
 
 // ─── Logs ─────────────────────────────────────────────────────────────────────
 $routes->get('log', 'Logs::log');

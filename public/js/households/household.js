@@ -1,73 +1,57 @@
-<script>
 $(document).ready(function () {
 
-    if (!$.fn.DataTable) {
-        console.error("DataTables not loaded");
-        return;
-    }
+   
+    function loadResidents() {
+        $.get(BASE + 'households/residentsOptions', function (res) {
+            let options = '<option value="">-- Select Head Resident --</option>';
 
-    // ✅ Define loadHouseholds before using it
-    function loadHouseholds(selector) {
-        $.get(APP.baseUrl + 'staff/household/list-all', function (data) {
-            var $sel = $(selector);
-            $sel.find('option:not(:first)').remove();
-            if (data && data.length) {
-                $.each(data, function (i, h) {
-                    $sel.append('<option value="' + h.id + '">HH #' + h.household_no + '</option>');
-                });
-            }
-        }).fail(function () {
-            console.warn('Could not load households.');
+            res.data.forEach(r => {
+                options += `<option value="${r.id}">
+                    ${r.last_name}, ${r.first_name}
+                </option>`;
+            });
+
+            $('#add_head_resident_id, #edit_head_resident_id').html(options);
         });
     }
 
-    $('#btnAddResident').on('click', function () {
-        $('#addResidentForm')[0].reset();
-        $('#addErrors').html('');
-        loadHouseholds('#add_household_id');
-        $('#addResidentModal').modal('show');
-    });
-
-    const table = $('#residentsTable').DataTable({
+  
+    let table = $('#householdsTable').DataTable({
         processing: true,
         serverSide: true,
         ajax: {
-            url: APP.baseUrl + 'staff/resident/list',
-            type: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            data: function (d) { d[APP.csrfName] = APP.csrfHash; },
-            error: function (xhr) {
-                console.log("AJAX ERROR:", xhr.responseText);
-                alert("Failed to load residents. Check console.");
-            }
+            url: BASE + 'households/list',
+            type: 'POST'
         },
         columns: [
-            { data: null },
-            { data: null, render: r => `${r.last_name}, ${r.first_name}` },
-            { data: 'sex' },
-            { data: 'birthdate' },
-            { data: 'civil_status' },
-            { data: 'household_no' },
             {
                 data: null,
-                render: r => {
-                    let t = '';
-                    if (r.is_voter == 1) t += 'Voter ';
-                    if (r.is_pwd == 1) t += 'PWD ';
-                    if (r.is_senior_citizen == 1) t += 'Senior ';
-                    return t || '-';
+                render: function (data, type, row, meta) {
+                    return meta.row + 1;
                 }
             },
+            { data: 'household_no' },
+            { data: 'street_address' },
+            { data: 'sitio' },
+            { data: 'house_type' },
+            { data: 'head_name' },
             {
-                data: 'id',
-                render: id => `
-                    <button class="btn btn-sm btn-info btn-view" data-id="${id}">View</button>
-                    <button class="btn btn-sm btn-warning btn-edit" data-id="${id}">Edit</button>
-                    <button class="btn btn-sm btn-danger btn-delete" data-id="${id}">Delete</button>
-                `
+                data: null,
+                render: function () {
+                    return `
+                        <button class="btn btn-sm btn-info">View</button>
+                        <button class="btn btn-sm btn-warning">Edit</button>
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                    `;
+                }
             }
         ]
     });
 
+   
+    $('#btnAddHousehold').on('click', function () {
+        loadResidents();
+        $('#addHouseholdModal').modal('show');
+    });
+
 });
-</script>
