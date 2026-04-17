@@ -1,149 +1,179 @@
 <?= $this->extend('theme/template') ?>
-
 <?= $this->section('content') ?>
 
-<div class="content-wrapper">
-  <!-- Content Header -->
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1 class="m-0">Add New Resident</h1>
+<div class="content-wrapper bg-light min-vh-100 p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="<?= base_url('staff/residents') ?>" class="text-muted small text-decoration-none">
+                <i class="fas fa-arrow-left"></i> Back to Resident List
+            </a>
+            <h2 class="font-weight-bold mt-1">Add New Resident</h2>
+            <p class="text-muted">Register a new person into the barangay database.</p>
         </div>
-        <div class="col-sm-6">
-          <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="<?= base_url('staff/dashboard') ?>">Home</a></li>
-            <li class="breadcrumb-item"><a href="<?= base_url('residents') ?>">Residents</a></li>
-            <li class="breadcrumb-item active">Add New</li>
-          </ol>
+        <div>
+            <button type="button" class="btn btn-outline-secondary mr-2 px-4 shadow-sm" onclick="window.history.back()">✕ Cancel</button>
+            <button type="submit" form="residentForm" class="btn btn-primary px-4 shadow-sm bg-navy border-0">
+                <i class="fas fa-save mr-1"></i> Save Resident
+            </button>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Main Content -->
-  <section class="content">
-    <div class="container-fluid">
-      
-      <!-- Display Validation Errors if any -->
-      <?php if (session()->getFlashdata('errors')): ?>
-        <div class="alert alert-danger alert-dismissible">
-          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-          <h5><i class="icon fas fa-ban"></i> Error!</h5>
-          <ul>
-            <?php foreach (session()->getFlashdata('errors') as $error): ?>
-              <li><?= esc($error) ?></li>
-            <?php endforeach; ?>
-          </ul>
-        </div>
-      <?php endif; ?>
+    <form id="residentForm" action="<?= base_url('staff/residents/store') ?>" method="POST" enctype="multipart/form-data">
+        <?= csrf_field() ?>
 
-      <div class="card card-primary card-outline">
-        <div class="card-header">
-          <h3 class="card-title">Resident Details</h3>
-        </div>
-        
-        <!-- Form starts here -->
-        <form role="form" action="<?= base_url('staff/resident/store') ?>" method="post">
-          <?= csrf_field() ?>
-          
-          <div class="card-body">
-            
-            <div class="row">
-              <!-- Left Column -->
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>First Name <span class="text-danger">*</span></label>
-                  <input type="text" name="first_name" class="form-control" placeholder="Enter first name" required value="<?= old('first_name') ?>">
-                </div>
+        <!-- BASIC INFO -->
+        <div class="card shadow-sm border-0 rounded-lg mb-4">
+            <div class="card-body p-4">
 
-                <div class="form-group">
-                  <label>Middle Name</label>
-                  <input type="text" name="middle_name" class="form-control" placeholder="Enter middle name" value="<?= old('middle_name') ?>">
-                </div>
-
-                <div class="form-group">
-                  <label>Last Name <span class="text-danger">*</span></label>
-                  <input type="text" name="last_name" class="form-control" placeholder="Enter last name" required value="<?= old('last_name') ?>">
-                </div>
-
-                <div class="form-group">
-                  <label>Birthdate <span class="text-danger">*</span></label>
-                  <input type="date" name="birthdate" class="form-control" required value="<?= old('birthdate') ?>">
-                </div>
-
-                <div class="form-group">
-                  <label>Sex <span class="text-danger">*</span></label>
-                  <select name="sex" class="form-control" required>
-                    <option value="">Select Sex</option>
-                    <option value="male" <?= old('sex') == 'male' ? 'selected' : '' ?>>Male</option>
-                    <option value="female" <?= old('sex') == 'female' ? 'selected' : '' ?>>Female</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Right Column -->
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Civil Status <span class="text-danger">*</span></label>
-                  <select name="civil_status" class="form-control" required>
-                    <option value="">Select Status</option>
-                    <option value="single" <?= old('civil_status') == 'single' ? 'selected' : '' ?>>Single</option>
-                    <option value="married" <?= old('civil_status') == 'married' ? 'selected' : '' ?>>Married</option>
-                    <option value="widowed" <?= old('civil_status') == 'widowed' ? 'selected' : '' ?>>Widowed</option>
-                    <option value="separated" <?= old('civil_status') == 'separated' ? 'selected' : '' ?>>Separated</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label>Relationship to Head</label>
-                  <input type="text" name="relationship_to_head" class="form-control" placeholder="e.g. Son, Daughter, Spouse" value="<?= old('relationship_to_head') ?>">
-                </div>
-
-                <div class="form-group">
-                  <label>Household ID</label>
-                  <input type="number" name="household_id" class="form-control" placeholder="Enter Household ID" value="<?= old('household_id') ?>">
-                </div>
-
-                <div class="form-group">
-                  <label>Contact Number</label>
-                  <input type="text" name="contact_number" class="form-control" placeholder="0912 345 6789" value="<?= old('contact_number') ?>">
-                </div>
-
-
-            <hr>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <label><strong>Attributes / Categories</strong></label>
-                    <div class="form-check mt-2">
-                        <input class="form-check-input" type="checkbox" name="is_voter" value="1" <?= old('is_voter') ? 'checked' : '' ?>>
-                        <label class="form-check-label">Registered Voter</label>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">First Name</label>
+                        <input type="text" name="first_name" class="form-control form-control-lg bg-light border-0" required>
                     </div>
-                    <div class="form-check mt-2">
-                        <input class="form-check-input" type="checkbox" name="is_senior_citizen" value="1" <?= old('is_senior_citizen') ? 'checked' : '' ?>>
-                        <label class="form-check-label">Senior Citizen</label>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Middle Name</label>
+                        <input type="text" name="middle_name" class="form-control form-control-lg bg-light border-0">
                     </div>
-                    <div class="form-check mt-2">
-                        <input class="form-check-input" type="checkbox" name="is_pwd" value="1" <?= old('is_pwd') ? 'checked' : '' ?>>
-                        <label class="form-check-label">PWD (Person with Disability)</label>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Last Name</label>
+                        <input type="text" name="last_name" class="form-control form-control-lg bg-light border-0" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Gender</label>
+                        <select name="sex" class="form-control form-control-lg bg-light border-0">
+                            <option disabled selected>Select gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Occupation</label>
+                        <input type="text" name="occupation" class="form-control form-control-lg bg-light border-0">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Citizenship</label>
+                        <input type="text" name="citizenship" class="form-control form-control-lg bg-light border-0">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Birthdate</label>
+                        <input type="date" name="birthdate" class="form-control form-control-lg bg-light border-0" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Civil Status</label>
+                        <select name="civil_status" class="form-control form-control-lg bg-light border-0">
+                            <option disabled selected>Select status</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Widowed">Widowed</option>
+                            <option value="Separated">Separated</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Profile Picture</label>
+                        <input type="file" name="profile_picture" class="form-control form-control-lg bg-light border-0">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADDRESS -->
+        <div class="card shadow-sm border-0 rounded-lg mb-4">
+            <div class="card-body p-4">
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="small font-weight-bold">Street / House Number</label>
+                        <input type="text" name="street_address" class="form-control form-control-lg bg-light border-0">
+                    </div>
+
+                    <!-- ✅ FIXED ENUM SITIO -->
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Sitio / Zone</label>
+                        <select name="sitio" class="form-control form-control-lg bg-light border-0" required>
+                            <option disabled selected>Select Sitio</option>
+                            <option value="Purok Malipayon">Purok Malipayon</option>
+                            <option value="Purok Masagana">Purok Masagana</option>
+                            <option value="Purok Cory">Purok Cory</option>
+                            <option value="Purok Kawayan">Purok Kawayan</option>
+                            <option value="Purok Pagla-um">Purok Pagla-um</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Household</label>
+                        <select name="household_id" class="form-control form-control-lg bg-light border-0">
+                            <option disabled selected>Select Household</option>
+                            <?php foreach($households as $h): ?>
+                                <option value="<?= $h['id'] ?>">#<?= $h['household_no'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Relationship to Head</label>
+                        <input type="text" name="relationship_to_head" class="form-control form-control-lg bg-light border-0">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold">Contact Number</label>
+                        <input type="text" name="contact_number" class="form-control form-control-lg bg-light border-0">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATUS -->
+        <h6 class="font-weight-bold mb-3"><i class="fas fa-stream mr-2"></i> Resident Status & Flags</h6>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm border-0 p-2">
+                    <div class="card-body d-flex align-items-start">
+                        <input type="checkbox" name="is_voter" class="mr-2 mt-1">
+                        <p class="mb-0 font-weight-bold small">Registered Voter</p>
                     </div>
                 </div>
             </div>
 
-          </div>
-          <!-- /.card-body -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm border-0 p-2">
+                    <div class="card-body d-flex align-items-start">
+                        <input type="checkbox" name="is_senior_citizen" class="mr-2 mt-1">
+                        <p class="mb-0 font-weight-bold small">Senior Citizen</p>
+                    </div>
+                </div>
+            </div>
 
-          <div class="card-footer">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-2"></i>Save Resident</button>
-            <a href="<?= base_url('residents') ?>" class="btn btn-default ml-2">Cancel</a>
-          </div>
-        </form>
-      </div>
-      <!-- /.card -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm border-0 p-2">
+                    <div class="card-body d-flex align-items-start">
+                        <input type="checkbox" name="is_pwd" class="mr-2 mt-1">
+                        <p class="mb-0 font-weight-bold small">Person with Disability</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    </div>
-  </section>
+        <!-- FOOTER -->
+        <div class="card border-0 shadow-sm mt-5 mb-5">
+            <div class="card-body d-flex justify-content-between align-items-center py-3 px-4">
+                <small class="text-muted">All fields are saved locally until submitted.</small>
+                <div>
+                    <button type="button" class="btn btn-outline-secondary mr-2">Cancel</button>
+                    <button type="submit" class="btn btn-primary bg-navy border-0">Save Resident</button>
+                </div>
+            </div>
+        </div>
+
+    </form>
 </div>
 
 <?= $this->endSection() ?>

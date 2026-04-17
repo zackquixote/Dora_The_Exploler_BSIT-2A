@@ -2,9 +2,7 @@
 
 use CodeIgniter\Router\RouteCollection;
 
-/**
- * @var RouteCollection $routes
- */
+/** @var RouteCollection $routes */
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 $routes->get('/',      'Auth::index');
@@ -12,55 +10,54 @@ $routes->get('login',  'Auth::index');
 $routes->post('auth',  'Auth::auth');
 $routes->get('logout', 'Auth::logout');
 
-// ─── Staff Dashboard ──────────────────────────────────────────────────────────
+// ─── Staff & Admin Dashboards ─────────────────────────────────────────────────
 $routes->group('staff', ['namespace' => 'App\Controllers\Staff'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
 });
 
-// ─── Admin Dashboard ──────────────────────────────────────────────────────────
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
 });
 
-// ─── Staff Residents ──────────────────────────────────────────────────────────
 $routes->group('staff/residents', ['namespace' => 'App\Controllers\Staff'], function ($routes) {
-    $routes->get('/',              'Resident::index');
-    $routes->post('list',          'Resident::list');
-    $routes->get('households',     'Resident::households');
-    $routes->post('store',         'Resident::store');
-    $routes->get('show/(:num)',    'Resident::show/$1');
+
+    // Pages
+    $routes->get('/', 'Resident::index');
+    $routes->get('create', 'Resident::create');
+    $routes->get('edit/(:num)', 'Resident::edit/$1');
+    $routes->get('view/(:num)', 'Resident::view/$1');
+
+    // AJAX
+    $routes->post('list', 'Resident::list');
+
+    // Actions
+    $routes->post('store', 'Resident::store');
     $routes->post('update/(:num)', 'Resident::update/$1');
     $routes->post('delete/(:num)', 'Resident::delete/$1');
+
+    // Optional
+    $routes->get('households', 'Resident::households');
 });
 
-// Shortcut alias
-$routes->get('residents', 'Staff\Resident::index');
+$routes->group('households', function($routes) {
 
-// ─── Households ───────────────────────────────────────────────────────────────
-$routes->group('households', function ($routes) {
-    $routes->get('/',                        'HouseholdController::index');
-    $routes->post('list',                    'HouseholdController::list');
-    $routes->post('store',                   'HouseholdController::store');
-    $routes->get('show/(:num)',              'HouseholdController::show/$1');
-    $routes->post('update/(:num)',           'HouseholdController::update/$1');
-    $routes->post('delete/(:num)',           'HouseholdController::delete/$1');
-    $routes->get('options',                  'HouseholdController::options');
-    $routes->get('residents-options',        'HouseholdController::residentsOptions');
-    $routes->get('residents-options/(:num)', 'HouseholdController::residentsOptions/$1');
+    // Pages
+    $routes->get('/', 'HouseholdController::index');
+    $routes->get('create', 'HouseholdController::create');
+    $routes->get('edit/(:num)', 'HouseholdController::edit/$1');
+
+    // Data
+    $routes->get('list', 'HouseholdController::list');
+    $routes->get('residentsOptions', 'HouseholdController::residentsOptions');
+
+    // Actions
+    $routes->post('store', 'HouseholdController::store');
+    $routes->post('update/(:num)', 'HouseholdController::update/$1');
+    $routes->post('delete/(:num)', 'HouseholdController::delete/$1');
 });
 
-// ─── Person ───────────────────────────────────────────────────────────────────
-$routes->group('person', function ($routes) {
-    $routes->get('/',                'Person::index');
-    $routes->post('save',            'Person::save');
-    $routes->get('edit/(:segment)',  'Person::edit/$1');
-    $routes->post('update',          'Person::update');
-    $routes->delete('delete/(:num)', 'Person::delete/$1');
-    $routes->post('fetchRecords',    'Person::fetchRecords');
-});
-
-// ─── Staff Users ──────────────────────────────────────────────────────────────
-$routes->group('staff/users', function ($routes) {
+// ─── Users ────────────────────────────────────────────────────────────────────
+$routes->group('staff/users', ['namespace' => 'App\Controllers\Staff'], function ($routes) {
     $routes->get('/',                'Users::index');
     $routes->post('save',            'Users::save');
     $routes->get('edit/(:segment)',  'Users::edit/$1');
@@ -69,6 +66,6 @@ $routes->group('staff/users', function ($routes) {
     $routes->post('fetchRecords',    'Users::fetchRecords');
 });
 
-
-// ─── Logs ─────────────────────────────────────────────────────────────────────
-$routes->get('log', 'Logs::log');
+// ─── Misc ─────────────────────────────────────────────────────────────────────
+$routes->get('residents', 'Staff\Resident::index');
+$routes->get('log',       'Logs::log');

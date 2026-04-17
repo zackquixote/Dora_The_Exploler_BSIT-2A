@@ -4,273 +4,95 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\HouseholdModel;
-use App\Models\ResidentModel;
 
 class HouseholdController extends BaseController
 {
-    protected $householdModel;
-    protected $residentModel;
-
-    public function __construct()
-    {
-        $this->householdModel = new HouseholdModel();
-        $this->residentModel  = new ResidentModel();
-    }
-
-    // ─────────────────────────────────────────────
-    // INDEX
-    // ─────────────────────────────────────────────
     public function index()
     {
-        if (!session()->get('logged_in')) {
-            return redirect()->to('/login');
-        }
-
-        return view('households/index', [
-            'title' => 'Households Management'
-        ]);
+        return view('households/index');
     }
 
-    // ─────────────────────────────────────────────
-    // DATA TABLE LIST (FIXED - WORKING 100%)
-    // ─────────────────────────────────────────────
-    public function list()
+
+    public function create()
     {
-        if (!session()->get('logged_in')) {
-            return $this->response->setStatusCode(401)
-                ->setJSON(['error' => 'Unauthorized']);
-        }
+        return view('households/create');
+    }
 
-        $draw   = intval($this->request->getPost('draw') ?? 1);
-        $start  = intval($this->request->getPost('start') ?? 0);
-        $length = intval($this->request->getPost('length') ?? 10);
+    public function edit($id)
+    {
+        $model = new HouseholdModel();
 
-        $search = $this->request->getPost('search')['value'] ?? '';
+        $data['household'] = $model->find($id);
 
+        return view('households/edit', $data);
+    }
+public function list()
+{
+    $db = \Config\Database::connect();
+
+    $residents = $db->table('residents r')
+        ->select('
+            r.id,
+            CONCAT(r.first_name, " ", IFNULL(r.middle_name, ""), " ", r.last_name) AS full_name,
+            r.sex,
+            r.birthdate,
+            r.civil_status,
+            h.household_no,
+            r.occupation,
+            r.citizenship,
+            r.is_voter,
+            r.is_senior_citizen,
+            r.is_pwd
+        ')
+        ->join('households h', 'h.id = r.household_id', 'left')
+        ->orderBy('r.last_name', 'ASC')
+        ->get()
+        ->getResultArray();
+
+    return $this->response->setJSON([
+        'data' => $residents
+    ]);
+}
+    public function residentsOptions()
+    {
         $db = \Config\Database::connect();
 
-        // BASE QUERY
-        $builder = $db->table('households h')
-            ->select('
-                h.*,
-                CONCAT(
-                    COALESCE(r.first_name,""),
-                    " ",
-                    COALESCE(r.last_name,"")
-                ) AS head_name
-            ')
-            ->join('residents r', 'r.id = h.head_resident_id', 'left');
-
-        // SEARCH FILTER
-        if (!empty($search)) {
-            $builder->groupStart()
-                ->like('h.household_no', $search)
-                ->orLike('h.sitio', $search)
-                ->orLike('h.street_address', $search)
-            ->groupEnd();
-        }
-
-        // TOTAL RECORDS (NO FILTER)
-        $totalRecords = $db->table('households')->countAllResults();
-
-        // FILTERED COUNT (SAFE CLONE)
-        $countBuilder = clone $builder;
-        $filteredRecords = $countBuilder->countAllResults();
-
-        // DATA FETCH (SAFE CLONE)
-        $dataBuilder = clone $builder;
-        $data = $dataBuilder
-            ->orderBy('h.id', 'DESC')
-            ->limit($length, $start)
-            ->get()
-            ->getResultArray();
-
         return $this->response->setJSON([
-            'draw' => $draw,
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data' => $data
+            'data' => $db->table('residents')
+                ->select('id, first_name, last_name')
+                ->orderBy('last_name', 'ASC')
+                ->get()
+                ->getResult()
         ]);
     }
 
-    // ─────────────────────────────────────────────
-    // STORE
-    // ─────────────────────────────────────────────
     public function store()
     {
-        if (!session()->get('logged_in')) {
-            return $this->response->setStatusCode(401)
-                ->setJSON(['error' => 'Unauthorized']);
-        }
+        $model = new HouseholdModel();
 
-        $data = [
-            'household_no'     => $this->request->getPost('household_no'),
-            'sitio'            => $this->request->getPost('sitio'),
-            'street_address'   => $this->request->getPost('street_address'),
-            'house_type'       => $this->request->getPost('house_type'),
-            'head_resident_id' => $this->request->getPost('head_resident_id') ?: null,
-        ];
+        $model->insert($this->request->getPost());
 
-        if ($this->householdModel->insert($data)) {
-            return $this->response->setJSON([
-                'status'  => 'success',
-                'message' => 'Household added successfully.'
-            ]);
-        }
-
-        return $this->response->setJSON([
-            'status'  => 'error',
-            'message' => 'Validation failed.',
-            'errors'  => $this->householdModel->errors()
-        ]);
+        return redirect()->to('/households');
     }
 
-    // ─────────────────────────────────────────────
-    // SHOW
-    // ─────────────────────────────────────────────
-    public function show($id)
-    {
-        if (!session()->get('logged_in')) {
-            return $this->response->setStatusCode(401)
-                ->setJSON(['error' => 'Unauthorized']);
-        }
-
-        $db = \Config\Database::connect();
-
-        $data = $db->table('households h')
-            ->select('
-                h.*,
-                CONCAT(
-                    COALESCE(r.first_name,""),
-                    " ",
-                    COALESCE(r.last_name,"")
-                ) AS head_name
-            ')
-            ->join('residents r', 'r.id = h.head_resident_id', 'left')
-            ->where('h.id', $id)
-            ->get()
-            ->getRowArray();
-
-        if (!$data) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Household not found.'
-            ]);
-        }
-
-        return $this->response->setJSON([
-            'status' => 'success',
-            'data'   => $data
-        ]);
-    }
-
-    // ─────────────────────────────────────────────
-    // UPDATE
-    // ─────────────────────────────────────────────
     public function update($id)
     {
-        if (!session()->get('logged_in')) {
-            return $this->response->setStatusCode(401)
-                ->setJSON(['error' => 'Unauthorized']);
-        }
+        $model = new HouseholdModel();
 
-        $data = [
-            'household_no'     => $this->request->getPost('household_no'),
-            'sitio'            => $this->request->getPost('sitio'),
-            'street_address'   => $this->request->getPost('street_address'),
-            'house_type'       => $this->request->getPost('house_type'),
-            'head_resident_id' => $this->request->getPost('head_resident_id') ?: null,
-        ];
+        $model->update($id, $this->request->getPost());
 
-        if ($this->householdModel->update($id, $data)) {
-            return $this->response->setJSON([
-                'status'  => 'success',
-                'message' => 'Household updated successfully.'
-            ]);
-        }
-
-        return $this->response->setJSON([
-            'status'  => 'error',
-            'message' => 'Update failed.',
-            'errors'  => $this->householdModel->errors()
-        ]);
+        return redirect()->to('/households');
     }
 
-    // ─────────────────────────────────────────────
-    // DELETE
-    // ─────────────────────────────────────────────
     public function delete($id)
     {
-        if (!session()->get('logged_in')) {
-            return $this->response->setStatusCode(401)
-                ->setJSON(['error' => 'Unauthorized']);
-        }
+        $model = new HouseholdModel();
 
-        // CHECK IF HAS RESIDENTS
-        $exists = $this->residentModel
-            ->where('household_id', $id)
-            ->first();
-
-        if ($exists) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Cannot delete household with residents.'
-            ]);
-        }
-
-        if ($this->householdModel->delete($id)) {
-            return $this->response->setJSON([
-                'status'  => 'success',
-                'message' => 'Household deleted successfully.'
-            ]);
-        }
+        $model->delete($id);
 
         return $this->response->setJSON([
-            'status'  => 'error',
-            'message' => 'Delete failed.'
+            'status' => 'success'
         ]);
     }
-
-    // ─────────────────────────────────────────────
-    // OPTIONS
-    // ─────────────────────────────────────────────
-    public function options()
-    {
-        $data = $this->householdModel
-            ->select('id, household_no, sitio')
-            ->findAll();
-
-        return $this->response->setJSON([
-            'status' => 'success',
-            'data'   => $data
-        ]);
-    }
-
-    // ─────────────────────────────────────────────
-    // RESIDENT OPTIONS
-    // ─────────────────────────────────────────────
-    public function residentsOptions($householdId = null)
-    {
-        if (!session()->get('logged_in')) {
-            return $this->response->setStatusCode(401)
-                ->setJSON(['error' => 'Unauthorized']);
-        }
-
-        $builder = $this->residentModel
-            ->select('id, first_name, last_name');
-
-        if (!empty($householdId)) {
-            $builder->where('household_id', $householdId);
-        }
-
-        $residents = $builder
-            ->orderBy('last_name', 'ASC')
-            ->findAll();
-
-        return $this->response->setJSON([
-            'status'  => 'success',
-            'data'    => $residents,
-            'message' => empty($residents) ? 'No residents found.' : null
-        ]);
-    }
+    
 }
