@@ -14,8 +14,9 @@ class Auth extends BaseController
             $role = session()->get('role');
             return redirect()->to($role . '/dashboard');
         }
-        return view('auth/login');
+        return view('login');
     }
+
 
     public function auth()
     {
