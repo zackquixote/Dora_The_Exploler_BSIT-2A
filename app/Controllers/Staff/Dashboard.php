@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers\Staff;
 
 use App\Controllers\BaseController;
@@ -15,7 +16,8 @@ class Dashboard extends BaseController
 
         $residentModel = new ResidentModel();
 
-        return view('staff/dashboard', [
+        // ✅ Changed view path from 'staff/dashboard' to 'residents/dashboard'
+        return view('residents/dashboard', [
             'totalResidents'  => $residentModel->countAll(),
             'totalHouseholds' => 0,   // replace with HouseholdModel later
             'pendingCerts'    => 0,   // replace with CertModel later

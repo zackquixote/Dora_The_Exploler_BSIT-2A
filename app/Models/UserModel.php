@@ -6,30 +6,30 @@ use CodeIgniter\Model;
 
 class UserModel extends Model
 {
-    protected $table = 'users';
-    protected $primaryKey = 'id';
+    protected $table            = 'users';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = true;
+    protected $returnType       = 'array';
+    protected $useSoftDeletes   = false;
+    protected $protectFields    = true;
+    protected $allowedFields    = [
+        'username',
+        'email',
+        'password',
+        'role',
+        'is_active',
+        'profile_picture'
+    ];
 
-    protected $allowedFields = ['uuid','email', 'password','role','status','name','phone', 'created_at', 'updated_at', 'deleted_at'];
+    protected $useTimestamps = true;
+    protected $dateFormat    = 'datetime';
+    protected $createdField  = 'created_at';
+    protected $updatedField  = 'updated_at';
 
-    public function getRecords($start, $length, $searchValue = '')
-    {
-        $builder = $this->builder();
-        $builder->select('*');
-
-        if (!empty($searchValue)) {
-            $builder->groupStart()
-                ->like('email', $searchValue)
-                ->orLike('name', $searchValue)
-                ->groupEnd();
-        }
-
-        // Clone builder for filtered count before applying limit
-        $filteredBuilder = clone $builder;
-        $filteredRecords = $filteredBuilder->countAllResults();
-
-        $builder->limit($length, $start);
-        $data = $builder->get()->getResultArray();
-
-        return ['data' => $data, 'filtered' => $filteredRecords];
-    }
+    protected $validationRules = [
+        'username' => 'required|min_length[3]|is_unique[users.username,id,{id}]',
+        'email'    => 'required|valid_email|is_unique[users.email,id,{id}]',
+        'password' => 'required|min_length[6]',
+        'role'     => 'required|in_list[admin,staff,resident]'
+    ];
 }

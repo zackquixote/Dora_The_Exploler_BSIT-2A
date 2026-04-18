@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Controllers\Staff;
+namespace App\Controllers;
 
-use App\Controllers\BaseController;
 use App\Models\ResidentModel;
 use App\Models\HouseholdModel;
 
@@ -17,110 +16,113 @@ class Resident extends BaseController
         $this->householdModel = new HouseholdModel();
     }
 
-    public function index()
-    {
-        if (!session()->get('logged_in')) {
-            return redirect()->to('/login');
-        }
-
-        return view('Staff/index', [
-            'title' => 'Residents Management'
-        ]);
+ public function index()
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to('/login');
     }
 
-    // ✅ CORRECTED server-side DataTable handler
-    public function list()
-    {
-        $db = \Config\Database::connect();
-        $request = $this->request;
+    // This loads the DataTable (residents list), NOT the dashboard
+    return view('residents/index', [
+        'title' => 'Residents Management'
+    ]);
+}
+    // Server-side DataTable handler
+  public function list()
+{
+    $db = \Config\Database::connect();
+    $request = $this->request;
 
-        $draw        = $request->getPost('draw');
-        $start       = $request->getPost('start');
-        $length      = $request->getPost('length');
-        $searchValue = $request->getPost('search')['value'] ?? '';
-        $orderColumn = $request->getPost('order')[0]['column'] ?? 0;
-        $orderDir    = $request->getPost('order')[0]['dir'] ?? 'desc';
+    $draw = (int) ($request->getPost('draw') ?? 1);
+    $start = (int) ($request->getPost('start') ?? 0);
+    $length = (int) ($request->getPost('length') ?? 10);
+    $searchValue = $request->getPost('search')['value'] ?? '';
 
-        $columns = [
-            'r.id', 'r.first_name', 'r.middle_name', 'r.last_name', 'r.sex',
-            'r.birthdate', 'r.civil_status', 'h.household_no', 'r.occupation',
-            'r.citizenship', 'r.is_voter', 'r.is_senior_citizen', 'r.is_pwd',
-            'r.profile_picture'
+    // Total records
+    $totalRecords = $db->table('residents')->countAll();
+
+    // Build query
+    $builder = $db->table('residents r');
+    $builder->select('r.*, h.household_no');
+    $builder->join('households h', 'h.id = r.household_id', 'left');
+    
+    // Apply search
+    if (!empty($searchValue)) {
+        $builder->groupStart()
+            ->like('r.first_name', $searchValue)
+            ->orLike('r.last_name', $searchValue)
+            ->orLike('r.middle_name', $searchValue)
+            ->orLike('r.occupation', $searchValue)
+            ->groupEnd();
+    }
+    
+    // Get filtered count
+    $recordsFiltered = $builder->countAllResults(false);
+    
+    // Apply order and limit
+    $builder->orderBy('r.id', 'DESC');
+    $builder->limit($length, $start);
+    
+    // Execute query
+    $residents = $builder->get()->getResultArray();
+
+    // Format data for DataTable
+    $data = [];
+    foreach ($residents as $r) {
+        // Full name
+        $fullName = $r['first_name'];
+        if (!empty($r['middle_name'])) {
+            $fullName .= ' ' . $r['middle_name'];
+        }
+        $fullName .= ' ' . $r['last_name'];
+        
+        // Age calculation
+        $age = '';
+        if (!empty($r['birthdate'])) {
+            $birthDate = new \DateTime($r['birthdate']);
+            $today = new \DateTime('today');
+            $age = $birthDate->diff($today)->y;
+        }
+        
+        // Profile image
+        $profileImage = !empty($r['profile_picture']) 
+            ? base_url('uploads/' . $r['profile_picture']) 
+            : base_url('assets/img/default.png');
+        
+        // Badges
+        $voterBadge = $r['is_voter'] ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>';
+        $seniorBadge = $r['is_senior_citizen'] ? '<span class="badge bg-info">Senior</span>' : '';
+        $pwdBadge = $r['is_pwd'] ? '<span class="badge bg-warning">PWD</span>' : '';
+        $flags = trim($seniorBadge . ' ' . $pwdBadge);
+        
+        $data[] = [
+            'id' => $r['id'],
+            'profile' => '<img src="' . $profileImage . '" width="40" height="40" class="rounded-circle">',
+            'full_name' => $fullName,
+            'sex' => ucfirst($r['sex']),
+            'age' => $age,
+            'civil_status' => ucfirst($r['civil_status'] ?? ''),
+            'household_no' => $r['household_no'] ?? '-',
+            'occupation' => $r['occupation'] ?? '-',
+            'citizenship' => $r['citizenship'] ?? '-',
+            'voter' => $voterBadge,
+            'flags' => $flags,
+            'actions' => '
+                <a href="' . base_url('resident/view/' . $r['id']) . '" class="btn btn-sm btn-info">View</a>
+                <a href="' . base_url('resident/edit/' . $r['id']) . '" class="btn btn-sm btn-warning">Edit</a>
+                <button class="btn btn-sm btn-danger delete-resident" data-id="' . $r['id'] . '">Delete</button>
+            '
         ];
-
-        $builder = $db->table('residents r')
-            ->select('r.*, h.household_no')
-            ->join('households h', 'h.id = r.household_id', 'left');
-
-        // Apply search
-        if (!empty($searchValue)) {
-            $builder->groupStart()
-                ->like('r.first_name', $searchValue)
-                ->orLike('r.middle_name', $searchValue)
-                ->orLike('r.last_name', $searchValue)
-                ->orLike('r.occupation', $searchValue)
-                ->orLike('r.citizenship', $searchValue)
-                ->groupEnd();
-        }
-
-        // Count total records (without filter)
-        $totalRecords = $builder->countAllResults(false);
-
-        // Apply ordering
-        if (isset($columns[$orderColumn])) {
-            $builder->orderBy($columns[$orderColumn], $orderDir);
-        } else {
-            $builder->orderBy('r.id', 'desc');
-        }
-
-        // Pagination
-        $builder->limit($length, $start);
-        $residents = $builder->get()->getResultArray();
-
-        // Count filtered records (same as total for simplicity, but you can add a separate count with search)
-        $recordsFiltered = $totalRecords;
-        if (!empty($searchValue)) {
-            // Re-run count with search conditions
-            $filteredBuilder = $db->table('residents r')
-                ->join('households h', 'h.id = r.household_id', 'left');
-            $filteredBuilder->groupStart()
-                ->like('r.first_name', $searchValue)
-                ->orLike('r.middle_name', $searchValue)
-                ->orLike('r.last_name', $searchValue)
-                ->orLike('r.occupation', $searchValue)
-                ->orLike('r.citizenship', $searchValue)
-                ->groupEnd();
-            $recordsFiltered = $filteredBuilder->countAllResults();
-        }
-
-        $data = [];
-        foreach ($residents as $r) {
-            $data[] = [
-                'id'                 => $r['id'],
-                'first_name'         => $r['first_name'],
-                'middle_name'        => $r['middle_name'] ?? '',
-                'last_name'          => $r['last_name'],
-                'sex'                => $r['sex'],
-                'birthdate'          => $r['birthdate'],
-                'civil_status'       => $r['civil_status'],
-                'household_no'       => $r['household_no'] ?? null,
-                'occupation'         => $r['occupation'],
-                'citizenship'        => $r['citizenship'],
-                'is_voter'           => (int)($r['is_voter'] ?? 0),
-                'is_senior_citizen'  => (int)($r['is_senior_citizen'] ?? 0),
-                'is_pwd'             => (int)($r['is_pwd'] ?? 0),
-                'profile_picture'    => $r['profile_picture'] ?? null
-            ];
-        }
-
-        return $this->response->setJSON([
-            'draw'            => intval($draw),
-            'recordsTotal'    => $totalRecords,
-            'recordsFiltered' => $recordsFiltered,
-            'data'            => $data,
-            'csrf_hash'       => csrf_hash()
-        ]);
     }
+    
+    // Return JSON response
+    return $this->response->setJSON([
+        'draw' => $draw,
+        'recordsTotal' => $totalRecords,
+        'recordsFiltered' => $recordsFiltered,
+        'data' => $data
+    ]);
+}
 
     public function households()
     {
@@ -146,13 +148,12 @@ class Resident extends BaseController
             ->orderBy('household_no', 'ASC')
             ->findAll();
 
-        return view('Staff/create', [
+        return view('residents/create', [
             'title'      => 'Add Resident',
             'households' => $households
         ]);
     }
 
-    // ✅ STORE with address fields and profile picture
     public function store()
     {
         $rules = [
@@ -173,7 +174,6 @@ class Resident extends BaseController
             return redirect()->back()->withInput();
         }
 
-        // Handle profile picture upload
         $profilePic = null;
         $file = $this->request->getFile('profile_picture');
         if ($file && $file->isValid() && !$file->hasMoved()) {
@@ -208,7 +208,7 @@ class Resident extends BaseController
 
         if ($this->residentModel->insert($data)) {
             session()->setFlashdata('success', 'Resident added successfully.');
-            return redirect()->to(base_url('staff/residents'));
+            return redirect()->to(base_url('resident'));
         }
 
         session()->setFlashdata('error', 'Failed to save resident.');
@@ -223,19 +223,18 @@ class Resident extends BaseController
 
         $resident = $this->residentModel->find($id);
         if (!$resident) {
-            return redirect()->to('/staff/residents')->with('error', 'Resident not found');
+            return redirect()->to('/resident')->with('error', 'Resident not found');
         }
 
         $households = $this->householdModel->orderBy('household_no', 'ASC')->findAll();
 
-        return view('Staff/edit', [
+        return view('residents/edit', [
             'title'      => 'Edit Resident',
             'resident'   => $resident,
             'households' => $households
         ]);
     }
 
-    // ✅ UPDATE with address fields and profile picture
     public function update($id)
     {
         $rules = [
@@ -262,11 +261,9 @@ class Resident extends BaseController
             return redirect()->back();
         }
 
-        // Handle profile picture upload
-        $profilePic = $resident['profile_picture']; // keep old by default
+        $profilePic = $resident['profile_picture'];
         $file = $this->request->getFile('profile_picture');
         if ($file && $file->isValid() && !$file->hasMoved()) {
-            // Delete old file if exists
             if ($profilePic && file_exists('uploads/' . $profilePic)) {
                 unlink('uploads/' . $profilePic);
             }
@@ -299,7 +296,7 @@ class Resident extends BaseController
 
         if ($this->residentModel->update($id, $data)) {
             session()->setFlashdata('success', 'Resident updated successfully.');
-            return redirect()->to(base_url('staff/residents'));
+            return redirect()->to(base_url('resident'));
         }
 
         session()->setFlashdata('error', 'Update failed.');
@@ -346,6 +343,6 @@ class Resident extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Resident not found");
         }
 
-        return view('Staff/view', ['resident' => $resident]);
+        return view('residents/view', ['resident' => $resident]);
     }
 }

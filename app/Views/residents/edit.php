@@ -34,9 +34,11 @@
     <?php endif; ?>
 
     <form id="residentForm"
-        action="<?= base_url('staff/resident/update/' . $resident['id']) ?>"
+        action="<?= base_url('resident/update/' . $resident['id']) ?>"
         method="POST"
         enctype="multipart/form-data">
+        <a href="<?= base_url('resident') ?>" class="btn btn-secondary">Cancel</a>
+
 
         <?= csrf_field() ?>
 
