@@ -9,132 +9,45 @@ class Resident extends BaseController
 {
     protected $residentModel;
     protected $householdModel;
+    protected $db;
 
     public function __construct()
     {
-        $this->residentModel  = new ResidentModel();
+        $this->residentModel = new ResidentModel();
         $this->householdModel = new HouseholdModel();
+        $this->db = \Config\Database::connect();
     }
 
- public function index()
-{
-    if (!session()->get('logged_in')) {
-        return redirect()->to('/login');
-    }
-
-    // This loads the DataTable (residents list), NOT the dashboard
-    return view('residents/index', [
-        'title' => 'Residents Management'
-    ]);
-}
-    // Server-side DataTable handler
-  public function list()
-{
-    $db = \Config\Database::connect();
-    $request = $this->request;
-
-    $draw = (int) ($request->getPost('draw') ?? 1);
-    $start = (int) ($request->getPost('start') ?? 0);
-    $length = (int) ($request->getPost('length') ?? 10);
-    $searchValue = $request->getPost('search')['value'] ?? '';
-
-    // Total records
-    $totalRecords = $db->table('residents')->countAll();
-
-    // Build query
-    $builder = $db->table('residents r');
-    $builder->select('r.*, h.household_no');
-    $builder->join('households h', 'h.id = r.household_id', 'left');
-    
-    // Apply search
-    if (!empty($searchValue)) {
-        $builder->groupStart()
-            ->like('r.first_name', $searchValue)
-            ->orLike('r.last_name', $searchValue)
-            ->orLike('r.middle_name', $searchValue)
-            ->orLike('r.occupation', $searchValue)
-            ->groupEnd();
-    }
-    
-    // Get filtered count
-    $recordsFiltered = $builder->countAllResults(false);
-    
-    // Apply order and limit
-    $builder->orderBy('r.id', 'DESC');
-    $builder->limit($length, $start);
-    
-    // Execute query
-    $residents = $builder->get()->getResultArray();
-
-    // Format data for DataTable
-    $data = [];
-    foreach ($residents as $r) {
-        // Full name
-        $fullName = $r['first_name'];
-        if (!empty($r['middle_name'])) {
-            $fullName .= ' ' . $r['middle_name'];
-        }
-        $fullName .= ' ' . $r['last_name'];
-        
-        // Age calculation
-        $age = '';
-        if (!empty($r['birthdate'])) {
-            $birthDate = new \DateTime($r['birthdate']);
-            $today = new \DateTime('today');
-            $age = $birthDate->diff($today)->y;
-        }
-        
-        // Profile image
-        $profileImage = !empty($r['profile_picture']) 
-            ? base_url('uploads/' . $r['profile_picture']) 
-            : base_url('assets/img/default.png');
-        
-        // Badges
-        $voterBadge = $r['is_voter'] ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>';
-        $seniorBadge = $r['is_senior_citizen'] ? '<span class="badge bg-info">Senior</span>' : '';
-        $pwdBadge = $r['is_pwd'] ? '<span class="badge bg-warning">PWD</span>' : '';
-        $flags = trim($seniorBadge . ' ' . $pwdBadge);
-        
-        $data[] = [
-            'id' => $r['id'],
-            'profile' => '<img src="' . $profileImage . '" width="40" height="40" class="rounded-circle">',
-            'full_name' => $fullName,
-            'sex' => ucfirst($r['sex']),
-            'age' => $age,
-            'civil_status' => ucfirst($r['civil_status'] ?? ''),
-            'household_no' => $r['household_no'] ?? '-',
-            'occupation' => $r['occupation'] ?? '-',
-            'citizenship' => $r['citizenship'] ?? '-',
-            'voter' => $voterBadge,
-            'flags' => $flags,
-            'actions' => '
-                <a href="' . base_url('resident/view/' . $r['id']) . '" class="btn btn-sm btn-info">View</a>
-                <a href="' . base_url('resident/edit/' . $r['id']) . '" class="btn btn-sm btn-warning">Edit</a>
-                <button class="btn btn-sm btn-danger delete-resident" data-id="' . $r['id'] . '">Delete</button>
-            '
-        ];
-    }
-    
-    // Return JSON response
-    return $this->response->setJSON([
-        'draw' => $draw,
-        'recordsTotal' => $totalRecords,
-        'recordsFiltered' => $recordsFiltered,
-        'data' => $data
-    ]);
-}
-
-    public function households()
+    public function index()
     {
-        $households = $this->householdModel
-            ->select('id, household_no, street_address AS address')
-            ->orderBy('household_no', 'ASC')
-            ->findAll();
-
-        return $this->response->setJSON([
-            'status'    => 'success',
-            'data'      => $households,
-            'csrf_hash' => csrf_hash(),
+        $selectedPurok = $this->request->getGet('purok') ?? 'all';
+        
+        $builder = $this->db->table('residents')
+            ->select('residents.*, households.household_no')
+            ->join('households', 'households.id = residents.household_id', 'left');
+        
+        if ($selectedPurok !== 'all') {
+            if ($selectedPurok === 'Unassigned') {
+                $builder->where('residents.sitio IS NULL', null, false);
+            } else {
+                $builder->where('residents.sitio', $selectedPurok);
+            }
+        }
+        
+        $residents = $builder->orderBy('residents.id', 'DESC')->get()->getResultArray();
+        
+        // Get purok counts
+        $allResidents = $this->db->table('residents')->select('sitio')->get()->getResultArray();
+        $purokCounts = [];
+        foreach ($allResidents as $r) {
+            $sitio = !empty($r['sitio']) ? $r['sitio'] : 'Unassigned';
+            $purokCounts[$sitio] = ($purokCounts[$sitio] ?? 0) + 1;
+        }
+        
+        return view('residents/index', [  // Changed to 'residents/index'
+            'residents' => $residents,
+            'purokCounts' => $purokCounts,
+            'selectedPurok' => $selectedPurok
         ]);
     }
 
@@ -144,13 +57,17 @@ class Resident extends BaseController
             return redirect()->to('/login');
         }
 
+        // Get household_id from URL if passed
+        $householdId = $this->request->getGet('household_id');
+        
         $households = $this->householdModel
             ->orderBy('household_no', 'ASC')
             ->findAll();
 
-        return view('residents/create', [
+        return view('residents/create', [  // Changed to 'residents/create'
             'title'      => 'Add Resident',
-            'households' => $households
+            'households' => $households,
+            'preselectedHousehold' => $householdId
         ]);
     }
 
@@ -161,17 +78,16 @@ class Resident extends BaseController
             'last_name'    => 'required|min_length[2]|max_length[100]',
             'birthdate'    => 'required|valid_date',
             'sex'          => 'required|in_list[male,female]',
-            'household_id' => 'permit_empty|integer',
+            'household_id' => 'required|integer',
             'occupation'   => 'permit_empty|max_length[100]',
             'citizenship'  => 'permit_empty|max_length[100]',
             'street_address' => 'permit_empty|max_length[255]',
-            'sitio'        => 'permit_empty|max_length[100]',
-            'profile_picture' => 'uploaded[profile_picture]|is_image[profile_picture]|max_size[profile_picture,2048]'
+            'sitio'        => 'required|max_length[100]',
+            'profile_picture' => 'is_image[profile_picture]|max_size[profile_picture,2048]'
         ];
 
         if (!$this->validate($rules)) {
-            session()->setFlashdata('error', 'Validation failed: ' . json_encode($this->validator->getErrors()));
-            return redirect()->back()->withInput();
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $profilePic = null;
@@ -207,12 +123,10 @@ class Resident extends BaseController
         ];
 
         if ($this->residentModel->insert($data)) {
-            session()->setFlashdata('success', 'Resident added successfully.');
-            return redirect()->to(base_url('resident'));
+            return redirect()->to(base_url('resident'))->with('success', 'Resident added successfully.');
         }
 
-        session()->setFlashdata('error', 'Failed to save resident.');
-        return redirect()->back()->withInput();
+        return redirect()->back()->with('error', 'Failed to save resident.')->withInput();
     }
 
     public function edit($id)
@@ -228,7 +142,7 @@ class Resident extends BaseController
 
         $households = $this->householdModel->orderBy('household_no', 'ASC')->findAll();
 
-        return view('residents/edit', [
+        return view('residents/edit', [  // Changed to 'residents/edit'
             'title'      => 'Edit Resident',
             'resident'   => $resident,
             'households' => $households
@@ -242,23 +156,21 @@ class Resident extends BaseController
             'last_name'    => 'required|min_length[2]',
             'birthdate'    => 'required|valid_date',
             'sex'          => 'required|in_list[male,female]',
-            'household_id' => 'permit_empty|integer',
+            'household_id' => 'required|integer',
             'occupation'   => 'permit_empty|max_length[100]',
             'citizenship'  => 'permit_empty|max_length[100]',
             'street_address' => 'permit_empty|max_length[255]',
-            'sitio'        => 'permit_empty|max_length[100]',
+            'sitio'        => 'required|max_length[100]',
             'profile_picture' => 'is_image[profile_picture]|max_size[profile_picture,2048]'
         ];
 
         if (!$this->validate($rules)) {
-            session()->setFlashdata('error', 'Validation failed.');
-            return redirect()->back()->withInput();
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $resident = $this->residentModel->find($id);
         if (!$resident) {
-            session()->setFlashdata('error', 'Resident not found.');
-            return redirect()->back();
+            return redirect()->back()->with('error', 'Resident not found.');
         }
 
         $profilePic = $resident['profile_picture'];
@@ -295,44 +207,55 @@ class Resident extends BaseController
         ];
 
         if ($this->residentModel->update($id, $data)) {
-            session()->setFlashdata('success', 'Resident updated successfully.');
-            return redirect()->to(base_url('resident'));
+            return redirect()->to(base_url('resident'))->with('success', 'Resident updated successfully.');
         }
 
-        session()->setFlashdata('error', 'Update failed.');
-        return redirect()->back()->withInput();
+        return redirect()->back()->with('error', 'Update failed.')->withInput();
     }
 
-    public function delete($id)
-    {
+  public function delete($id)
+{
+    // Check if it's an AJAX request
+    if ($this->request->isAJAX()) {
         $resident = $this->residentModel->find($id);
-        if ($resident && !empty($resident['profile_picture']) && file_exists('uploads/' . $resident['profile_picture'])) {
-            unlink('uploads/' . $resident['profile_picture']);
-        }
-
-        if ($this->residentModel->delete($id)) {
+        
+        if (!$resident) {
             return $this->response->setJSON([
-                'status'    => 'success',
-                'message'   => 'Resident deleted successfully.',
-                'csrf_hash' => csrf_hash(),
+                'status' => 'error',
+                'message' => 'Resident not found'
             ]);
         }
-
-        return $this->response->setJSON([
-            'status'    => 'error',
-            'message'   => 'Delete failed.',
-            'csrf_hash' => csrf_hash(),
-        ]);
+        
+        // Delete profile picture if exists
+        if (!empty($resident['profile_picture']) && file_exists('uploads/' . $resident['profile_picture'])) {
+            unlink('uploads/' . $resident['profile_picture']);
+        }
+        
+        // Delete the resident
+        if ($this->residentModel->delete($id)) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Resident deleted successfully.',
+                'csrf_hash' => csrf_hash()
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to delete resident.'
+            ]);
+        }
     }
-
+    
+    // If not AJAX, redirect back
+    return redirect()->back()->with('error', 'Invalid request');
+}
     public function view($id = null)
     {
         if (!$id) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Missing resident ID");
         }
 
-        $db = \Config\Database::connect();
-        $resident = $db->table('residents r')
+        $resident = $this->db->table('residents r')
             ->select('r.*, h.household_no, h.street_address as household_address')
             ->join('households h', 'h.id = r.household_id', 'left')
             ->where('r.id', $id)
@@ -343,6 +266,31 @@ class Resident extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Resident not found");
         }
 
-        return view('residents/view', ['resident' => $resident]);
+        return view('residents/view', ['resident' => $resident]);  // Changed to 'residents/view'
     }
+
+    public function getHouseholdsBySitio()
+    {
+        if ($this->request->isAJAX()) {
+            $sitio = $this->request->getPost('sitio');
+            
+            if ($sitio) {
+                $households = $this->householdModel
+                    ->where('sitio', $sitio)
+                    ->orderBy('household_no', 'ASC')
+                    ->findAll();
+                
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'households' => $households
+                ]);
+            }
+        }
+        
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Invalid request'
+        ]);
+    }
+    
 }

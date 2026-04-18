@@ -154,5 +154,6 @@
         </div>
     </div>
 </div>
-
+<!-- External JavaScript files -->
+<script src="<?= base_url('assets/js/resident/residents-dashboard.js') ?>"></script>
 <?= $this->endSection() ?>

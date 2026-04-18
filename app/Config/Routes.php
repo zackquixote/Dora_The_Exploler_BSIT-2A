@@ -46,19 +46,17 @@ $routes->post('resident/list', 'Resident::list');
 
 // Alias for /residents (optional, points to same Resident controller)
 $routes->get('residents', 'Resident::index');
+$routes->post('resident/get-households-by-sitio', 'Resident::getHouseholdsBySitio');
 
-// ─── Household Management ────────────────────────────────────────────────────
-$routes->group('households', function ($routes) {
-    $routes->get('/',                    'HouseholdController::index');
-    $routes->get('create',               'HouseholdController::create');
-    $routes->get('edit/(:num)',          'HouseholdController::edit/$1');
-    $routes->get('list',                 'HouseholdController::list');
-    $routes->get('residentsOptions',     'HouseholdController::residentsOptions');
-    $routes->post('store',               'HouseholdController::store');
-    $routes->post('update/(:num)',       'HouseholdController::update/$1');
-    $routes->post('delete/(:num)',       'HouseholdController::delete/$1');
-});
-
+// Household routes
+$routes->get('households', 'HouseholdController::index');
+$routes->get('households/create', 'HouseholdController::create');
+$routes->post('households/store', 'HouseholdController::store');
+$routes->get('households/edit/(:num)', 'HouseholdController::edit/$1');
+$routes->post('households/update/(:num)', 'HouseholdController::update/$1');
+$routes->get('households/view/(:num)', 'HouseholdController::view/$1');
+$routes->post('households/delete/(:num)', 'HouseholdController::delete/$1');
+$routes->post('households/get-by-sitio', 'HouseholdController::getBySitio');
 // ─── Users Management (Staff) ────────────────────────────────────────────────
 $routes->group('staff/users', function ($routes) {
     $routes->get('/',                'Users::index');

@@ -14,40 +14,60 @@ class Auth extends BaseController
             $role = session()->get('role');
             return redirect()->to($role . '/dashboard');
         }
-        return view('login');
+        
+        // Pass lockout time if needed (for failed attempts feature)
+        $data['lockout'] = 0;
+        return view('login', $data);
     }
-
 
     public function auth()
     {
         $model = new UserModel();
-        $username = $this->request->getPost('username');
+        
+        // Get email and password from your form
+        $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
+        $remember = $this->request->getPost('remember');
 
-        $user = $model->where('username', $username)->first();
+        // Find user by email
+        $user = $model->where('email', $email)->first();
 
+        // Verify password
         if ($user && password_verify($password, $user['password'])) {
-            // ✅ Set session data
+            
+            // Set session data
             session()->set([
                 'logged_in' => true,
                 'user_id'   => $user['id'],
-                'role'      => $user['role'],      // 'staff' or 'admin'
-                'username'  => $user['username']
+                'role'      => $user['role'],
+                'email'     => $user['email'],
+                'name'      => $user['name']
             ]);
 
-            // Force session write
-            session()->commit();
+            // Handle "Remember me" functionality
+            if ($remember) {
+                $this->response->setCookie('user_email', $email, 60 * 60 * 24 * 30);
+                $this->response->setCookie('user_id', $user['id'], 60 * 60 * 24 * 30);
+            }
+
+            // REMOVE or COMMENT OUT this line:
+            // session()->commit();
 
             // Redirect based on role
             return redirect()->to($user['role'] . '/dashboard');
         }
 
-        return redirect()->back()->with('error', 'Invalid credentials');
+        // Failed login
+        return redirect()->back()->with('error', 'Invalid email or password');
     }
 
     public function logout()
     {
         session()->destroy();
+        
+        $this->response->deleteCookie('user_email');
+        $this->response->deleteCookie('user_id');
+        
         return redirect()->to('/login');
     }
 }
