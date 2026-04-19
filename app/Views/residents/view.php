@@ -27,7 +27,7 @@
                         <div class="card-body box-profile">
                             <div class="text-center">
                                 <img class="profile-user-img img-fluid img-circle"
-                                     src="<?= base_url(!empty($resident['profile_picture']) ? 'uploads/'.$resident['profile_picture'] : 'assets/img/default.png') ?>"
+                                     src="<?= base_url(!empty($resident['profile_picture']) ? 'uploads/' . $resident['profile_picture'] : 'assets/img/default.png') ?>"
                                      alt="Profile picture">
                             </div>
                             <h3 class="profile-username text-center">
@@ -43,7 +43,7 @@
                                 </li>
                                 <li class="list-group-item">
                                     <b>Age</b> <span class="float-right">
-                                        <?php 
+                                        <?php
                                         if (!empty($resident['birthdate'])) {
                                             $birth = new DateTime($resident['birthdate']);
                                             $today = new DateTime();
@@ -58,7 +58,7 @@
                                     <b>Contact</b> <span class="float-right"><?= esc($resident['contact_number'] ?? 'N/A') ?></span>
                                 </li>
                             </ul>
-                            <a href="<?= base_url('resident/edit/'.$resident['id']) ?>" class="btn btn-primary btn-block">
+                            <a href="<?= base_url('resident/edit/' . $resident['id']) ?>" class="btn btn-primary btn-block">
                                 <i class="fas fa-edit"></i> Edit Profile
                             </a>
                             <a href="<?= base_url('resident') ?>" class="btn btn-secondary btn-block mt-2">
@@ -74,7 +74,7 @@
                             <ul class="nav nav-pills">
                                 <li class="nav-item"><a class="nav-link active" href="#details" data-toggle="tab">Personal Details</a></li>
                                 <li class="nav-item"><a class="nav-link" href="#address" data-toggle="tab">Address Information</a></li>
-                                <li class="nav-item"><a class="nav-link" href="#status" data-toggle="tab">Status & Flags</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#status" data-toggle="tab">Status &amp; Flags</a></li>
                             </ul>
                         </div>
                         <div class="card-body">
@@ -112,5 +112,25 @@
         </div>
     </section>
 </div>
+
+<!--
+    FIX: Expose flat global variables (BASE_URL, CSRF_*) in addition to the
+    APP object so residents-view.js works consistently with the rest of the
+    JS files. Variables declared BEFORE the external script tag.
+-->
+<script>
+    var BASE_URL         = "<?= base_url() ?>";
+    var CSRF_TOKEN_NAME  = "<?= csrf_token() ?>";
+    var CSRF_TOKEN_VALUE = "<?= csrf_hash() ?>";
+
+    // Legacy APP object kept for backward compatibility
+    var APP = {
+        baseUrl:     BASE_URL,
+        csrfName:    CSRF_TOKEN_NAME,
+        csrfHash:    CSRF_TOKEN_VALUE,
+        currentPurok: "<?= isset($selectedPurok) ? esc($selectedPurok) : 'all' ?>"
+    };
+</script>
+<script src="<?= base_url('js/residents/residents-view.js') ?>"></script>
 
 <?= $this->endSection() ?>

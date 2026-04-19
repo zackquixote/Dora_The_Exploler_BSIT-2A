@@ -18,4 +18,33 @@ class UserModel extends Model
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';
     protected $deletedField = 'deleted_at';
+
+    /**
+     * Get paginated records for DataTables
+     */
+    public function getRecords($start, $length, $searchValue)
+    {
+        $builder = $this->builder();
+        
+        // Apply search filter if provided
+        if (!empty($searchValue)) {
+            $builder->groupStart()
+                    ->like('name', $searchValue)
+                    ->orLike('email', $searchValue)
+                    ->orLike('role', $searchValue)
+                    ->orLike('phone', $searchValue)
+                    ->groupEnd();
+        }
+        
+        // Get total filtered count
+        $filteredCount = $builder->countAllResults(false);
+        
+        // Get paginated results - FIXED: Use $this->findAll() not $builder->findAll()
+        $data = $this->findAll($length, $start);
+        
+        return [
+            'data' => $data,
+            'filtered' => $filteredCount
+        ];
+    }
 }

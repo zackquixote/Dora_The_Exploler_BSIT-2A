@@ -31,7 +31,7 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-info">
                         <div class="inner">
-                            <h3><?= $totalResidents ?? 0 ?></h3>
+                            <h3 id="totalResidents"><?= $totalResidents ?? 0 ?></h3>
                             <p>Total Residents</p>
                         </div>
                         <div class="icon"><i class="fas fa-users"></i></div>
@@ -41,7 +41,7 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-success">
                         <div class="inner">
-                            <h3><?= $totalHouseholds ?? 0 ?></h3>
+                            <h3 id="totalHouseholds"><?= $totalHouseholds ?? 0 ?></h3>
                             <p>Total Households</p>
                         </div>
                         <div class="icon"><i class="fas fa-home"></i></div>
@@ -51,7 +51,7 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-warning">
                         <div class="inner">
-                            <h3><?= $pendingCerts ?? 0 ?></h3>
+                            <h3 id="pendingCerts"><?= $pendingCerts ?? 0 ?></h3>
                             <p>Pending Certificates</p>
                         </div>
                         <div class="icon"><i class="fas fa-file-invoice"></i></div>
@@ -61,7 +61,7 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-danger">
                         <div class="inner">
-                            <h3><?= $blotterCount ?? 0 ?></h3>
+                            <h3 id="blotterCount"><?= $blotterCount ?? 0 ?></h3>
                             <p>Blotter Records</p>
                         </div>
                         <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
@@ -154,6 +154,16 @@
         </div>
     </div>
 </div>
-<!-- External JavaScript files -->
-<script src="<?= base_url('assets/js/resident/residents-dashboard.js') ?>"></script>
+
+<!--
+    FIX: JS variables declared BEFORE the external script.
+    residents-dashboard.js uses BASE_URL for the AJAX stats refresh call.
+-->
+<script>
+    var BASE_URL         = "<?= base_url() ?>";
+    var CSRF_TOKEN_NAME  = "<?= csrf_token() ?>";
+    var CSRF_TOKEN_VALUE = "<?= csrf_hash() ?>";
+</script>
+<script src="<?= base_url('js/residents/residents-dashboard.js') ?>"></script>
+
 <?= $this->endSection() ?>

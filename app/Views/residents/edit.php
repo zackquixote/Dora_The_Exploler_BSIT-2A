@@ -49,39 +49,39 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">First Name <span class="text-danger">*</span></label>
-                        <input type="text" name="first_name" class="form-control form-control-lg bg-light border-0" 
+                        <input type="text" name="first_name" class="form-control form-control-lg bg-light border-0"
                                value="<?= esc($resident['first_name']) ?>" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Middle Name</label>
-                        <input type="text" name="middle_name" class="form-control form-control-lg bg-light border-0" 
+                        <input type="text" name="middle_name" class="form-control form-control-lg bg-light border-0"
                                value="<?= esc($resident['middle_name'] ?? '') ?>">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Last Name <span class="text-danger">*</span></label>
-                        <input type="text" name="last_name" class="form-control form-control-lg bg-light border-0" 
+                        <input type="text" name="last_name" class="form-control form-control-lg bg-light border-0"
                                value="<?= esc($resident['last_name']) ?>" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Gender <span class="text-danger">*</span></label>
                         <select name="sex" class="form-control form-control-lg bg-light border-0" required>
-                            <option value="male" <?= ($resident['sex'] ?? '') === 'male' ? 'selected' : '' ?>>Male</option>
+                            <option value="male"   <?= ($resident['sex'] ?? '') === 'male'   ? 'selected' : '' ?>>Male</option>
                             <option value="female" <?= ($resident['sex'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Occupation</label>
-                        <input type="text" name="occupation" class="form-control form-control-lg bg-light border-0" 
+                        <input type="text" name="occupation" class="form-control form-control-lg bg-light border-0"
                                value="<?= esc($resident['occupation'] ?? '') ?>">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Citizenship</label>
-                        <input type="text" name="citizenship" class="form-control form-control-lg bg-light border-0" 
+                        <input type="text" name="citizenship" class="form-control form-control-lg bg-light border-0"
                                value="<?= esc($resident['citizenship'] ?? 'Filipino') ?>">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Birthdate <span class="text-danger">*</span></label>
-                        <input type="date" name="birthdate" class="form-control form-control-lg bg-light border-0" 
+                        <input type="date" name="birthdate" class="form-control form-control-lg bg-light border-0"
                                value="<?= esc($resident['birthdate']) ?>" required>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -98,11 +98,11 @@
                         <label class="small font-weight-bold text-secondary">Profile Picture</label>
                         <input type="file" name="profile_picture" class="form-control form-control-lg bg-light border-0" accept="image/*">
                         <small class="text-muted">Leave empty to keep current photo</small>
-                        
+
                         <?php if (!empty($resident['profile_picture'])): ?>
                             <div class="current-photo mt-2">
                                 <small class="text-muted">Current photo:</small><br>
-                                <img src="<?= base_url('uploads/' . $resident['profile_picture']) ?>" 
+                                <img src="<?= base_url('uploads/' . $resident['profile_picture']) ?>"
                                      height="60" class="rounded-circle shadow-sm mt-1">
                             </div>
                         <?php endif; ?>
@@ -120,51 +120,36 @@
                 <div class="row">
                     <div class="col-md-8 mb-3">
                         <label class="small font-weight-bold text-secondary">Street / House Number</label>
-                        <input type="text" name="street_address" class="form-control form-control-lg bg-light border-0" 
+                        <input type="text" name="street_address" class="form-control form-control-lg bg-light border-0"
                                value="<?= esc($resident['street_address'] ?? '') ?>" placeholder="e.g., Block 1 Lot 2, Phase 3">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Sitio / Zone <span class="text-danger">*</span></label>
                         <select name="sitio" id="sitioSelect" class="form-control form-control-lg bg-light border-0" required>
                             <option value="">Select Sitio</option>
-                            <option value="Purok Malipayon" <?= ($resident['sitio'] ?? '') === 'Purok Malipayon' ? 'selected' : '' ?>>
-                                Purok Malipayon
-                            </option>
-                            <option value="Purok Masagana" <?= ($resident['sitio'] ?? '') === 'Purok Masagana' ? 'selected' : '' ?>>
-                                Purok Masagana
-                            </option>
-                            <option value="Purok Cory" <?= ($resident['sitio'] ?? '') === 'Purok Cory' ? 'selected' : '' ?>>
-                                Purok Cory
-                            </option>
-                            <option value="Purok Kawayan" <?= ($resident['sitio'] ?? '') === 'Purok Kawayan' ? 'selected' : '' ?>>
-                                Purok Kawayan
-                            </option>
-                            <option value="Purok Pagla-um" <?= ($resident['sitio'] ?? '') === 'Purok Pagla-um' ? 'selected' : '' ?>>
-                                Purok Pagla-um
-                            </option>
+                            <option value="Purok Malipayon" <?= ($resident['sitio'] ?? '') === 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
+                            <option value="Purok Masagana"  <?= ($resident['sitio'] ?? '') === 'Purok Masagana'  ? 'selected' : '' ?>>Purok Masagana</option>
+                            <option value="Purok Cory"      <?= ($resident['sitio'] ?? '') === 'Purok Cory'      ? 'selected' : '' ?>>Purok Cory</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Household <span class="text-danger">*</span></label>
                         <select name="household_id" id="householdSelect" class="form-control form-control-lg bg-light border-0" required>
-                            <option value="">Select Household</option>
-                            <?php foreach ($households as $h): ?>
-                                <option value="<?= $h['id'] ?>" 
-                                        data-sitio="<?= esc($h['sitio'] ?? '') ?>"
-                                        <?= ($resident['household_id'] ?? '') == $h['id'] ? 'selected' : '' ?>>
-                                    #<?= $h['household_no'] ?> - <?= esc($h['street_address'] ?? 'Address not set') ?>
-                                </option>
-                            <?php endforeach; ?>
+                            <option value="">Loading households...</option>
                         </select>
+                        <!-- Loading indicator -->
+                        <div id="householdLoading" class="spinner-border spinner-border-sm text-primary ml-2" style="display:none;" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Relationship to Head</label>
-                        <input type="text" name="relationship_to_head" class="form-control form-control-lg bg-light border-0" 
+                        <input type="text" name="relationship_to_head" class="form-control form-control-lg bg-light border-0"
                                value="<?= esc($resident['relationship_to_head'] ?? '') ?>" placeholder="e.g., Son, Daughter, Father">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Contact Number</label>
-                        <input type="text" name="contact_number" class="form-control form-control-lg bg-light border-0" 
+                        <input type="text" name="contact_number" class="form-control form-control-lg bg-light border-0"
                                value="<?= esc($resident['contact_number'] ?? '') ?>" placeholder="e.g., 09123456789">
                     </div>
                 </div>
@@ -180,7 +165,7 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" name="is_voter" id="is_voter" value="1" 
+                            <input type="checkbox" class="custom-control-input" name="is_voter" id="is_voter" value="1"
                                    <?= !empty($resident['is_voter']) ? 'checked' : '' ?>>
                             <label class="custom-control-label font-weight-bold" for="is_voter">
                                 <i class="fas fa-check-circle text-success mr-1"></i> Registered Voter
@@ -189,7 +174,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" name="is_senior_citizen" id="is_senior_citizen" value="1" 
+                            <input type="checkbox" class="custom-control-input" name="is_senior_citizen" id="is_senior_citizen" value="1"
                                    <?= !empty($resident['is_senior_citizen']) ? 'checked' : '' ?>>
                             <label class="custom-control-label font-weight-bold" for="is_senior_citizen">
                                 <i class="fas fa-user-graduate text-info mr-1"></i> Senior Citizen
@@ -198,7 +183,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" name="is_pwd" id="is_pwd" value="1" 
+                            <input type="checkbox" class="custom-control-input" name="is_pwd" id="is_pwd" value="1"
                                    <?= !empty($resident['is_pwd']) ? 'checked' : '' ?>>
                             <label class="custom-control-label font-weight-bold" for="is_pwd">
                                 <i class="fas fa-wheelchair text-danger mr-1"></i> Person with Disability
@@ -246,16 +231,29 @@
 }
 </style>
 
-<!-- JavaScript Variables -->
+<!-- FIX: JS variables declared BEFORE the external script -->
 <script>
-    var BASE_URL = "<?= base_url() ?>";
-    var CSRF_TOKEN_NAME = "<?= csrf_token() ?>";
-    var CSRF_TOKEN_VALUE = "<?= csrf_hash() ?>";
-    var CURRENT_SITIO = "<?= $resident['sitio'] ?? '' ?>";
-    var CURRENT_HOUSEHOLD_ID = "<?= $resident['household_id'] ?? '' ?>";
+    var BASE_URL            = "<?= base_url() ?>";
+    var CSRF_TOKEN_NAME     = "<?= csrf_token() ?>";
+    var CSRF_TOKEN_VALUE    = "<?= csrf_hash() ?>";
+    var CURRENT_SITIO       = "<?= esc($resident['sitio'] ?? '') ?>";
+    var CURRENT_HOUSEHOLD_ID = "<?= esc($resident['household_id'] ?? '') ?>";
+    
+    // Helper function to load script only when jQuery is ready
+    function loadResidentsEditScript() {
+        if (typeof jQuery !== 'undefined') {
+            console.log('jQuery found, loading residents-edit.js');
+            var script = document.createElement('script');
+            script.src = BASE_URL + 'js/residents/residents-edit.js';
+            document.body.appendChild(script);
+        } else {
+            console.log('Waiting for jQuery...');
+            setTimeout(loadResidentsEditScript, 50);
+        }
+    }
+    
+    // Start checking for jQuery
+    loadResidentsEditScript();
 </script>
-
-<!-- External JavaScript file -->
-<script src="<?= base_url('assets/js/resident/residents-edit.js') ?>"></script>
 
 <?= $this->endSection() ?>

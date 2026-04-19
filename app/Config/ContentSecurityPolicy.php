@@ -47,29 +47,35 @@ class ContentSecurityPolicy extends BaseConfig
      *
      * @var list<string>|string|null
      */
-    public $defaultSrc;
+    public $defaultSrc = null;
 
     /**
      * Lists allowed scripts' URLs.
      *
      * @var list<string>|string
      */
-     public $scriptSrc = ['self', "'unsafe-inline'", "'unsafe-eval'"];
-
+    public $scriptSrc = ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:", "http:"];
 
     /**
      * Lists allowed stylesheets' URLs.
      *
      * @var list<string>|string
      */
-    public $styleSrc = ['self', "'unsafe-inline'"];
+    public $styleSrc = [
+        "'self'",
+        "'unsafe-inline'",
+        "https://fonts.googleapis.com",
+        "https://code.ionicframework.com",
+        "https:",
+        "http:",
+    ];
 
     /**
      * Defines the origins from which images can be loaded.
      *
      * @var list<string>|string
      */
-    public $imageSrc = 'self';
+    public $imageSrc = ["'self'", "data:", "https:", "http:"];
 
     /**
      * Restricts the URLs that can appear in a page's `<base>` element.
@@ -78,14 +84,14 @@ class ContentSecurityPolicy extends BaseConfig
      *
      * @var list<string>|string|null
      */
-    public $baseURI;
+    public $baseURI = null;
 
     /**
      * Lists the URLs for workers and embedded frame contents
      *
      * @var list<string>|string
      */
-    public $childSrc = 'self';
+    public $childSrc = ["'self'"];
 
     /**
      * Limits the origins that you can connect to (via XHR,
@@ -93,21 +99,21 @@ class ContentSecurityPolicy extends BaseConfig
      *
      * @var list<string>|string
      */
-    public $connectSrc = 'self';
+    public $connectSrc = ["'self'", "http://localhost:*", "http://127.0.0.1:*"];
 
     /**
      * Specifies the origins that can serve web fonts.
      *
      * @var list<string>|string
      */
-    public $fontSrc;
+    public $fontSrc = ["'self'", "https://fonts.gstatic.com", "data:", "https:"];
 
     /**
      * Lists valid endpoints for submission from `<form>` tags.
      *
      * @var list<string>|string
      */
-    public $formAction = 'self';
+    public $formAction = ["'self'"];
 
     /**
      * Specifies the sources that can embed the current page.
@@ -117,7 +123,7 @@ class ContentSecurityPolicy extends BaseConfig
      *
      * @var list<string>|string|null
      */
-    public $frameAncestors;
+    public $frameAncestors = null;
 
     /**
      * The frame-src directive restricts the URLs which may
@@ -125,40 +131,40 @@ class ContentSecurityPolicy extends BaseConfig
      *
      * @var list<string>|string|null
      */
-    public $frameSrc;
+    public $frameSrc = null;
 
     /**
      * Restricts the origins allowed to deliver video and audio.
      *
      * @var list<string>|string|null
      */
-    public $mediaSrc;
+    public $mediaSrc = null;
 
     /**
      * Allows control over Flash and other plugins.
      *
      * @var list<string>|string
      */
-    public $objectSrc = 'self';
+    public $objectSrc = ["'self'"];
 
     /**
      * @var list<string>|string|null
      */
-    public $manifestSrc;
+    public $manifestSrc = null;
 
     /**
      * Limits the kinds of plugins a page may invoke.
      *
      * @var list<string>|string|null
      */
-    public $pluginTypes;
+    public $pluginTypes = null;
 
     /**
      * List of actions allowed.
      *
      * @var list<string>|string|null
      */
-    public $sandbox;
+    public $sandbox = null;
 
     /**
      * Nonce tag for style

@@ -16,9 +16,7 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    // public string $baseURL = 'http://localhost:8080/';
-
-    public $baseURL = 'http://localhost:8080/';
+    public string $baseURL = 'http://localhost:8080/';
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
@@ -42,8 +40,6 @@ class App extends BaseConfig
      * something else. If you have configured your web server to remove this file
      * from your site URIs, set this variable to an empty string.
      */
-    // public string $indexPage = 'index.php';
-
     public string $indexPage = '';
 
     /**
@@ -137,7 +133,7 @@ class App extends BaseConfig
      * @see https://www.php.net/manual/en/timezones.php for list of timezones
      *      supported by PHP.
      */
-    public string $appTimezone = 'UTC';
+    public string $appTimezone = 'Asia/Manila';
 
     /**
      * --------------------------------------------------------------------------
@@ -203,5 +199,13 @@ class App extends BaseConfig
      * @see http://www.w3.org/TR/CSP/
      */
     public bool $CSPEnabled = false;
-        // Enable CSRF protection
-public $csrfProtection = false;}
+
+    /**
+     * --------------------------------------------------------------------------
+     * CSRF Protection
+     * --------------------------------------------------------------------------
+     *
+     * Enables Cross-Site Request Forgery (CSRF) protection.
+     */
+    public bool $CSRFEnabled = true;
+}

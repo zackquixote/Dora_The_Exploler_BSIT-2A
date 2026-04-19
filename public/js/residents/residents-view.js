@@ -1,79 +1,84 @@
 /**
  * Residents Management - View Page JavaScript
- * Handles print and other view-related functions
+ * Handles print, clipboard copy, and print-mode styles.
+ *
+ * Globals expected (set in view.php before this script loads):
+ *   BASE_URL, CSRF_TOKEN_NAME, CSRF_TOKEN_VALUE, APP
  */
 
-$(document).ready(function() {
-    // Print resident details
-    $('#printBtn').on('click', function() {
+$(document).ready(function () {
+
+    // ============================================
+    // PRINT
+    // ============================================
+
+    $('#printBtn').on('click', function () {
         window.print();
     });
-    
-    // Copy resident information to clipboard
-    $('#copyInfoBtn').on('click', function() {
-        var residentInfo = '';
-        
-        // Gather resident info
-        $('.profile-username').each(function() {
-            residentInfo += 'Name: ' + $(this).text() + '\n';
+
+    // ============================================
+    // COPY TO CLIPBOARD
+    // ============================================
+
+    $('#copyInfoBtn').on('click', function () {
+        var info = '';
+
+        $('.profile-username').each(function () {
+            info += 'Name: ' + $.trim($(this).text()) + '\n';
         });
-        
-        $('.list-group-item').each(function() {
-            var label = $(this).find('b').text();
-            var value = $(this).find('.float-right').text();
+
+        $('.list-group-item').each(function () {
+            var label = $.trim($(this).find('b').text());
+            var value = $.trim($(this).find('.float-right').text());
             if (label && value) {
-                residentInfo += label + ': ' + value + '\n';
+                info += label + ': ' + value + '\n';
             }
         });
-        
-        // Copy to clipboard
-        navigator.clipboard.writeText(residentInfo).then(function() {
-            showToast('success', 'Resident information copied to clipboard!');
-        }).catch(function() {
-            showToast('error', 'Failed to copy information');
-        });
+
+        if (navigator.clipboard && info) {
+            navigator.clipboard.writeText(info)
+                .then(function ()  { showToast('success', 'Resident information copied to clipboard!'); })
+                .catch(function () { showToast('error',   'Failed to copy information'); });
+        } else {
+            showToast('error', 'Clipboard not available in this browser');
+        }
     });
-    
-    // Show toast notification
+
+    // ============================================
+    // TOAST HELPER
+    // ============================================
+
     function showToast(type, message) {
-        var toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
-        var toastHtml = `
-            <div class="toast align-items-center text-white ${toastClass} border-0 position-fixed" style="top: 20px; right: 20px; z-index: 9999;" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="true" data-delay="3000">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        ${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>
-        `;
-        
+        var bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+
+        var html =
+            '<div class="toast align-items-center text-white ' + bgClass + ' border-0 position-fixed" ' +
+            'style="top:20px;right:20px;z-index:9999;" ' +
+            'role="alert" aria-live="assertive" aria-atomic="true" ' +
+            'data-autohide="true" data-delay="3000">' +
+            '<div class="d-flex">' +
+            '<div class="toast-body">' + message + '</div>' +
+            '<button type="button" class="btn-close btn-close-white me-2 m-auto" ' +
+            'data-bs-dismiss="toast" aria-label="Close"></button>' +
+            '</div></div>';
+
         $('.toast').remove();
-        $('body').append(toastHtml);
+        $('body').append(html);
         $('.toast').toast('show');
-        
-        setTimeout(function() {
-            $('.toast').remove();
-        }, 3000);
+
+        setTimeout(function () { $('.toast').remove(); }, 3500);
     }
-    
-    // Add print styles
-    var printStyles = `
-        <style media="print">
-            .main-sidebar, .main-header, .footer, .breadcrumb, .btn, .nav-tabs {
-                display: none !important;
-            }
-            .content-wrapper, .content, .card, .tab-content {
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            .profile-user-img {
-                max-width: 150px !important;
-            }
-            body {
-                background: white !important;
-            }
-        </style>
-    `;
-    $('head').append(printStyles);
+
+    // ============================================
+    // PRINT STYLES (injected at runtime)
+    // ============================================
+
+    $('head').append(
+        '<style media="print">' +
+        '.main-sidebar,.main-header,.footer,.breadcrumb,.btn,.nav-tabs { display:none !important; }' +
+        '.content-wrapper,.content,.card,.tab-content { margin:0 !important; padding:0 !important; }' +
+        '.profile-user-img { max-width:150px !important; }' +
+        'body { background:white !important; }' +
+        '</style>'
+    );
 });

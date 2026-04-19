@@ -44,9 +44,16 @@ $routes->get('staff/residents/view/(:num)', 'Resident::view/$1');  // Backward c
 $routes->post('resident/delete/(:num)', 'Resident::delete/$1');
 $routes->post('resident/list', 'Resident::list');
 
+// ✅ FIXED: Add proper route for household dropdown AJAX
+$routes->get('resident/getHouseholdsBySitio', 'Resident::getHouseholdsBySitio');
+$routes->post('resident/getHouseholdsBySitio', 'Resident::getHouseholdsBySitio');
+
+// Also keep hyphenated version for compatibility
+$routes->get('resident/get-households-by-sitio', 'Resident::getHouseholdsBySitio');
+$routes->post('resident/get-households-by-sitio', 'Resident::getHouseholdsBySitio');
+
 // Alias for /residents (optional, points to same Resident controller)
 $routes->get('residents', 'Resident::index');
-$routes->post('resident/get-households-by-sitio', 'Resident::getHouseholdsBySitio');
 
 // Household routes
 $routes->get('households', 'HouseholdController::index');
@@ -56,8 +63,10 @@ $routes->get('households/edit/(:num)', 'HouseholdController::edit/$1');
 $routes->post('households/update/(:num)', 'HouseholdController::update/$1');
 $routes->get('households/view/(:num)', 'HouseholdController::view/$1');
 $routes->post('households/delete/(:num)', 'HouseholdController::delete/$1');
+$routes->post('households/getResidentsBySitio', 'HouseholdController::getResidentsBySitio');
 $routes->post('households/get-by-sitio', 'HouseholdController::getBySitio');
-// ─── Users Management (Staff) ────────────────────────────────────────────────
+
+// ─── Users Management (Staff) ─────────────────────────
 $routes->group('staff/users', function ($routes) {
     $routes->get('/',                'Users::index');
     $routes->post('save',            'Users::save');
@@ -66,7 +75,6 @@ $routes->group('staff/users', function ($routes) {
     $routes->delete('delete/(:num)', 'Users::delete/$1');
     $routes->post('fetchRecords',    'Users::fetchRecords');
 });
-
 
 // ─── Miscellaneous ───────────────────────────────────────────────────────────
 $routes->get('log', 'Logs::log');

@@ -48,7 +48,7 @@
                             <?php endif; ?>
                         </h3>
                         <div class="d-flex flex-wrap gap-2">
-                            <!-- Purok Filter Form - FIXED -->
+                            <!-- Purok Filter Form -->
                             <form method="GET" action="<?= base_url('resident') ?>" class="d-flex" id="purokFilterForm">
                                 <select name="purok" id="purokFilter" class="form-control form-control-sm mr-2" style="min-width: 180px;" onchange="this.form.submit()">
                                     <option value="all" <?= ($selectedPurok ?? 'all') == 'all' ? 'selected' : '' ?>>All Puroks</option>
@@ -106,18 +106,20 @@
                                             $today = new DateTime();
                                             $age = $birth->diff($today)->y;
                                         }
-                                        
-                                        $profileImg = !empty($r['profile_picture']) 
-                                            ? base_url('uploads/' . $r['profile_picture']) 
+
+                                        $profileImg = !empty($r['profile_picture'])
+                                            ? base_url('uploads/' . $r['profile_picture'])
                                             : base_url('assets/img/default.png');
-                                        
+
                                         $voterBadge = $r['is_voter'] ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>';
                                         $seniorBadge = $r['is_senior_citizen'] ? '<span class="badge bg-info">Senior</span>' : '';
                                         $pwdBadge = $r['is_pwd'] ? '<span class="badge bg-warning">PWD</span>' : '';
                                         $flags = trim($seniorBadge . ' ' . $pwdBadge);
-                                        
+
                                         $purokDisplay = !empty($r['sitio']) ? $r['sitio'] : 'Unassigned';
-                                        $purokBadge = $purokDisplay != 'Unassigned' ? '<span class="badge bg-primary">' . esc($purokDisplay) . '</span>' : '<span class="badge bg-secondary">Unassigned</span>';
+                                        $purokBadge = $purokDisplay != 'Unassigned'
+                                            ? '<span class="badge bg-primary">' . esc($purokDisplay) . '</span>'
+                                            : '<span class="badge bg-secondary">Unassigned</span>';
                                     ?>
                                         <tr>
                                             <td><?= $r['id'] ?></td>
@@ -133,15 +135,15 @@
                                             <td><?= $voterBadge ?></td>
                                             <td><?= $flags ?></td>
                                             <td>
-                                                <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="btn btn-sm btn-info">
+                                                <a href="<?= base_url('resident/view/' . $r['id']) ?>" class="btn btn-sm btn-info">
                                                     <i class="fas fa-eye"></i> View
                                                 </a>
-                                                <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="btn btn-sm btn-warning">
+                                                <a href="<?= base_url('resident/edit/' . $r['id']) ?>" class="btn btn-sm btn-warning">
                                                     <i class="fas fa-edit"></i> Edit
                                                 </a>
                                                 <button type="button" class="btn btn-sm btn-danger delete-resident" data-id="<?= $r['id'] ?>">
-    <i class="fas fa-trash"></i> Delete
-</button>
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -151,7 +153,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Purok Statistics Cards -->
             <div class="row mt-4">
                 <div class="col-12">
@@ -161,10 +163,10 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <?php 
+                                <?php
                                 $colors = ['primary', 'success', 'warning', 'danger', 'info', 'secondary'];
                                 $i = 0;
-                                foreach ($purokCounts as $purok => $count): 
+                                foreach ($purokCounts as $purok => $count):
                                     $color = $colors[$i % count($colors)];
                                 ?>
                                     <div class="col-md-2 col-sm-3 col-6 mb-3">
@@ -175,9 +177,9 @@
                                             </div>
                                         </a>
                                     </div>
-                                <?php 
+                                <?php
                                     $i++;
-                                endforeach; 
+                                endforeach;
                                 ?>
                             </div>
                         </div>
@@ -187,104 +189,6 @@
         </div>
     </section>
 </div>
-
-<!-- DataTables JS -->
-<script src="<?= base_url('assets/adminlte/plugins/datatables/jquery.dataTables.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js') ?>"></script>
-
-<script>
-$(document).ready(function() {
-    // Initialize DataTable
-    var residentsTable = $('#residentsTable').DataTable({
-        "order": [[0, "desc"]],
-        "pageLength": 10,
-        "responsive": true,
-        "autoWidth": false,
-        "language": {
-            "search": "Search residents:",
-            "emptyTable": "No residents found",
-            "info": "Showing _START_ to _END_ of _TOTAL_ residents",
-            "infoEmpty": "Showing 0 to 0 of 0 residents",
-            "infoFiltered": "(filtered from _MAX_ total residents)"
-        },
-        "columnDefs": [
-            { "orderable": true, "targets": [0, 2, 3, 4, 5, 6, 7, 8, 9] },
-            { "orderable": false, "targets": [1, 10, 11, 12] }
-        ]
-    });
-    
-    // Delete resident handler
-    $(document).on('click', '.delete-resident', function() {
-        var residentId = $(this).data('id');
-        var row = $(this).closest('tr');
-        
-        if (confirm('Are you sure you want to delete this resident? This action cannot be undone.')) {
-            $.ajax({
-                url: BASE_URL + 'resident/delete/' + residentId,
-                type: 'POST',
-                data: {
-                    [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        residentsTable.row(row).remove().draw();
-                        showAlert('success', 'Resident deleted successfully!');
-                        setTimeout(function() {
-                            location.reload();
-                        }, 1000);
-                    } else {
-                        showAlert('danger', 'Delete failed: ' + (response.message || 'Unknown error'));
-                    }
-                },
-                error: function() {
-                    showAlert('danger', 'Error deleting resident. Please try again.');
-                }
-            });
-        }
-    });
-    
-    // Function to show alert messages
-    function showAlert(type, message) {
-        var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-        var alertHtml = `
-            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="close" data-dismiss="alert">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        `;
-        $('.alert').not('.alert-dismissible').remove();
-        $('.content .container-fluid').prepend(alertHtml);
-        setTimeout(function() {
-            $('.alert').fadeOut('slow', function() {
-                $(this).remove();
-            });
-        }, 3000);
-    }
-    
-    // Highlight current purok in stats cards
-    var currentPurok = "<?= $selectedPurok ?? 'all' ?>";
-    if (currentPurok !== 'all') {
-        $('.purok-stat-card').each(function() {
-            var href = $(this).attr('href');
-            if (href && href.indexOf(encodeURIComponent(currentPurok)) !== -1) {
-                $(this).find('.small-box').css({
-                    'border': '3px solid #ffc107',
-                    'transform': 'scale(1.05)'
-                });
-            }
-        });
-    }
-});
-
-// Pass PHP variables to JavaScript
-var BASE_URL = "<?= base_url() ?>";
-var CSRF_TOKEN_NAME = "<?= csrf_token() ?>";
-var CSRF_TOKEN_VALUE = "<?= csrf_hash() ?>";
-</script>
 
 <style>
 .gap-2 { gap: 0.5rem; }
@@ -299,5 +203,19 @@ var CSRF_TOKEN_VALUE = "<?= csrf_hash() ?>";
 .text-white { color: #fff !important; }
 .small-box h3 { font-size: 2rem; }
 </style>
+
+<!-- DataTables JS -->
+<script src="<?= base_url('assets/adminlte/plugins/datatables/jquery.dataTables.min.js') ?>"></script>
+<script src="<?= base_url('assets/adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') ?>"></script>
+<script src="<?= base_url('assets/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js') ?>"></script>
+
+<!-- FIX: JS variables in their own block, THEN load external script -->
+<script>
+    var BASE_URL       = "<?= base_url() ?>";
+    var CSRF_TOKEN_NAME  = "<?= csrf_token() ?>";
+    var CSRF_TOKEN_VALUE = "<?= csrf_hash() ?>";
+    var CURRENT_PUROK    = "<?= $selectedPurok ?? 'all' ?>";
+</script>
+<script src="<?= base_url('js/residents/residents-index.js') ?>"></script>
 
 <?= $this->endSection() ?>
