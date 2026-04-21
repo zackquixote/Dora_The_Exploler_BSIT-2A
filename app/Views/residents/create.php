@@ -81,10 +81,10 @@
                         <label class="small font-weight-bold text-secondary">Civil Status</label>
                         <select name="civil_status" class="form-control form-control-lg bg-light border-0">
                             <option value="" disabled selected>Select status</option>
-                            <option value="Single" <?= old('civil_status') == 'Single' ? 'selected' : '' ?>>Single</option>
-                            <option value="Married" <?= old('civil_status') == 'Married' ? 'selected' : '' ?>>Married</option>
-                            <option value="Widowed" <?= old('civil_status') == 'Widowed' ? 'selected' : '' ?>>Widowed</option>
-                            <option value="Separated" <?= old('civil_status') == 'Separated' ? 'selected' : '' ?>>Separated</option>
+                            <option value="single" <?= old('civil_status') == 'single' ? 'selected' : '' ?>>Single</option>
+                            <option value="married" <?= old('civil_status') == 'married' ? 'selected' : '' ?>>Married</option>
+                            <option value="widowed" <?= old('civil_status') == 'widowed' ? 'selected' : '' ?>>Widowed</option>
+                            <option value="separated" <?= old('civil_status') == 'separated' ? 'selected' : '' ?>>Separated</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -96,24 +96,22 @@
             </div>
         </div>
 
-        <!-- ADDRESS INFORMATION -->
+        <!-- ADDRESS & HOUSEHOLD INFO -->
         <div class="card shadow-sm border-0 rounded-lg mb-4">
             <div class="card-header bg-white border-0 pt-4 px-4">
-                <h5 class="mb-0 font-weight-bold"><i class="fas fa-home mr-2 text-success"></i> Address Information</h5>
+                <h5 class="mb-0 font-weight-bold"><i class="fas fa-home mr-2 text-success"></i> Address & Household</h5>
             </div>
             <div class="card-body p-4">
                 <div class="row">
-                    <div class="col-md-8 mb-3">
-                        <label class="small font-weight-bold text-secondary">Street / House Number</label>
-                        <input type="text" name="street_address" class="form-control form-control-lg bg-light border-0" value="<?= old('street_address') ?>" placeholder="e.g., Block 1 Lot 2, Phase 3">
-                    </div>
                     <div class="col-md-4 mb-3">
-                        <label class="small font-weight-bold text-secondary">Sitio / Zone <span class="text-danger">*</span></label>
+                        <label class="small font-weight-bold text-secondary">Sitio / Purok <span class="text-danger">*</span></label>
                         <select name="sitio" id="sitioSelect" class="form-control form-control-lg bg-light border-0" required>
                             <option value="" disabled selected>Select Sitio</option>
                             <option value="Purok Malipayon" <?= old('sitio') == 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
                             <option value="Purok Masagana" <?= old('sitio') == 'Purok Masagana' ? 'selected' : '' ?>>Purok Masagana</option>
                             <option value="Purok Cory" <?= old('sitio') == 'Purok Cory' ? 'selected' : '' ?>>Purok Cory</option>
+                            <option value="Purok Kawayan" <?= old('sitio') == 'Purok Kawayan' ? 'selected' : '' ?>>Purok Kawayan</option>
+                            <option value="Purok Pagla-um" <?= old('sitio') == 'Purok Pagla-um' ? 'selected' : '' ?>>Purok Pagla-um</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -126,10 +124,27 @@
                             <span class="sr-only">Loading...</span>
                         </div>
                     </div>
+                    
+                    <!-- UPDATED: Relationship to Head as Dropdown -->
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Relationship to Head</label>
-                        <input type="text" name="relationship_to_head" class="form-control form-control-lg bg-light border-0" value="<?= old('relationship_to_head') ?>" placeholder="e.g., Son, Daughter, Father">
+                        <select name="relationship_to_head" class="form-control form-control-lg bg-light border-0" required>
+                            <option value="" disabled selected>Select Relationship</option>
+                            <?php 
+                            // Options derived from your requested JS array
+                            $relOptions = [
+                                'Head', 'Spouse', 'Son', 'Daughter', 'Father', 'Mother',
+                                'Grandfather', 'Grandmother', 'Grandson', 'Granddaughter',
+                                'Brother', 'Sister', 'Uncle', 'Aunt', 'Nephew', 'Niece',
+                                'Cousin', 'Son-in-law', 'Daughter-in-law', 'Brother-in-law',
+                                'Sister-in-law', 'Other Relative', 'Non-Relative'
+                            ];
+                            foreach ($relOptions as $opt): ?>
+                                <option value="<?= $opt ?>" <?= old('relationship_to_head') == $opt ? 'selected' : '' ?>><?= $opt ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
+
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Contact Number</label>
                         <input type="text" name="contact_number" class="form-control form-control-lg bg-light border-0" value="<?= old('contact_number') ?>" placeholder="e.g., 09123456789">
@@ -147,7 +162,7 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" name="is_voter" id="is_voter" value="1" <?= old('is_voter') ? 'checked' : '' ?>>
+                            <input type="checkbox" class="custom-control-input" name="is_voter" id="is_voter" value="1" <?= old('is_voter') == '1' ? 'checked' : '' ?>>
                             <label class="custom-control-label font-weight-bold" for="is_voter">
                                 <i class="fas fa-check-circle text-success mr-1"></i> Registered Voter
                             </label>
@@ -155,7 +170,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" name="is_senior_citizen" id="is_senior_citizen" value="1" <?= old('is_senior_citizen') ? 'checked' : '' ?>>
+                            <input type="checkbox" class="custom-control-input" name="is_senior_citizen" id="is_senior_citizen" value="1" <?= old('is_senior_citizen') == '1' ? 'checked' : '' ?>>
                             <label class="custom-control-label font-weight-bold" for="is_senior_citizen">
                                 <i class="fas fa-user-graduate text-info mr-1"></i> Senior Citizen
                             </label>
@@ -163,7 +178,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" name="is_pwd" id="is_pwd" value="1" <?= old('is_pwd') ? 'checked' : '' ?>>
+                            <input type="checkbox" class="custom-control-input" name="is_pwd" id="is_pwd" value="1" <?= old('is_pwd') == '1' ? 'checked' : '' ?>>
                             <label class="custom-control-label font-weight-bold" for="is_pwd">
                                 <i class="fas fa-wheelchair text-danger mr-1"></i> Person with Disability
                             </label>
@@ -210,28 +225,23 @@
 }
 </style>
 
-<!-- FIX: Wait for jQuery to be fully loaded before running our script -->
+<!-- Load script properly using DOMContentLoaded -->
 <script>
     // Define global variables first
     var BASE_URL         = "<?= base_url() ?>";
     var CSRF_TOKEN_NAME  = "<?= csrf_token() ?>";
     var CSRF_TOKEN_VALUE = "<?= csrf_hash() ?>";
     
-    // Helper function to load script only when jQuery is ready
-    function loadResidentsCreateScript() {
+    document.addEventListener("DOMContentLoaded", function(event) {
         if (typeof jQuery !== 'undefined') {
             console.log('jQuery found, loading residents-create.js');
             var script = document.createElement('script');
             script.src = BASE_URL + 'js/residents/residents-create.js';
             document.body.appendChild(script);
         } else {
-            console.log('Waiting for jQuery...');
-            setTimeout(loadResidentsCreateScript, 50);
+            console.error('jQuery is not loaded. Script execution skipped.');
         }
-    }
-    
-    // Start checking for jQuery
-    loadResidentsCreateScript();
+    });
 </script>
 
 <?= $this->endSection() ?>

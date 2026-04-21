@@ -1,10 +1,6 @@
 <?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
 
-<!-- DataTables CSS -->
-<link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') ?>">
-<link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') ?>">
-
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid">
@@ -24,6 +20,7 @@
 
     <section class="content">
         <div class="container-fluid">
+            <!-- Flash Messages -->
             <?php if (session()->getFlashdata('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show">
                     <?= session()->getFlashdata('success') ?>
@@ -44,7 +41,7 @@
                         <h3 class="card-title mb-2 mb-md-0">
                             <i class="fas fa-users mr-2"></i> List of Residents
                             <?php if ($selectedPurok !== 'all'): ?>
-                                <span class="badge badge-info ml-2">Filtered by: <?= $selectedPurok ?></span>
+                                <span class="badge badge-info ml-2">Filtered by: <?= esc($selectedPurok) ?></span>
                             <?php endif; ?>
                         </h3>
                         <div class="d-flex flex-wrap gap-2">
@@ -76,30 +73,31 @@
                         <table id="residentsTable" class="table table-bordered table-striped table-sm w-100">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Profile</th>
+                                    <th style="width: 40px;">ID</th>
+                                    <th style="width: 60px;">Profile</th>
                                     <th>Full Name</th>
-                                    <th>Sex</th>
-                                    <th>Age</th>
-                                    <th>Civil Status</th>
-                                    <th>Purok/Sitio</th>
-                                    <th>Household No.</th>
+                                    <th style="width: 50px;">Sex</th>
+                                    <th style="width: 40px;">Age</th>
+                                    <th style="width: 100px;">Civil Status</th>
+                                    <th style="width: 120px;">Purok/Sitio</th>
+                                    <th style="width: 80px;">Household No.</th>
                                     <th>Occupation</th>
                                     <th>Citizenship</th>
-                                    <th>Voter</th>
-                                    <th>Flags</th>
-                                    <th>Actions</th>
+                                    <th style="width: 60px;">Voter</th>
+                                    <th style="width: 120px;">Flags</th>
+                                    <th style="width: 150px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (empty($residents)): ?>
                                     <tr>
                                         <td colspan="13" class="text-center">
-                                            No residents found <?= $selectedPurok != 'all' ? 'in ' . $selectedPurok : '' ?>
+                                            No residents found <?= $selectedPurok != 'all' ? 'in ' . esc($selectedPurok) : '' ?>
                                         </td>
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($residents as $r):
+                                        // Calculate Age
                                         $age = '';
                                         if (!empty($r['birthdate'])) {
                                             $birth = new DateTime($r['birthdate']);
@@ -107,15 +105,37 @@
                                             $age = $birth->diff($today)->y;
                                         }
 
+                                        // Profile Image Logic
                                         $profileImg = !empty($r['profile_picture'])
                                             ? base_url('uploads/' . $r['profile_picture'])
                                             : base_url('assets/img/default.png');
 
-                                        $voterBadge = $r['is_voter'] ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>';
-                                        $seniorBadge = $r['is_senior_citizen'] ? '<span class="badge bg-info">Senior</span>' : '';
-                                        $pwdBadge = $r['is_pwd'] ? '<span class="badge bg-warning">PWD</span>' : '';
+                                        // --- BADGE LOGIC (Simplified to match View Page) ---
+                                        
+                                        // Voter Badge
+                                        if (!empty($r['is_voter'])) {
+                                            $voterBadge = '<span class="badge bg-success">Yes</span>';
+                                        } else {
+                                            $voterBadge = '<span class="badge bg-secondary">No</span>';
+                                        }
+
+                                        // Senior Citizen Badge
+                                        if (!empty($r['is_senior_citizen'])) {
+                                            $seniorBadge = '<span class="badge bg-info">Senior</span>';
+                                        } else {
+                                            $seniorBadge = '';
+                                        }
+
+                                        // PWD Badge
+                                        if (!empty($r['is_pwd'])) {
+                                            $pwdBadge = '<span class="badge bg-warning">PWD</span>';
+                                        } else {
+                                            $pwdBadge = '';
+                                        }
+
                                         $flags = trim($seniorBadge . ' ' . $pwdBadge);
 
+                                        // Purok Display Logic
                                         $purokDisplay = !empty($r['sitio']) ? $r['sitio'] : 'Unassigned';
                                         $purokBadge = $purokDisplay != 'Unassigned'
                                             ? '<span class="badge bg-primary">' . esc($purokDisplay) . '</span>'
@@ -123,7 +143,7 @@
                                     ?>
                                         <tr>
                                             <td><?= $r['id'] ?></td>
-                                            <td><img src="<?= $profileImg ?>" width="40" height="40" class="rounded-circle"></td>
+                                            <td><img src="<?= $profileImg ?>" width="40" height="40" class="rounded-circle" alt="Profile"></td>
                                             <td><?= esc($r['first_name']) ?> <?= esc($r['middle_name'] ?? '') ?> <?= esc($r['last_name']) ?></td>
                                             <td><?= ucfirst($r['sex']) ?></td>
                                             <td><?= $age ?></td>
@@ -133,17 +153,19 @@
                                             <td><?= esc($r['occupation'] ?? '-') ?></td>
                                             <td><?= esc($r['citizenship'] ?? '-') ?></td>
                                             <td><?= $voterBadge ?></td>
-                                            <td><?= $flags ?></td>
+                                            <td><?= $flags ?: '-' ?></td>
                                             <td>
-                                                <a href="<?= base_url('resident/view/' . $r['id']) ?>" class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye"></i> View
-                                                </a>
-                                                <a href="<?= base_url('resident/edit/' . $r['id']) ?>" class="btn btn-sm btn-warning">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-danger delete-resident" data-id="<?= $r['id'] ?>">
-                                                    <i class="fas fa-trash"></i> Delete
-                                                </button>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="<?= base_url('resident/view/' . $r['id']) ?>" class="btn btn-info" title="View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="<?= base_url('resident/edit/' . $r['id']) ?>" class="btn btn-warning" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-danger delete-resident" data-id="<?= $r['id'] ?>" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -170,10 +192,10 @@
                                     $color = $colors[$i % count($colors)];
                                 ?>
                                     <div class="col-md-2 col-sm-3 col-6 mb-3">
-                                        <a href="<?= base_url('resident?purok=' . urlencode($purok)) ?>" class="purok-stat-card text-decoration-none">
+                                        <a href="<?= base_url('resident?purok=' . urlencode($purok)) ?>" class="purok-stat-card text-decoration-none" data-purok-name="<?= esc($purok) ?>">
                                             <div class="small-box bg-<?= $color ?> text-white p-3 text-center rounded">
                                                 <h3 class="mb-1"><?= $count ?></h3>
-                                                <small><?= $purok ?></small>
+                                                <small><?= esc($purok) ?></small>
                                             </div>
                                         </a>
                                     </div>
@@ -194,28 +216,36 @@
 .gap-2 { gap: 0.5rem; }
 .small-box { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
 .small-box:hover { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-.bg-primary { background-color: #007bff !important; }
-.bg-success { background-color: #28a745 !important; }
-.bg-warning { background-color: #ffc107 !important; color: #333 !important; }
-.bg-danger { background-color: #dc3545 !important; }
-.bg-info { background-color: #17a2b8 !important; }
-.bg-secondary { background-color: #6c757d !important; }
-.text-white { color: #fff !important; }
-.small-box h3 { font-size: 2rem; }
+/* Ensure Voter column has a minimum width */
+#residentsTable th:nth-child(11), 
+#residentsTable td:nth-child(11) {
+    min-width: 70px;
+    text-align: center;
+}
 </style>
+
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') ?>">
 
 <!-- DataTables JS -->
 <script src="<?= base_url('assets/adminlte/plugins/datatables/jquery.dataTables.min.js') ?>"></script>
 <script src="<?= base_url('assets/adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') ?>"></script>
 <script src="<?= base_url('assets/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js') ?>"></script>
 
-<!-- FIX: JS variables in their own block, THEN load external script -->
+<!-- Configuration variables for JS -->
 <script>
-    var BASE_URL       = "<?= base_url() ?>";
-    var CSRF_TOKEN_NAME  = "<?= csrf_token() ?>";
-    var CSRF_TOKEN_VALUE = "<?= csrf_hash() ?>";
-    var CURRENT_PUROK    = "<?= $selectedPurok ?? 'all' ?>";
+    var RESIDENTS_CONFIG = {
+        baseUrl: "<?= base_url() ?>",
+        csrfName: "<?= csrf_token() ?>",
+        csrfHash: "<?= csrf_hash() ?>",
+        currentPurok: "<?= $selectedPurok ?? 'all' ?>"
+    };
 </script>
-<script src="<?= base_url('js/residents/residents-index.js') ?>"></script>
 
+<!-- Custom JavaScript -->
+<script src="<?= base_url('js/residents/residents-index.js') ?>"></script>
 <?= $this->endSection() ?>

@@ -1,0 +1,111 @@
+
+<style>
+#erd svg.erDiagram .divider path { stroke-opacity: 0.5; }
+#erd svg.erDiagram .row-rect-odd path,
+#erd svg.erDiagram .row-rect-odd rect,
+#erd svg.erDiagram .row-rect-even path,
+#erd svg.erDiagram .row-rect-even rect { stroke: none !important; }
+</style>
+<div id="erd" style="padding:1rem 0"></div>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: '"Anthropic Sans", sans-serif',
+  themeVariables: {
+    darkMode: dark,
+    fontSize: '13px',
+    fontFamily: '"Anthropic Sans", sans-serif',
+    lineColor: dark ? '#9c9a92' : '#73726c',
+    textColor: dark ? '#c2c0b6' : '#3d3d3a',
+  },
+});
+const { svg } = await mermaid.render('erd-svg', `erDiagram
+  USERS ||--o{ RESIDENTS : "registers"
+  USERS ||--o{ TBL_LOGS : "creates"
+  HOUSEHOLDS ||--o{ RESIDENTS : "contains"
+  HOUSEHOLDS }o--o| RESIDENTS : "has head"
+
+  USERS {
+    int id PK
+    varchar email
+    varchar role
+    varchar name
+    varchar status
+    timestamp created_at
+  }
+  HOUSEHOLDS {
+    int id PK
+    varchar household_no
+    varchar address
+    varchar street_address
+    int head_resident_id FK
+    enum sitio
+    enum house_type
+    timestamp created_at
+  }
+  RESIDENTS {
+    int id PK
+    int household_id FK
+    varchar first_name
+    varchar middle_name
+    varchar last_name
+    date birthdate
+    enum sex
+    enum civil_status
+    enum sitio
+    varchar contact_number
+    varchar occupation
+    varchar relationship_to_head
+    tinyint is_voter
+    tinyint is_senior_citizen
+    tinyint is_pwd
+    int registered_by FK
+    enum status
+    timestamp registered_at
+  }
+  TBL_LOGS {
+    int LOGID PK
+    int USERID FK
+    varchar ACTIVITY
+    date DATE
+    varchar IP_ADDRESS
+    varchar USERNAME
+    varchar ACTION
+  }
+  LOGIN_ATTEMPTS {
+    int id PK
+    varchar email
+    varchar ip_address
+    datetime attempt_time
+    varchar user_agent
+  }`);
+document.getElementById('erd').innerHTML = svg;
+
+document.querySelectorAll('#erd svg.erDiagram .node').forEach(node => {
+  const firstPath = node.querySelector('path[d]');
+  if (!firstPath) return;
+  const d = firstPath.getAttribute('d');
+  const nums = d.match(/-?[\d.]+/g)?.map(Number);
+  if (!nums || nums.length < 8) return;
+  const xs = [nums[0], nums[2], nums[4], nums[6]];
+  const ys = [nums[1], nums[3], nums[5], nums[7]];
+  const x = Math.min(...xs), y = Math.min(...ys);
+  const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', x); rect.setAttribute('y', y);
+  rect.setAttribute('width', w); rect.setAttribute('height', h);
+  rect.setAttribute('rx', '8');
+  for (const a of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+    if (firstPath.hasAttribute(a)) rect.setAttribute(a, firstPath.getAttribute(a));
+  }
+  firstPath.replaceWith(rect);
+});
+
+document.querySelectorAll('#erd svg.erDiagram .row-rect-odd path, #erd svg.erDiagram .row-rect-even path').forEach(p => {
+  p.setAttribute('stroke', 'none');
+});
+</script>

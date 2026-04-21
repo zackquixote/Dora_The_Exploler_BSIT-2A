@@ -1,324 +1,488 @@
 <?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
-
-:root {
-    --navy:    #03213b;
-    --accent:  #2563eb;
-    --al:      #eff6ff;
-    --success: #16a34a;
-    --danger:  #dc2626;
-    --muted:   #6b7280;
-    --border:  #e5e7eb;
-    --bg:      #f9fafb;
-    --card:    #ffffff;
-    --text:    #111827;
-    --tsm:     #374151;
-    --radius:  12px;
-    --shadow:  0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.05);
-}
-body, .content-wrapper { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
-
-.cr-header { padding:28px 32px 0; display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; }
-.cr-breadcrumb { font-size:12px; color:var(--muted); margin-bottom:6px; }
-.cr-breadcrumb a { color:var(--muted); text-decoration:none; }
-.cr-breadcrumb a:hover { color:var(--accent); }
-.cr-header h1 { font-size:26px; font-weight:700; color:var(--text); margin:0 0 4px; letter-spacing:-.4px; }
-.cr-header p  { font-size:14px; color:var(--muted); margin:0; }
-.cr-header-btns { display:flex; gap:8px; align-items:center; padding-top:16px; }
-.btn-cancel { display:inline-flex; align-items:center; gap:6px; padding:10px 18px; border:1px solid var(--border); border-radius:8px; background:var(--card); font-size:14px; font-family:'DM Sans',sans-serif; color:var(--tsm); cursor:pointer; text-decoration:none; font-weight:500; transition:all .15s; }
-.btn-cancel:hover { border-color:var(--muted); text-decoration:none; color:var(--text); }
-.btn-save { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; border:none; border-radius:8px; background:var(--navy); color:#fff; font-size:14px; font-family:'DM Sans',sans-serif; font-weight:600; cursor:pointer; transition:background .15s; }
-.btn-save:hover { background:#0a3259; }
-
-.cr-body { padding:24px 32px 40px; display:flex; flex-direction:column; gap:20px; }
-
-.form-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
-.form-card-header { padding:18px 24px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
-.form-card-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
-.fci-blue   { background:var(--al);   color:var(--accent); }
-.fci-green  { background:#f0fdf4; color:#16a34a; }
-.fci-yellow { background:#fefce8; color:#ca8a04; }
-.form-card-header h5 { font-size:15px; font-weight:700; color:var(--text); margin:0; }
-.form-card-header p  { font-size:13px; color:var(--muted); margin:0; }
-.form-card-body { padding:24px; }
-
-.field-row { display:grid; gap:16px; }
-.field-row.cols-3 { grid-template-columns:repeat(3,1fr); }
-.field-row.cols-2 { grid-template-columns:repeat(2,1fr); }
-.field-row.cols-1 { grid-template-columns:1fr; }
-.field-group { display:flex; flex-direction:column; gap:6px; }
-.field-label { font-size:12px; font-weight:600; color:var(--tsm); text-transform:uppercase; letter-spacing:.5px; }
-.field-label .req { color:var(--danger); margin-left:2px; }
-.field-control { padding:11px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; font-family:'DM Sans',sans-serif; color:var(--text); background:var(--bg); width:100%; transition:all .15s; }
-.field-control:focus { outline:none; border-color:var(--accent); background:#fff; box-shadow:0 0 0 3px rgba(37,99,235,.1); }
-.field-control:disabled { opacity:.65; cursor:not-allowed; background:#f3f4f6; }
-.field-hint { font-size:12px; color:var(--muted); }
-
-.state-alert { display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:8px; font-size:13px; margin-top:12px; }
-.state-alert.info    { background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; }
-.state-alert.warning { background:#fffbeb; color:#92400e; border:1px solid #fde68a; }
-.state-alert.loading { background:#f9fafb; color:var(--muted); border:1px solid var(--border); }
-.state-alert.success { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; }
-.state-alert i { margin-top:1px; flex-shrink:0; }
-.state-alert a { color:inherit; font-weight:600; }
-
-.cr-footer { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
-.cr-footer .footer-note { font-size:13px; color:var(--muted); display:flex; align-items:center; gap:6px; }
-
-/* Edit-specific: change indicator */
-.hh-id-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; background:var(--al); border-radius:6px; font-size:12px; font-weight:600; color:var(--accent); margin-left:10px; vertical-align:middle; }
-
-.flash-zone { padding:16px 32px 0; }
-.flash-zone .alert { border-radius:var(--radius); border:none; font-size:14px; }
-</style>
-
 <div class="content-wrapper">
 
     <!-- PAGE HEADER -->
-    <div class="cr-header">
-        <div>
-            <div class="cr-breadcrumb">
-                <a href="<?= base_url('households') ?>">Households</a>
-                <span class="mx-1">›</span>
-                <a href="<?= base_url('households/view/'.$household['id']) ?>"><?= esc($household['household_no']) ?></a>
-                <span class="mx-1">›</span>
-                <span>Edit</span>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Edit Household</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="<?= base_url('staff/dashboard') ?>">Home</a></li>
+                        <li class="breadcrumb-item"><a href="<?= base_url('households') ?>">Households</a></li>
+                        <li class="breadcrumb-item"><a href="<?= base_url('households/view/'.$household['id']) ?>"><?= esc($household['household_no']) ?></a></li>
+                        <li class="breadcrumb-item active">Edit</li>
+                    </ol>
+                </div>
             </div>
-            <h1>
-                Edit Household
-                <span class="hh-id-badge">
-                    <i class="fas fa-hashtag" style="font-size:10px;"></i>
-                    <?= esc($household['household_no']) ?>
-                </span>
-            </h1>
-            <p>Update the information for this household record.</p>
-        </div>
-        <div class="cr-header-btns">
-            <a href="<?= base_url('households/view/'.$household['id']) ?>" class="btn-cancel">
-                <i class="fas fa-times"></i> Cancel
-            </a>
-            <button type="submit" form="householdForm" class="btn-save">
-                <i class="fas fa-save"></i> Update Household
-            </button>
         </div>
     </div>
 
-    <!-- FLASH ERRORS -->
-    <?php if (session()->getFlashdata('errors')): ?>
-    <div class="flash-zone">
-        <div class="alert alert-danger alert-dismissible fade show">
-            <strong><i class="fas fa-exclamation-circle mr-2"></i>Please fix the following:</strong>
-            <ul class="mb-0 mt-1">
-                <?php foreach (session()->getFlashdata('errors') as $e): ?>
-                    <li><?= esc($e) ?></li>
-                <?php endforeach; ?>
-            </ul>
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <section class="content">
+        <div class="container-fluid">
+            
+            <!-- FLASH ERRORS -->
+            <?php if (session()->getFlashdata('errors')): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <h5><i class="icon fas fa-ban"></i> Please fix the following:</h5>
+                <ul class="mb-0">
+                    <?php foreach (session()->getFlashdata('errors') as $e): ?>
+                        <li><?= esc($e) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+            <?php endif; ?>
+
+            <form id="householdForm" action="<?= base_url('households/update/'.$household['id']) ?>" method="POST">
+                <?= csrf_field() ?>
+                <input type="hidden" name="id" value="<?= $household['id'] ?>">
+
+                <!-- HOUSEHOLD INFO -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-home mr-2"></i>Household Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Household Number <span class="text-danger">*</span></label>
+                                    <input type="text" name="household_no" id="householdNo" class="form-control"
+                                           value="<?= esc($household['household_no']) ?>" readonly>
+                                    <small class="text-muted">Household number cannot be changed</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Purok / Sitio <span class="text-danger">*</span></label>
+                                    <select name="sitio" id="sitioSelect" class="form-control" required>
+                                        <option value="">— Select Purok —</option>
+                                        <option value="Purok Malipayon" <?= ($household['sitio']??'')=='Purok Malipayon'?'selected':'' ?>>Purok Malipayon</option>
+                                        <option value="Purok Masagana"  <?= ($household['sitio']??'')=='Purok Masagana' ?'selected':'' ?>>Purok Masagana</option>
+                                        <option value="Purok Cory"      <?= ($household['sitio']??'')=='Purok Cory'     ?'selected':'' ?>>Purok Cory</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>House Type</label>
+                                    <select name="house_type" class="form-control">
+                                        <option value="">— Select Type —</option>
+                                        <option value="Concrete"       <?= ($household['house_type']??'')=='Concrete'       ?'selected':'' ?>>Concrete</option>
+                                        <option value="Semi-Concrete"  <?= ($household['house_type']??'')=='Semi-Concrete'  ?'selected':'' ?>>Semi-Concrete</option>
+                                        <option value="Wood"           <?= ($household['house_type']??'')=='Wood'           ?'selected':'' ?>>Wood</option>
+                                        <option value="Light Materials"<?= ($household['house_type']??'')=='Light Materials'?'selected':'' ?>>Light Materials</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADDRESS -->
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-map-marker-alt mr-2"></i>Address Information</h3>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- HIDDEN INPUT: Auto-generates address for DB storage -->
+                        <input type="hidden" name="address" id="completeAddress" value="<?= esc($household['address'] ?? '') ?>">
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Street Address</label>
+                                    <input type="text" name="street_address" id="streetAddress" class="form-control"
+                                           value="<?= esc($household['street_address'] ?? '') ?>"
+                                           placeholder="e.g., Block 1, Lot 2, House #12">
+                                    <small class="text-muted">Enter specific house details. Full address is auto-generated.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HEAD OF HOUSEHOLD -->
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-user-tie mr-2"></i>Head of Household</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Select Head Resident</label>
+                                    <select name="head_resident_id" id="headResidentSelect" class="form-control">
+                                        <option value="">— Select Head of Household —</option>
+                                    </select>
+                                    <small class="text-muted">Shows residents from selected purok and current members.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="membersLoadingAlert" class="alert alert-info" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading residents…
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CURRENT MEMBERS SUMMARY -->
+                <?php if ($residentCount > 0): ?>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 
+                    This household currently has <strong><?= $residentCount ?> registered resident(s)</strong>.
+                </div>
+                <?php endif; ?>
+
+                <!-- HOUSEHOLD MEMBERS MANAGER -->
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-users mr-2"></i>Manage Household Members</h3>
+                        <div class="card-tools">
+                            <span class="badge badge-light mr-2" id="selectedCount">0 selected</span>
+                            <button type="button" class="btn btn-tool" id="toggleAllMembers" title="Toggle All">
+                                <i class="fas fa-check-double"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Members Table -->
+                        <div id="membersTableContainer">
+                            <table class="table table-striped table-hover" id="membersTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;">
+                                            <input type="checkbox" id="selectAllCheckbox">
+                                        </th>
+                                        <th>Resident Name</th>
+                                        <th style="width: 200px;">Relationship to Head</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="membersTableBody">
+                                    <!-- Dynamically populated -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Empty state -->
+                        <div id="emptyMembersState" class="text-center py-5 text-muted" style="display:none;">
+                            <i class="fas fa-users fa-3x mb-3"></i>
+                            <p>No residents available in this purok</p>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Check residents to add them to this household. Uncheck to remove them.
+                            Unchecked members will be marked as "Transferred".
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Hidden field for member data -->
+                <input type="hidden" name="household_members_data" id="householdMembersData" value="[]">
+
+                <!-- FORM ACTIONS -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <a href="<?= base_url('households/view/'.$household['id']) ?>" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary float-right" id="submitBtn">
+                            <i class="fas fa-save"></i> Update Household
+                        </button>
+                    </div>
+                </div>
+
+            </form>
         </div>
-    </div>
-    <?php endif; ?>
-
-    <form id="householdForm"
-          action="<?= base_url('households/update/'.$household['id']) ?>"
-          method="POST">
-        <?= csrf_field() ?>
-        <input type="hidden" name="id" value="<?= $household['id'] ?>">
-
-        <div class="cr-body">
-
-            <!-- HOUSEHOLD INFO -->
-            <div class="form-card">
-                <div class="form-card-header">
-                    <div class="form-card-icon fci-blue"><i class="fas fa-home"></i></div>
-                    <div>
-                        <h5>Household Information</h5>
-                        <p>Basic identification details for this household</p>
-                    </div>
-                </div>
-                <div class="form-card-body">
-                    <div class="field-row cols-3">
-                        <div class="field-group">
-                            <label class="field-label">Household Number<span class="req">*</span></label>
-                            <input type="text" name="household_no" class="field-control"
-                                   value="<?= esc($household['household_no']) ?>">
-                            <span class="field-hint">Must be unique across all households</span>
-                        </div>
-                        <div class="field-group">
-                            <label class="field-label">Purok / Sitio<span class="req">*</span></label>
-                            <select name="sitio" id="sitioSelect" class="field-control">
-                                <option value="">— Select Purok —</option>
-                                <option value="Purok Malipayon" <?= $household['sitio']=='Purok Malipayon'?'selected':'' ?>>Purok Malipayon</option>
-                                <option value="Purok Masagana"  <?= $household['sitio']=='Purok Masagana' ?'selected':'' ?>>Purok Masagana</option>
-                                <option value="Purok Cory"      <?= $household['sitio']=='Purok Cory'     ?'selected':'' ?>>Purok Cory</option>
-                                <option value="Purok Kawayan"   <?= $household['sitio']=='Purok Kawayan'  ?'selected':'' ?>>Purok Kawayan</option>
-                                <option value="Purok Pagla-um"  <?= $household['sitio']=='Purok Pagla-um' ?'selected':'' ?>>Purok Pagla-um</option>
-                            </select>
-                        </div>
-                        <div class="field-group">
-                            <label class="field-label">House Type</label>
-                            <select name="house_type" class="field-control">
-                                <option value="">— Select Type —</option>
-                                <option value="Concrete"       <?= $household['house_type']=='Concrete'       ?'selected':'' ?>>Concrete</option>
-                                <option value="Semi-Concrete"  <?= $household['house_type']=='Semi-Concrete'  ?'selected':'' ?>>Semi-Concrete</option>
-                                <option value="Wood"           <?= $household['house_type']=='Wood'            ?'selected':'' ?>>Wood</option>
-                                <option value="Light Materials" <?= $household['house_type']=='Light Materials'?'selected':'' ?>>Light Materials</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ADDRESS -->
-            <div class="form-card">
-                <div class="form-card-header">
-                    <div class="form-card-icon fci-green"><i class="fas fa-map-marker-alt"></i></div>
-                    <div>
-                        <h5>Address Information</h5>
-                        <p>Physical location of the household</p>
-                    </div>
-                </div>
-                <div class="form-card-body">
-                    <div class="field-row cols-2">
-                        <div class="field-group">
-                            <label class="field-label">Street Address</label>
-                            <input type="text" name="street_address" class="field-control"
-                                   value="<?= esc($household['street_address'] ?? '') ?>"
-                                   placeholder="e.g., Block 1, Lot 2, House #12">
-                        </div>
-                        <div class="field-group">
-                            <label class="field-label">Complete Address</label>
-                            <input type="text" name="address" class="field-control"
-                                   value="<?= esc($household['address'] ?? '') ?>"
-                                   placeholder="e.g., Barangay Salong, Iloilo">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- HEAD OF HOUSEHOLD -->
-            <div class="form-card">
-                <div class="form-card-header">
-                    <div class="form-card-icon fci-yellow"><i class="fas fa-user"></i></div>
-                    <div>
-                        <h5>Head of Household</h5>
-                        <p>Currently showing residents from <strong><?= esc($household['sitio']) ?></strong></p>
-                    </div>
-                </div>
-                <div class="form-card-body">
-                    <div class="field-row cols-1">
-                        <div class="field-group">
-                            <label class="field-label">Select Head Resident</label>
-                            <select name="head_resident_id" id="headResidentSelect"
-                                    class="field-control" disabled>
-                                <option value="">Loading residents…</option>
-                            </select>
-                            <span class="field-hint">Shows residents from the selected purok and all unassigned residents.</span>
-                        </div>
-                    </div>
-                    <div id="loadingAlert" class="state-alert loading" style="display:none;">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>Loading residents…</span>
-                    </div>
-                    <div id="noResidentsAlert" class="state-alert warning" style="display:none;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>No residents found in this purok.
-                            <a href="<?= base_url('resident/create') ?>">Add a resident →</a>
-                        </span>
-                    </div>
-                    <?php if ($residentCount > 0): ?>
-                    <div class="state-alert success mt-2">
-                        <i class="fas fa-info-circle"></i>
-                        <span>This household currently has <strong><?= $residentCount ?> registered resident(s)</strong>.</span>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <!-- FOOTER -->
-            <div class="cr-footer">
-                <span class="footer-note">
-                    <i class="fas fa-info-circle" style="color:var(--accent);"></i>
-                    Fields marked <span style="color:var(--danger);font-weight:700;margin:0 2px;">*</span> are required.
-                </span>
-                <div style="display:flex;gap:8px;">
-                    <a href="<?= base_url('households/view/'.$household['id']) ?>" class="btn-cancel">Cancel</a>
-                    <button type="submit" class="btn-save">
-                        <i class="fas fa-save"></i> Update Household
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </form>
+    </section>
 </div>
 
+<style>
+.badge-pink { background-color: #e83e8c; color: white; }
+.badge-sm { font-size: 10px; padding: 2px 5px; }
+#membersTable th, #membersTable td { vertical-align: middle; }
+</style>
+
 <script>
-$(document).ready(function () {
-    var currentSitio  = '<?= esc($household['sitio']) ?>';
-    var currentHeadId = '<?= $household['head_resident_id'] ?? '' ?>';
+    var BASE_URL = '<?= base_url() ?>';
+    var CSRF_TOKEN_NAME = '<?= csrf_token() ?>';
+    var CSRF_TOKEN_VALUE = '<?= csrf_hash() ?>';
+    var householdId = <?= $household['id'] ?>;
+    var headId = <?= $household['head_resident_id'] ? $household['head_resident_id'] : 'null' ?>;
+    var currentSitio = '<?= esc($household['sitio'] ?? '') ?>';
+    
+    // 1. Load current members passed from Controller
+    var currentMembersData = <?= json_encode($currentMembers ?? []) ?>;
+    var allResidents = [];
+    var selectedMembers = {};
 
-    function loadResidents(sitio, selectedId) {
-        var headSelect = $('#headResidentSelect');
-        if (!sitio) {
-            headSelect.html('<option value="">— Select Purok first —</option>').prop('disabled', true);
-            $('#noResidentsAlert, #loadingAlert').hide();
-            return;
-        }
-        $('#loadingAlert').show();
-        $('#noResidentsAlert').hide();
-        headSelect.html('<option value="">Loading…</option>').prop('disabled', true);
+    var relationshipOptions = [
+        'Head', 'Spouse', 'Son', 'Daughter', 'Father', 'Mother',
+        'Grandfather', 'Grandmother', 'Grandson', 'Granddaughter',
+        'Brother', 'Sister', 'Uncle', 'Aunt', 'Nephew', 'Niece',
+        'Cousin', 'Son-in-law', 'Daughter-in-law', 'Brother-in-law',
+        'Sister-in-law', 'Other Relative', 'Non-Relative'
+    ];
 
-        $.ajax({
-            url  : '<?= base_url('households/getResidentsBySitio') ?>',
-            type : 'POST',
-            data : { sitio: sitio, '<?= csrf_token() ?>': '<?= csrf_hash() ?>' },
-            dataType: 'json',
-            success: function (res) {
-                $('#loadingAlert').hide();
-                console.log('[Edit] residents response:', res);
-                if (res.status === 'success' && res.residents && res.residents.length > 0) {
-                    var opts = '<option value="">— Select Head of Household —</option>';
-                    $.each(res.residents, function (i, r) {
-                        var name = r.last_name + ', ' + r.first_name;
-                        if (r.middle_name) name += ' ' + r.middle_name;
-                        name += ' (' + (r.sex ? r.sex.charAt(0).toUpperCase() + r.sex.slice(1) : 'N/A') + ')';
-                        if (!r.resident_sitio) name += ' [Unassigned]';
-                        var sel = (selectedId && String(r.id) === String(selectedId)) ? 'selected' : '';
-                        opts += '<option value="' + r.id + '" ' + sel + '>' + name + '</option>';
-                    });
-                    headSelect.html(opts).prop('disabled', false);
+    if (typeof jQuery === 'undefined') {
+        setTimeout(initHouseholdEdit, 50);
+    } else {
+        initHouseholdEdit();
+    }
+
+    function initHouseholdEdit() {
+        jQuery(document).ready(function($) {
+            
+            // ==========================================
+            // AUTO ADDRESS GENERATION LOGIC
+            // ==========================================
+            function updateCompleteAddress() {
+                var street = $('#streetAddress').val().trim();
+                var sitio   = $('#sitioSelect').find("option:selected").text();
+                
+                var purok = (sitio && sitio !== "— Select Purok —") ? sitio + ", " : "";
+                var barangay = "Barangay Tabu, ";
+                var province = "Negros Occidental";
+                
+                var parts = [];
+                if (street) parts.push(street);
+                if (purok) parts.push(purok);
+                
+                var fullAddress = parts.join(", ") + ", " + barangay + province;
+                $('#completeAddress').val(fullAddress);
+            }
+
+            $('#streetAddress').on('input blur', updateCompleteAddress);
+            $('#sitioSelect').on('change', updateCompleteAddress);
+            updateCompleteAddress();
+            // ==========================================
+
+            // 2. Load Residents
+            function loadResidents(sitio) {
+                if (!sitio) return;
+
+                $('#membersLoadingAlert').show();
+                $('#membersTableBody').empty();
+                $('#emptyMembersState').hide();
+
+                $.ajax({
+                    url: BASE_URL + 'households/getResidentsBySitio',
+                    type: 'POST',
+                    data: { 
+                        sitio: sitio,
+                        [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
+                    },
+                    dataType: 'json',
+                    success: function(res) {
+                        $('#membersLoadingAlert').hide();
+                        
+                        if (res.csrf_hash) {
+                            $('input[name="' + CSRF_TOKEN_NAME + '"]').val(res.csrf_hash);
+                            CSRF_TOKEN_VALUE = res.csrf_hash;
+                        }
+
+                        if (res.status === 'success' && res.residents) {
+                            allResidents = res.residents;
+                            populateHeadDropdown(allResidents);
+                            renderMembersTable(allResidents);
+                        } else {
+                            $('#emptyMembersState').show();
+                            $('#membersTableContainer').hide();
+                        }
+                    },
+                    error: function() {
+                        $('#membersLoadingAlert').hide();
+                        alert('Error loading residents.');
+                    }
+                });
+            }
+
+            function populateHeadDropdown(residents) {
+                var headSelect = $('#headResidentSelect');
+                headSelect.empty().append('<option value="">— Select Head of Household —</option>');
+
+                residents.forEach(function(r) {
+                    var name = r.last_name + ', ' + r.first_name + (r.middle_name ? ' ' + r.middle_name : '');
+                    var selected = (r.id == headId) ? 'selected' : '';
+                    headSelect.append('<option value="' + r.id + '" ' + selected + '>' + name + '</option>');
+                });
+            }
+
+            function renderMembersTable(residents) {
+                var tbody = $('#membersTableBody');
+                tbody.empty();
+                
+                if (residents.length === 0) {
+                    $('#emptyMembersState').show();
+                    $('#membersTableContainer').hide();
+                    return;
                 } else {
-                    headSelect.html('<option value="">— No residents found —</option>').prop('disabled', true);
-                    $('#noResidentsAlert').show();
-                    console.warn('No residents:', res);
+                    $('#emptyMembersState').hide();
+                    $('#membersTableContainer').show();
                 }
-            },
-            error: function (xhr) {
-                $('#loadingAlert').hide();
-                console.error('AJAX error:', xhr.status, xhr.responseText);
-                headSelect.html('<option value="">— Request failed —</option>').prop('disabled', true);
+
+                // ==========================================
+                // LOGIC FIX: AUTO-CHECK BY NAME MATCHING
+                // ==========================================
+                
+                // First, let's create a lookup map from currentMembersData
+                // We normalize names (uppercase, trim) to ensure matching works
+                var currentMemberLookup = {};
+                
+                // We assume currentMembersData contains objects like: 
+                // { resident_id: 123, first_name: 'Juan', last_name: 'Dela Cruz', ... }
+                // OR we rely on the names inside the resident object if available.
+                // Let's iterate and build a map based on ID if possible, else Name.
+                
+                // SAFEST APPROACH: Match by ID if available, else Name.
+                // Since you mentioned it wasn't working, we will enforce a double-check (ID AND Name).
+                
+                var dbMemberMap = {};
+                $.each(currentMembersData, function(i, m) {
+                    // Handle different possible keys for ID
+                    var mid = m.resident_id || m.id || m.user_id;
+                    
+                    if (mid) {
+                        dbMemberMap[mid] = m.relationship_to_head || m.relationship || '';
+                    }
+                });
+
+                residents.forEach(function(r) {
+                    // 1. Check if this resident ID exists in our DB map
+                    var isChecked = dbMemberMap[r.id] ? 'checked' : '';
+                    var relationship = dbMemberMap[r.id] ? dbMemberMap[r.id] : '';
+
+                    // 2. Fallback: Name Matching (if IDs didn't match for some reason)
+                    if (!isChecked) {
+                        $.each(currentMembersData, function(i, cm) {
+                            // Compare Last and First Name (uppercase for consistency)
+                            var dbLast = (cm.last_name || '').toUpperCase().trim();
+                            var dbFirst = (cm.first_name || '').toUpperCase().trim();
+                            var ajaxLast = (r.last_name || '').toUpperCase().trim();
+                            var ajaxFirst = (r.first_name || '').toUpperCase().trim();
+
+                            if (dbLast === ajaxLast && dbFirst === ajaxFirst) {
+                                isChecked = 'checked';
+                                relationship = cm.relationship_to_head || cm.relationship || '';
+                                return false; // Break loop
+                            }
+                        });
+                    }
+
+                    var unassignedBadge = (!r.resident_sitio || r.resident_sitio === '') ? ' <span class="badge badge-warning badge-sm">Unassigned</span>' : '';
+
+                    var html = '<tr>';
+                    html += '<td><input type="checkbox" class="member-checkbox" data-id="' + r.id + '" ' + isChecked + '></td>';
+                    html += '<td><strong>' + r.last_name + ', ' + r.first_name + '</strong> ' + unassignedBadge + '</td>';
+                    html += '<td>';
+                    html += '<select class="form-control form-control-sm relationship-select" data-id="' + r.id + '" ' + (isChecked ? '' : 'disabled') + '>';
+                    html += '<option value="">— Select —</option>';
+                    relationshipOptions.forEach(function(rel) {
+                        var selected = (relationship === rel) ? 'selected' : '';
+                        html += '<option value="' + rel + '" ' + selected + '>' + rel + '</option>';
+                    });
+                    html += '</select>';
+                    html += '</td></tr>';
+                    
+                    tbody.append(html);
+
+                    // Add to selectedMembers object immediately so it tracks correctly
+                    if (isChecked) {
+                        selectedMembers[r.id] = {
+                            id: r.id,
+                            relationship: relationship
+                        };
+                    }
+                });
+                
+                updateSelectedCount();
+                updateHiddenField();
+            }
+
+            // Event Listeners
+            $('#sitioSelect').on('change', function() {
+                selectedMembers = {};
+                loadResidents($(this).val());
+            });
+
+            $(document).on('change', '.member-checkbox', function() {
+                var id = $(this).data('id');
+                var isChecked = $(this).is(':checked');
+                var row = $(this).closest('tr');
+                var select = row.find('.relationship-select');
+
+                if (isChecked) {
+                    select.prop('disabled', false);
+                    if (!selectedMembers[id]) {
+                        selectedMembers[id] = {
+                            id: id,
+                            relationship: select.val() || ''
+                        };
+                    }
+                } else {
+                    select.prop('disabled', true);
+                    delete selectedMembers[id];
+                }
+                updateSelectedCount();
+                updateHiddenField();
+            });
+
+            $(document).on('change', '.relationship-select', function() {
+                var id = $(this).data('id');
+                if (selectedMembers[id]) {
+                    selectedMembers[id].relationship = $(this).val();
+                    updateHiddenField();
+                }
+            });
+            
+            // Auto-set Head Resident logic
+            $('#headResidentSelect').on('change', function() {
+                var newHeadId = $(this).val();
+                if (newHeadId) {
+                    var checkbox = $('.member-checkbox[data-id="' + newHeadId + '"]');
+                    if (checkbox.length > 0 && !checkbox.is(':checked')) {
+                        checkbox.prop('checked', true).trigger('change');
+                    }
+                    var select = $('.relationship-select[data-id="' + newHeadId + '"]');
+                    if (select.length > 0) {
+                        select.val('Head').trigger('change');
+                    }
+                }
+            });
+
+            $('#selectAllCheckbox').on('change', function() {
+                var isChecked = $(this).is(':checked');
+                $('.member-checkbox').prop('checked', isChecked).trigger('change');
+            });
+
+            $('#toggleAllMembers').on('click', function() {
+                var anyUnchecked = $('.member-checkbox:not(:checked)').length > 0;
+                $('.member-checkbox').prop('checked', anyUnchecked).trigger('change');
+                $('#selectAllCheckbox').prop('checked', anyUnchecked);
+            });
+
+            function updateSelectedCount() {
+                var count = Object.keys(selectedMembers).length;
+                $('#selectedCount').text(count + ' selected');
+            }
+
+            function updateHiddenField() {
+                $('#householdMembersData').val(JSON.stringify(selectedMembers));
+            }
+
+            // Initial Load
+            if (currentSitio) {
+                loadResidents(currentSitio);
             }
         });
     }
-
-    // Auto-load on page open
-    if (currentSitio) loadResidents(currentSitio, currentHeadId);
-
-    $('#sitioSelect').on('change', function () {
-        loadResidents($(this).val(), null);
-    });
-
-    $('#householdForm').on('submit', function (e) {
-        var hhNo  = $('input[name="household_no"]').val().trim();
-        var sitio = $('#sitioSelect').val();
-        if (!hhNo)  { alert('Please enter household number.'); e.preventDefault(); return false; }
-        if (!sitio) { alert('Please select Purok/Sitio.');     e.preventDefault(); return false; }
-        $('.btn-save').html('<i class="fas fa-spinner fa-spin mr-1"></i> Updating…').prop('disabled', true);
-    });
-});
 </script>
 
 <?= $this->endSection() ?>

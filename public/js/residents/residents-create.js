@@ -1,261 +1,325 @@
 /**
- * Residents Management - Create Page JavaScript
- * FIXED: Properly waits for jQuery and DOM
+ * Residents Create Form JavaScript
+ * Handles dynamic household loading and address preview
+ * File location: public/js/residents/residents-create.js
  */
 
 (function() {
-    // Wait for both jQuery and DOM to be ready
-    function initWhenReady() {
-        if (typeof jQuery === 'undefined') {
-            setTimeout(initWhenReady, 50);
+    'use strict';
+    
+    // DOM Elements
+    let $sitioSelect;
+    let $householdSelect;
+    let $loadingIndicator;
+    let $addressPreview;
+    let $addressText;
+    let $residentForm;
+    
+    // Configuration
+    const config = {
+        baseUrl: BASE_URL || '',
+        csrfName: CSRF_TOKEN_NAME || '',
+        csrfValue: CSRF_TOKEN_VALUE || '',
+        preselectedHousehold: typeof PRESELECTED_HOUSEHOLD !== 'undefined' ? PRESELECTED_HOUSEHOLD : ''
+    };
+    
+    /**
+     * Initialize the form
+     */
+    function init() {
+        cacheElements();
+        bindEvents();
+        initializeForm();
+    }
+    
+    /**
+     * Cache DOM elements
+     */
+    function cacheElements() {
+        $sitioSelect = $('#sitioSelect');
+        $householdSelect = $('#householdSelect');
+        $loadingIndicator = $('#householdLoading');
+        $addressPreview = $('#householdAddressPreview');
+        $addressText = $('#addressText');
+        $residentForm = $('#residentForm');
+    }
+    
+    /**
+     * Bind event listeners
+     */
+    function bindEvents() {
+        $sitioSelect.on('change', handleSitioChange);
+        $householdSelect.on('change', handleHouseholdChange);
+        $residentForm.on('submit', handleFormSubmit);
+    }
+    
+    /**
+     * Initialize form with pre-selected values
+     */
+    function initializeForm() {
+        const initialSitio = $sitioSelect.val();
+        if (initialSitio) {
+            loadHouseholds(initialSitio);
+        }
+    }
+    
+    /**
+     * Handle sitio selection change
+     */
+    function handleSitioChange() {
+        const selectedSitio = $(this).val();
+        loadHouseholds(selectedSitio);
+    }
+    
+    /**
+     * Handle household selection change
+     */
+    function handleHouseholdChange() {
+        const selectedHousehold = $(this).val();
+        displayHouseholdAddress(selectedHousehold);
+    }
+    
+    /**
+     * Handle form submission
+     */
+    function handleFormSubmit(e) {
+        const sitio = $sitioSelect.val();
+        
+        if (!sitio) {
+            e.preventDefault();
+            showNotification('Please select a Sitio/Zone', 'warning');
+            $sitioSelect.focus();
+            return false;
+        }
+        
+        // Form is valid, continue with submission
+        return true;
+    }
+    
+    /**
+     * Load households based on selected sitio
+     * @param {string} sitio - Selected sitio
+     */
+    function loadHouseholds(sitio) {
+        if (!sitio) {
+            resetHouseholdSelect('-- First select a Sitio --', true);
+            $addressPreview.hide();
             return;
         }
         
-        jQuery(document).ready(function($) {
-            console.log('Residents create page loaded. jQuery version:', $.fn.jquery);
-            console.log('BASE_URL:', BASE_URL);
-
-            // ============================================
-            // DEPENDENT DROPDOWN: SITIO -> HOUSEHOLD
-            // ============================================
-
-            function initDependentDropdown() {
-                var $sitio     = $('#sitioSelect');
-                var $household = $('#householdSelect');
-                var $loading   = $('#householdLoading');
-
-                if (!$sitio.length || !$household.length) {
-                    console.warn('Sitio or Household select not found');
-                    return;
-                }
-
-                console.log('Dependent dropdown initialized');
-
-                $sitio.on('change', function () {
-                    var selectedSitio = $(this).val();
-                    console.log('Sitio changed to:', selectedSitio);
-
-                    $household.empty();
-                    $loading.show();
-
-                    if (!selectedSitio) {
-                        $household.append('<option value="" disabled selected>First select a Sitio</option>');
-                        $household.prop('disabled', true);
-                        $loading.hide();
-                        return;
-                    }
-
-                    $household.append('<option value="" disabled selected>Loading households…</option>');
-                    $household.prop('disabled', true);
-
-                    var url = BASE_URL + 'resident/getHouseholdsBySitio';
-                    console.log('AJAX URL:', url);
-                    console.log('Sending sitio:', selectedSitio);
-
-                    $.ajax({
-                        url:      url,
-                        type:     'GET',
-                        data:     { sitio: selectedSitio },
-                        dataType: 'json',
-                        timeout:  10000,
-                        success: function (response) {
-                            console.log('AJAX Response:', response);
-                            
-                            $household.empty();
-                            $household.prop('disabled', false);
-                            $loading.hide();
-
-                            var households = [];
-                            var status = false;
-                            
-                            if (response.status === 'success') {
-                                status = true;
-                                households = response.data || response.households || [];
-                            } else if (response.success === true) {
-                                status = true;
-                                households = response.data || response.households || [];
-                            } else if (Array.isArray(response)) {
-                                status = true;
-                                households = response;
-                            } else if (response.households && Array.isArray(response.households)) {
-                                status = true;
-                                households = response.households;
-                            }
-
-                            console.log('Parsed households:', households);
-                            console.log('Households length:', households.length);
-
-                            if (status && households.length > 0) {
-                                $household.append('<option value="" disabled selected>Select Household</option>');
-                                $.each(households, function (i, h) {
-                                    var label = '';
-                                    if (h.household_no) {
-                                        label = '#' + h.household_no;
-                                    } else if (h.id) {
-                                        label = '#HH-' + h.id;
-                                    } else {
-                                        label = 'Household ' + (i + 1);
-                                    }
-                                    
-                                    if (h.street_address) {
-                                        label += ' - ' + h.street_address;
-                                    } else if (h.address) {
-                                        label += ' - ' + h.address;
-                                    }
-                                    
-                                    console.log('Adding option:', h.id, label);
-                                    $household.append('<option value="' + h.id + '">' + label + '</option>');
-                                });
-                            } else {
-                                console.warn('No households found for sitio:', selectedSitio);
-                                $household.append('<option value="" disabled selected>No households found in this sitio</option>');
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error('AJAX Error:', {
-                                status: status,
-                                error: error,
-                                xhrStatus: xhr.status,
-                                responseText: xhr.responseText
-                            });
-                            
-                            $household.empty();
-                            $household.prop('disabled', false);
-                            $loading.hide();
-                            
-                            if (xhr.status === 404) {
-                                $household.append('<option value="" disabled selected>Error: Endpoint not found</option>');
-                            } else {
-                                $household.append('<option value="" disabled selected>Error loading. Try again.</option>');
-                            }
-                        }
-                    });
-                });
-
-                // If there's a preselected sitio from old() data
-                var currentSitio = $sitio.val();
-                if (currentSitio) {
-                    setTimeout(function() {
-                        $sitio.trigger('change');
-                    }, 100);
-                }
+        showLoadingState();
+        
+        $.ajax({
+            url: `${config.baseUrl}resident/getHouseholdsBySitio`,
+            type: 'GET',
+            data: { sitio: sitio },
+            dataType: 'json',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                handleHouseholdsResponse(response);
+            },
+            error: function(xhr, status, error) {
+                handleHouseholdsError(xhr, status, error);
             }
-
-            // ============================================
-            // FORM SUBMISSION
-            // ============================================
-
-            function initFormSubmission() {
-                $('#residentForm').on('submit', function (e) {
-                    e.preventDefault();
-
-                    var form       = this;
-                    var formData   = new FormData(form);
-                    var $submitBtn = $(form).find('button[type="submit"]');
-                    var origHtml   = $submitBtn.html();
-
-                    $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving…');
-
-                    if (typeof CSRF_TOKEN_NAME !== 'undefined') {
-                        formData.append(CSRF_TOKEN_NAME, CSRF_TOKEN_VALUE);
-                    }
-
-                    $.ajax({
-                        url:         $(form).attr('action'),
-                        type:        'POST',
-                        data:        formData,
-                        processData: false,
-                        contentType: false,
-                        dataType:    'json',
-                        success: function (response) {
-                            if (response.status === 'success') {
-                                if (response.csrf_hash) {
-                                    CSRF_TOKEN_VALUE = response.csrf_hash;
-                                    $('input[name="' + CSRF_TOKEN_NAME + '"]').val(response.csrf_hash);
-                                }
-                                alert('Resident saved successfully!');
-                                setTimeout(function () {
-                                    window.location.href = BASE_URL + 'resident';
-                                }, 1000);
-                            } else {
-                                var msg = response.message || 'Error saving resident';
-                                if (response.errors) {
-                                    msg = Object.values(response.errors).join('\n');
-                                }
-                                alert('Error: ' + msg);
-                                $submitBtn.prop('disabled', false).html(origHtml);
-                            }
-                        },
-                        error: function () {
-                            alert('Error saving resident. Please try again.');
-                            $submitBtn.prop('disabled', false).html(origHtml);
-                        }
-                    });
-                });
-            }
-
-            // ============================================
-            // FILE UPLOAD PREVIEW
-            // ============================================
-
-            function initFileUploadPreview() {
-                $('input[name="profile_picture"]').on('change', function (e) {
-                    var file = e.target.files[0];
-                    if (!file) { return; }
-
-                    if (file.size > 2 * 1024 * 1024) {
-                        alert('File size exceeds 2 MB limit');
-                        $(this).val('');
-                        return;
-                    }
-
-                    var reader = new FileReader();
-                    reader.onload = function (ev) {
-                        $('#profilePreview').remove();
-                        $('input[name="profile_picture"]').after(
-                            '<div id="profilePreview" class="mt-2">' +
-                            '<img src="' + ev.target.result + '" ' +
-                            'class="img-thumbnail rounded-circle" ' +
-                            'style="width:80px;height:80px;object-fit:cover;">' +
-                            '</div>'
-                        );
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-
-            // ============================================
-            // AGE CALCULATOR
-            // ============================================
-
-            function initAgeCalculator() {
-                $('input[name="birthdate"]').on('change', function () {
-                    var birthdate = $(this).val();
-                    if (!birthdate) { return; }
-
-                    var today = new Date();
-                    var birth = new Date(birthdate);
-                    var age   = today.getFullYear() - birth.getFullYear();
-                    var m     = today.getMonth() - birth.getMonth();
-                    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) { age--; }
-
-                    if (age >= 60) {
-                        $('input[name="is_senior_citizen"]').prop('checked', true);
-                    }
-                });
-            }
-
-            // ============================================
-            // INIT
-            // ============================================
-
-            initDependentDropdown();
-            initFormSubmission();
-            initFileUploadPreview();
-            initAgeCalculator();
         });
     }
-
-    // Start initialization
-    initWhenReady();
+    
+    /**
+     * Handle households API response
+     * @param {Object} response - API response
+     */
+    function handleHouseholdsResponse(response) {
+        hideLoadingState();
+        
+        if (response.status === 'success' && response.data) {
+            populateHouseholdOptions(response.data);
+        } else {
+            showErrorState('Error loading households');
+            console.error('Error loading households:', response);
+        }
+    }
+    
+    /**
+     * Handle households API error
+     * @param {Object} xhr - XHR object
+     * @param {string} status - Error status
+     * @param {string} error - Error message
+     */
+    function handleHouseholdsError(xhr, status, error) {
+        hideLoadingState();
+        showErrorState('Error loading households');
+        console.error('AJAX Error:', status, error);
+    }
+    
+    /**
+     * Populate household select options
+     * @param {Array} households - List of households
+     */
+    function populateHouseholdOptions(households) {
+        let options = '<option value="">-- Select household (optional) --</option>';
+        
+        if (households.length > 0) {
+            households.forEach(function(household) {
+                const selected = (config.preselectedHousehold == household.id) ? 'selected' : '';
+                const address = escapeHtml(household.street_address || '');
+                const householdNo = escapeHtml(household.household_no || '');
+                
+                options += `<option value="${household.id}" ${selected} 
+                            data-address="${address}" 
+                            data-household-no="${householdNo}">
+                            ${householdNo} - ${address || 'No address'}
+                            </option>`;
+            });
+            
+            $householdSelect.html(options).prop('disabled', false);
+            
+            // Trigger change if there's a preselected household
+            if (config.preselectedHousehold) {
+                $householdSelect.trigger('change');
+            }
+        } else {
+            $householdSelect.html('<option value="">No households found in this sitio</option>');
+        }
+    }
+    
+    /**
+     * Display selected household address
+     * @param {string} householdId - Selected household ID
+     */
+    function displayHouseholdAddress(householdId) {
+        if (!householdId) {
+            $addressPreview.hide();
+            return;
+        }
+        
+        const $selectedOption = $householdSelect.find('option:selected');
+        const address = $selectedOption.data('address') || '';
+        const householdNo = $selectedOption.data('household-no') || '';
+        const sitio = $sitioSelect.val() || '';
+        
+        if (address) {
+            const fullAddress = `${householdNo} - ${address}, ${sitio}`;
+            $addressText.text(fullAddress);
+            $addressPreview.show();
+        } else {
+            // Fallback: fetch from server if data attribute is empty
+            fetchHouseholdDetails(householdId, sitio);
+        }
+    }
+    
+    /**
+     * Fetch household details from server
+     * @param {string} householdId - Household ID
+     * @param {string} sitio - Sitio name
+     */
+    function fetchHouseholdDetails(householdId, sitio) {
+        $.ajax({
+            url: `${config.baseUrl}households/getDetails/${householdId}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success' && response.data) {
+                    const household = response.data;
+                    const fullAddress = `${household.household_no || ''} - ${household.street_address || 'No address'}, ${household.sitio || sitio}`;
+                    $addressText.text(fullAddress);
+                    $addressPreview.show();
+                }
+            },
+            error: function() {
+                console.warn('Could not fetch household details');
+            }
+        });
+    }
+    
+    /**
+     * Reset household select to default state
+     * @param {string} message - Message to display
+     * @param {boolean} disabled - Whether select should be disabled
+     */
+    function resetHouseholdSelect(message, disabled = true) {
+        $householdSelect.html(`<option value="">${message}</option>`);
+        $householdSelect.prop('disabled', disabled);
+    }
+    
+    /**
+     * Show loading state
+     */
+    function showLoadingState() {
+        $householdSelect.html('<option value="">Loading households...</option>');
+        $householdSelect.prop('disabled', true);
+        $loadingIndicator.show();
+        $addressPreview.hide();
+    }
+    
+    /**
+     * Hide loading state
+     */
+    function hideLoadingState() {
+        $loadingIndicator.hide();
+    }
+    
+    /**
+     * Show error state
+     * @param {string} message - Error message
+     */
+    function showErrorState(message) {
+        $householdSelect.html(`<option value="">${message}</option>`);
+    }
+    
+    /**
+     * Escape HTML to prevent XSS
+     * @param {string} text - Text to escape
+     * @returns {string} Escaped text
+     */
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    /**
+     * Show notification message
+     * @param {string} message - Message to display
+     * @param {string} type - Notification type (success, error, warning, info)
+     */
+    function showNotification(message, type = 'info') {
+        // Check if SweetAlert2 is available
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                text: message,
+                icon: type,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        } else {
+            alert(message);
+        }
+    }
+    
+    /**
+     * Calculate age from birthdate
+     * @param {string} birthdate - Birthdate in YYYY-MM-DD format
+     * @returns {number} Age in years
+     */
+    function calculateAge(birthdate) {
+        const today = new Date();
+        const birthDate = new Date(birthdate);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        
+        return age;
+    }
+    
+    // Initialize when DOM is ready
+    $(document).ready(init);
+    
 })();

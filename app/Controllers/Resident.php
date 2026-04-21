@@ -87,10 +87,9 @@ class Resident extends BaseController
             'last_name'    => 'required|min_length[2]|max_length[100]',
             'birthdate'    => 'required|valid_date',
             'sex'          => 'required|in_list[male,female]',
-            'household_id' => 'required|integer',
+            // 'household_id' => 'required|integer',
             'occupation'   => 'permit_empty|max_length[100]',
             'citizenship'  => 'permit_empty|max_length[100]',
-            'street_address' => 'permit_empty|max_length[255]',
             'sitio'        => 'required|max_length[100]',
             'profile_picture' => 'is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]'
         ];
@@ -372,8 +371,7 @@ class Resident extends BaseController
             'citizenship'          => $this->request->getPost('citizenship') ?: null,
             'street_address'       => $this->request->getPost('street_address') ?: null,
             'sitio'                => $sitio,
-            'is_voter'             => $this->request->getPost('is_voter') ? 1 : 0,
-            'is_pwd'               => $this->request->getPost('is_pwd') ? 1 : 0,
+'is_voter' => (int) ($this->request->getPost('is_voter') ?? 0),            'is_pwd'               => $this->request->getPost('is_pwd') ? 1 : 0,
             'is_senior_citizen'    => $this->request->getPost('is_senior_citizen') ? 1 : 0,
             'profile_picture'      => $profilePic,
         ];

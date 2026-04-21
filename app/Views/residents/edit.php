@@ -88,7 +88,7 @@
                         <label class="small font-weight-bold text-secondary">Civil Status</label>
                         <select name="civil_status" class="form-control form-control-lg bg-light border-0">
                             <?php foreach (['Single', 'Married', 'Widowed', 'Separated'] as $cs): ?>
-                                <option value="<?= $cs ?>" <?= ($resident['civil_status'] ?? '') === $cs ? 'selected' : '' ?>>
+                                <option value="<?= $cs ?>" ($resident['civil_status'] ?? '') === $cs ? 'selected' : '' ?>>
                                     <?= $cs ?>
                                 </option>
                             <?php endforeach; ?>
@@ -142,11 +142,29 @@
                             <span class="sr-only">Loading...</span>
                         </div>
                     </div>
+                    
+                    <!-- UPDATED: Relationship to Head as Dropdown -->
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Relationship to Head</label>
-                        <input type="text" name="relationship_to_head" class="form-control form-control-lg bg-light border-0"
-                               value="<?= esc($resident['relationship_to_head'] ?? '') ?>" placeholder="e.g., Son, Daughter, Father">
+                        <select name="relationship_to_head" class="form-control form-control-lg bg-light border-0">
+                            <option value="" disabled selected>Select Relationship</option>
+                            <?php 
+                            // Check old() first (if validation failed), then check DB value
+                            $currentRel = old('relationship_to_head', $resident['relationship_to_head'] ?? '');
+
+                            $relOptions = [
+                                'Head', 'Spouse', 'Son', 'Daughter', 'Father', 'Mother',
+                                'Grandfather', 'Grandmother', 'Grandson', 'Granddaughter',
+                                'Brother', 'Sister', 'Uncle', 'Aunt', 'Nephew', 'Niece',
+                                'Cousin', 'Son-in-law', 'Daughter-in-law', 'Brother-in-law',
+                                'Sister-in-law', 'Other Relative', 'Non-Relative'
+                            ];
+                            foreach ($relOptions as $opt): ?>
+                                <option value="<?= $opt ?>" <?= $currentRel == $opt ? 'selected' : '' ?>><?= $opt ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
+
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Contact Number</label>
                         <input type="text" name="contact_number" class="form-control form-control-lg bg-light border-0"

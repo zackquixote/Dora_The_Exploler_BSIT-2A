@@ -1,15 +1,16 @@
 /**
- * Households Index Page JavaScript
- * Handles search, delete, and toast notifications
+ * Households View Page JavaScript
+ * Handles delete functionality for household details page
  */
 
-var HouseholdIndex = (function() {
+var HouseholdView = (function() {
     'use strict';
     
     // Private variables
     var BASE_URL = '';
     var CSRF_TOKEN = '';
     var CSRF_HASH = '';
+    var RESIDENT_COUNT = 0;
     
     // Private methods
     function showToast(type, msg) {
@@ -50,29 +51,16 @@ var HouseholdIndex = (function() {
         }
     }
     
-    function initSearch() {
-        jQuery('#hhSearch').on('input', function () {
-            var q = jQuery(this).val().toLowerCase();
-            jQuery('#hhTable tbody tr').each(function () {
-                jQuery(this).toggle(jQuery(this).text().toLowerCase().includes(q));
-            });
-        });
-    }
-    
     function initDelete() {
-        jQuery(document).on('click', '.delete-household', function (e) {
+        jQuery(document).on('click', '.delete-household-view', function (e) {
             e.preventDefault();
-            e.stopPropagation();
-            
             var $btn = jQuery(this);
             var id = $btn.data('id');
             var no = $btn.data('no');
-            var $row = $btn.closest('tr');
-            var residentCount = parseInt($row.find('.resident-count').text()) || 0;
             
             var confirmMsg = 'Delete Household ' + no + '?';
-            if (residentCount > 0) {
-                confirmMsg += '\n\nWARNING: This household has ' + residentCount + ' resident(s).';
+            if (RESIDENT_COUNT > 0) {
+                confirmMsg += '\n\nWARNING: This household has ' + RESIDENT_COUNT + ' resident(s).';
                 confirmMsg += '\nDeleting will remove all residents from this household.';
             }
             confirmMsg += '\n\nThis action cannot be undone.';
@@ -80,9 +68,6 @@ var HouseholdIndex = (function() {
             if (!confirm(confirmMsg)) {
                 return;
             }
-            
-            // Disable button and show loading
-            $btn.html('<i class="fas fa-spinner fa-spin"></i>').prop('disabled', true);
             
             var requestData = {};
             requestData[CSRF_TOKEN] = CSRF_HASH;
@@ -95,21 +80,15 @@ var HouseholdIndex = (function() {
                 dataType: 'json',
                 success: function (res) {
                     if (res.status === 'success') {
-                        $row.fadeOut(350, function () { 
-                            jQuery(this).remove(); 
-                        });
-                        showToast('success', res.message);
-                        updateCSRFToken(res.csrf_hash);
+                        window.location.href = BASE_URL + 'households';
                     } else {
                         showToast('error', res.message);
                         updateCSRFToken(res.csrf_hash);
-                        $btn.html('<i class="fas fa-trash"></i>').prop('disabled', false);
                     }
                 },
                 error: function (xhr, status, error) {
                     console.error('AJAX Error:', status, error);
                     showToast('error', 'Server error. Please try again.');
-                    $btn.html('<i class="fas fa-trash"></i>').prop('disabled', false);
                 }
             });
         });
@@ -120,16 +99,15 @@ var HouseholdIndex = (function() {
         BASE_URL = config.baseUrl || '';
         CSRF_TOKEN = config.csrfToken || 'csrf_token';
         CSRF_HASH = config.csrfHash || '';
+        RESIDENT_COUNT = config.residentCount || 0;
         
-        // Wait for jQuery to be available
         if (typeof jQuery === 'undefined') {
             setTimeout(function() { init(config); }, 50);
             return;
         }
         
         jQuery(document).ready(function($) {
-            console.log('Household index initialized');
-            initSearch();
+            console.log('Household view initialized');
             initDelete();
         });
     }

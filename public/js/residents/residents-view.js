@@ -1,84 +1,249 @@
 /**
- * Residents Management - View Page JavaScript
- * Handles print, clipboard copy, and print-mode styles.
- *
- * Globals expected (set in view.php before this script loads):
- *   BASE_URL, CSRF_TOKEN_NAME, CSRF_TOKEN_VALUE, APP
+ * Residents View JavaScript
+ * Handles resident profile view actions
+ * File location: public/js/residents/residents-view.js
  */
 
-$(document).ready(function () {
-
-    // ============================================
-    // PRINT
-    // ============================================
-
-    $('#printBtn').on('click', function () {
+(function() {
+    'use strict';
+    
+    // Configuration
+    const config = {
+        baseUrl: BASE_URL || '',
+        csrfName: CSRF_TOKEN_NAME || '',
+        csrfValue: CSRF_TOKEN_VALUE || '',
+        residentId: typeof RESIDENT_ID !== 'undefined' ? RESIDENT_ID : '',
+        residentName: typeof RESIDENT_NAME !== 'undefined' ? RESIDENT_NAME : ''
+    };
+    
+    /**
+     * Initialize the page
+     */
+    function init() {
+        bindEvents();
+        initializeTabs();
+    }
+    
+    /**
+     * Bind event listeners
+     */
+    function bindEvents() {
+        // Tab persistence
+        $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', handleTabShown);
+        
+        // Print button
+        $(document).on('click', '.print-profile', handlePrint);
+        
+        // Delete button
+        $(document).on('click', '.delete-resident', handleDelete);
+        
+        // Edit button
+        $(document).on('click', '.edit-resident', handleEdit);
+    }
+    
+    /**
+     * Initialize tabs from URL hash
+     */
+    function initializeTabs() {
+        const hash = window.location.hash;
+        if (hash) {
+            $(`a[href="${hash}"]`).tab('show');
+        }
+    }
+    
+    /**
+     * Handle tab shown event
+     * @param {Event} e - Tab shown event
+     */
+    function handleTabShown(e) {
+        const tabId = e.target.hash;
+        window.location.hash = tabId;
+    }
+    
+    /**
+     * Handle print action
+     * @param {Event} e - Click event
+     */
+    function handlePrint(e) {
+        e.preventDefault();
         window.print();
-    });
-
-    // ============================================
-    // COPY TO CLIPBOARD
-    // ============================================
-
-    $('#copyInfoBtn').on('click', function () {
-        var info = '';
-
-        $('.profile-username').each(function () {
-            info += 'Name: ' + $.trim($(this).text()) + '\n';
-        });
-
-        $('.list-group-item').each(function () {
-            var label = $.trim($(this).find('b').text());
-            var value = $.trim($(this).find('.float-right').text());
-            if (label && value) {
-                info += label + ': ' + value + '\n';
+    }
+    
+    /**
+     * Handle edit action
+     * @param {Event} e - Click event
+     */
+    function handleEdit(e) {
+        e.preventDefault();
+        window.location.href = `${config.baseUrl}resident/edit/${config.residentId}`;
+    }
+    
+    /**
+     * Handle delete action
+     * @param {Event} e - Click event
+     */
+    function handleDelete(e) {
+        e.preventDefault();
+        confirmDelete();
+    }
+    
+    /**
+     * Confirm and execute delete
+     */
+    function confirmDelete() {
+        const options = {
+            title: 'Delete Resident?',
+            text: `Are you sure you want to delete ${config.residentName}? This action cannot be undone!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete',
+            cancelButtonText: 'Cancel'
+        };
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire(options).then((result) => {
+                if (result.isConfirmed) {
+                    executeDelete();
+                }
+            });
+        } else {
+            if (confirm(`Are you sure you want to delete ${config.residentName}?`)) {
+                executeDelete();
+            }
+        }
+    }
+    
+    /**
+     * Execute delete AJAX request
+     */
+    function executeDelete() {
+        const data = {};
+        data[config.csrfName] = config.csrfValue;
+        
+        $.ajax({
+            url: `${config.baseUrl}resident/delete/${config.residentId}`,
+            type: 'POST',
+            data: data,
+            dataType: 'json',
+            beforeSend: function() {
+                showLoading(true);
+            },
+            success: function(response) {
+                handleDeleteSuccess(response);
+            },
+            error: function(xhr, status, error) {
+                handleDeleteError(xhr, status, error);
+            },
+            complete: function() {
+                showLoading(false);
             }
         });
-
-        if (navigator.clipboard && info) {
-            navigator.clipboard.writeText(info)
-                .then(function ()  { showToast('success', 'Resident information copied to clipboard!'); })
-                .catch(function () { showToast('error',   'Failed to copy information'); });
-        } else {
-            showToast('error', 'Clipboard not available in this browser');
-        }
-    });
-
-    // ============================================
-    // TOAST HELPER
-    // ============================================
-
-    function showToast(type, message) {
-        var bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
-
-        var html =
-            '<div class="toast align-items-center text-white ' + bgClass + ' border-0 position-fixed" ' +
-            'style="top:20px;right:20px;z-index:9999;" ' +
-            'role="alert" aria-live="assertive" aria-atomic="true" ' +
-            'data-autohide="true" data-delay="3000">' +
-            '<div class="d-flex">' +
-            '<div class="toast-body">' + message + '</div>' +
-            '<button type="button" class="btn-close btn-close-white me-2 m-auto" ' +
-            'data-bs-dismiss="toast" aria-label="Close"></button>' +
-            '</div></div>';
-
-        $('.toast').remove();
-        $('body').append(html);
-        $('.toast').toast('show');
-
-        setTimeout(function () { $('.toast').remove(); }, 3500);
     }
-
-    // ============================================
-    // PRINT STYLES (injected at runtime)
-    // ============================================
-
-    $('head').append(
-        '<style media="print">' +
-        '.main-sidebar,.main-header,.footer,.breadcrumb,.btn,.nav-tabs { display:none !important; }' +
-        '.content-wrapper,.content,.card,.tab-content { margin:0 !important; padding:0 !important; }' +
-        '.profile-user-img { max-width:150px !important; }' +
-        'body { background:white !important; }' +
-        '</style>'
-    );
-});
+    
+    /**
+     * Handle successful delete response
+     * @param {Object} response - API response
+     */
+    function handleDeleteSuccess(response) {
+        if (response.status === 'success') {
+            showNotification('Resident deleted successfully', 'success');
+            
+            setTimeout(function() {
+                window.location.href = `${config.baseUrl}resident`;
+            }, 1500);
+        } else {
+            showNotification(response.message || 'Failed to delete resident', 'error');
+        }
+    }
+    
+    /**
+     * Handle delete error
+     * @param {Object} xhr - XHR object
+     * @param {string} status - Error status
+     * @param {string} error - Error message
+     */
+    function handleDeleteError(xhr, status, error) {
+        console.error('Delete Error:', status, error);
+        showNotification('An error occurred while deleting', 'error');
+    }
+    
+    /**
+     * Generate certificate
+     */
+    function generateCertificate() {
+        const options = {
+            title: 'Generate Certificate',
+            text: `Select certificate type for ${config.residentName}`,
+            input: 'select',
+            inputOptions: {
+                'barangay_clearance': 'Barangay Clearance',
+                'indigency': 'Certificate of Indigency',
+                'residency': 'Certificate of Residency',
+                'good_moral': 'Certificate of Good Moral'
+            },
+            inputPlaceholder: 'Select certificate type',
+            showCancelButton: true,
+            confirmButtonText: 'Generate',
+            cancelButtonText: 'Cancel'
+        };
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire(options).then((result) => {
+                if (result.isConfirmed) {
+                    const certType = result.value;
+                    window.location.href = `${config.baseUrl}certificates/generate/${config.residentId}/${certType}`;
+                }
+            });
+        } else {
+            showNotification('Certificate generation feature coming soon!', 'info');
+        }
+    }
+    
+    /**
+     * Show/hide loading state
+     * @param {boolean} isLoading - Whether loading is active
+     */
+    function showLoading(isLoading) {
+        if (isLoading) {
+            $('body').addClass('loading');
+        } else {
+            $('body').removeClass('loading');
+        }
+    }
+    
+    /**
+     * Show notification message
+     * @param {string} message - Message to display
+     * @param {string} type - Notification type
+     */
+    function showNotification(message, type = 'info') {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                text: message,
+                icon: type,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        } else {
+            alert(message);
+        }
+    }
+    
+    // Initialize when DOM is ready
+    $(document).ready(init);
+    
+    // Expose public methods
+    window.ResidentsView = {
+        printProfile: function() {
+            window.print();
+        },
+        generateCertificate: generateCertificate,
+        deleteResident: confirmDelete
+    };
+    
+})();
