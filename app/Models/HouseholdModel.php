@@ -9,7 +9,7 @@ class HouseholdModel extends Model
     protected $table = 'households';
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
-    protected $returnType = 'array'; // Consider 'object' or 'App\Entities\Household' for larger apps
+    protected $returnType = 'array'; 
     protected $useSoftDeletes = false;
     protected $protectFields = true;
     
@@ -27,19 +27,19 @@ class HouseholdModel extends Model
     protected $dateFormat = 'datetime'; 
     protected $createdField = 'created_at';
     
-    // Define allowed Sitios to match your DB ENUM
+    // --- UPDATED: Only these 5 Puroks are allowed ---
     protected $allowedSitios = [
         'Purok Malipayon', 
         'Purok Masagana', 
-        'Purok Masinop', 
-        'Purok Maunlad', 
-        // Add the rest from your DB here
+        'Purok Cory',       
+        'Purok Kawayan',    
+        'Purok Pagla-um',   
     ];
 
-    // Basic validation rules (Note: is_unique is commented out for updates, see note below)
+    // --- UPDATED: Validation rule updated to match the 5 above exactly ---
     protected $validationRules = [
         'household_no' => 'required|min_length[3]|max_length[50]',
-        'sitio'        => 'required|in_list[Purok Malipayon,Purok Masagana,Purok Masinop,Purok Maunlad]',
+        'sitio'        => 'required|in_list[Purok Malipayon,Purok Masagana,Purok Cory,Purok Kawayan,Purok Pagla-um]',
         'house_type'   => 'permit_empty|in_list[Concrete,Semi-Concrete,Wood,Light Materials]'
     ];
 
@@ -49,7 +49,7 @@ class HouseholdModel extends Model
         ],
         'sitio' => [
             'required' => 'Sitio/Purok is required',
-            'in_list' => 'Invalid Sitio selected'
+            'in_list'  => 'Invalid Sitio selected' 
         ]
     ];
 
@@ -86,7 +86,7 @@ class HouseholdModel extends Model
     }
 
     /**
-     * Helper function to check uniqueness manually (better for Edit/Update scenarios)
+     * Helper function to check uniqueness manually
      */
     public function isUniqueHouseholdNo($no, $ignoreId = null)
     {

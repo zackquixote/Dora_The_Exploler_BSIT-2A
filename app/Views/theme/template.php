@@ -139,7 +139,7 @@
 
   <!-- Navbar -->
   <?= $this->include('theme/navbar') ?>
-
+<link rel="stylesheet" href="<?= base_url('assets/css/custom.css') ?>">
   <!-- Sidebar -->
   <?= $this->include('theme/sidebar') ?>
 

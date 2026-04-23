@@ -1,0 +1,32 @@
+/* public/assets/css/custom.css */
+
+/* Badges */
+.badge-pink { 
+    background-color: #e83e8c; 
+    color: white; 
+}
+.badge-sm { 
+    font-size: 10px; 
+    padding: 2px 5px; 
+}
+
+/* Tables */
+#membersTable th, #membersTable td { 
+    vertical-align: middle; 
+}
+
+/* Validation States */
+.is-valid { 
+    border-color: #28a745 !important; 
+}
+.is-invalid { 
+    border-color: #dc3545 !important; 
+}
+.valid-feedback { 
+    color: #28a745; 
+    font-size: 80%; 
+}
+.invalid-feedback { 
+    color: #dc3545; 
+    font-size: 80%; 
+}

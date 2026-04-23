@@ -49,6 +49,8 @@
                                     <option value="Purok Malipayon" <?= ($selectedPurok ?? '') == 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
                                     <option value="Purok Masagana"  <?= ($selectedPurok ?? '') == 'Purok Masagana'  ? 'selected' : '' ?>>Purok Masagana</option>
                                     <option value="Purok Cory"      <?= ($selectedPurok ?? '') == 'Purok Cory'      ? 'selected' : '' ?>>Purok Cory</option>
+                                    <option value="Purok Kawayan"   <?= ($selectedPurok ?? '') == 'Purok Kawayan'   ? 'selected' : '' ?>>Purok Kawayan</option>
+                                    <option value="Purok Pagla-um"  <?= ($selectedPurok ?? '') == 'Purok Pagla-um'  ? 'selected' : '' ?>>Purok Pagla-um</option>
                                 </select>
                             </div>
 
@@ -129,7 +131,6 @@
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($households as $h): 
-                                        // Determine occupancy badge
                                         $count = $h['resident_count'];
                                         $badgeClass = 'bg-secondary';
                                         $badgeText = 'Low';
@@ -137,9 +138,6 @@
                                         if ($count >= 4 && $count < 7) { $badgeClass = 'bg-info'; $badgeText = 'Medium'; }
                                         if ($count >= 7) { $badgeClass = 'bg-warning'; $badgeText = 'High'; }
                                         if ($count >= 10) { $badgeClass = 'bg-danger'; $badgeText = 'Crowded'; }
-                                        
-                                        // Generate Initials Avatar
-                                        $initials = strtoupper(substr($h['head_name'], 0, 1));
                                     ?>
                                     <tr>
                                         <td class="pl-4">
@@ -160,7 +158,7 @@
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <span class="badge <?= $badgeClass ?> mr-2"><?= $count ?></span>
+                                                <span class="badge <?= $badgeClass ?> mr-2 resident-count"><?= $count ?></span>
                                                 <small class="text-muted"><?= $badgeText ?></small>
                                             </div>
                                         </td>
@@ -190,28 +188,16 @@
     </section>
 </div>
 
-<!-- CSS Enhancements -->
-<style>
-    .card { border-radius: 0.75rem; }
-    .card-outline { border-top: 3px solid; }
-    .text-xs { font-size: 0.75rem; letter-spacing: 0.5px; }
-    .table td { vertical-align: middle; border-bottom: 1px solid #f0f0f0; }
-    .table tr:hover { background-color: #f9fafb; }
-    .badge-light { background-color: #f8f9fa; color: #495057; font-weight: 500; }
-    .opacity-20 { opacity: 0.2; }
-</style>
+<!-- JS VARIABLES BRIDGE -->
+<div id="js-variables" style="display:none;"
+     data-base-url="<?= base_url() ?>"
+     data-csrf-token="<?= csrf_token() ?>"
+     data-csrf-hash="<?= csrf_hash() ?>">
+</div>
 
-<!-- Load external JavaScript -->
-<script src="<?= base_url('js/households/households-index.js') ?>"></script>
-<script>
-// Initialize the household index module
-if (typeof HouseholdIndex !== 'undefined') {
-    HouseholdIndex.init({
-        baseUrl: '<?= base_url() ?>',
-        csrfToken: '<?= csrf_token() ?>',
-        csrfHash: '<?= csrf_hash() ?>'
-    });
-}
-</script>
+<?= $this->endSection() ?>
 
+<!-- Load Index Specific JS -->
+<?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/js/households/households-index.js') ?>"></script>
 <?= $this->endSection() ?>

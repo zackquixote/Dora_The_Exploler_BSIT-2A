@@ -1,7 +1,4 @@
-/**
- * Households Index Page JavaScript
- * Handles search, delete, and toast notifications
- */
+// public/assets/js/households/households-index.js
 
 var HouseholdIndex = (function() {
     'use strict';
@@ -68,6 +65,7 @@ var HouseholdIndex = (function() {
             var id = $btn.data('id');
             var no = $btn.data('no');
             var $row = $btn.closest('tr');
+            // Find count in the badge
             var residentCount = parseInt($row.find('.resident-count').text()) || 0;
             
             var confirmMsg = 'Delete Household ' + no + '?';
@@ -129,6 +127,8 @@ var HouseholdIndex = (function() {
         
         jQuery(document).ready(function($) {
             console.log('Household index initialized');
+            
+            // Initialize functions
             initSearch();
             initDelete();
         });
@@ -141,3 +141,15 @@ var HouseholdIndex = (function() {
     };
     
 })();
+
+// Initialize with data from the HTML bridge
+jQuery(document).ready(function() {
+    var vars = jQuery('#js-variables').data();
+    if (typeof HouseholdIndex !== 'undefined') {
+        HouseholdIndex.init({
+            baseUrl: vars.baseUrl,
+            csrfToken: vars.csrfToken,
+            csrfHash: vars.csrfHash
+        });
+    }
+});
