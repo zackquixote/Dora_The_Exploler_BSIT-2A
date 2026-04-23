@@ -230,5 +230,10 @@
      data-csrf-hash="<?= csrf_hash() ?>"
      data-old-household-no="<?= old('household_no') ?>">
 </div>
-<script src="<?= base_url('assets/js/household-create.js') ?>"></script>
+<?= $this->endSection() ?>
+
+<!-- Load Create Specific JS -->
+<?= $this->section('scripts') ?>
+<!-- REMOVED 'assets/' to match your folder structure -->
+<script src="<?= base_url('js/households/household-create.js') ?>"></script>
 <?= $this->endSection() ?>

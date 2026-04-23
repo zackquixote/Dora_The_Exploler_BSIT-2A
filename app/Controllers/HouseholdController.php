@@ -68,20 +68,10 @@ class HouseholdController extends BaseController
             ->countAllResults();
         $avgPerHousehold = $totalHouseholds > 0 ? round($totalResidents / $totalHouseholds, 1) : 0;
 
-        $allHouseholds = $this->db->table('households')
-            ->select('sitio')
-            ->get()
-            ->getResultArray();
-
-        $purokCounts = [];
-        foreach ($allHouseholds as $h) {
-            $sitio = !empty($h['sitio']) ? $h['sitio'] : 'Unassigned';
-            $purokCounts[$sitio] = ($purokCounts[$sitio] ?? 0) + 1;
-        }
+        // Removed unused 'purokCounts' to keep code clean, but you can add it back if needed for stats
 
         return view('households/index', [
             'households'       => $householdsData,
-            'purokCounts'      => $purokCounts,
             'selectedPurok'    => $selectedPurok,
             'totalHouseholds'  => $totalHouseholds,
             'totalResidents'   => $totalResidents,
@@ -173,6 +163,7 @@ class HouseholdController extends BaseController
             
             $headId = $this->request->getPost('head_resident_id');
             
+            // Ensure head is in the members list
             if ($headId && !isset($members[$headId])) {
                 $members[$headId] = [
                     'id'           => $headId,
@@ -253,7 +244,7 @@ class HouseholdController extends BaseController
         }
 
         $rules = [
-            'household_no'     => 'required',
+            'household_no'     => "required|is_unique[households.household_no,id,{$id}]",
             'sitio'            => 'required',
             'address'          => 'permit_empty|max_length[255]',
             'street_address'   => 'permit_empty|max_length[255]',
@@ -280,6 +271,7 @@ class HouseholdController extends BaseController
             $membersData = $this->request->getPost('household_members_data');
             $members = json_decode($membersData, true) ?? [];
             
+            // Get current members to handle removals
             $currentMembers = $this->residentModel
                 ->where('household_id', $id)
                 ->where('deleted_at', null)
@@ -287,6 +279,7 @@ class HouseholdController extends BaseController
             $currentMemberIds = array_column($currentMembers, 'id');
             $newMemberIds = array_keys($members);
             
+            // Handle removed members (set to Transferred)
             $removedMemberIds = array_diff($currentMemberIds, $newMemberIds);
             if (!empty($removedMemberIds)) {
                 $this->residentModel->whereIn('id', $removedMemberIds)->set([
@@ -299,6 +292,7 @@ class HouseholdController extends BaseController
             
             $memberCount = 0;
             
+            // Add or Update members
             foreach ($members as $memberId => $memberInfo) {
                 $updateData = [
                     'household_id'         => $id,
@@ -307,6 +301,7 @@ class HouseholdController extends BaseController
                     'member_status'        => 'Active',
                 ];
                 
+                // If this is a new member being added to the household
                 if (!in_array($memberId, $currentMemberIds)) {
                     $updateData['joined_household_date'] = date('Y-m-d');
                 }
@@ -365,8 +360,8 @@ class HouseholdController extends BaseController
 
         if (!$household) {
             return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Household not found',
+                'status'    => 'error',
+                'message'   => 'Household not found',
                 'csrf_hash' => csrf_hash(),
             ]);
         }
@@ -380,8 +375,8 @@ class HouseholdController extends BaseController
 
         if ($hasResidents > 0 && !$force) {
             return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Cannot delete household with ' . $hasResidents . ' resident(s). Please transfer or delete residents first.',
+                'status'    => 'error',
+                'message'   => 'Cannot delete household with ' . $hasResidents . ' resident(s). Please transfer or delete residents first.',
                 'csrf_hash' => csrf_hash(),
             ]);
         }
@@ -412,8 +407,8 @@ class HouseholdController extends BaseController
         }
 
         return $this->response->setJSON([
-            'status'  => 'error',
-            'message' => 'Delete failed',
+            'status'    => 'error',
+            'message'   => 'Delete failed',
             'csrf_hash' => csrf_hash(),
         ]);
     }
@@ -430,9 +425,10 @@ class HouseholdController extends BaseController
                 ->findAll();
             
             return $this->response->setJSON([
-                'status'  => 'success',
-                'members' => $members,
-                'count'   => count($members),
+                'status'    => 'success',
+                'members'   => $members,
+                'count'     => count($members),
+                'csrf_hash' => csrf_hash(),
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
@@ -504,9 +500,10 @@ class HouseholdController extends BaseController
                 ->findAll();
 
             return $this->response->setJSON([
-                'status' => 'success',
-                'data'   => $households,
-                'count'  => count($households),
+                'status'    => 'success',
+                'data'      => $households,
+                'count'     => count($households),
+                'csrf_hash' => csrf_hash(),
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
@@ -532,6 +529,7 @@ class HouseholdController extends BaseController
             return $this->response->setJSON([
                 'status'     => 'success',
                 'households' => $households,
+                'csrf_hash' => csrf_hash(),
             ]);
         }
 
@@ -555,6 +553,7 @@ class HouseholdController extends BaseController
         $nextNumber = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
         $householdNo = "HH-{$year}-{$nextNumber}";
         
+        // Ensure uniqueness
         while ($this->householdModel->where('household_no', $householdNo)->first()) {
             $count++;
             $nextNumber = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
@@ -563,7 +562,8 @@ class HouseholdController extends BaseController
         
         return $this->response->setJSON([
             'status'       => 'success',
-            'household_no' => $householdNo
+            'household_no' => $householdNo,
+            'csrf_hash'   => csrf_hash(),
         ]);
     }
 
@@ -584,9 +584,10 @@ class HouseholdController extends BaseController
         $exists = $this->householdModel->where('household_no', $householdNo)->first();
         
         return $this->response->setJSON([
-            'status'  => 'success',
-            'exists'  => $exists ? true : false,
-            'message' => $exists ? 'Household number already exists' : 'Household number is available'
+            'status'    => 'success',
+            'exists'    => $exists ? true : false,
+            'message'   => $exists ? 'Household number already exists' : 'Household number is available',
+            'csrf_hash' => csrf_hash(),
         ]);
     }
 
@@ -603,7 +604,8 @@ class HouseholdController extends BaseController
     
         return $this->response->setJSON([
             'status' => 'success',
-            'data' => $household
+            'data'   => $household,
+            'csrf_hash' => csrf_hash(),
         ]);
     }
 }

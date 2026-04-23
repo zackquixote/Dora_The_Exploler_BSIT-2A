@@ -17,7 +17,7 @@
                             <p class="text-muted mb-0 small"><i class="fas fa-map-marker-alt mr-1"></i> <?= esc($household['address'] ?? 'Address not set') ?></p>
                         </div>
                     </div>
-                </div>
+                </div> 
                 <div class="col-sm-4 text-right">
                     <div class="dropdown">
                         <button class="btn btn-primary shadow-sm" data-toggle="dropdown">
@@ -28,7 +28,7 @@
                                 <i class="fas fa-edit text-primary mr-2"></i> Edit Details
                             </a>
                             <a class="dropdown-item" href="<?= base_url('resident/create?household_id='.$household['id']) ?>">
-                                <i class="fas fa-user-plus text-success mr-2"></i> Add Member
+                                <i class="fas fa-user-plus text-success mr-2"></i> Quick Add New Member
                             </a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-danger delete-household-view"
@@ -122,7 +122,6 @@
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-body box-profile text-center">
                             <?php 
-                                // Determine image source (Uploaded or Default)
                                 $profileSrc = 'assets/img/default.png';
                                 if ($headResident && !empty($headResident['profile_picture'])) {
                                     $profileSrc = 'uploads/' . $headResident['profile_picture'];
@@ -202,9 +201,9 @@
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
                             <h5 class="card-title text-dark mb-0 font-weight-bold">Household Members (<?= $residentCount ?>)</h5>
-                            <a href="<?= base_url('resident/create?household_id='.$household['id']) ?>" class="btn btn-sm btn-primary shadow-sm">
+                            <button type="button" class="btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#addMemberModal">
                                 <i class="fas fa-plus"></i> Add Member
-                            </a>
+                            </button>
                         </div>
                         <div class="card-body p-0">
                             <?php if (empty($residents)): ?>
@@ -232,7 +231,6 @@
                                                 }
                                                 $isHead = ($headResident && $headResident['id'] == $r['id']);
                                                 $fullName = $r['first_name'] . ' ' . $r['last_name'];
-                                                // Use local image if available, else initials avatar
                                                 $memberImg = 'https://ui-avatars.com/api/?name='.urlencode($fullName).'&background=random&color=fff&size=32';
                                                 if (!empty($r['profile_picture'])) {
                                                     $memberImg = base_url('uploads/' . $r['profile_picture']);
@@ -286,36 +284,57 @@
     </section>
 </div>
 
-<!-- CSS Enhancements -->
-<style>
-    .card { border-radius: 0.75rem; }
-    .card-header { border-top-left-radius: 0.75rem !important; border-top-right-radius: 0.75rem !important; }
-    .badge-pill { padding-right: 0.6em; padding-left: 0.6em; }
-    .badge-sm { font-size: 0.65em; }
-    .table td { border-top: 1px solid #f0f0f0; padding: 1rem 0.75rem; vertical-align: middle; }
-    .rounded-circle { object-fit: cover; }
-    .shadow-sm { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important; }
-    .border-0 { border: 0 !important; }
-    
-    /* Specific Styling to match Resident View */
-    .profile-user-img {
-        border: 3px solid #adb5bd;
-        padding: 3px;
-    }
-</style>
+<!-- ADD MEMBER MODAL -->
+<div class="modal fade" id="addMemberModal" tabindex="-1" role="dialog" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content shadow border-0">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title font-weight-bold">Add Member to Household</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted text-center mb-4">Choose an option below:</p>
+                
+                <div class="d-grid gap-3">
+                    <!-- Option 1: Add New -->
+                    <a href="<?= base_url('resident/create?household_id='.$household['id']) ?>" class="card border-0 shadow-sm text-decoration-none text-dark">
+                        <div class="card-body p-3 text-center">
+                            <div class="mb-2">
+                                <i class="fas fa-user-plus fa-2x text-primary"></i>
+                            </div>
+                            <h6 class="font-weight-bold mb-1">Create New Resident</h6>
+                            <p class="small text-muted mb-0">Add a person who is not yet in the system.</p>
+                        </div>
+                    </a>
 
-<!-- Load external JavaScript -->
+                    <!-- Option 2: Add Existing -->
+                    <a href="<?= base_url('resident/assign-search?household_id='.$household['id']) ?>" class="card border-0 shadow-sm text-decoration-none text-dark">
+                        <div class="card-body p-3 text-center">
+                            <div class="mb-2">
+                                <i class="fas fa-search fa-2x text-success"></i>
+                            </div>
+                            <h6 class="font-weight-bold mb-1">Add Existing Resident</h6>
+                            <p class="small text-muted mb-0">Search for a resident already in the database.</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS VARIABLES BRIDGE -->
+<div id="js-variables" style="display:none;"
+     data-base-url="<?= base_url() ?>"
+     data-csrf-token="<?= csrf_token() ?>"
+     data-csrf-hash="<?= csrf_hash() ?>"
+     data-resident-count="<?= $residentCount ?>">
+</div>
+
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
 <script src="<?= base_url('js/households/households-view.js') ?>"></script>
-<script>
-// Initialize the household view module
-if (typeof HouseholdView !== 'undefined') {
-    HouseholdView.init({
-        baseUrl: '<?= base_url() ?>',
-        csrfToken: '<?= csrf_token() ?>',
-        csrfHash: '<?= csrf_hash() ?>',
-        residentCount: <?= $residentCount ?>
-    });
-}
-</script>
-
 <?= $this->endSection() ?>

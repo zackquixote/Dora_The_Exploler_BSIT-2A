@@ -1,7 +1,4 @@
-/**
- * Households View Page JavaScript
- * Handles delete functionality for household details page
- */
+// public/assets/js/households/households-view.js
 
 var HouseholdView = (function() {
     'use strict';
@@ -80,6 +77,7 @@ var HouseholdView = (function() {
                 dataType: 'json',
                 success: function (res) {
                     if (res.status === 'success') {
+                        // Redirect on success
                         window.location.href = BASE_URL + 'households';
                     } else {
                         showToast('error', res.message);
@@ -119,3 +117,16 @@ var HouseholdView = (function() {
     };
     
 })();
+
+// Initialize with data from the HTML bridge
+jQuery(document).ready(function() {
+    var vars = jQuery('#js-variables').data();
+    if (typeof HouseholdView !== 'undefined') {
+        HouseholdView.init({
+            baseUrl: vars.baseUrl,
+            csrfToken: vars.csrfToken,
+            csrfHash: vars.csrfHash,
+            residentCount: vars.residentCount
+        });
+    }
+});

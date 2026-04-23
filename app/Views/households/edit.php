@@ -215,7 +215,7 @@
 
 <?= $this->endSection() ?>
 
-<!-- Load Edit Specific JS -->
+<!-- Load Index Specific JS -->
 <?= $this->section('scripts') ?>
-<script src="<?= base_url('assets/js/households/household-edit.js') ?>"></script>
+<script src="<?= base_url('js/households/households-index.js') ?>"></script>
 <?= $this->endSection() ?>

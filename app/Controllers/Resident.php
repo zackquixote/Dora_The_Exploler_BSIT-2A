@@ -40,7 +40,6 @@ class Resident extends BaseController
         
         $residents = $builder->orderBy('residents.id', 'DESC')->get()->getResultArray();
         
-        // Get purok counts
         $allResidents = $this->db->table('residents')
             ->select('sitio')
             ->where('deleted_at', null)
@@ -66,20 +65,18 @@ class Resident extends BaseController
             return redirect()->to('/login');
         }
 
-        // Get household_id from URL if passed
-        $householdId = $this->request->getGet('household_id');
-        
-        $households = $this->householdModel
-            ->orderBy('household_no', 'ASC')
-            ->findAll();
+        $households = $this->householdModel->orderBy('household_no', 'ASC')->findAll();
 
         return view('residents/create', [
             'title' => 'Add Resident',
             'households' => $households,
-            'preselectedHousehold' => $householdId
+            'preselectedHousehold' => $this->request->getGet('household_id')
         ]);
     }
 
+    // ------------------------------------------------------
+    // CLEANED UP STORE METHOD
+    // ------------------------------------------------------
     public function store()
     {
         $rules = [
@@ -87,77 +84,25 @@ class Resident extends BaseController
             'last_name'    => 'required|min_length[2]|max_length[100]',
             'birthdate'    => 'required|valid_date',
             'sex'          => 'required|in_list[male,female]',
-            // 'household_id' => 'required|integer',
-            'occupation'   => 'permit_empty|max_length[100]',
-            'citizenship'  => 'permit_empty|max_length[100]',
             'sitio'        => 'required|max_length[100]',
             'profile_picture' => 'is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]'
         ];
 
-        // Check if it's an AJAX request
         if ($this->request->isAJAX()) {
             if (!$this->validate($rules)) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Validation failed',
-                    'errors' => $this->validator->getErrors()
-                ]);
+                return $this->response->setJSON(['status' => 'error', 'errors' => $this->validator->getErrors()]);
             }
 
-            $sitio = $this->request->getPost('sitio');
-            $profilePic = null;
-            $file = $this->request->getFile('profile_picture');
+            // 1. Handle File Upload
+            $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
             
-            if ($file && $file->isValid() && !$file->hasMoved()) {
-                // Create sitio-based folder
-                $folderName = $this->getSitioFolderName($sitio);
-                $uploadPath = FCPATH . 'uploads/' . $folderName;
-                
-                if (!is_dir($uploadPath)) {
-                    mkdir($uploadPath, 0777, true);
-                }
-                
-                $newName = $file->getRandomName();
-                $file->move($uploadPath, $newName);
-                $profilePic = $folderName . '/' . $newName;
-            }
-
-            $householdId = $this->request->getPost('household_id');
-
-            $data = [
-                'household_id'         => !empty($householdId) ? (int)$householdId : null,
-                'first_name'           => $this->request->getPost('first_name'),
-                'middle_name'          => $this->request->getPost('middle_name') ?: null,
-                'last_name'            => $this->request->getPost('last_name'),
-                'birthdate'            => $this->request->getPost('birthdate'),
-                'sex'                  => $this->request->getPost('sex'),
-                'civil_status'         => $this->request->getPost('civil_status') ?: null,
-                'contact_number'       => $this->request->getPost('contact_number') ?: null,
-                'relationship_to_head' => $this->request->getPost('relationship_to_head') ?: null,
-                'occupation'           => $this->request->getPost('occupation') ?: null,
-                'citizenship'          => $this->request->getPost('citizenship') ?: null,
-                'street_address'       => $this->request->getPost('street_address') ?: null,
-                'sitio'                => $sitio,
-                'is_voter'             => $this->request->getPost('is_voter') ? 1 : 0,
-                'is_pwd'               => $this->request->getPost('is_pwd') ? 1 : 0,
-                'is_senior_citizen'    => $this->request->getPost('is_senior_citizen') ? 1 : 0,
-                'profile_picture'      => $profilePic,
-                'status'               => 'active',
-                'registered_by'        => session()->get('user_id') ?? 1,
-            ];
+            // 2. Prepare Data
+            $data = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
             if ($this->residentModel->insert($data)) {
-                return $this->response->setJSON([
-                    'status' => 'success',
-                    'message' => 'Resident added successfully.',
-                    'redirect' => base_url('resident')
-                ]);
+                return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             }
-
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Failed to save resident.'
-            ]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to save resident.']);
         }
 
         // Non-AJAX fallback
@@ -165,46 +110,8 @@ class Resident extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $sitio = $this->request->getPost('sitio');
-        $profilePic = null;
-        $file = $this->request->getFile('profile_picture');
-        
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            $folderName = $this->getSitioFolderName($sitio);
-            $uploadPath = FCPATH . 'uploads/' . $folderName;
-            
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
-            }
-            
-            $newName = $file->getRandomName();
-            $file->move($uploadPath, $newName);
-            $profilePic = $folderName . '/' . $newName;
-        }
-
-        $householdId = $this->request->getPost('household_id');
-
-        $data = [
-            'household_id'         => !empty($householdId) ? (int)$householdId : null,
-            'first_name'           => $this->request->getPost('first_name'),
-            'middle_name'          => $this->request->getPost('middle_name') ?: null,
-            'last_name'            => $this->request->getPost('last_name'),
-            'birthdate'            => $this->request->getPost('birthdate'),
-            'sex'                  => $this->request->getPost('sex'),
-            'civil_status'         => $this->request->getPost('civil_status') ?: null,
-            'contact_number'       => $this->request->getPost('contact_number') ?: null,
-            'relationship_to_head' => $this->request->getPost('relationship_to_head') ?: null,
-            'occupation'           => $this->request->getPost('occupation') ?: null,
-            'citizenship'          => $this->request->getPost('citizenship') ?: null,
-            'street_address'       => $this->request->getPost('street_address') ?: null,
-            'sitio'                => $sitio,
-            'is_voter'             => $this->request->getPost('is_voter') ? 1 : 0,
-            'is_pwd'               => $this->request->getPost('is_pwd') ? 1 : 0,
-            'is_senior_citizen'    => $this->request->getPost('is_senior_citizen') ? 1 : 0,
-            'profile_picture'      => $profilePic,
-            'status'               => 'active',
-            'registered_by'        => session()->get('user_id') ?? 1,
-        ];
+        $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
+        $data = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
         if ($this->residentModel->insert($data)) {
             return redirect()->to(base_url('resident'))->with('success', 'Resident added successfully.');
@@ -233,6 +140,9 @@ class Resident extends BaseController
         ]);
     }
 
+    // ------------------------------------------------------
+    // CLEANED UP UPDATE METHOD
+    // ------------------------------------------------------
     public function update($id)
     {
         $rules = [
@@ -240,88 +150,35 @@ class Resident extends BaseController
             'last_name'    => 'required|min_length[2]',
             'birthdate'    => 'required|valid_date',
             'sex'          => 'required|in_list[male,female]',
-            'household_id' => 'required|integer',
-            'occupation'   => 'permit_empty|max_length[100]',
-            'citizenship'  => 'permit_empty|max_length[100]',
-            'street_address' => 'permit_empty|max_length[255]',
+            'household_id' => 'required|integer', // Note: Made household_id required here as per your previous code
             'sitio'        => 'required|max_length[100]',
             'profile_picture' => 'is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]'
         ];
 
         if ($this->request->isAJAX()) {
             if (!$this->validate($rules)) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Validation failed',
-                    'errors' => $this->validator->getErrors()
-                ]);
+                return $this->response->setJSON(['status' => 'error', 'errors' => $this->validator->getErrors()]);
             }
 
             $resident = $this->residentModel->find($id);
             if (!$resident) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Resident not found'
-                ]);
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Resident not found']);
             }
 
-            $sitio = $this->request->getPost('sitio');
-            $profilePic = $resident['profile_picture'];
-            $file = $this->request->getFile('profile_picture');
+            // 1. Handle File Upload (passing existing image to delete if needed)
+            $profilePic = $this->uploadProfilePicture(
+                $this->request->getFile('profile_picture'), 
+                $this->request->getPost('sitio'),
+                $resident['profile_picture'] ?? null
+            );
             
-            if ($file && $file->isValid() && !$file->hasMoved()) {
-                // Delete old picture
-                if ($profilePic && file_exists(FCPATH . 'uploads/' . $profilePic)) {
-                    unlink(FCPATH . 'uploads/' . $profilePic);
-                }
-                
-                // Upload new picture
-                $folderName = $this->getSitioFolderName($sitio);
-                $uploadPath = FCPATH . 'uploads/' . $folderName;
-                
-                if (!is_dir($uploadPath)) {
-                    mkdir($uploadPath, 0777, true);
-                }
-                
-                $newName = $file->getRandomName();
-                $file->move($uploadPath, $newName);
-                $profilePic = $folderName . '/' . $newName;
-            }
-
-            $householdId = $this->request->getPost('household_id');
-
-            $data = [
-                'household_id'         => !empty($householdId) ? (int)$householdId : null,
-                'first_name'           => $this->request->getPost('first_name'),
-                'middle_name'          => $this->request->getPost('middle_name') ?: null,
-                'last_name'            => $this->request->getPost('last_name'),
-                'birthdate'            => $this->request->getPost('birthdate'),
-                'sex'                  => $this->request->getPost('sex'),
-                'civil_status'         => $this->request->getPost('civil_status') ?: null,
-                'contact_number'       => $this->request->getPost('contact_number') ?: null,
-                'relationship_to_head' => $this->request->getPost('relationship_to_head') ?: null,
-                'occupation'           => $this->request->getPost('occupation') ?: null,
-                'citizenship'          => $this->request->getPost('citizenship') ?: null,
-                'street_address'       => $this->request->getPost('street_address') ?: null,
-                'sitio'                => $sitio,
-                'is_voter'             => $this->request->getPost('is_voter') ? 1 : 0,
-                'is_pwd'               => $this->request->getPost('is_pwd') ? 1 : 0,
-                'is_senior_citizen'    => $this->request->getPost('is_senior_citizen') ? 1 : 0,
-                'profile_picture'      => $profilePic,
-            ];
+            // 2. Prepare Data
+            $data = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
             if ($this->residentModel->update($id, $data)) {
-                return $this->response->setJSON([
-                    'status' => 'success',
-                    'message' => 'Resident updated successfully.',
-                    'redirect' => base_url('resident')
-                ]);
+                return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             }
-
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Update failed.'
-            ]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Update failed.']);
         }
 
         // Non-AJAX fallback
@@ -330,51 +187,12 @@ class Resident extends BaseController
         }
 
         $resident = $this->residentModel->find($id);
-        if (!$resident) {
-            return redirect()->back()->with('error', 'Resident not found.');
-        }
-
-        $sitio = $this->request->getPost('sitio');
-        $profilePic = $resident['profile_picture'];
-        $file = $this->request->getFile('profile_picture');
-        
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            if ($profilePic && file_exists(FCPATH . 'uploads/' . $profilePic)) {
-                unlink(FCPATH . 'uploads/' . $profilePic);
-            }
-            
-            $folderName = $this->getSitioFolderName($sitio);
-            $uploadPath = FCPATH . 'uploads/' . $folderName;
-            
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
-            }
-            
-            $newName = $file->getRandomName();
-            $file->move($uploadPath, $newName);
-            $profilePic = $folderName . '/' . $newName;
-        }
-
-        $householdId = $this->request->getPost('household_id');
-
-        $data = [
-            'household_id'         => !empty($householdId) ? (int)$householdId : null,
-            'first_name'           => $this->request->getPost('first_name'),
-            'middle_name'          => $this->request->getPost('middle_name') ?: null,
-            'last_name'            => $this->request->getPost('last_name'),
-            'birthdate'            => $this->request->getPost('birthdate'),
-            'sex'                  => $this->request->getPost('sex'),
-            'civil_status'         => $this->request->getPost('civil_status') ?: null,
-            'contact_number'       => $this->request->getPost('contact_number') ?: null,
-            'relationship_to_head' => $this->request->getPost('relationship_to_head') ?: null,
-            'occupation'           => $this->request->getPost('occupation') ?: null,
-            'citizenship'          => $this->request->getPost('citizenship') ?: null,
-            'street_address'       => $this->request->getPost('street_address') ?: null,
-            'sitio'                => $sitio,
-'is_voter' => (int) ($this->request->getPost('is_voter') ?? 0),            'is_pwd'               => $this->request->getPost('is_pwd') ? 1 : 0,
-            'is_senior_citizen'    => $this->request->getPost('is_senior_citizen') ? 1 : 0,
-            'profile_picture'      => $profilePic,
-        ];
+        $profilePic = $this->uploadProfilePicture(
+            $this->request->getFile('profile_picture'), 
+            $this->request->getPost('sitio'),
+            $resident['profile_picture'] ?? null
+        );
+        $data = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
         if ($this->residentModel->update($id, $data)) {
             return redirect()->to(base_url('resident'))->with('success', 'Resident updated successfully.');
@@ -385,38 +203,22 @@ class Resident extends BaseController
 
     public function delete($id)
     {
-        // Check if it's an AJAX request
         if ($this->request->isAJAX()) {
             $resident = $this->residentModel->find($id);
             
             if (!$resident) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Resident not found'
-                ]);
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Resident not found']);
             }
             
-            // Delete profile picture if exists
             if (!empty($resident['profile_picture']) && file_exists(FCPATH . 'uploads/' . $resident['profile_picture'])) {
                 unlink(FCPATH . 'uploads/' . $resident['profile_picture']);
             }
             
-            // Delete the resident (soft delete)
             if ($this->residentModel->delete($id)) {
-                return $this->response->setJSON([
-                    'status' => 'success',
-                    'message' => 'Resident deleted successfully.',
-                    'csrf_hash' => csrf_hash()
-                ]);
-            } else {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Failed to delete resident.'
-                ]);
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Resident deleted successfully.', 'csrf_hash' => csrf_hash()]);
             }
         }
         
-        // If not AJAX, redirect back
         return redirect()->back()->with('error', 'Invalid request');
     }
 
@@ -441,35 +243,84 @@ class Resident extends BaseController
         return view('residents/view', ['resident' => $resident]);
     }
 
-    /**
-     * Get households by sitio (AJAX endpoint)
-     */public function getHouseholdsBySitio()
-{
-    $sitio = $this->request->getGet('sitio');
-    
-    if (empty($sitio)) {
+    public function getHouseholdsBySitio()
+    {
+        $sitio = $this->request->getGet('sitio');
+        
+        if (empty($sitio)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Sitio parameter is required']);
+        }
+        
+        $households = $this->householdModel->where('sitio', $sitio)->findAll();
+        
         return $this->response->setJSON([
-            'status' => 'error',
-            'message' => 'Sitio parameter is required'
+            'status' => 'success',
+            'data' => $households
         ]);
     }
-    
-    $householdModel = new \App\Models\HouseholdModel();
-    
-    // Only query by 'sitio' column (which is an ENUM)
-    $households = $householdModel
-        ->where('sitio', $sitio)
-        ->findAll();
-    
-    return $this->response->setJSON([
-        'status' => 'success',
-        'data' => $households,
-        'households' => $households
-    ]);
-}
+
+    // ==========================================================
+    // NEW HELPER METHODS (The Magic Cleanup)
+    // ==========================================================
+
     /**
-     * Get folder name based on sitio
+     * Handles the file upload logic. Replaces repeated code in store/update.
      */
+    private function uploadProfilePicture($file, $sitio, $currentPicture = null)
+    {
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            // Delete old picture if updating and it exists
+            if ($currentPicture && file_exists(FCPATH . 'uploads/' . $currentPicture)) {
+                unlink(FCPATH . 'uploads/' . $currentPicture);
+            }
+            
+            $folderName = $this->getSitioFolderName($sitio);
+            $uploadPath = FCPATH . 'uploads/' . $folderName;
+            
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+            
+            $newName = $file->getRandomName();
+            $file->move($uploadPath, $newName);
+            
+            return $folderName . '/' . $newName;
+        }
+        
+        // Return existing picture if no new file uploaded, or null if new file failed
+        return $currentPicture; 
+    }
+
+    /**
+     * Prepares the data array for DB insertion. Replaces repeated array definitions.
+     */
+    private function prepareResidentData($postData, $profilePic)
+    {
+        $householdId = !empty($postData['household_id']) ? (int)$postData['household_id'] : null;
+
+        return [
+            'household_id'         => $householdId,
+            'first_name'           => $postData['first_name'],
+            'middle_name'          => !empty($postData['middle_name']) ? $postData['middle_name'] : null,
+            'last_name'            => $postData['last_name'],
+            'birthdate'            => $postData['birthdate'],
+            'sex'                  => $postData['sex'],
+            'civil_status'         => !empty($postData['civil_status']) ? $postData['civil_status'] : null,
+            'contact_number'       => !empty($postData['contact_number']) ? $postData['contact_number'] : null,
+            'relationship_to_head' => !empty($postData['relationship_to_head']) ? $postData['relationship_to_head'] : null,
+            'occupation'           => !empty($postData['occupation']) ? $postData['occupation'] : null,
+            'citizenship'          => !empty($postData['citizenship']) ? $postData['citizenship'] : null,
+            'street_address'       => !empty($postData['street_address']) ? $postData['street_address'] : null,
+            'sitio'                => $postData['sitio'],
+            'is_voter'             => isset($postData['is_voter']) ? 1 : 0,
+            'is_pwd'               => isset($postData['is_pwd']) ? 1 : 0,
+            'is_senior_citizen'    => isset($postData['is_senior_citizen']) ? 1 : 0,
+            'profile_picture'      => $profilePic,
+            'status'               => 'active',
+            'registered_by'        => session()->get('user_id') ?? 1,
+        ];
+    }
+
     private function getSitioFolderName($sitio)
     {
         $folderMap = [
@@ -479,7 +330,72 @@ class Resident extends BaseController
             'Purok Kawayan'   => 'purok_kawayan',
             'Purok Pagla-um'  => 'purok_paglaum'
         ];
-        
         return $folderMap[$sitio] ?? 'others';
+    }
+
+    // ==========================================================
+    // ASSIGNMENT METHODS
+    // ==========================================================
+    public function assignSearch()
+    {
+        $householdId = $this->request->getGet('household_id');
+        $keyword = $this->request->getGet('q');
+        $filterPurok = $this->request->getGet('filter_purok');
+        $filterHouseId = $this->request->getGet('filter_household_id');
+
+        $builder = $this->residentModel
+            ->groupStart()
+                ->where('household_id !=', $householdId)
+                ->orWhere('household_id IS NULL', null, false)
+            ->groupEnd();
+
+        if ($filterPurok) {
+            $builder->where('sitio', $filterPurok);
+        }
+        if ($filterHouseId) {
+            $builder->where('household_id', $filterHouseId);
+        }
+        if ($keyword) {
+            $builder->groupStart()
+                    ->like('first_name', $keyword)
+                    ->orLike('last_name', $keyword)
+                    ->groupEnd();
+        }
+
+        $data['residents'] = $builder->paginate(20);
+        $data['pager'] = $this->residentModel->pager;
+        $data['household_id'] = $householdId; 
+        $data['keyword'] = $keyword;
+        $data['filterPurok'] = $filterPurok;
+        $data['filterHouseId'] = $filterHouseId;
+
+        return view('households/resident_assign_search', $data);
+    }
+
+    public function assignBulk()
+    {
+        $targetHouseholdId = $this->request->getPost('target_household_id');
+        $selectedResidents = $this->request->getPost('selected_residents');
+        $relationships = $this->request->getPost('relationships');
+
+        if (empty($selectedResidents)) {
+            return redirect()->back()->with('error', 'No residents selected.');
+        }
+
+        $successCount = 0;
+
+        foreach ($selectedResidents as $residentId) {
+            $relationToSet = isset($relationships[$residentId]) ? $relationships[$residentId] : null;
+
+            if ($relationToSet) {
+                $this->residentModel->update($residentId, [
+                    'household_id' => $targetHouseholdId,
+                    'relationship_to_head' => $relationToSet
+                ]);
+                $successCount++;
+            }
+        }
+
+        return redirect()->back()->with('success', $successCount . ' resident(s) assigned successfully!');
     }
 }

@@ -199,5 +199,5 @@
 
 <!-- Load Index Specific JS -->
 <?= $this->section('scripts') ?>
-<script src="<?= base_url('assets/js/households/households-index.js') ?>"></script>
+<script src="<?= base_url('js/households/households-index.js') ?>"></script>
 <?= $this->endSection() ?>
