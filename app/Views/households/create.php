@@ -219,11 +219,9 @@
     </section>
 </div>
 
-<!-- 
-    We need to pass PHP variables to JS.
-    We can create a hidden container or pass them via window object.
-    Here we use a hidden container for cleanliness.
--->
+
+
+
 <div id="js-variables" style="display:none;"
      data-base-url="<?= base_url() ?>"
      data-csrf-token="<?= csrf_token() ?>"

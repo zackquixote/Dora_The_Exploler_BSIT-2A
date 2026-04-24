@@ -60,7 +60,7 @@ use CodeIgniter\Router\RouteCollection;
 
 // ─── HOUSEHOLD MANAGEMENT (Controller: App\Controllers\HouseholdController) ──
  $routes->group('households', function ($routes) {
-    $routes->get('/', 'HouseholdController::index');
+    $routes->get('/',              'HouseholdController::index');
     $routes->get('create', 'HouseholdController::create');
     $routes->post('store', 'HouseholdController::store');
     $routes->get('edit/(:num)', 'HouseholdController::edit/$1');

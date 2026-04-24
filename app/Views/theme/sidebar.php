@@ -70,12 +70,7 @@ $isActive = function($val) use ($seg1, $seg2) {
                         <p>Households</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="<?= base_url('person') ?>" class="nav-link <?= $isActive('person') ?>">
-                        <i class="nav-icon fas fa-user-friends"></i>
-                        <p>Person</p>
-                    </a>
-                </li>
+             
                 <li class="nav-item">
                     <a href="<?= base_url('staff/users') ?>" class="nav-link <?= $isActive('users') ?>">
                         <i class="nav-icon fas fa-user-lock"></i>
