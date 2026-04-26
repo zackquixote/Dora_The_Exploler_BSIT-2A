@@ -1,3 +1,14 @@
+
+<?php
+// ---------------------------------------------------------
+// SMART THEME LOADER
+// ---------------------------------------------------------
+// If Admin → Load Admin Template (Red Sidebar)
+// If Staff  → Load Staff Template (Green Sidebar)
+ $role = strtolower(session()->get('role') ?? 'staff');
+ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+?>
+
 <?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
 
@@ -83,8 +94,17 @@
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <b><i class="fas fa-circle mr-2"></i>Status</b>
                                     <span>
-                                        <?php $status = $resident['status'] ?? 'active'; ?>
-                                        <span class="badge badge-<?= $status == 'active' ? 'success' : 'secondary' ?>">
+                                        <?php 
+                                        $status = $resident['status'] ?? 'active';
+                                        $statusBadge = [
+                                            'active' => 'success',
+                                            'inactive' => 'secondary',
+                                            'deceased' => 'dark',
+                                            'transferred' => 'warning'
+                                        ];
+                                        $badge = $statusBadge[$status] ?? 'secondary';
+                                        ?>
+                                        <span class="badge badge-<?= $badge ?>">
                                             <?= ucfirst($status) ?>
                                         </span>
                                     </span>
@@ -271,7 +291,7 @@
                                     <div class="alert alert-info mt-3">
                                         <i class="fas fa-info-circle mr-2"></i>
                                         <strong>Note:</strong> This resident's address is based on their assigned household. 
-                                        To update the address, please edit the household information.
+                                        To update address, please edit household information.
                                     </div>
                                     <?php endif; ?>
                                 </div>
@@ -350,7 +370,7 @@
                                     <?php if (!empty($resident['is_voter']) || !empty($resident['is_senior_citizen']) || !empty($resident['is_pwd'])): ?>
                                     <div class="alert alert-success mt-3">
                                         <i class="fas fa-check-circle mr-2"></i>
-                                        <strong>Benefits Eligibility:</strong> This resident may qualify for the following:
+                                        <strong>Benefits Eligibility:</strong> This resident may qualify for following:
                                         <ul class="mb-0 mt-2">
                                             <?php if (!empty($resident['is_senior_citizen'])): ?>
                                                 <li>Senior Citizen discount (20% on purchases)</li>

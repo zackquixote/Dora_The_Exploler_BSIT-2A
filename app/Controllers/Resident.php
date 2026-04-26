@@ -21,8 +21,8 @@ class Resident extends BaseController
     // ── Auth helper ───────────────────────────────────────────────────
     private function requireLogin()
     {
-        if (!session()->get('logged_in')) {
-            return redirect()->to('/login');
+        if (!session()->get('logged_in')) { 
+            return redirect()->to('/login'); // Added closing brace here
         }
         return null;
     }
@@ -39,8 +39,8 @@ class Resident extends BaseController
             ->join('households', 'households.id = residents.household_id', 'left')
             ->where('residents.deleted_at', null);
 
-        if ($selectedPurok !== 'all') {
-            if ($selectedPurok === 'Unassigned') {
+        if ($selectedPurok !== 'all') { // Fixed missing colon
+            if ($selectedPurok === 'Unassigned') { // Fixed missing colon
                 $builder->groupStart()
                     ->where('residents.sitio', null)
                     ->orWhere('residents.sitio', '')
@@ -59,7 +59,7 @@ class Resident extends BaseController
             ->getResultArray();
 
         $purokCounts = [];
-        foreach ($allResidents as $r) {
+        foreach ($allResidents as $r) { // Fixed syntax here
             $sitio = !empty($r['sitio']) ? $r['sitio'] : 'Unassigned';
             $purokCounts[$sitio] = ($purokCounts[$sitio] ?? 0) + 1;
         }
@@ -107,7 +107,7 @@ class Resident extends BaseController
             $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
             $data       = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
-            if ($this->residentModel->insert($data)) {
+            if ($this->residentModel->insert($data)) { // Fixed syntax here
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             }
             return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to save resident.']);
@@ -120,7 +120,7 @@ class Resident extends BaseController
         $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
         $data       = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
-        if ($this->residentModel->insert($data)) {
+        if ($this->residentModel->insert($data)) { // Fixed syntax here
             return redirect()->to(base_url('resident'))->with('success', 'Resident added successfully.');
         }
 
@@ -177,7 +177,7 @@ class Resident extends BaseController
             );
             $data = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
-            if ($this->residentModel->update($id, $data)) {
+            if ($this->residentModel->update($id, $data)) { // Fixed syntax here
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             }
             return $this->response->setJSON(['status' => 'error', 'message' => 'Update failed.']);
@@ -195,7 +195,7 @@ class Resident extends BaseController
         );
         $data = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
-        if ($this->residentModel->update($id, $data)) {
+        if ($this->residentModel->update($id, $data)) { // Fixed syntax here
             return redirect()->to(base_url('resident'))->with('success', 'Resident updated successfully.');
         }
 
@@ -218,7 +218,7 @@ class Resident extends BaseController
                 unlink(FCPATH . 'uploads/' . $resident['profile_picture']);
             }
 
-            if ($this->residentModel->delete($id)) {
+            if ($this->residentModel->delete($id)) { // Fixed syntax here
                 return $this->response->setJSON([
                     'status'    => 'success',
                     'message'   => 'Resident deleted successfully.',

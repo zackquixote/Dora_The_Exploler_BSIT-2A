@@ -1,4 +1,13 @@
-<?= $this->extend('theme/template') ?>
+<?php
+// ---------------------------------------------------------
+// SMART THEME LOADER
+// ---------------------------------------------------------
+ $role = strtolower(session()->get('role') ?? 'staff');
+ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+?>
+
+<?= $this->extend($template) ?>
+
 <?= $this->section('content') ?>
 
 <div class="content-wrapper bg-light min-vh-100 p-4">
@@ -16,7 +25,8 @@
             <button type="button" class="btn btn-outline-secondary mr-2 px-4 shadow-sm" onclick="window.history.back()">
                 <i class="fas fa-times mr-1"></i> Cancel
             </button>
-            <button type="submit" form="residentForm" class="btn btn-primary px-4 shadow-sm bg-navy border-0">
+            <!-- FIX: Removed bg-navy, used standard btn-primary for compatibility -->
+            <button type="submit" form="residentForm" class="btn btn-primary px-4 shadow-sm">
                 <i class="fas fa-save mr-1"></i> Update Resident
             </button>
         </div>
@@ -50,45 +60,45 @@
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">First Name <span class="text-danger">*</span></label>
                         <input type="text" name="first_name" class="form-control form-control-lg bg-light border-0"
-                               value="<?= esc($resident['first_name']) ?>" required>
+                               value="<?= old('first_name', $resident['first_name']) ?>" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Middle Name</label>
                         <input type="text" name="middle_name" class="form-control form-control-lg bg-light border-0"
-                               value="<?= esc($resident['middle_name'] ?? '') ?>">
+                               value="<?= old('middle_name', $resident['middle_name'] ?? '') ?>">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Last Name <span class="text-danger">*</span></label>
                         <input type="text" name="last_name" class="form-control form-control-lg bg-light border-0"
-                               value="<?= esc($resident['last_name']) ?>" required>
+                               value="<?= old('last_name', $resident['last_name']) ?>" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Gender <span class="text-danger">*</span></label>
                         <select name="sex" class="form-control form-control-lg bg-light border-0" required>
-                            <option value="male"   <?= ($resident['sex'] ?? '') === 'male'   ? 'selected' : '' ?>>Male</option>
-                            <option value="female" <?= ($resident['sex'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
+                            <option value="male"   <?= old('sex', $resident['sex'] ?? '') === 'male'   ? 'selected' : '' ?>>Male</option>
+                            <option value="female" <?= old('sex', $resident['sex'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Occupation</label>
                         <input type="text" name="occupation" class="form-control form-control-lg bg-light border-0"
-                               value="<?= esc($resident['occupation'] ?? '') ?>">
+                               value="<?= old('occupation', $resident['occupation'] ?? '') ?>">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Citizenship</label>
                         <input type="text" name="citizenship" class="form-control form-control-lg bg-light border-0"
-                               value="<?= esc($resident['citizenship'] ?? 'Filipino') ?>">
+                               value="<?= old('citizenship', $resident['citizenship'] ?? 'Filipino') ?>">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Birthdate <span class="text-danger">*</span></label>
                         <input type="date" name="birthdate" class="form-control form-control-lg bg-light border-0"
-                               value="<?= esc($resident['birthdate']) ?>" required>
+                               value="<?= old('birthdate', $resident['birthdate']) ?>" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Civil Status</label>
                         <select name="civil_status" class="form-control form-control-lg bg-light border-0">
                             <?php foreach (['Single', 'Married', 'Widowed', 'Separated'] as $cs): ?>
-                                <option value="<?= $cs ?>" ($resident['civil_status'] ?? '') === $cs ? 'selected' : '' ?>>
+                                <option value="<?= $cs ?>" <?= old('civil_status', $resident['civil_status'] ?? '') === $cs ? 'selected' : '' ?>>
                                     <?= $cs ?>
                                 </option>
                             <?php endforeach; ?>
@@ -121,15 +131,15 @@
                     <div class="col-md-8 mb-3">
                         <label class="small font-weight-bold text-secondary">Street / House Number</label>
                         <input type="text" name="street_address" class="form-control form-control-lg bg-light border-0"
-                               value="<?= esc($resident['street_address'] ?? '') ?>" placeholder="e.g., Block 1 Lot 2, Phase 3">
+                               value="<?= old('street_address', $resident['street_address'] ?? '') ?>" placeholder="e.g., Block 1 Lot 2, Phase 3">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Sitio / Zone <span class="text-danger">*</span></label>
                         <select name="sitio" id="sitioSelect" class="form-control form-control-lg bg-light border-0" required>
                             <option value="">Select Sitio</option>
-                            <option value="Purok Malipayon" <?= ($resident['sitio'] ?? '') === 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
-                            <option value="Purok Masagana"  <?= ($resident['sitio'] ?? '') === 'Purok Masagana'  ? 'selected' : '' ?>>Purok Masagana</option>
-                            <option value="Purok Cory"      <?= ($resident['sitio'] ?? '') === 'Purok Cory'      ? 'selected' : '' ?>>Purok Cory</option>
+                            <option value="Purok Malipayon" <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
+                            <option value="Purok Masagana"  <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Masagana'  ? 'selected' : '' ?>>Purok Masagana</option>
+                            <option value="Purok Cory"      <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Cory'      ? 'selected' : '' ?>>Purok Cory</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -168,7 +178,7 @@
                     <div class="col-md-4 mb-3">
                         <label class="small font-weight-bold text-secondary">Contact Number</label>
                         <input type="text" name="contact_number" class="form-control form-control-lg bg-light border-0"
-                               value="<?= esc($resident['contact_number'] ?? '') ?>" placeholder="e.g., 09123456789">
+                               value="<?= old('contact_number', $resident['contact_number'] ?? '') ?>" placeholder="e.g., 09123456789">
                     </div>
                 </div>
             </div>
@@ -184,7 +194,7 @@
                     <div class="col-md-4 mb-3">
                         <div class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" name="is_voter" id="is_voter" value="1"
-                                   <?= !empty($resident['is_voter']) ? 'checked' : '' ?>>
+                                   <?= !empty(old('is_voter', $resident['is_voter'])) ? 'checked' : '' ?>>
                             <label class="custom-control-label font-weight-bold" for="is_voter">
                                 <i class="fas fa-check-circle text-success mr-1"></i> Registered Voter
                             </label>
@@ -193,7 +203,7 @@
                     <div class="col-md-4 mb-3">
                         <div class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" name="is_senior_citizen" id="is_senior_citizen" value="1"
-                                   <?= !empty($resident['is_senior_citizen']) ? 'checked' : '' ?>>
+                                   <?= !empty(old('is_senior_citizen', $resident['is_senior_citizen'])) ? 'checked' : '' ?>>
                             <label class="custom-control-label font-weight-bold" for="is_senior_citizen">
                                 <i class="fas fa-user-graduate text-info mr-1"></i> Senior Citizen
                             </label>
@@ -202,7 +212,7 @@
                     <div class="col-md-4 mb-3">
                         <div class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" name="is_pwd" id="is_pwd" value="1"
-                                   <?= !empty($resident['is_pwd']) ? 'checked' : '' ?>>
+                                   <?= !empty(old('is_pwd', $resident['is_pwd'])) ? 'checked' : '' ?>>
                             <label class="custom-control-label font-weight-bold" for="is_pwd">
                                 <i class="fas fa-wheelchair text-danger mr-1"></i> Person with Disability
                             </label>
@@ -222,7 +232,7 @@
                     <button type="button" class="btn btn-outline-secondary mr-2 px-4" onclick="window.history.back()">
                         <i class="fas fa-times mr-1"></i> Cancel
                     </button>
-                    <button type="submit" class="btn btn-primary px-4 bg-navy border-0">
+                    <button type="submit" class="btn btn-primary px-4">
                         <i class="fas fa-save mr-1"></i> Update Resident
                     </button>
                 </div>
@@ -232,7 +242,7 @@
 </div>
 
 <style>
-.bg-navy { background-color: #03213b !important; }
+/* Removed .bg-navy as it conflicts in Staff theme */
 .custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
     background-color: #03213b;
     border-color: #03213b;
@@ -249,7 +259,7 @@
 }
 </style>
 
-<!-- FIX: JS variables declared BEFORE the external script -->
+<!-- JS variables declared BEFORE external script -->
 <script>
     var BASE_URL            = "<?= base_url() ?>";
     var CSRF_TOKEN_NAME     = "<?= csrf_token() ?>";
@@ -274,4 +284,4 @@
     loadResidentsEditScript();
 </script>
 
-<?= $this->endSection() ?>
+<?= $this->endSection() ?>  
