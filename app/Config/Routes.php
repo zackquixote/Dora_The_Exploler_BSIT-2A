@@ -41,6 +41,7 @@ use CodeIgniter\Router\RouteCollection;
     // User Management (Points to App\Controllers\Users)
     $routes->group('users', ['namespace' => 'App\Controllers'], function ($routes) {
         $routes->get('/', 'Users::index');
+        $routes->get('create', 'Users::create'); 
         $routes->post('save', 'Users::save');
         $routes->get('edit/(:segment)', 'Users::edit/$1');
         $routes->post('update', 'Users::update');

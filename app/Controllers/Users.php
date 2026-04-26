@@ -79,26 +79,7 @@ class Users extends Controller
         return $this->response->setJSON($response);
     }
 
-    public function save()
-    {
-        $data = [
-            'name'     => $this->request->getPost('name'),
-            'email'    => $this->request->getPost('email'),
-            'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-            'role'     => $this->request->getPost('role'),
-            'status'   => $this->request->getPost('status'),
-        ];
-
-        $db = \Config\Database::connect();
-        $builder = $db->table('users');
-
-        if ($builder->insert($data)) {
-            return $this->response->setJSON(['status' => 'success', 'message' => 'User added successfully']);
-        } else {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to add user']);
-        }
-    }
-
+   
     public function edit($id = null)
     {
         if (!$this->request->isAJAX()) return $this->response->setStatusCode(404);
@@ -149,4 +130,47 @@ class Users extends Controller
             return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete user']);
         }
     }
+
+        // ... your existing code ...
+
+    // ADD THIS NEW METHOD
+    public function create()
+    {
+        return view('users/create');
+    }
+
+      public function save()
+    {
+        // 1. Get the email from the input
+        $email = $this->request->getPost('email');
+
+        // 2. Check if email already exists in database
+        $db = \Config\Database::connect();
+        $exists = $db->table('users')->where('email', $email)->countAllResults();
+
+        if ($exists > 0) {
+            // Email exists, redirect back with error
+            return redirect()->back()->with('error', 'Email already exists. Please use a different email.');
+        }
+
+        // 3. Prepare data (Only runs if email is unique)
+        $data = [
+            'name'     => $this->request->getPost('name'),
+            'email'    => $email,
+            'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+            'role'     => $this->request->getPost('role'),
+            'status'   => $this->request->getPost('status'),
+            'phone'    => $this->request->getPost('phone'),
+        ];
+
+        // 4. Insert data
+        $builder = $db->table('users');
+
+        if ($builder->insert($data)) {
+            return redirect()->to('/admin/users')->with('success', 'User added successfully');
+        } else {
+            return redirect()->back()->with('error', 'Failed to add user');
+        }
+    }
+    
 }
