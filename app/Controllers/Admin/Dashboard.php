@@ -10,10 +10,12 @@ class Dashboard extends BaseController
 {
     public function index()
     {
+        // 1. Authentication Check
         if (!session()->get('logged_in') || session()->get('role') !== 'admin') {
             return redirect()->to('/login');
         }
 
+        // 2. Initialize Database & Models
         $db             = \Config\Database::connect();
         $residentModel  = new ResidentModel();
         $householdModel = new HouseholdModel();
@@ -56,7 +58,10 @@ class Dashboard extends BaseController
         $latestBlotters = [];   // replace with BlotterModel when ready
         $latestCerts    = [];   // replace with CertModel when ready
 
-        return view('admin/dashboard', [
+        // 3. Load the View
+        // NOTE: This loads 'Admin/dashboard' (app/Views/Admin/dashboard.php)
+        return view('Admin/dashboard', [
+            'title'           => 'Admin Dashboard',
             'totalResidents'  => $totalResidents,
             'totalHouseholds' => $totalHouseholds,
             'pendingCerts'    => $pendingCerts,

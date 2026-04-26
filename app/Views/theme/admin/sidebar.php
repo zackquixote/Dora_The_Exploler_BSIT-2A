@@ -1,9 +1,9 @@
-<?php //staff dashboard sidebar ?>
+<?php //admin dashboard sidebar ?>
 <style>
-/* ── Staff Sidebar ─────────────────────────────────────── */
+/* ── Admin Sidebar ─────────────────────────────────────── */
 .main-sidebar {
-    background: #061a10 !important;
-    border-right: 1px solid rgba(39,174,96,0.15) !important;
+    background: #0d0d1a !important;
+    border-right: 1px solid rgba(233,69,96,0.15) !important;
     font-family: 'Source Sans Pro', sans-serif;
 }
 .main-sidebar::before {
@@ -11,8 +11,8 @@
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background:
-        radial-gradient(ellipse at 20% 20%, rgba(39,174,96,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 80%, rgba(30,132,73,0.05) 0%, transparent 60%);
+        radial-gradient(ellipse at 20% 20%, rgba(233,69,96,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(192,57,43,0.06) 0%, transparent 60%);
     pointer-events: none;
     z-index: 0;
 }
@@ -22,17 +22,17 @@
 /* Brand */
 .brand-link {
     background: transparent !important;
-    border-bottom: 1px solid rgba(39,174,96,0.2) !important;
+    border-bottom: 1px solid rgba(233,69,96,0.2) !important;
     padding: 14px 16px !important;
     display: flex !important;
     align-items: center !important;
     gap: 10px !important;
 }
-.brand-link:hover { background: rgba(39,174,96,0.05) !important; }
+.brand-link:hover { background: rgba(233,69,96,0.05) !important; }
 .brand-image {
-    background: linear-gradient(135deg, #27ae60, #1e8449) !important;
-    box-shadow: 0 0 12px rgba(39,174,96,0.5) !important;
-    border: 2px solid rgba(39,174,96,0.3) !important;
+    background: linear-gradient(135deg, #e94560, #c0392b) !important;
+    box-shadow: 0 0 12px rgba(233,69,96,0.5) !important;
+    border: 2px solid rgba(233,69,96,0.3) !important;
 }
 .brand-text {
     color: #fff !important;
@@ -43,24 +43,24 @@
 }
 
 /* User Card */
-.staff-user-card {
+.admin-user-card {
     margin: 16px 12px 8px;
     padding: 14px 12px;
     background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(39,174,96,0.15);
+    border: 1px solid rgba(233,69,96,0.15);
     border-radius: 12px;
     text-align: center;
 }
-.staff-avatar {
+.admin-avatar {
     width: 52px; height: 52px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #27ae60, #1e8449);
+    background: linear-gradient(135deg, #e94560, #c0392b);
     margin: 0 auto 8px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 20px rgba(39,174,96,0.4), 0 0 0 3px rgba(39,174,96,0.15);
+    box-shadow: 0 0 20px rgba(233,69,96,0.4), 0 0 0 3px rgba(233,69,96,0.15);
     font-size: 20px; color: #fff;
 }
-.staff-name {
+.admin-name {
     color: #fff;
     font-size: 13px;
     font-weight: 700;
@@ -69,9 +69,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.staff-badge {
+.admin-badge {
     display: inline-block;
-    background: linear-gradient(135deg, #27ae60, #1e8449);
+    background: linear-gradient(135deg, #e94560, #c0392b);
     color: #fff;
     font-size: 9px;
     font-weight: 800;
@@ -83,7 +83,7 @@
 
 /* Nav */
 .nav-header {
-    color: rgba(39,174,96,0.5) !important;
+    color: rgba(233,69,96,0.5) !important;
     font-size: 9px !important;
     font-weight: 800 !important;
     letter-spacing: 2.5px !important;
@@ -107,24 +107,24 @@
     position: absolute;
     left: 0; top: 0; bottom: 0;
     width: 0;
-    background: linear-gradient(90deg, rgba(39,174,96,0.4), transparent);
+    background: linear-gradient(90deg, rgba(233,69,96,0.3), transparent);
     border-radius: 8px 0 0 8px;
     transition: width 0.25s ease;
 }
 .nav-sidebar .nav-link:hover::before { width: 3px; }
 .nav-sidebar .nav-link:hover {
     color: #fff !important;
-    background: rgba(39,174,96,0.1) !important;
-    border-color: rgba(39,174,96,0.2) !important;
+    background: rgba(233,69,96,0.1) !important;
+    border-color: rgba(233,69,96,0.2) !important;
     transform: translateX(3px) !important;
 }
 .nav-sidebar .nav-link.active {
-    background: linear-gradient(135deg, rgba(39,174,96,0.25), rgba(30,132,73,0.15)) !important;
+    background: linear-gradient(135deg, rgba(233,69,96,0.25), rgba(192,57,43,0.15)) !important;
     color: #fff !important;
-    border-color: rgba(39,174,96,0.35) !important;
-    box-shadow: 0 2px 12px rgba(39,174,96,0.2) !important;
+    border-color: rgba(233,69,96,0.35) !important;
+    box-shadow: 0 2px 12px rgba(233,69,96,0.2) !important;
 }
-.nav-sidebar .nav-link.active::before { width: 3px; background: #27ae60; }
+.nav-sidebar .nav-link.active::before { width: 3px; background: #e94560; }
 .nav-icon {
     color: rgba(255,255,255,0.35) !important;
     width: 1.5rem !important;
@@ -132,9 +132,9 @@
     transition: color 0.25s ease !important;
 }
 .nav-sidebar .nav-link:hover .nav-icon,
-.nav-sidebar .nav-link.active .nav-icon { color: #27ae60 !important; }
+.nav-sidebar .nav-link.active .nav-icon { color: #e94560 !important; }
 
-/* Logout */
+/* Logout link */
 .nav-link-logout { color: rgba(231,76,60,0.7) !important; }
 .nav-link-logout:hover {
     color: #e74c3c !important;
@@ -149,23 +149,34 @@
     margin: 10px 16px !important;
 }
 
+/* Scrollbar */
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
-.sidebar::-webkit-scrollbar-thumb { background: rgba(39,174,96,0.3); border-radius: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(233,69,96,0.3); border-radius: 4px; }
 </style>
 
 <?php
-$uri      = service('uri');
-$seg1     = $uri->getSegment(1);
-$seg2     = $uri->getSegment(2);
-$isActive = function($val) use ($seg1, $seg2) {
+ $uri     = service('uri');
+ $seg1    = $uri->getSegment(1);
+ $seg2    = $uri->getSegment(2);
+
+// --- LOGIC FIX STARTS HERE ---
+ $role = session()->get('role'); // Get role from session (admin or staff)
+
+// Determine Dashboard URL based on role
+ $dashboardUrl = ($role === 'admin') ? 'admin/dashboard' : 'staff/dashboard';
+
+// Helper for active class
+ $isActive = function($val) use ($seg1, $seg2) {
     return ($seg1 === $val || $seg2 === $val) ? 'active' : '';
 };
+// --- LOGIC FIX ENDS HERE ---
 ?>
 
-<aside class="main-sidebar elevation-4 sidebar-dark-success" id="mainSidebar">
+<aside class="main-sidebar elevation-4 sidebar-dark-danger" id="mainSidebar">
 
-    <a href="<?= base_url('staff/dashboard') ?>" class="brand-link" id="brandLink">
+    <!-- Dynamic Brand Link -->
+    <a href="<?= base_url($dashboardUrl) ?>" class="brand-link" id="brandLink">
         <img src="<?= base_url('assets/adminlte/dist/img/AdminLTELogo.png') ?>"
              alt="BMIS" class="brand-image img-circle elevation-3" style="opacity:.9">
         <span class="brand-text">BMIS</span>
@@ -173,12 +184,14 @@ $isActive = function($val) use ($seg1, $seg2) {
 
     <div class="sidebar os-host-flexbox">
         <!-- User Card -->
-        <div class="staff-user-card">
-            <div class="staff-avatar">
-                <i class="fas fa-user-tie"></i>
+        <div class="admin-user-card">
+            <div class="admin-avatar" style="background: <?= ($role === 'admin') ? 'linear-gradient(135deg, #e94560, #c0392b)' : 'linear-gradient(135deg, #3498db, #2980b9)' ?>;">
+                <i class="fas <?= ($role === 'admin') ? 'fa-user-shield' : 'fa-user-tie' ?>"></i>
             </div>
-            <div class="staff-name"><?= esc(session()->get('name') ?? 'Staff User') ?></div>
-            <span class="staff-badge">Staff</span>
+            <div class="admin-name"><?= esc(session()->get('name') ?? 'User') ?></div>
+            <span class="admin-badge" style="background: <?= ($role === 'admin') ? 'linear-gradient(135deg, #e94560, #c0392b)' : 'linear-gradient(135deg, #3498db, #2980b9)' ?>;">
+                <?= ucfirst($role) ?>
+            </span>
         </div>
 
         <nav class="mt-2">
@@ -188,7 +201,7 @@ $isActive = function($val) use ($seg1, $seg2) {
                 <!-- MAIN -->
                 <li class="nav-header">Main</li>
                 <li class="nav-item">
-                    <a href="<?= base_url('staff/dashboard') ?>" class="nav-link <?= $isActive('dashboard') ?>">
+                    <a href="<?= base_url($dashboardUrl) ?>" class="nav-link <?= $isActive('dashboard') ?>">
                         <i class="nav-icon fas fa-th-large"></i>
                         <p>Dashboard</p>
                     </a>
@@ -221,14 +234,22 @@ $isActive = function($val) use ($seg1, $seg2) {
                     </a>
                 </li>
 
-                <!-- RECORDS -->
-                <li class="nav-header">Records</li>
+                <!-- SYSTEM: ADMIN ONLY -->
+                <?php if ($role === 'admin'): ?>
+                <li class="nav-header">System</li>
+                <li class="nav-item">
+                    <a href="<?= base_url('admin/users') ?>" class="nav-link <?= $isActive('users') ?>">
+                        <i class="nav-icon fas fa-user-lock"></i>
+                        <p>User Accounts</p>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a href="<?= base_url('log') ?>" class="nav-link <?= $isActive('log') ?>">
                         <i class="nav-icon fas fa-history"></i>
                         <p>Activity Logs</p>
                     </a>
                 </li>
+                <?php endif; ?>
 
                 <li><div class="sidebar-divider"></div></li>
 

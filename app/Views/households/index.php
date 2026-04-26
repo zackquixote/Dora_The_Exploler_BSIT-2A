@@ -1,4 +1,13 @@
-<?= $this->extend('theme/template') ?>
+<?php
+// ---------------------------------------------------------
+// SMART THEME LOADER
+// ---------------------------------------------------------
+ $role = strtolower(session()->get('role') ?? 'staff');
+ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+?>
+
+<?= $this->extend($template) ?>
+
 <?= $this->section('content') ?>
 
 <div class="content-wrapper bg-light">
@@ -10,7 +19,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="<?= base_url('staff/dashboard') ?>">Home</a></li>
+                        <li class="breadcrumb-item"><a href="<?= base_url(strtolower(session()->get('role') . '/dashboard')) ?>">Home</a></li>
                         <li class="breadcrumb-item active">Households</li>
                     </ol>
                 </div>

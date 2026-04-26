@@ -1,4 +1,5 @@
-<?= $this->extend('admin/template') ?>
+<?php $this->extend('theme/admin/template') ?>
+
 <?= $this->section('content') ?>
 
 <div class="content-wrapper" style="background:#f4f6f9;">

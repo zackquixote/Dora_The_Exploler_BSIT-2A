@@ -1,14 +1,15 @@
-<?= $this->extend('theme/template') ?>
+<?= $this->extend('theme/admin/template') ?>
 
 <?= $this->section('content') ?>
 <div class="content-wrapper">
     <section class="content">
         <div class="container-fluid">
-            <!-- Table Card -->
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">User Accounts</h3>
-                    <button class="btn btn-primary float-right" data-toggle="modal" data-target="#AddNewModal">Add New</button>
+                    <button class="btn btn-primary float-right" data-toggle="modal" data-target="#AddNewModal">
+                        <i class="fas fa-plus"></i> Add New
+                    </button>
                 </div>
                 <div class="card-body">
                     <table id="users-table" class="table table-bordered table-striped">
@@ -22,9 +23,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- Data will be populated by DataTables -->
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
@@ -32,77 +31,119 @@
     </section>
 </div>
 
-<!-- Add/Edit Modals (Your existing modal HTML here) -->
-<div class="toasts-top-right fixed" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;"></div>
+<!-- MODAL: ADD USER -->
+<div class="modal fade" id="AddNewModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addUserForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New User</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select name="role" class="form-control">
+                            <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="status" class="form-control">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: EDIT USER -->
+<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editUserForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="userId" id="userId">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" name="name" id="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" id="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password (leave blank to keep current)</label>
+                        <input type="password" name="password" id="password" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select name="role" id="role" class="form-control">
+                            <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-<script>
-    const baseUrl = "<?= site_url('staff/users') ?>";
-</script>
-<!-- Include DataTables CSS and JS if not already included -->
+<!-- 1. Include External CSS/JS Dependencies -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
+<!-- 2. Configuration Script (The Bridge) -->
 <script>
-$(document).ready(function() {
-    // Initialize DataTable
-    $('#users-table').DataTable({
-        "processing": true,
-        "serverSide": true,
-        "ajax": {
-            "url": baseUrl + "/fetchRecords",
-            "type": "POST",
-            "dataType": "json",
-            "error": function(xhr, error, thrown) {
-                console.log("Ajax error:", error);
-                console.log("Status:", xhr.status);
-                console.log("Response:", xhr.responseText);
-                alert("Error loading data. Check console for details.");
-            }
-        },
-        "columns": [
-            { "data": 0 },
-            { "data": 1 },
-            { "data": 2 },
-            { "data": 3 },
-            { "data": 4 },
-            { "data": 5, "orderable": false }
-        ],
-        "order": [[0, 'asc']],
-        "pageLength": 10
-    });
-    
-    // Handle edit button click (example)
-    $(document).on('click', '.edit-btn', function() {
-        var userId = $(this).data('id');
-        // Load user data and show edit modal
-        $.get(baseUrl + '/edit/' + userId, function(response) {
-            if (response.data) {
-                // Populate your edit modal with response.data
-                console.log('User data:', response.data);
-                // Show edit modal
-                $('#EditModal').modal('show');
-            }
-        });
-    });
-    
-    // Handle delete button click (example)
-    $(document).on('click', '.delete-btn', function() {
-        if (confirm('Are you sure you want to delete this user?')) {
-            var userId = $(this).data('id');
-            $.post(baseUrl + '/delete/' + userId, function(response) {
-                if (response.success) {
-                    $('#users-table').DataTable().ajax.reload();
-                    alert(response.message);
-                } else {
-                    alert(response.message);
-                }
-            });
-        }
-    });
-});
+    // Define global variables that the external JS file expects
+    window.baseUrl = "<?= site_url('admin/users') ?>";
+    window.csrfName = "<?= csrf_token() ?>";
+    window.csrfHash = "<?= csrf_hash() ?>";
 </script>
+
+<!-- 3. Include Your External JS File -->
+<script src="<?= base_url('js/users/users.js') ?>"></script>
+
 <?= $this->endSection() ?>

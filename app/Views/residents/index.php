@@ -1,4 +1,15 @@
-<?= $this->extend('theme/template') ?>
+<?php
+// ---------------------------------------------------------
+// SMART THEME LOADER
+// ---------------------------------------------------------
+// If Admin → Load Admin Template (Red Sidebar)
+// If Staff  → Load Staff Template (Green Sidebar)
+ $role = strtolower(session()->get('role') ?? 'staff');
+ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+?>
+
+<?= $this->extend($template) ?>
+
 <?= $this->section('content') ?>
 
 <div class="content-wrapper">
@@ -10,7 +21,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="<?= base_url('staff/dashboard') ?>">Home</a></li>
+                        <li class="breadcrumb-item"><a href="<?= base_url(strtolower(session()->get('role') . '/dashboard')) ?>">Home</a></li>
                         <li class="breadcrumb-item active">Residents</li>
                     </ol>
                 </div>
@@ -48,13 +59,13 @@
                             <!-- Purok Filter Form -->
                             <form method="GET" action="<?= base_url('resident') ?>" class="d-flex" id="purokFilterForm">
                                 <select name="purok" id="purokFilter" class="form-control form-control-sm mr-2" style="min-width: 180px;" onchange="this.form.submit()">
-                                    <option value="all" <?= ($selectedPurok ?? 'all') == 'all' ? 'selected' : '' ?>>All Puroks</option>
-                                    <option value="Purok Malipayon" <?= ($selectedPurok ?? '') == 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
-                                    <option value="Purok Masagana" <?= ($selectedPurok ?? '') == 'Purok Masagana' ? 'selected' : '' ?>>Purok Masagana</option>
-                                    <option value="Purok Cory" <?= ($selectedPurok ?? '') == 'Purok Cory' ? 'selected' : '' ?>>Purok Cory</option>
-                                    <option value="Purok Kawayan" <?= ($selectedPurok ?? '') == 'Purok Kawayan' ? 'selected' : '' ?>>Purok Kawayan</option>
-                                    <option value="Purok Pagla-um" <?= ($selectedPurok ?? '') == 'Purok Pagla-um' ? 'selected' : '' ?>>Purok Pagla-um</option>
-                                    <option value="Unassigned" <?= ($selectedPurok ?? '') == 'Unassigned' ? 'selected' : '' ?>>Unassigned</option>
+                                        <option value="all" <?= ($selectedPurok ?? 'all') == 'all' ? 'selected' : '' ?>>All Puroks</option>
+                                        <option value="Purok Malipayon" <?= ($selectedPurok ?? '') == 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
+                                        <option value="Purok Masagana" <?= ($selectedPurok ?? '') == 'Purok Masagana' ? 'selected' : '' ?>>Purok Masagana</option>
+                                        <option value="Purok Cory" <?= ($selectedPurok ?? '') == 'Purok Cory' ? 'selected' : '' ?>>Purok Cory</option>
+                                        <option value="Purok Kawayan" <?= ($selectedPurok ?? '') == 'Purok Kawayan' ? 'selected' : '' ?>>Purok Kawayan</option>
+                                        <option value="Purok Pagla-um" <?= ($selectedPurok ?? '') == 'Purok Pagla-um' ? 'selected' : '' ?>>Purok Pagla-um</option>
+                                        <option value="Unassigned" <?= ($selectedPurok ?? '') == 'Unassigned' ? 'selected' : '' ?>>Unassigned</option>
                                 </select>
                                 <?php if (($selectedPurok ?? 'all') != 'all'): ?>
                                     <a href="<?= base_url('resident') ?>" class="btn btn-secondary btn-sm" id="clearFilterBtn">
@@ -96,7 +107,7 @@
                                         </td>
                                     </tr>
                                 <?php else: ?>
-                                    <?php foreach ($residents as $r):
+                                    <?php foreach ($residents as $r): 
                                         // Calculate Age
                                         $age = '';
                                         if (!empty($r['birthdate'])) {
@@ -110,25 +121,25 @@
                                             ? base_url('uploads/' . $r['profile_picture'])
                                             : base_url('assets/img/default.png');
 
-                                        // --- BADGE LOGIC (Simplified to match View Page) ---
+                                        // --- BADGE LOGIC ---
                                         
                                         // Voter Badge
                                         if (!empty($r['is_voter'])) {
-                                            $voterBadge = '<span class="badge bg-success">Yes</span>';
+                                            $voterBadge = '<span class="badge badge-success">Yes</span>';
                                         } else {
-                                            $voterBadge = '<span class="badge bg-secondary">No</span>';
+                                            $voterBadge = '<span class="badge badge-secondary">No</span>';
                                         }
 
                                         // Senior Citizen Badge
                                         if (!empty($r['is_senior_citizen'])) {
-                                            $seniorBadge = '<span class="badge bg-info">Senior</span>';
+                                            $seniorBadge = '<span class="badge badge-info">Senior</span>';
                                         } else {
                                             $seniorBadge = '';
                                         }
 
                                         // PWD Badge
                                         if (!empty($r['is_pwd'])) {
-                                            $pwdBadge = '<span class="badge bg-warning">PWD</span>';
+                                            $pwdBadge = '<span class="badge badge-warning">PWD</span>';
                                         } else {
                                             $pwdBadge = '';
                                         }
@@ -138,8 +149,8 @@
                                         // Purok Display Logic
                                         $purokDisplay = !empty($r['sitio']) ? $r['sitio'] : 'Unassigned';
                                         $purokBadge = $purokDisplay != 'Unassigned'
-                                            ? '<span class="badge bg-primary">' . esc($purokDisplay) . '</span>'
-                                            : '<span class="badge bg-secondary">Unassigned</span>';
+                                            ? '<span class="badge badge-primary">' . esc($purokDisplay) . '</span>'
+                                            : '<span class="badge badge-secondary">Unassigned</span>';
                                     ?>
                                         <tr>
                                             <td><?= $r['id'] ?></td>
@@ -228,11 +239,9 @@
 
 <?= $this->section('scripts') ?>
 <!-- DataTables CSS -->
-<link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.rap4.min.css') ?>">
-min.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') ?>">
 <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') ?>">
 <!-- DataTables JS -->
-
 <script src="<?= base_url('assets/adminlte/plugins/datatables/jquery.dataTables.min.js') ?>"></script>
 <script src="<?= base_url('assets/adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') ?>"></script>
 <script src="<?= base_url('assets/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js') ?>"></script>

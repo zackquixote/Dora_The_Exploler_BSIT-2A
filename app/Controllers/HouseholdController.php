@@ -15,23 +15,29 @@ class HouseholdController extends BaseController
     {
         $this->householdModel = new HouseholdModel();
         $this->residentModel  = new ResidentModel();
-        $this->db = \Config\Database::connect();
+        $this->db             = \Config\Database::connect();
     }
 
-    // ----------------------------------------------------------------
-    // List all households
-    // ----------------------------------------------------------------
+    // ── Auth helper ───────────────────────────────────────────────────
+    private function requireLogin()
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/login');
+        }
+        return null;
+    }
+
+    // ── Index ─────────────────────────────────────────────────────────
     public function index()
     {
+        if ($r = $this->requireLogin()) return $r;
+
         $selectedPurok = $this->request->getGet('purok') ?? 'all';
 
-        $builder = $this->db->table('households');
-        $builder->select('*');
-
+        $builder = $this->db->table('households')->select('*');
         if ($selectedPurok !== 'all') {
             $builder->where('sitio', $selectedPurok);
         }
-
         $builder->orderBy('household_no', 'ASC');
         $households = $builder->get()->getResultArray();
 
@@ -63,74 +69,62 @@ class HouseholdController extends BaseController
         }
 
         $totalHouseholds = count($householdsData);
-        $totalResidents = $this->db->table('residents')
-            ->where('deleted_at', null)
-            ->countAllResults();
+        $totalResidents  = $this->db->table('residents')->where('deleted_at', null)->countAllResults();
         $avgPerHousehold = $totalHouseholds > 0 ? round($totalResidents / $totalHouseholds, 1) : 0;
 
-        // Removed unused 'purokCounts' to keep code clean, but you can add it back if needed for stats
-
         return view('households/index', [
-            'households'       => $householdsData,
-            'selectedPurok'    => $selectedPurok,
-            'totalHouseholds'  => $totalHouseholds,
-            'totalResidents'   => $totalResidents,
-            'avgPerHousehold'  => $avgPerHousehold,
+            'title'           => 'Households',
+            'households'      => $householdsData,
+            'selectedPurok'   => $selectedPurok,
+            'totalHouseholds' => $totalHouseholds,
+            'totalResidents'  => $totalResidents,
+            'avgPerHousehold' => $avgPerHousehold,
         ]);
     }
 
-    // ----------------------------------------------------------------
-    // Create household form
-    // ----------------------------------------------------------------
+    // ── Create ────────────────────────────────────────────────────────
     public function create()
     {
-        if (!session()->get('logged_in')) {
-            return redirect()->to('/login');
-        }
+        if ($r = $this->requireLogin()) return $r;
 
-        $year = date('Y');
-        $count = $this->householdModel
-            ->like('household_no', "HH-{$year}-%")
-            ->countAllResults();
-        
-        $nextNumber = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+        $year  = date('Y');
+        $count = $this->householdModel->like('household_no', "HH-{$year}-%")->countAllResults();
+
+        $nextNumber           = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
         $generatedHouseholdNo = "HH-{$year}-{$nextNumber}";
-        
+
         while ($this->householdModel->where('household_no', $generatedHouseholdNo)->first()) {
             $count++;
-            $nextNumber = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+            $nextNumber           = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
             $generatedHouseholdNo = "HH-{$year}-{$nextNumber}";
         }
 
         return view('households/create', [
-            'title' => 'Add Household',
+            'title'                => 'Add Household',
             'generatedHouseholdNo' => $generatedHouseholdNo,
         ]);
     }
 
-    // ----------------------------------------------------------------
-    // Store household
-    // ----------------------------------------------------------------
+    // ── Store ─────────────────────────────────────────────────────────
     public function store()
     {
+        if ($r = $this->requireLogin()) return $r;
+
         $householdNo = $this->request->getPost('household_no');
-        
+
         if (empty($householdNo)) {
-            $year = date('Y');
-            $count = $this->householdModel
-                ->like('household_no', "HH-{$year}-%")
-                ->countAllResults();
-            
-            $nextNumber = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+            $year        = date('Y');
+            $count       = $this->householdModel->like('household_no', "HH-{$year}-%")->countAllResults();
+            $nextNumber  = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
             $householdNo = "HH-{$year}-{$nextNumber}";
-            
+
             while ($this->householdModel->where('household_no', $householdNo)->first()) {
                 $count++;
-                $nextNumber = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+                $nextNumber  = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
                 $householdNo = "HH-{$year}-{$nextNumber}";
             }
         }
-        
+
         $rules = [
             'household_no'     => 'required|is_unique[households.household_no]',
             'sitio'            => 'required',
@@ -141,9 +135,7 @@ class HouseholdController extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('errors', $this->validator->getErrors());
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $data = [
@@ -157,57 +149,39 @@ class HouseholdController extends BaseController
 
         if ($this->householdModel->insert($data)) {
             $householdId = $this->householdModel->getInsertID();
-            
             $membersData = $this->request->getPost('household_members_data');
-            $members = json_decode($membersData, true) ?? [];
-            
-            $headId = $this->request->getPost('head_resident_id');
-            
-            // Ensure head is in the members list
+            $members     = json_decode($membersData, true) ?? [];
+            $headId      = $this->request->getPost('head_resident_id');
+
             if ($headId && !isset($members[$headId])) {
-                $members[$headId] = [
-                    'id'           => $headId,
-                    'relationship' => 'Head'
-                ];
+                $members[$headId] = ['id' => $headId, 'relationship' => 'Head'];
             }
-            
+
             $memberCount = 0;
-            
             foreach ($members as $memberId => $memberInfo) {
                 $updateData = [
-                    'household_id'         => $householdId,
-                    'relationship_to_head' => $memberInfo['relationship'] ?? null,
-                    'is_household_head'    => ($headId == $memberId) ? 1 : 0,
-                    'member_status'        => 'Active',
+                    'household_id'          => $householdId,
+                    'relationship_to_head'  => $memberInfo['relationship'] ?? null,
+                    'is_household_head'     => ($headId == $memberId) ? 1 : 0,
+                    'member_status'         => 'Active',
                     'joined_household_date' => date('Y-m-d'),
                 ];
-                
-                if ($this->residentModel->update($memberId, $updateData)) {
-                    $memberCount++;
-                }
+                if ($this->residentModel->update($memberId, $updateData)) $memberCount++;
             }
-            
+
             $message = "Household {$householdNo} added successfully";
-            if ($memberCount > 0) {
-                $message .= " with {$memberCount} member(s)";
-            }
-            
+            if ($memberCount > 0) $message .= " with {$memberCount} member(s)";
+
             return redirect()->to('/households')->with('success', $message);
         }
 
-        return redirect()->back()
-            ->withInput()
-            ->with('error', 'Failed to add household. Please try again.');
+        return redirect()->back()->withInput()->with('error', 'Failed to add household. Please try again.');
     }
 
-    // ----------------------------------------------------------------
-    // Edit household form
-    // ----------------------------------------------------------------
+    // ── Edit ──────────────────────────────────────────────────────────
     public function edit($id)
     {
-        if (!session()->get('logged_in')) {
-            return redirect()->to('/login');
-        }
+        if ($r = $this->requireLogin()) return $r;
 
         $household = $this->householdModel->find($id);
         if (!$household) {
@@ -233,11 +207,11 @@ class HouseholdController extends BaseController
         ]);
     }
 
-    // ----------------------------------------------------------------
-    // Update household
-    // ----------------------------------------------------------------
+    // ── Update ────────────────────────────────────────────────────────
     public function update($id)
     {
+        if ($r = $this->requireLogin()) return $r;
+
         $household = $this->householdModel->find($id);
         if (!$household) {
             return redirect()->to('/households')->with('error', 'Household not found');
@@ -266,33 +240,25 @@ class HouseholdController extends BaseController
         ];
 
         if ($this->householdModel->update($id, $data)) {
-            $headId = $this->request->getPost('head_resident_id');
-            
+            $headId      = $this->request->getPost('head_resident_id');
             $membersData = $this->request->getPost('household_members_data');
-            $members = json_decode($membersData, true) ?? [];
-            
-            // Get current members to handle removals
-            $currentMembers = $this->residentModel
-                ->where('household_id', $id)
-                ->where('deleted_at', null)
-                ->findAll();
+            $members     = json_decode($membersData, true) ?? [];
+
+            $currentMembers   = $this->residentModel->where('household_id', $id)->where('deleted_at', null)->findAll();
             $currentMemberIds = array_column($currentMembers, 'id');
-            $newMemberIds = array_keys($members);
-            
-            // Handle removed members (set to Transferred)
+            $newMemberIds     = array_keys($members);
             $removedMemberIds = array_diff($currentMemberIds, $newMemberIds);
+
             if (!empty($removedMemberIds)) {
                 $this->residentModel->whereIn('id', $removedMemberIds)->set([
-                    'household_id'        => null,
-                    'is_household_head'   => 0,
-                    'member_status'       => 'Transferred',
-                    'left_household_date' => date('Y-m-d')
+                    'household_id'       => null,
+                    'is_household_head'  => 0,
+                    'member_status'      => 'Transferred',
+                    'left_household_date' => date('Y-m-d'),
                 ])->update();
             }
-            
+
             $memberCount = 0;
-            
-            // Add or Update members
             foreach ($members as $memberId => $memberInfo) {
                 $updateData = [
                     'household_id'         => $id,
@@ -300,30 +266,23 @@ class HouseholdController extends BaseController
                     'is_household_head'    => ($headId == $memberId) ? 1 : 0,
                     'member_status'        => 'Active',
                 ];
-                
-                // If this is a new member being added to the household
                 if (!in_array($memberId, $currentMemberIds)) {
                     $updateData['joined_household_date'] = date('Y-m-d');
                 }
-                
-                if ($this->residentModel->update($memberId, $updateData)) {
-                    $memberCount++;
-                }
+                if ($this->residentModel->update($memberId, $updateData)) $memberCount++;
             }
-            
-            return redirect()->to('/households')->with('success', 
-                "Household updated successfully with {$memberCount} active member(s)"
-            );
+
+            return redirect()->to('/households')->with('success', "Household updated successfully with {$memberCount} active member(s)");
         }
 
         return redirect()->back()->with('error', 'Failed to update household');
     }
 
-    // ----------------------------------------------------------------
-    // View household details
-    // ----------------------------------------------------------------
+    // ── View ──────────────────────────────────────────────────────────
     public function view($id)
     {
+        if ($r = $this->requireLogin()) return $r;
+
         $household = $this->householdModel->find($id);
         if (!$household) {
             return redirect()->to('/households')->with('error', 'Household not found');
@@ -351,19 +310,14 @@ class HouseholdController extends BaseController
         ]);
     }
 
-    // ----------------------------------------------------------------
-    // Delete household (AJAX)
-    // ----------------------------------------------------------------
+    // ── Delete (AJAX) ─────────────────────────────────────────────────
     public function delete($id)
     {
-        $household = $this->householdModel->find($id);
+        if ($r = $this->requireLogin()) return $r;
 
+        $household = $this->householdModel->find($id);
         if (!$household) {
-            return $this->response->setJSON([
-                'status'    => 'error',
-                'message'   => 'Household not found',
-                'csrf_hash' => csrf_hash(),
-            ]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Household not found', 'csrf_hash' => csrf_hash()]);
         }
 
         $hasResidents = $this->db->table('residents')
@@ -376,236 +330,137 @@ class HouseholdController extends BaseController
         if ($hasResidents > 0 && !$force) {
             return $this->response->setJSON([
                 'status'    => 'error',
-                'message'   => 'Cannot delete household with ' . $hasResidents . ' resident(s). Please transfer or delete residents first.',
+                'message'   => "Cannot delete household with {$hasResidents} resident(s). Please transfer or delete residents first.",
                 'csrf_hash' => csrf_hash(),
             ]);
         }
 
-        // If force delete, transfer residents first
         if ($force && $hasResidents > 0) {
             $this->db->table('residents')
                 ->where('household_id', $id)
                 ->where('deleted_at', null)
                 ->update([
-                    'household_id'        => null,
-                    'is_household_head'   => 0,
-                    'member_status'       => 'Transferred',
-                    'left_household_date' => date('Y-m-d')
+                    'household_id'       => null,
+                    'is_household_head'  => 0,
+                    'member_status'      => 'Transferred',
+                    'left_household_date' => date('Y-m-d'),
                 ]);
         }
 
         if ($this->householdModel->delete($id)) {
             $message = 'Household deleted successfully';
-            if ($force && $hasResidents > 0) {
-                $message .= '. ' . $hasResidents . ' resident(s) transferred.';
-            }
-            return $this->response->setJSON([
-                'status'    => 'success',
-                'message'   => $message,
-                'csrf_hash' => csrf_hash(),
-            ]);
+            if ($force && $hasResidents > 0) $message .= ". {$hasResidents} resident(s) transferred.";
+            return $this->response->setJSON(['status' => 'success', 'message' => $message, 'csrf_hash' => csrf_hash()]);
         }
 
-        return $this->response->setJSON([
-            'status'    => 'error',
-            'message'   => 'Delete failed',
-            'csrf_hash' => csrf_hash(),
-        ]);
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Delete failed', 'csrf_hash' => csrf_hash()]);
     }
 
-    // ----------------------------------------------------------------
-    // AJAX - Get current members of a household
-    // ----------------------------------------------------------------
+    // ── AJAX: Get members of a household ──────────────────────────────
     public function getMembers($householdId)
     {
         try {
-            $members = $this->residentModel
-                ->where('household_id', $householdId)
-                ->where('deleted_at', null)
-                ->findAll();
-            
-            return $this->response->setJSON([
-                'status'    => 'success',
-                'members'   => $members,
-                'count'     => count($members),
-                'csrf_hash' => csrf_hash(),
-            ]);
+            $members = $this->residentModel->where('household_id', $householdId)->where('deleted_at', null)->findAll();
+            return $this->response->setJSON(['status' => 'success', 'members' => $members, 'count' => count($members), 'csrf_hash' => csrf_hash()]);
         } catch (\Exception $e) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Database error: ' . $e->getMessage(),
-            ]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
         }
     }
 
-    // ----------------------------------------------------------------
-    // AJAX - get residents by sitio for head of household dropdown
-    // ----------------------------------------------------------------
+    // ── AJAX: Residents by sitio ──────────────────────────────────────
     public function getResidentsBySitio()
     {
         $sitio = $this->request->getPost('sitio');
-
         if (empty($sitio)) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Sitio parameter is required',
-            ]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Sitio parameter is required']);
         }
 
         try {
-            $builder = $this->db->table('residents');
-            $builder->select('id, first_name, middle_name, last_name, sex, sitio as resident_sitio');
-            $builder->where('deleted_at', null);
-            $builder->groupStart()
-                ->where('sitio', $sitio)
-                ->orWhere('sitio', null)
-                ->orWhere('sitio', '')
-                ->groupEnd();
-            $builder->orderBy('last_name', 'ASC');
+            $residents = $this->db->table('residents')
+                ->select('id, first_name, middle_name, last_name, sex, sitio as resident_sitio')
+                ->where('deleted_at', null)
+                ->groupStart()
+                    ->where('sitio', $sitio)
+                    ->orWhere('sitio', null)
+                    ->orWhere('sitio', '')
+                ->groupEnd()
+                ->orderBy('last_name', 'ASC')
+                ->get()->getResultArray();
 
-            $residents = $builder->get()->getResultArray();
-
-            return $this->response->setJSON([
-                'status'    => 'success',
-                'residents' => $residents,
-                'count'     => count($residents),
-                'csrf_hash' => csrf_hash(),
-            ]);
+            return $this->response->setJSON(['status' => 'success', 'residents' => $residents, 'count' => count($residents), 'csrf_hash' => csrf_hash()]);
         } catch (\Exception $e) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Database error: ' . $e->getMessage(),
-            ]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
         }
     }
 
-    // ----------------------------------------------------------------
-    // AJAX - get households by sitio for dropdowns/search
-    // ----------------------------------------------------------------
+    // ── AJAX: Households by sitio ─────────────────────────────────────
     public function getHouseholdsBySitio()
     {
         $sitio = $this->request->getGet('sitio') ?? $this->request->getPost('sitio');
-
         if (empty($sitio)) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Sitio is required',
-            ]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Sitio is required']);
         }
 
         try {
-            $households = $this->householdModel
-                ->where('sitio', $sitio)
-                ->orderBy('household_no', 'ASC')
-                ->findAll();
-
-            return $this->response->setJSON([
-                'status'    => 'success',
-                'data'      => $households,
-                'count'     => count($households),
-                'csrf_hash' => csrf_hash(),
-            ]);
+            $households = $this->householdModel->where('sitio', $sitio)->orderBy('household_no', 'ASC')->findAll();
+            return $this->response->setJSON(['status' => 'success', 'data' => $households, 'count' => count($households), 'csrf_hash' => csrf_hash()]);
         } catch (\Exception $e) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Database error: ' . $e->getMessage(),
-            ]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
         }
     }
 
-    // ----------------------------------------------------------------
-    // AJAX - get households by sitio (used elsewhere)
-    // ----------------------------------------------------------------
+    // ── AJAX: Get by sitio (alternate endpoint) ───────────────────────
     public function getBySitio()
     {
         $sitio = $this->request->getPost('sitio');
-
         if ($sitio) {
-            $households = $this->householdModel
-                ->where('sitio', $sitio)
-                ->orderBy('household_no', 'ASC')
-                ->findAll();
-
-            return $this->response->setJSON([
-                'status'     => 'success',
-                'households' => $households,
-                'csrf_hash' => csrf_hash(),
-            ]);
+            $households = $this->householdModel->where('sitio', $sitio)->orderBy('household_no', 'ASC')->findAll();
+            return $this->response->setJSON(['status' => 'success', 'households' => $households, 'csrf_hash' => csrf_hash()]);
         }
-
-        return $this->response->setJSON([
-            'status'  => 'error',
-            'message' => 'Invalid request',
-        ]);
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request']);
     }
 
-    // ----------------------------------------------------------------
-    // AJAX - Get next available household number
-    // ----------------------------------------------------------------
+    // ── AJAX: Next household number ───────────────────────────────────
     public function getNextHouseholdNo()
     {
-        $year = date('Y');
-        
-        $count = $this->householdModel
-            ->like('household_no', "HH-{$year}-%")
-            ->countAllResults();
-        
-        $nextNumber = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+        $year        = date('Y');
+        $count       = $this->householdModel->like('household_no', "HH-{$year}-%")->countAllResults();
+        $nextNumber  = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
         $householdNo = "HH-{$year}-{$nextNumber}";
-        
-        // Ensure uniqueness
+
         while ($this->householdModel->where('household_no', $householdNo)->first()) {
             $count++;
-            $nextNumber = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+            $nextNumber  = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
             $householdNo = "HH-{$year}-{$nextNumber}";
         }
-        
-        return $this->response->setJSON([
-            'status'       => 'success',
-            'household_no' => $householdNo,
-            'csrf_hash'   => csrf_hash(),
-        ]);
+
+        return $this->response->setJSON(['status' => 'success', 'household_no' => $householdNo, 'csrf_hash' => csrf_hash()]);
     }
 
-    // ----------------------------------------------------------------
-    // AJAX - Check if household number exists
-    // ----------------------------------------------------------------
+    // ── AJAX: Check if household number exists ────────────────────────
     public function checkHouseholdNo()
     {
         $householdNo = $this->request->getGet('household_no');
-        
         if (empty($householdNo)) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Household number required'
-            ]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Household number required']);
         }
-        
+
         $exists = $this->householdModel->where('household_no', $householdNo)->first();
-        
         return $this->response->setJSON([
             'status'    => 'success',
-            'exists'    => $exists ? true : false,
+            'exists'    => (bool) $exists,
             'message'   => $exists ? 'Household number already exists' : 'Household number is available',
             'csrf_hash' => csrf_hash(),
         ]);
     }
 
+    // ── AJAX: Get household details ───────────────────────────────────
     public function getDetails($id)
     {
         $household = $this->householdModel->find($id);
-    
         if (!$household) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Household not found'
-            ]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Household not found']);
         }
-    
-        return $this->response->setJSON([
-            'status' => 'success',
-            'data'   => $household,
-            'csrf_hash' => csrf_hash(),
-        ]);
+        return $this->response->setJSON(['status' => 'success', 'data' => $household, 'csrf_hash' => csrf_hash()]);
     }
 }

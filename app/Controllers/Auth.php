@@ -10,12 +10,11 @@ class Auth extends BaseController
     public function index()
     {
         if (session()->get('logged_in')) {
-            // Already logged in → go to appropriate dashboard
-            $role = session()->get('role');
-            return redirect()->to($role . '/dashboard');
+            // Force lowercase to match Routes (admin or staff)
+            $redirectRole = strtolower(session()->get('role'));
+            return redirect()->to($redirectRole . '/dashboard');
         }
         
-        // Pass lockout time if needed (for failed attempts feature)
         $data['lockout'] = 0;
         return view('login', $data);
     }
@@ -24,18 +23,14 @@ class Auth extends BaseController
     {
         $model = new UserModel();
         
-        // Get email and password from your form
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
         $remember = $this->request->getPost('remember');
 
-        // Find user by email
         $user = $model->where('email', $email)->first();
 
-        // Verify password
         if ($user && password_verify($password, $user['password'])) {
             
-            // Set session data
             session()->set([
                 'logged_in' => true,
                 'user_id'   => $user['id'],
@@ -44,20 +39,16 @@ class Auth extends BaseController
                 'name'      => $user['name']
             ]);
 
-            // Handle "Remember me" functionality
             if ($remember) {
                 $this->response->setCookie('user_email', $email, 60 * 60 * 24 * 30);
                 $this->response->setCookie('user_id', $user['id'], 60 * 60 * 24 * 30);
             }
 
-            // REMOVE or COMMENT OUT this line:
-            // session()->commit();
-
-            // Redirect based on role
-            return redirect()->to($user['role'] . '/dashboard');
+            // Force lowercase redirection
+            $redirectRole = strtolower($user['role']);
+            return redirect()->to($redirectRole . '/dashboard');
         }
 
-        // Failed login
         return redirect()->back()->with('error', 'Invalid email or password');
     }
 

@@ -2,7 +2,7 @@
 <html lang="en" style="font-size: 14px;">
 <head>
     <meta name="csrf-token" content="<?= csrf_hash() ?>">
-    <meta name="csrf-name" content="<?= csrf_token() ?>">
+    <meta name="csrf-name"  content="<?= csrf_token() ?>">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>BMIS | <?= isset($title) ? esc($title) : 'Dashboard' ?></title>
@@ -25,53 +25,108 @@
     <link rel="stylesheet" href="<?= base_url('assets/css/custom.css') ?>">
 
     <style>
-        .content-wrapper { background: #f0f7f2 !important; transition: all 0.3s ease; }
-        .main-footer { background: #1a3c2e; color: #a8d5b5; border-top: 2px solid #27ae60; }
-        .main-footer a { color: #27ae60; }
+        :root {
+            --role-primary: <?= session()->get('role') === 'admin' ? '#e94560' : '#27ae60' ?>;
+            --role-dark:    <?= session()->get('role') === 'admin' ? '#c0392b' : '#1e8449' ?>;
+        }
 
-        .card { border: none; border-radius: 12px; box-shadow: 0 2px 15px rgba(0,0,0,0.08); transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0,0,0,0.12); }
-        .card-header { border-radius: 12px 12px 0 0 !important; border-bottom: 1px solid rgba(0,0,0,0.06); font-weight: 600; }
+        /* ── Layout ── */
+        .content-wrapper {
+            background: #f0f2f8 !important;
+            transition: background 0.3s ease;
+        }
+        .main-footer {
+            background: #0d0d1a;
+            color: #a8b2c8;
+            border-top: 2px solid var(--role-primary);
+            font-size: 12px;
+        }
+        .main-footer a { color: var(--role-primary); }
+
+        /* ── Cards ── */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.07);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0,0,0,0.11); }
+        .card-header {
+            border-radius: 12px 12px 0 0 !important;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-weight: 600;
+            background: #fff;
+        }
+
+        /* ── Small boxes ── */
         .small-box { border-radius: 12px; overflow: hidden; }
-        .content-header h1 { font-weight: 700; color: #1a3c2e; }
+
+        /* ── Breadcrumb ── */
+        .content-header h1 { font-weight: 700; color: #1a1a2e; }
         .breadcrumb { background: transparent; }
 
-        /* Dark Mode */
-        body.dark-mode .content-wrapper { background: #0a1f14 !important; color: #e0e0e0; }
-        body.dark-mode .card { background: #1a3c2e; border: 1px solid #2a5a3e; color: #e0e0e0; }
-        body.dark-mode .card-header { background: #145a32; color: #e0e0e0; }
-        body.dark-mode .table { color: #e0e0e0; }
-        body.dark-mode .table thead th { background: #145a32; border-color: #2a5a3e; color: #a8d5b5; }
-        body.dark-mode .table td, body.dark-mode .table th { border-color: #2a5a3e; }
-        body.dark-mode .form-control { background: #145a32; border-color: #2a5a3e; color: #e0e0e0; }
-        body.dark-mode .form-control:focus { background: #1a3c2e; color: #fff; }
-        body.dark-mode .modal-content { background: #1a3c2e; color: #e0e0e0; }
-        body.dark-mode .modal-header, body.dark-mode .modal-footer { border-color: #2a5a3e; }
+        /* ── Navbar accent ── */
+        .main-header.navbar { border-bottom: 2px solid var(--role-primary) !important; }
+
+        /* ── Dark Mode ── */
+        body.dark-mode .content-wrapper  { background: #0f0f1a !important; color: #e0e0e0; }
+        body.dark-mode .card             { background: #1a1a2e; border: 1px solid #2a2a4e; color: #e0e0e0; }
+        body.dark-mode .card-header      { background: #16213e; color: #e0e0e0; }
+        body.dark-mode .table            { color: #e0e0e0; }
+        body.dark-mode .table thead th   { background: #16213e; border-color: #2a2a4e; color: #a8b2c8; }
+        body.dark-mode .table td,
+        body.dark-mode .table th         { border-color: #2a2a4e; }
+        body.dark-mode .form-control     { background: #16213e; border-color: #2a2a4e; color: #e0e0e0; }
+        body.dark-mode .form-control:focus { background: #1a1a2e; color: #fff; }
+        body.dark-mode .modal-content    { background: #1a1a2e; color: #e0e0e0; }
+        body.dark-mode .modal-header,
+        body.dark-mode .modal-footer     { border-color: #2a2a4e; }
         body.dark-mode .content-header h1 { color: #e0e0e0; }
-        body.dark-mode .main-footer { background: #0a1f14; }
-        body.dark-mode .text-muted { color: #5a9a6a !important; }
+        body.dark-mode .main-footer      { background: #0a0a14; }
+        body.dark-mode .small-box        { filter: brightness(0.85); }
+        body.dark-mode .text-muted       { color: #6c7a9c !important; }
+        body.dark-mode .card-header      { background: #16213e !important; }
     </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
-    <?= $this->include('theme/navbar') ?>
-    <?= $this->include('theme/sidebar') ?>
+    <?= $this->include('theme/admin/navbar') ?>
+
+    <?php
+    /*
+     * ── SIDEBAR ROLE ROUTER ───────────────────────────────────────────────────
+     * This is the fix: load the correct sidebar based on the session role.
+     * Admin  → theme/admin/sidebar   (red theme, User Accounts link)
+     * Staff  → theme/staff/sidebar   (green theme, no User Accounts link)
+     * ─────────────────────────────────────────────────────────────────────────
+     */
+    $role = strtolower(session()->get('role') ?? 'staff');
+    if ($role === 'admin') {
+        echo $this->include('theme/admin/sidebar');
+    } else {
+        echo $this->include('theme/staff/sidebar');
+    }
+    ?>
 
     <?= $this->renderSection('content') ?>
 
     <footer class="main-footer no-print">
-        <strong>Copyright &copy; 2025 <a href="#">Glenn IT Solutions</a></strong>
+        <strong>Copyright &copy; <?= date('Y') ?> <a href="#">Glenn IT Solutions</a></strong>
         All rights reserved.
         <div class="float-right d-none d-sm-inline-block">
-            <b>Version</b> CI4.v1
+            <b>Version</b> CI4.v1 &nbsp;|&nbsp;
+            <span style="color: var(--role-primary); font-weight: 700; text-transform: uppercase; font-size: 11px;">
+                <?= esc(strtoupper($role)) ?>
+            </span>
         </div>
     </footer>
 
     <aside class="control-sidebar control-sidebar-dark"></aside>
 </div>
 
+<!-- Scripts -->
 <script src="<?= base_url('assets/adminlte/plugins/jquery/jquery.min.js') ?>"></script>
 <script src="<?= base_url('assets/adminlte/plugins/jquery-ui/jquery-ui.min.js') ?>"></script>
 <script>$.widget.bridge('uibutton', $.ui.button)</script>
@@ -122,20 +177,22 @@ applyTheme(localStorage.getItem('adminlteTheme') || 'light');
 if (themeToggle) {
     themeToggle.addEventListener('click', function(e) {
         e.preventDefault();
-        let newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+        const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
         applyTheme(newTheme);
         localStorage.setItem('adminlteTheme', newTheme);
     });
 }
 
+// Auto-attach CSRF to all AJAX POST requests
 $(document).ajaxSend(function(e, xhr, options) {
-    if (options.type.toUpperCase() === 'POST') {
+    if (options.type && options.type.toUpperCase() === 'POST') {
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     }
 });
 
+// Prevent double-submit
 $(document).on('submit', 'form', function() {
-    var $form = $(this);
+    const $form = $(this);
     if ($form.data('submitted') === true) return false;
     $form.data('submitted', true);
 });
