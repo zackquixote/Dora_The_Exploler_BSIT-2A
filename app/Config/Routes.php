@@ -38,7 +38,7 @@ use CodeIgniter\Router\RouteCollection;
 
     $routes->get('dashboard', 'Dashboard::index');
 
-    // User Management (Points to App\Controllers\Users)
+    // User Management
     $routes->group('users', ['namespace' => 'App\Controllers'], function ($routes) {
         $routes->get('/', 'Users::index');
         $routes->get('create', 'Users::create'); 
@@ -60,19 +60,12 @@ use CodeIgniter\Router\RouteCollection;
 
     $routes->get('dashboard', 'Dashboard::index');
 
-    // Residents
-    $routes->group('residents', function ($routes) {
-        $routes->get('/', 'Resident::index');
-        $routes->match(['get', 'post'], 'create', 'Resident::create');
-        $routes->post('store', 'Resident::store');
-        $routes->match(['get', 'post'], 'edit/(:num)', 'Resident::edit/$1');
-        $routes->post('update/(:num)', 'Resident::update/$1');
-        $routes->get('view/(:num)', 'Resident::view/$1');
+    // FIX: Redirect Staff Dashboard residents link to main Resident controller
+    $routes->get('residents', function() {
+        return redirect()->to('/resident'); 
     });
 
-    // User Management (Points to App\Controllers\Users)
-    // Note: Currently only index/fetch enabled for Staff. 
-    // Add save/update/delete routes here if Staff needs full CRUD.
+    // User Management (Read Only for Staff)
     $routes->group('users', ['namespace' => 'App\Controllers'], function ($routes) {
         $routes->get('/', 'Users::index');
         $routes->post('fetchRecords', 'Users::fetchRecords');
@@ -80,15 +73,17 @@ use CodeIgniter\Router\RouteCollection;
 });
 
 // ------------------------------------------------
-// Shared Area (Role: Logged In)
+// Shared Area (Role: Logged In - Residents & Households)
 // ------------------------------------------------
  $routes->group('', [
     'namespace' => 'App\Controllers',
     'filter'    => 'loggedIn',
 ], function ($routes) {
 
-    // Residents
+    // Residents (Both singular and plural)
+    $routes->get('resident', 'Resident::index');
     $routes->get('residents', 'Resident::index');
+    
     $routes->match(['get', 'post'], 'resident/create', 'Resident::create');
     $routes->post('resident/store', 'Resident::store');
     $routes->match(['get', 'post'], 'resident/edit/(:num)', 'Resident::edit/$1');
