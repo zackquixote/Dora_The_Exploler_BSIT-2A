@@ -114,6 +114,13 @@ use CodeIgniter\Router\RouteCollection;
  $routes->get('certificate', 'Certificate::index');
  $routes->post('certificate/store', 'Certificate::store');
  $routes->get('certificate/print/(:num)', 'Certificate::print/$1');
+
+  $routes->get('officials', 'Officials::index');
+ $routes->get('officials/create', 'Officials::create');
+ $routes->post('officials/store', 'Officials::store');
+ $routes->get('officials/edit/(:num)', 'Officials::edit/$1');
+ $routes->post('officials/update/(:num)', 'Officials::update/$1');
+ $routes->get('officials/delete/(:num)', 'Officials::delete/$1');
 // ------------------------------------------------
 // System (Admin Only)
 // ------------------------------------------------
