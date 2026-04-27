@@ -124,4 +124,13 @@ use CodeIgniter\Router\RouteCollection;
 // ------------------------------------------------
 // System (Admin Only)
 // ------------------------------------------------
+
+ $routes->get('blotter', 'Blotter::index');
+ $routes->get('blotter/create', 'Blotter::create');
+ $routes->post('blotter/store', 'Blotter::store');
+ $routes->get('blotter/view/(:num)', 'Blotter::view/$1');
+ $routes->post('blotter/update/(:num)', 'Blotter::update/$1');
+
+
+ 
  $routes->get('log', 'Logs::log', ['filter' => 'adminOnly']);
