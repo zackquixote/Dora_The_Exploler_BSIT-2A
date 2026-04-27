@@ -1,15 +1,13 @@
-
 <?php
 // ---------------------------------------------------------
 // SMART THEME LOADER
 // ---------------------------------------------------------
-// If Admin → Load Admin Template (Red Sidebar)
-// If Staff  → Load Staff Template (Green Sidebar)
  $role = strtolower(session()->get('role') ?? 'staff');
  $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
+<link rel="stylesheet" href="<?= base_url('assets/css/resident/style.css') ?>">
+<?= $this->extend($template) ?>
 
-<?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
 
 <div class="content-wrapper">
@@ -21,7 +19,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="<?= base_url('staff/dashboard') ?>">Home</a></li>
+                        <li class="breadcrumb-item"><a href="<?= base_url(strtolower(session()->get('role') . '/dashboard')) ?>">Home</a></li>
                         <li class="breadcrumb-item"><a href="<?= base_url('resident') ?>">Residents</a></li>
                         <li class="breadcrumb-item active">View</li>
                     </ol>
@@ -394,27 +392,50 @@
     </section>
 </div>
 
-<style>
-.profile-user-img {
-    border: 3px solid #adb5bd;
-    padding: 3px;
-}
-.list-group-item {
-    border-left: none;
-    border-right: none;
-}
-.table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-}
-.nav-pills .nav-link.active {
-    background-color: #007bff;
-}
-.badge {
-    padding: 5px 10px;
-    font-size: 0.9rem;
-}
-</style>
+<!-- --------------------------------------------------------- -->
+<!-- CERTIFICATE GENERATION MODAL -->
+<!-- --------------------------------------------------------- -->
+<div class="modal fade" id="generateCertificateModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h4 class="modal-title">Generate Certificate</h4>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            
+            <form action="<?= base_url('certificate/store') ?>" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="resident_id" value="<?= $resident['id'] ?>">
+                    
+                    <div class="form-group">
+                        <label for="certType">Certificate Type</label>
+                        <select name="certificate_type" id="certType" class="form-control custom-select" required>
+                            <option value="Barangay Clearance">Barangay Clearance</option>
+                            <option value="Certificate of Indigency">Certificate of Indigency</option>
+                            <option value="Residency">Certificate of Residency</option>
+                            <option value="Business Permit">Business Permit</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="certPurpose">Purpose</label>
+                        <input type="text" name="purpose" id="certPurpose" class="form-control" placeholder="e.g. Employment Requirement" required>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-file-alt mr-1"></i> Generate & Print
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- SweetAlert2 for better dialogs -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -439,6 +460,7 @@
 
 <!-- External JavaScript -->
 <script src="<?= base_url('js/residents/residents-view.js') ?>"></script>
+<link rel="stylesheet" href="<?= base_url('assets/css/resident/style.css') ?>">
 
 <!-- Inline functions for quick actions -->
 <script>
@@ -447,20 +469,8 @@ function printProfile() {
 }
 
 function generateCertificate() {
-    Swal.fire({
-        title: 'Generate Certificate',
-        text: 'Select certificate type for ' + RESIDENT_NAME,
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonText: 'Generate',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Redirect to certificate generation page
-            // window.location.href = BASE_URL + 'certificates/generate/' + RESIDENT_ID;
-            Swal.fire('Info', 'Certificate generation feature coming soon!', 'info');
-        }
-    });
+    // Simply open the Bootstrap Modal
+    $('#generateCertificateModal').modal('show');
 }
 
 function deleteResident() {
