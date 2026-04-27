@@ -155,10 +155,10 @@
 </style>
 
 <?php
-$uri      = service('uri');
-$seg1     = $uri->getSegment(1);
-$seg2     = $uri->getSegment(2);
-$isActive = function($val) use ($seg1, $seg2) {
+ $uri      = service('uri');
+ $seg1     = $uri->getSegment(1);
+ $seg2     = $uri->getSegment(2);
+ $isActive = function($val) use ($seg1, $seg2) {
     return ($seg1 === $val || $seg2 === $val) ? 'active' : '';
 };
 ?>
@@ -168,7 +168,8 @@ $isActive = function($val) use ($seg1, $seg2) {
     <a href="<?= base_url('staff/dashboard') ?>" class="brand-link" id="brandLink">
         <img src="<?= base_url('assets/adminlte/dist/img/AdminLTELogo.png') ?>"
              alt="BMIS" class="brand-image img-circle elevation-3" style="opacity:.9">
-        <span class="brand-text">BMIS</span>
+        <span class="brand-text"> Tabu, Ilog City
+</span>
     </a>
 
     <div class="sidebar os-host-flexbox">
@@ -208,14 +209,18 @@ $isActive = function($val) use ($seg1, $seg2) {
                         <p>Households</p>
                     </a>
                 </li>
+                
+                <!-- RESTORED: OFFICIALS LINK -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link <?= $isActive('certificates') ?>">
-                        <i class="nav-icon fas fa-file-alt"></i>
-                        <p>Certificates</p>
+                    <a href="<?= base_url('officials') ?>" class="nav-link <?= $isActive('officials') ?>">
+                        <i class="nav-icon fas fa-user-tie"></i>
+                        <p>Officials</p>
                     </a>
                 </li>
+
+                <!-- UPDATED: BLOTTER LINK -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link <?= $isActive('blotter') ?>">
+                    <a href="<?= base_url('blotter') ?>" class="nav-link <?= $isActive('blotter') ?>">
                         <i class="nav-icon fas fa-gavel"></i>
                         <p>Blotter</p>
                     </a>

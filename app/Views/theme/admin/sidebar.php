@@ -179,7 +179,7 @@
     <a href="<?= base_url($dashboardUrl) ?>" class="brand-link" id="brandLink">
         <img src="<?= base_url('assets/adminlte/dist/img/AdminLTELogo.png') ?>"
              alt="BMIS" class="brand-image img-circle elevation-3" style="opacity:.9">
-        <span class="brand-text">BMIS</span>
+        <span class="brand-text">Tabu, Ilog City</span>
     </a>
 
     <div class="sidebar os-host-flexbox">
