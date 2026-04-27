@@ -43,6 +43,7 @@
                             <thead>
                                 <tr>
                                     <th>Date</th>
+                                    <th>Purok</th> <!-- ADDED -->
                                     <th>Complainant</th>
                                     <th>vs</th>
                                     <th>Respondent</th>
@@ -55,6 +56,7 @@
                                 <?php foreach($blotters as $b): ?>
                                 <tr>
                                     <td><?= date('M d, Y', strtotime($b['incident_date'])) ?></td>
+                                    <td><span class="badge badge-info"><?= esc($b['purok'] ?? '-') ?></span></td> <!-- ADDED -->
                                     <td><?= esc($b['complainant']) ?></td>
                                     <td class="text-center font-weight-bold">VS</td>
                                     <td><?= esc($b['respondent']) ?></td>

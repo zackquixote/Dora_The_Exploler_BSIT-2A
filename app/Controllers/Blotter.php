@@ -55,6 +55,7 @@ class Blotter extends BaseController
             'incident_type'    => $this->request->getPost('incident_type'),
             'incident_date'    => $this->request->getPost('incident_date'),
             'incident_location'=> $this->request->getPost('incident_location'),
+            'purok'            => $this->request->getPost('purok'), // ADDED HERE
             'details'          => $this->request->getPost('details'),
             'status'           => 'Pending', // Default status
             'created_by'       => session()->get('id')

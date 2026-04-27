@@ -71,12 +71,26 @@
                                     <input type="date" name="incident_date" class="form-control" required value="<?= old('incident_date') ?>">
                                 </div>
                             </div>
+                            
+                            <!-- UPDATED: Purok Dropdown Here -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Location</label>
-                                    <input type="text" name="incident_location" class="form-control" placeholder="Purok/Sitio" value="<?= old('incident_location') ?>">
+                                    <label>Purok</label>
+                                    <select name="purok" class="form-control custom-select">
+                                        <option value="">Select Purok</option>
+                                        <option value="Purok Malipayon" <?= (old('purok') == 'Purok Malipayon') ? 'selected' : '' ?>>Purok Malipayon</option>
+                                        <option value="Purok Masagana" <?= (old('purok') == 'Purok Masagana') ? 'selected' : '' ?>>Purok Masagana</option>
+                                        <option value="Purok Cory" <?= (old('purok') == 'Purok Cory') ? 'selected' : '' ?>>Purok Cory</option>
+                                        <option value="Purok Kawayan" <?= (old('purok') == 'Purok Kawayan') ? 'selected' : '' ?>>Purok Kawayan</option>
+                                        <option value="Purok Pagla-um" <?= (old('purok') == 'Purok Pagla-um') ? 'selected' : '' ?>>Purok Pagla-um</option>
+                                    </select>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Incident Location (Specific)</label>
+                            <input type="text" name="incident_location" class="form-control" placeholder="e.g., Near Chapel, Basketball Court..." value="<?= old('incident_location') ?>">
                         </div>
 
                         <div class="form-group">
