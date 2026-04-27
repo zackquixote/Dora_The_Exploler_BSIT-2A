@@ -236,8 +236,10 @@
                         <p>Certificates</p>
                     </a>
                 </li>
+                
+                <!-- UPDATED: BLOTTER LINK -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link <?= $isActive('blotter') ?>">
+                    <a href="<?= base_url('blotter') ?>" class="nav-link <?= $isActive('blotter') ?>">
                         <i class="nav-icon fas fa-gavel"></i>
                         <p>Blotter</p>
                     </a>

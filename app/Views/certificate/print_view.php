@@ -4,223 +4,482 @@
     <meta charset="UTF-8">
     <title>Barangay Certificate</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
 
+        /* ============================================================
+           PAGE / BODY
+        ============================================================ */
         body {
-            background-color: #ccc; 
-            font-family: "Times New Roman", Times, serif;
-            padding: 20px;
+            background-color: #7a7a7a;
+            font-family: "EB Garamond", "Times New Roman", Times, serif;
+            padding: 30px 20px;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
 
+        /* ============================================================
+           PAPER
+        ============================================================ */
         .paper {
-            background: white;
-            width: 216mm; /* Legal width usually, or 210mm A4 */
-            min-height: 330mm; /* Adjusted height for content */
-            padding: 25mm;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            background: #fffef9;
+            width: 216mm;
+            min-height: 330mm;
+            padding: 22mm 25mm;
+            box-shadow: 0 6px 40px rgba(0,0,0,0.45);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Outer decorative border */
+        .paper::before {
+            content: '';
+            position: absolute;
+            inset: 10px;
+            border: 2.5px double #1a3a6c;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Inner hairline border */
+        .paper::after {
+            content: '';
+            position: absolute;
+            inset: 15px;
+            border: 1px solid #c5a84b;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Subtle diagonal watermark */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-35deg);
+            font-family: 'Cinzel', serif;
+            font-size: 72pt;
+            font-weight: 700;
+            color: rgba(26, 58, 108, 0.035);
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 0;
+            user-select: none;
+        }
+
+        /* Ensure content is above decorative elements */
+        .content-wrapper { position: relative; z-index: 1; }
+
+        /* ============================================================
+           HEADER — Logo | Text | Logo
+        ============================================================ */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-bottom: 14px;
+            margin-bottom: 24px;
+            border-bottom: 3px double #1a3a6c;
+        }
+
+        /* Left and Right logos */
+        .header-logo {
+            width: 88px;
+            height: 88px;
+            object-fit: contain;
+            flex-shrink: 0;
+            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.15));
+        }
+
+        /* Center text block */
+        .header-text {
+            text-align: center;
+            flex: 1;
+            line-height: 1.35;
+        }
+
+        .header-text .line-republic {
+            font-family: Arial Narrow, Arial, sans-serif;
+            font-size: 9.5pt;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #222;
+            margin: 0 0 2px;
+        }
+
+        .header-text .line-province {
+            font-family: Arial Narrow, Arial, sans-serif;
+            font-size: 9.5pt;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #333;
+            margin: 0 0 3px;
+        }
+
+        .header-text .line-municipality {
+            font-family: Arial Narrow, Arial, sans-serif;
+            font-size: 11.5pt;
+            font-weight: bold;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: #1a3a6c;
+            margin: 0 0 3px;
+        }
+
+        .header-text .line-barangay {
+            font-family: 'Cinzel', serif;
+            font-size: 18pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #1a3a6c;
+            letter-spacing: 3px;
+            margin: 2px 0 4px;
+        }
+
+        .header-text .line-office {
+            font-family: Arial Narrow, Arial, sans-serif;
+            font-size: 8.5pt;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #666;
+            margin: 0;
+            font-style: italic;
+        }
+
+        /* Thin gold rule under header text */
+        .header-text hr.gold-rule {
+            border: none;
+            border-top: 1px solid #c5a84b;
+            margin: 5px auto 5px;
+            width: 80%;
+        }
+
+        /* ============================================================
+           DOCUMENT NUMBER
+        ============================================================ */
+        .doc-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9pt;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        /* ============================================================
+           CERTIFICATE TITLE
+        ============================================================ */
+        .cert-title-wrap {
+            text-align: center;
+            margin: 20px 0 26px;
+        }
+
+        .cert-title {
+            display: inline-block;
+            font-family: 'Cinzel', serif;
+            font-size: 14pt;
+            font-weight: 700;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: #1a3a6c;
+            padding: 9px 36px;
+            border-top: 2px solid #1a3a6c;
+            border-bottom: 2px solid #1a3a6c;
             position: relative;
         }
 
-        /* HEADER STYLING - Updated for Logo */
-        .header {
-            display: flex; /* Aligns Logo and Text side by side */
-            align-items: center;
-            border-bottom: 3px double #000;
-            padding-bottom: 20px;
-            margin-bottom: 40px;
-        }
-
-        .header img {
-            height: 90px; /* Size of the Logo */
-            width: auto;
-            margin-right: 20px; /* Space between logo and text */
-        }
-
-        .header-text {
-            text-align: center;
-            flex-grow: 1; /* Takes up remaining space */
-        }
-
-        .header-text h5 {
-            font-family: sans-serif;
+        .cert-title::before,
+        .cert-title::after {
+            content: '✦';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #c5a84b;
             font-size: 11pt;
-            margin: 0;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 1px;
         }
-        
-        .header-text h4 {
-            font-family: sans-serif;
-            font-size: 13pt;
-            font-weight: bold;
-            margin: 5px 0;
-            text-transform: uppercase;
-        }
+        .cert-title::before { left: 10px; }
+        .cert-title::after  { right: 10px; }
 
-        .header-text h3 {
-            font-family: "Times New Roman", serif;
-            font-weight: 900;
-            margin: 5px 0;
-            text-transform: uppercase;
-            font-size: 20pt;
-        }
-
-        .header-text small {
-            font-family: sans-serif;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 10pt;
-        }
-
-        /* CONTENT STYLING */
-        .cert-title {
-            text-align: center;
-            font-weight: bold;
-            font-size: 18pt;
-            margin-bottom: 30px;
-            text-decoration: underline;
-            text-transform: uppercase;
-        }
-
+        /* ============================================================
+           BODY TEXT
+        ============================================================ */
         .body-text {
             text-align: justify;
-            font-size: 13pt;
-            line-height: 2.2;
-            text-indent: 50px;
+            font-size: 12.5pt;
+            line-height: 2.1;
+            color: #111;
+        }
+
+        .body-text p {
+            margin-bottom: 0.4em;
+        }
+
+        .body-text .greeting {
+            text-indent: 0;
+            font-weight: bold;
+            font-size: 11pt;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #1a3a6c;
+        }
+
+        .body-text .indent {
+            text-indent: 60px;
         }
 
         .name-text {
             font-weight: bold;
             text-transform: uppercase;
             text-decoration: underline;
+            text-underline-offset: 4px;
+            text-decoration-color: #c5a84b;
+            color: #1a3a6c;
         }
 
-        /* Indigency Specific (Optional) */
-        .indigency-box {
-            border: 1px solid #999;
-            padding: 15px;
-            margin: 20px 50px;
-            text-align: center;
+        /* Indigency special box */
+        .indigency-notice {
+            border: 1px solid #c5a84b;
+            background: #fffbf0;
+            padding: 10px 18px;
+            margin: 14px 0;
             font-style: italic;
-            font-size: 12pt;
+            font-size: 11.5pt;
+            color: #444;
+            border-radius: 2px;
         }
 
-        /* FOOTER STYLING */
-        .footer {
-            margin-top: 60px;
+        /* ============================================================
+           OFFICIAL SEAL AREA (left, near footer)
+        ============================================================ */
+        .seal-area {
+            position: absolute;
+            left: 25mm;
+            bottom: 45mm;
+        }
+
+        .seal-label {
+            font-size: 8pt;
+            color: #aaa;
             text-align: center;
-        }
-        
-        .sign-box {
-            display: inline-block;
-            width: 60%;
-        }
-        
-        .sign-name {
-            font-weight: bold;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            margin-top: 60px;
-            border-top: 1px solid #000;
-            padding-top: 5px;
+            margin-top: 4px;
         }
 
-        /* CONTROLS */
+        /* ============================================================
+           FOOTER / SIGNATURE
+        ============================================================ */
+        .footer {
+            margin-top: 55px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .sign-block {
+            text-align: center;
+            width: 58%;
+        }
+
+        .sign-name {
+            font-family: 'Cinzel', serif;
+            font-size: 11pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-top: 1.5px solid #1a3a6c;
+            padding-top: 7px;
+            color: #1a3a6c;
+            margin-top: 70px;
+        }
+
+        .sign-title {
+            font-size: 10pt;
+            color: #555;
+            font-style: italic;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* ============================================================
+           CONTROLS (screen only)
+        ============================================================ */
         .controls {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        /* PRINT */
+        /* ============================================================
+           PRINT STYLES
+        ============================================================ */
         @media print {
-            body { background: none; padding: 0; -webkit-print-color-adjust: exact; }
-            .paper { box-shadow: none; margin: 0; width: 100%; padding: 0; }
-            .controls { display: none; }
-            @page { margin: 10mm; }
+            body {
+                background: none;
+                padding: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .paper {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                padding: 15mm 18mm;
+                min-height: unset;
+            }
+            .controls { display: none !important; }
+            @page { margin: 8mm; size: legal portrait; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Controls -->
+    <!-- ================================
+         CONTROLS (no-print)
+    ================================ -->
     <div class="controls no-print">
-        <button onclick="window.print()" class="btn btn-primary">
-            <i class="fas fa-print"></i> Print
+        <button onclick="window.print()" class="btn btn-primary btn-sm">
+            <i class="fas fa-print mr-1"></i> Print
         </button>
-        <button onclick="window.close()" class="btn btn-secondary">
-            <i class="fas fa-times"></i> Close
+        <button onclick="window.close()" class="btn btn-secondary btn-sm">
+            <i class="fas fa-times mr-1"></i> Close
         </button>
     </div>
 
-    <!-- The Paper -->
+    <!-- ================================
+         THE PAPER
+    ================================ -->
     <div class="paper">
-        <!-- Header with Logo -->
-        <div class="header">
-            <!-- Logo -->
-            <img src="<?= esc($settings->logo_url) ?>" alt="Barangay Logo">
-            
-            <!-- Text -->
-            <div class="header-text">
-                <h5>Republic of the Philippines</h5>
-                <h5>Province of <?= esc($settings->province) ?></h5>
-                <h4>MUNICIPALITY OF <?= esc($settings->municipality) ?></h4>
-                <h3>BARANGAY <?= esc($settings->barangay_name) ?></h3>
-                <small>Office of the Punong Barangay</small>
+
+        <!-- Watermark -->
+        <div class="watermark">Official</div>
+
+        <div class="content-wrapper">
+
+            <!-- ========================
+                 HEADER
+            ======================== -->
+            <div class="header">
+
+                <!-- LEFT LOGO: Municipal / Province Seal (ilog.png) -->
+                <img
+                    src="/assets/img/ilog.png"
+                    alt="Municipal Seal"
+                    class="header-logo">
+
+                <!-- CENTER TEXT -->
+                <div class="header-text">
+                    <hr class="gold-rule">
+                    <p class="line-republic">Republic of the Philippines</p>
+                    <p class="line-province">Province of <?= esc($settings->province) ?></p>
+                    <p class="line-municipality">Municipality of <?= esc($settings->municipality) ?></p>
+                    <p class="line-barangay">Barangay <?= esc($settings->barangay_name) ?></p>
+                    <p class="line-office">Office of the Punong Barangay</p>
+                    <hr class="gold-rule">
+                </div>
+
+                <!-- RIGHT LOGO: Barangay Seal (tabu.jpg) -->
+                <img
+                    src="/assets/img/tabu.jpg"
+                    alt="Barangay Seal"
+                    class="header-logo">
+
             </div>
-        </div>
+            <!-- END HEADER -->
 
-        <!-- Title -->
-        <div class="cert-title">
-            <?= esc($cert['certificate_type']) ?>
-        </div>
+            <!-- Document number + date issued -->
+            <div class="doc-meta">
+                <span>Cert. No.: _____________</span>
+                <span>Date Issued: <?= date('F d, Y') ?></span>
+            </div>
 
-        <!-- Body Content -->
-        <div class="body-text">
-            <p>TO WHOM IT MAY CONCERN:</p>
-            
-            <p>
-                This is to certify that <span class="name-text">
-                    <?= esc($cert['first_name']) ?> 
-                    <?= esc($cert['middle_name'] ?? '') ?> 
-                    <?= esc($cert['last_name']) ?>
-                </span>, 
-                <?= esc(ucfirst($cert['sex'])) ?>, 
-                <?= esc(ucfirst($cert['civil_status'])) ?>, 
-                is a bonafide resident of Purok <?= esc($cert['sitio'] ?? 'N/A') ?>, Barangay <?= esc($settings->barangay_name) ?>, Municipality of <?= esc($settings->municipality) ?>.
-            </p>
+            <!-- ========================
+                 CERTIFICATE TITLE
+            ======================== -->
+            <div class="cert-title-wrap">
+                <div class="cert-title">
+                    <?= esc($cert['certificate_type']) ?>
+                </div>
+            </div>
 
-            <!-- Conditional Indigency Text -->
-            <?php if ($cert['certificate_type'] == 'Certificate of Indigency'): ?>
-                <p>
-                    This certification is issued to certify that the above-named person belongs to the indigent family/sector of this barangay.
+            <!-- ========================
+                 BODY
+            ======================== -->
+            <div class="body-text">
+
+                <p class="greeting">To Whom It May Concern:</p>
+                <br>
+
+                <p class="indent">
+                    This is to certify that
+                    <span class="name-text">
+                        <?= esc($cert['first_name']) ?>
+                        <?= esc($cert['middle_name'] ?? '') ?>
+                        <?= esc($cert['last_name']) ?>
+                    </span>,
+                    <?= esc(ucfirst($cert['sex'])) ?>,
+                    <?= esc(ucfirst($cert['civil_status'])) ?>,
+                    of legal age, is a <em>bonafide</em> resident of
+                    Purok <?= esc($cert['sitio'] ?? 'N/A') ?>,
+                    Barangay <?= esc($settings->barangay_name) ?>,
+                    Municipality of <?= esc($settings->municipality) ?>,
+                    Province of <?= esc($settings->province) ?>.
                 </p>
-            <?php endif; ?>
+                <br>
 
-            <p>
-                This certification is being issued upon the request of the interested party for 
-                <strong><?= esc($cert['purpose']) ?></strong>.
-            </p>
+                <?php if ($cert['certificate_type'] === 'Certificate of Indigency'): ?>
+                <div class="indigency-notice">
+                    This certification further attests that the above-named person
+                    belongs to the indigent family/sector of this barangay and is
+                    entitled to assistance under applicable government programs.
+                </div>
+                <?php endif; ?>
 
-            <p>
-                Issued this <?= date('d') ?> day of <?= date('F') ?>, <?= date('Y') ?> at Barangay <?= esc($settings->barangay_name) ?>.
-            </p>
-        </div>
+                <p class="indent">
+                    This certification is being issued upon the request of the
+                    interested party for
+                    <strong><?= esc($cert['purpose']) ?></strong>
+                    and for whatever legal purpose it may serve.
+                </p>
+                <br>
 
-        <!-- Signature -->
-        <div class="footer">
-            <div class="sign-box">
-                <div class="sign-name"><?= esc($settings->captain_name) ?></div>
-                <div>Punong Barangay</div>
+                <p class="indent">
+                    Issued this <strong><?= date('jS') ?></strong> day of
+                    <strong><?= date('F') ?></strong>,
+                    <strong><?= date('Y') ?></strong>
+                    at Barangay <?= esc($settings->barangay_name) ?>,
+                    Municipality of <?= esc($settings->municipality) ?>.
+                </p>
+
             </div>
+            <!-- END BODY -->
+
+            <!-- ========================
+                 SIGNATURE BLOCK
+            ======================== -->
+            <div class="footer">
+                <div class="sign-block">
+                    <div class="sign-name"><?= esc($settings->captain_name) ?></div>
+                    <div class="sign-title">Punong Barangay</div>
+                </div>
+            </div>
+
         </div>
+        <!-- END content-wrapper -->
+
     </div>
+    <!-- END PAPER -->
 
 </body>
 </html>

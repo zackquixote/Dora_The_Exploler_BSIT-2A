@@ -1,4 +1,13 @@
-<?= $this->extend('theme/template') ?>
+<?php
+// ---------------------------------------------------------
+// SMART THEME LOADER
+// ---------------------------------------------------------
+ $role = strtolower(session()->get('role') ?? 'staff');
+ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+?>
+
+<?= $this->extend($template) ?>
+
 <?= $this->section('content') ?>
 
 <div class="content-wrapper">

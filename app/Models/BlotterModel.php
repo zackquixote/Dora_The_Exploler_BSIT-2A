@@ -15,6 +15,7 @@ class BlotterModel extends Model
         'incident_type', 
         'incident_date', 
         'incident_location', 
+        'purok', 
         'details', 
         'status', 
         'action_taken',
@@ -27,10 +28,11 @@ class BlotterModel extends Model
 
     /**
      * Get all blotters with creator name
+     * FIX: Changed users.username to users.name to match your DB structure
      */
     public function getBlotters()
     {
-        return $this->select('blotter_records.*, users.username as created_by_name')
+        return $this->select('blotter_records.*, users.name as created_by_name')
                     ->join('users', 'users.id = blotter_records.created_by', 'left')
                     ->orderBy('created_at', 'DESC')
                     ->findAll();
