@@ -221,6 +221,15 @@
                         <p>Households</p>
                     </a>
                 </li>
+                
+                <!-- NEW: OFFICIALS LINK -->
+                <li class="nav-item">
+                    <a href="<?= base_url('officials') ?>" class="nav-link <?= $isActive('officials') ?>">
+                        <i class="nav-icon fas fa-user-tie"></i>
+                        <p>Officials</p>
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <a href="#" class="nav-link <?= $isActive('certificates') ?>">
                         <i class="nav-icon fas fa-file-alt"></i>
