@@ -111,7 +111,9 @@ use CodeIgniter\Router\RouteCollection;
         $routes->get('checkHouseholdNo', 'HouseholdController::checkHouseholdNo');
     });
 });
-
+ $routes->get('certificate', 'Certificate::index');
+ $routes->post('certificate/store', 'Certificate::store');
+ $routes->get('certificate/print/(:num)', 'Certificate::print/$1');
 // ------------------------------------------------
 // System (Admin Only)
 // ------------------------------------------------
