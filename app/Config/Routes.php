@@ -148,6 +148,7 @@ $routes->group('admin', [
         $routes->post('update', 'Users::update');
         $routes->delete('delete/(:num)', 'Users::delete/$1');
         $routes->post('fetchRecords', 'Users::fetchRecords');
+        $routes->get('users/create', 'Users::create');
     });
 });
 

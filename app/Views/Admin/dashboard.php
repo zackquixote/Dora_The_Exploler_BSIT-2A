@@ -357,13 +357,13 @@
                             <a href="<?= base_url('households') ?>" class="btn btn-secondary btn-block mb-2">
                                 <i class="fas fa-home mr-2"></i> View Households
                             </a>
-                            <a href="#" class="btn btn-success btn-block mb-2">
+                            <a href="<?= base_url('certificate/create') ?>" class="btn btn-success btn-block mb-2">
                                 <i class="fas fa-file-alt mr-2"></i> Issue Certificate
                             </a>
-                            <a href="#" class="btn btn-warning btn-block mb-2">
-                                <i class="fas fa-users-cog mr-2"></i> Manage Staff
-                            </a>
-                            <a href="#" class="btn btn-danger btn-block">
+                          <a href="<?= base_url('admin/users/create') ?>" class="btn btn-warning btn-block mb-2">
+    <i class="fas fa-users-cog mr-2"></i> Manage Users
+</a>
+                            <a href="<?= base_url('blotter/create') ?>" class="btn btn-danger btn-block">
                                 <i class="fas fa-gavel mr-2"></i> Record Blotter
                             </a>
                         </div>

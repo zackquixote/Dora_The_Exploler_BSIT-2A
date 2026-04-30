@@ -225,7 +225,12 @@
                         <p>Blotter</p>
                     </a>
                 </li>
-
+      <li class="nav-item">
+                    <a href="<?= base_url('certificate') ?>" class="nav-link <?= $isActive('certificate') ?>">
+                        <i class="nav-icon fas fa-file-contract"></i>
+                        <p>Certificates</p>
+                    </a>
+                </li>
              
 
                 <li><div class="sidebar-divider"></div></li>
