@@ -152,7 +152,7 @@
 /* Scrollbar */
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
-.sidebar::-webkit-scrollbar-thumb { background: rgba(233,69,96,0.3); border-radius: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(238, 232, 233, 0.3); border-radius: 4px; }
 </style>
 
 <?php
@@ -160,7 +160,6 @@
  $seg1    = $uri->getSegment(1);
  $seg2    = $uri->getSegment(2);
 
-// --- LOGIC FIX STARTS HERE ---
  $role = session()->get('role'); // Get role from session (admin or staff)
 
 // Determine Dashboard URL based on role
@@ -169,17 +168,16 @@
 // Helper for active class
  $isActive = function($val) use ($seg1, $seg2) {
     return ($seg1 === $val || $seg2 === $val) ? 'active' : '';
-};
-// --- LOGIC FIX ENDS HERE ---
+ };
 ?>
 
 <aside class="main-sidebar elevation-4 sidebar-dark-danger" id="mainSidebar">
 
-    <!-- Dynamic Brand Link -->
+    <!-- Dynamic Brand Link (ADDED BACK) -->
     <a href="<?= base_url($dashboardUrl) ?>" class="brand-link" id="brandLink">
         <img src="<?= base_url('assets/adminlte/dist/img/AdminLTELogo.png') ?>"
              alt="BMIS" class="brand-image img-circle elevation-3" style="opacity:.9">
-        <span class="brand-text">Tabu, Ilog City</span>
+        <span class="brand-text"> Tabu, Ilog City</span>
     </a>
 
     <div class="sidebar os-host-flexbox">
@@ -222,7 +220,7 @@
                     </a>
                 </li>
                 
-                <!-- NEW: OFFICIALS LINK -->
+                <!-- OFFICIALS LINK -->
                 <li class="nav-item">
                     <a href="<?= base_url('officials') ?>" class="nav-link <?= $isActive('officials') ?>">
                         <i class="nav-icon fas fa-user-tie"></i>
@@ -230,14 +228,15 @@
                     </a>
                 </li>
 
+                <!-- CERTIFICATES LINK (FIXED) -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link <?= $isActive('certificates') ?>">
-                        <i class="nav-icon fas fa-file-alt"></i>
+                    <a href="<?= base_url('certificate') ?>" class="nav-link <?= $isActive('certificate') ?>">
+                        <i class="nav-icon fas fa-file-contract"></i>
                         <p>Certificates</p>
                     </a>
                 </li>
                 
-                <!-- UPDATED: BLOTTER LINK -->
+                <!-- BLOTTER LINK -->
                 <li class="nav-item">
                     <a href="<?= base_url('blotter') ?>" class="nav-link <?= $isActive('blotter') ?>">
                         <i class="nav-icon fas fa-gavel"></i>
@@ -255,7 +254,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= base_url('log') ?>" class="nav-link <?= $isActive('log') ?>">
+                    <a href="<?= base_url('logs') ?>" class="nav-link <?= $isActive('log') ?>">
                         <i class="nav-icon fas fa-history"></i>
                         <p>Activity Logs</p>
                     </a>
@@ -263,7 +262,12 @@
                 <?php endif; ?>
 
                 <li><div class="sidebar-divider"></div></li>
-
+<li class="nav-item">
+    <a href="<?= base_url('admin/settings') ?>" class="nav-link">
+        <i class="nav-icon fas fa-cog"></i>
+        <p>Settings</p>
+    </a>
+</li>
                 <li class="nav-item">
                     <a href="<?= base_url('logout') ?>" class="nav-link nav-link-logout">
                         <i class="nav-icon fas fa-sign-out-alt"></i>

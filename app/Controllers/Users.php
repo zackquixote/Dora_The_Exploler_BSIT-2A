@@ -4,6 +4,27 @@ namespace App\Controllers;
 
 use CodeIgniter\Controller;
 
+/**
+ * Users Controller
+ * 
+ * Manages system user accounts: listing, creating, editing, deleting.
+ * Uses DataTables for AJAX listing and inline edits.
+ * 
+ * METHODS:
+ * - index(): Displays the main user management view.
+ * - fetchRecords(): DataTables server-side processing for user list.
+ * - edit($id): Returns user data for editing (AJAX).
+ * - update(): Updates user details (name, email, role, status, optional password).
+ * - delete($id): Deletes a user account.
+ * - create(): Displays the "add user" form.
+ * - save(): Validates unique email and inserts new user.
+ * 
+ * DEPENDENCIES:
+ * - Database connection for raw queries.
+ * - No explicit model used; uses Query Builder directly.
+ * 
+ * @package App\Controllers
+ */
 class Users extends Controller
 {
     public function index()

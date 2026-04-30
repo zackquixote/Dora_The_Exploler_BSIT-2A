@@ -22,7 +22,14 @@
     <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/toastr/toastr.min.css') ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="<?= base_url('assets/css/custom.css') ?>">
+
+<link rel="stylesheet" href="<?= base_url('assets/css/user/user.css') ?>">
+<link rel="stylesheet" href="<?= base_url('asset/css/blotter/blotter.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-create.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-index.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-view.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/dashboard/style.css') ?>">
+
 
     <style>
         :root {

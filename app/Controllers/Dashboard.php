@@ -2,6 +2,16 @@
 
 namespace App\Controllers;
 
+/**
+ * Dashboard Controller
+ * 
+ * Serves as the landing page after successful login.
+ * 
+ * METHODS:
+ * - index(): Checks authentication and loads the main dashboard view.
+ * 
+ * @package App\Controllers
+ */
 class Dashboard extends BaseController
 {
     public function index()

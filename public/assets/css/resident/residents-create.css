@@ -1,0 +1,278 @@
+/* ============================================================
+   residents-create.css
+   Professional Modern Form (Sidebar Friendly Layout)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary: #2B4FBF;
+    --primary-hover: #1E3A9B;
+    --bg-page: transparent; 
+    --bg-card: #FFFFFF;
+    --text-main: #1A202C;
+    --text-muted: #718096;
+    --border: #E2E8F0;
+    --danger: #E53E3E;
+    --success: #10B981;
+    --radius: 8px;
+}
+
+/* Main Container */
+.rc-container {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    background: var(--bg-page) !important;
+    padding: 1.5rem 0;
+    max-width: 1300px;   
+    margin: 0 auto !important;
+}
+
+/* --- Header --- */
+.rc-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 2rem !important;
+    padding: 0 1rem !important;
+    flex-wrap: wrap !important;
+    gap: 1rem !important;
+}
+
+.rc-title h1 {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: var(--text-main) !important;
+    margin: 0 !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+.rc-title p {
+    color: var(--text-muted) !important;
+    margin: 0.25rem 0 0 !important;
+    font-size: 0.9rem !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+.rc-header-actions {
+    display: flex !important;
+    gap: 0.75rem !important;
+}
+
+/* --- Buttons --- */
+.rc-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    padding: 0.6rem 1.25rem !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    border: none !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+
+.rc-btn-primary {
+    background: var(--primary) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(43, 79, 191, 0.2) !important;
+}
+.rc-btn-primary:hover { background: var(--primary-hover) !important; transform: translateY(-1px) !important; }
+
+.rc-btn-secondary {
+    background: white !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border) !important;
+}
+.rc-btn-secondary:hover { background: #F8FAFC !important; border-color: #CBD5E0 !important; }
+
+/* --- Alert Box --- */
+.rc-alert {
+    background: #FEF2F2 !important;
+    border: 1px solid #FECACA !important;
+    color: #991B1B !important;
+    padding: 1rem 1.5rem !important;
+    border-radius: var(--radius) !important;
+    margin-bottom: 1.5rem !important;
+    display: flex !important;
+    align-items: flex-start !important;
+}
+.rc-alert ul { margin: 0.5rem 0 0 1.5rem !important; }
+.rc-alert li { margin-bottom: 0.25rem !important; }
+
+/* --- Cards & Sections --- */
+.rc-card {
+    background: var(--bg-card) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
+    border: 1px solid var(--border) !important;
+    overflow: hidden !important;
+    margin-bottom: 1.5rem !important;
+    border: none !important; /* Remove AdminLTE card border */
+}
+
+.rc-section-header {
+    padding: 1.25rem 1.5rem !important;
+    border-bottom: 1px solid var(--border) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    background: #FAFAFA !important;
+}
+
+.rc-section-title {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: var(--text-main) !important;
+    margin: 0 !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+.rc-section-icon {
+    color: var(--primary) !important;
+    font-size: 1.1rem !important;
+}
+
+.rc-card-body {
+    padding: 1.5rem !important;
+}
+
+/* --- Grid Layout --- */
+.rc-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important; 
+    gap: 1.5rem !important;
+}
+
+@media (max-width: 992px) {
+    .rc-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 768px) {
+    .rc-grid { grid-template-columns: 1fr !important; }
+}
+
+/* --- Inputs --- */
+.rc-field {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+}
+
+.rc-field.full-width {
+    grid-column: span 3 !important;
+}
+@media (max-width: 992px) { .rc-field.full-width { grid-column: span 2 !important; } }
+@media (max-width: 768px) { .rc-field.full-width { grid-column: span 1 !important; } }
+
+.rc-label {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: #4A5568 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+.rc-label span { color: var(--danger) !important; }
+
+/* FORCE INPUT STYLES */
+.rc-input, .rc-select {
+    width: 100% !important;
+    padding: 0.6rem 0.85rem !important;
+    font-size: 0.9rem !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    color: var(--text-main) !important;
+    background: #FFFFFF !important;
+    transition: all 0.2s !important;
+    height: auto !important;
+    line-height: normal !important;
+    box-shadow: none !important;
+}
+
+.rc-input:focus, .rc-select:focus {
+    outline: none !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(43, 79, 191, 0.1) !important;
+}
+
+/* --- Custom Checkbox --- */
+.rc-checkbox-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    padding: 1rem !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
+}
+.rc-checkbox-group:hover { background: #F8FAFC !important; }
+
+.rc-checkbox {
+    width: 18px !important;
+    height: 18px !important;
+    border: 2px solid #CBD5E0 !important;
+    border-radius: 4px !important;
+    display: grid !important;
+    place-content: center !important;
+    transition: 0.2s !important;
+}
+.rc-checkbox input { display: none !important; }
+
+.rc-checkbox input:checked + svg {
+    color: white !important;
+    width: 10px !important;
+    height: 10px !important;
+    display: block !important;
+}
+.rc-checkbox input:checked {
+    border-color: var(--primary) !important;
+    background: var(--primary) !important;
+}
+
+.rc-check-label h4 { font-size: 0.9rem !important; font-weight: 600 !important; margin: 0 !important; color: var(--text-main) !important; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important; }
+.rc-check-label p { font-size: 0.8rem !important; margin: 0 !important; color: var(--text-muted) !important; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important; }
+
+/* --- File Upload --- */
+.rc-file-area {
+    border: 2px dashed var(--border) !important;
+    border-radius: 6px !important;
+    padding: 1.25rem !important;
+    text-align: center !important;
+    background: #F8FAFC !important;
+    transition: all 0.2s !important;
+}
+.rc-file-area:hover { border-color: var(--primary) !important; background: #EBF0FF !important; }
+.rc-file-area input[type="file"] { display: none !important; }
+.rc-file-trigger {
+    display: block !important;
+    padding: 0.4rem 1rem !important;
+    background: white !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 4px !important;
+    font-size: 0.85rem !important;
+    margin: 0.75rem auto 0 !important;
+    width: fit-content !important;
+    cursor: pointer !important;
+    font-weight: 500 !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* --- Footer --- */
+.rc-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(4px) !important;
+    border-top: 1px solid var(--border) !important;
+    padding: 1rem 1.5rem !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin: 0 -1.5rem -1.5rem -1.5rem !important; 
+    border-radius: 0 0 var(--radius) var(--radius) !important;
+    z-index: 10 !important;
+}

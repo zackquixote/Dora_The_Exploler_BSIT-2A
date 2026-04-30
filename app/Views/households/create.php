@@ -137,7 +137,7 @@
                                 <div class="form-group">
                                     <label>Select Head Resident</label>
                                     <select name="head_resident_id" id="headResidentSelect" class="form-control" disabled>
-                                        <option value="">— Select Purok/Sitio first —</option>
+                                        <option value=""> Select Purok/Sitio first </option>
                                     </select>
                                     <small class="text-muted">Shows residents from selected purok and unassigned residents.</small>
                                 </div>

@@ -5,6 +5,34 @@ namespace App\Controllers;
 use App\Models\HouseholdModel;
 use App\Models\ResidentModel;
 
+/**
+ * Household Controller
+ * 
+ * Manages households: listing, creating, editing, viewing, and deleting.
+ * Also handles AJAX endpoints for residents by sitio, household number checks, etc.
+ * 
+ * METHODS (key):
+ * - index(): Lists households with optional purok filter.
+ * - create(): Shows form with auto-generated household number.
+ * - store(): Saves new household, assigns members, logs activity.
+ * - edit($id): Displays edit form with current members.
+ * - update($id): Updates household and member assignments.
+ * - view($id): Shows household details and member list.
+ * - delete($id): AJAX delete with force option to transfer residents.
+ * 
+ * AJAX METHODS:
+ * - getMembers($householdId)
+ * - getResidentsBySitio()
+ * - getHouseholdsBySitio()
+ * - getNextHouseholdNo()
+ * - checkHouseholdNo()
+ * - getDetails($id)
+ * 
+ * DEPENDENCIES:
+ * - HouseholdModel, ResidentModel, Database connection
+ * 
+ * @package App\Controllers
+ */
 class HouseholdController extends BaseController
 {
     protected $householdModel;

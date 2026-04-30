@@ -2,8 +2,13 @@
 
 <?= $this->section('content') ?>
 
-<div class="content-wrapper" style="background:#f4f6f9;">
-    <!-- Content Header -->
+<!-- ================================================================
+     Dashboard CSS – externalised for easy maintenance
+     ================================================================ -->
+<link rel="stylesheet" href="<?= base_url('assets/css/dashboard.css') ?>">
+
+<div class="content-wrapper">
+    <!-- Content Header (Page title & breadcrumb) -->
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -27,8 +32,11 @@
     <div class="content">
         <div class="container-fluid">
 
-            <!-- ===================== ROW 1: Primary Stats ===================== -->
+            <!-- ================================================================
+                 ROW 1 – Primary Statistic Cards
+                 ================================================================ -->
             <div class="row">
+                <!-- Total Residents -->
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-info">
                         <div class="inner">
@@ -39,6 +47,7 @@
                         <a href="<?= base_url('resident') ?>" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
+                <!-- Total Households -->
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-success">
                         <div class="inner">
@@ -49,16 +58,20 @@
                         <a href="<?= base_url('households') ?>" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
+                <!-- Certificates (total + today) -->
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-warning">
                         <div class="inner">
                             <h3><?= $pendingCerts ?? 0 ?></h3>
-                            <p>Pending Certificates</p>
+                            <p>Total Certificates</p>
                         </div>
                         <div class="icon"><i class="fas fa-file-invoice"></i></div>
-                        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        <a href="#" class="small-box-footer">
+                            <?= $dailyCerts ?? 0 ?> issued today <i class="fas fa-arrow-circle-right"></i>
+                        </a>
                     </div>
                 </div>
+                <!-- Blotter Records -->
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-danger">
                         <div class="inner">
@@ -71,7 +84,9 @@
                 </div>
             </div>
 
-            <!-- ===================== ROW 2: Secondary Stats ===================== -->
+            <!-- ================================================================
+                 ROW 2 – Secondary Statistics (info boxes)
+                 ================================================================ -->
             <div class="row">
                 <!-- Registered Voters -->
                 <div class="col-lg-3 col-md-6 col-12">
@@ -83,12 +98,13 @@
                             <div class="progress">
                                 <div class="progress-bar bg-primary" style="width: <?= ($totalResidents ?? 0) > 0 ? round((($totalVoters ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>%"></div>
                             </div>
-                            <span class="progress-description"><?= ($totalResidents ?? 0) > 0 ? round((($totalVoters ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>% of residents</span>
+                            <span class="progress-description">
+                                <?= ($totalResidents ?? 0) > 0 ? round((($totalVoters ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>% of residents
+                            </span>
                         </div>
                     </div>
                 </div>
-
-                <!-- PWD -->
+                <!-- PWD Residents -->
                 <div class="col-lg-3 col-md-6 col-12">
                     <div class="info-box shadow-sm">
                         <span class="info-box-icon bg-indigo elevation-1"><i class="fas fa-wheelchair"></i></span>
@@ -98,11 +114,12 @@
                             <div class="progress">
                                 <div class="progress-bar bg-indigo" style="width: <?= ($totalResidents ?? 0) > 0 ? round((($totalPwd ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>%"></div>
                             </div>
-                            <span class="progress-description"><?= ($totalResidents ?? 0) > 0 ? round((($totalPwd ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>% of residents</span>
+                            <span class="progress-description">
+                                <?= ($totalResidents ?? 0) > 0 ? round((($totalPwd ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>% of residents
+                            </span>
                         </div>
                     </div>
                 </div>
-
                 <!-- Senior Citizens -->
                 <div class="col-lg-3 col-md-6 col-12">
                     <div class="info-box shadow-sm">
@@ -113,12 +130,13 @@
                             <div class="progress">
                                 <div class="progress-bar bg-teal" style="width: <?= ($totalResidents ?? 0) > 0 ? round((($totalSenior ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>%"></div>
                             </div>
-                            <span class="progress-description"><?= ($totalResidents ?? 0) > 0 ? round((($totalSenior ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>% of residents</span>
+                            <span class="progress-description">
+                                <?= ($totalResidents ?? 0) > 0 ? round((($totalSenior ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>% of residents
+                            </span>
                         </div>
                     </div>
                 </div>
-
-                <!-- Avg Household Size -->
+                <!-- Average Household Size -->
                 <div class="col-lg-3 col-md-6 col-12">
                     <div class="info-box shadow-sm">
                         <span class="info-box-icon bg-orange elevation-1"><i class="fas fa-chart-line"></i></span>
@@ -134,8 +152,11 @@
                 </div>
             </div>
 
-            <!-- ===================== ROW 3: Admin-Only Stats ===================== -->
+            <!-- ================================================================
+                 ROW 3 – Admin-specific stats & gender breakdown
+                 ================================================================ -->
             <div class="row">
+                <!-- Admin Accounts -->
                 <div class="col-lg-3 col-md-6 col-12">
                     <div class="info-box shadow-sm">
                         <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-user-shield"></i></span>
@@ -149,6 +170,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Staff Accounts -->
                 <div class="col-lg-3 col-md-6 col-12">
                     <div class="info-box shadow-sm">
                         <span class="info-box-icon bg-secondary elevation-1"><i class="fas fa-user-tie"></i></span>
@@ -162,6 +184,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Male Residents -->
                 <div class="col-lg-3 col-md-6 col-12">
                     <div class="info-box shadow-sm">
                         <span class="info-box-icon bg-info elevation-1"><i class="fas fa-male"></i></span>
@@ -171,10 +194,13 @@
                             <div class="progress">
                                 <div class="progress-bar bg-info" style="width: <?= ($totalResidents ?? 0) > 0 ? round((($totalMale ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>%"></div>
                             </div>
-                            <span class="progress-description"><?= ($totalResidents ?? 0) > 0 ? round((($totalMale ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>% of residents</span>
+                            <span class="progress-description">
+                                <?= ($totalResidents ?? 0) > 0 ? round((($totalMale ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>% of residents
+                            </span>
                         </div>
                     </div>
                 </div>
+                <!-- Female Residents -->
                 <div class="col-lg-3 col-md-6 col-12">
                     <div class="info-box shadow-sm">
                         <span class="info-box-icon elevation-1" style="background:#e91e8c;"><i class="fas fa-female"></i></span>
@@ -184,15 +210,19 @@
                             <div class="progress">
                                 <div class="progress-bar" style="background:#e91e8c; width: <?= ($totalResidents ?? 0) > 0 ? round((($totalFemale ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>%"></div>
                             </div>
-                            <span class="progress-description"><?= ($totalResidents ?? 0) > 0 ? round((($totalFemale ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>% of residents</span>
+                            <span class="progress-description">
+                                <?= ($totalResidents ?? 0) > 0 ? round((($totalFemale ?? 0) / ($totalResidents ?? 1)) * 100) : 0 ?>% of residents
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ===================== ROW 4: Charts ===================== -->
+            <!-- ================================================================
+                 ROW 4 – Charts (Gender, Purok, Civil Status)
+                 ================================================================ -->
             <div class="row">
-                <!-- Gender Doughnut -->
+                <!-- Gender Pie / Doughnut -->
                 <div class="col-lg-4 col-md-6 col-12">
                     <div class="card card-default shadow-sm">
                         <div class="card-header">
@@ -210,8 +240,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Residents per Purok Bar -->
+                <!-- Residents per Purok (bar chart) -->
                 <div class="col-lg-5 col-md-6 col-12">
                     <div class="card card-default shadow-sm">
                         <div class="card-header">
@@ -225,8 +254,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Civil Status Pie -->
+                <!-- Civil Status (pie chart) -->
                 <div class="col-lg-3 col-md-6 col-12">
                     <div class="card card-default shadow-sm">
                         <div class="card-header">
@@ -254,58 +282,71 @@
                 </div>
             </div>
 
-            <!-- ===================== ROW 5: Activity + Quick Actions ===================== -->
+            <!-- ================================================================
+                 ROW 5 – Recent Activity & Quick Actions
+                 ================================================================ -->
             <div class="row">
+                <!-- Recent System Activity Panel -->
                 <div class="col-md-8">
-                    <div class="card card-default shadow-sm">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-bullhorn mr-1"></i> Recent Activity</h3>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                    <div class="rv-activity-panel">
+                        <div class="rv-activity-header">
+                            <div class="rv-activity-title">
+                                <i class="fas fa-history"></i>
+                                Recent System Activity
                             </div>
+                            <a href="<?= base_url('logs') ?>" style="font-size:0.75rem; color:var(--rv-primary); text-decoration:none; font-weight:600;">View All</a>
                         </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table m-0 table-striped">
-                                    <thead>
-                                        <tr><th>Type</th><th>Details</th><th>Date</th></tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if (!empty($latestBlotters)): ?>
-                                            <?php foreach ($latestBlotters as $blotter): ?>
-                                                <tr>
-                                                    <td><span class="badge badge-danger">Blotter</span></td>
-                                                    <td><?= esc($blotter['complainant']) ?> vs <?= esc($blotter['respondent']) ?></td>
-                                                    <td><small><?= date('M d, Y', strtotime($blotter['created_at'])) ?></small></td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                        <?php if (!empty($latestCerts)): ?>
-                                            <?php foreach ($latestCerts as $cert): ?>
-                                                <tr>
-                                                    <td><span class="badge badge-info">Certificate</span></td>
-                                                    <td><?= esc($cert['type']) ?> — <?= esc($cert['resident_name']) ?></td>
-                                                    <td><small><?= date('M d, Y', strtotime($cert['created_at'])) ?></small></td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                        <?php if (empty($latestBlotters) && empty($latestCerts)): ?>
-                                            <tr><td colspan="3" class="text-center text-muted">No recent activity found.</td></tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="card-footer text-center">
-                            <a href="#" class="text-uppercase text-sm">View All Activity</a>
+
+                        <div class="rv-activity-feed">
+                            <?php if (empty($recentLogs)): ?>
+                                <div class="rv-activity-empty">
+                                    <i class="fas fa-history"></i>
+                                    <p>No recent activity found.</p>
+                                </div>
+                            <?php else: ?>
+                                <?php foreach ($recentLogs as $log): ?>
+                                    <?php 
+                                    // Determine icon based on action type
+                                    $iconClass = 'view';
+                                    $iconIcon  = 'fa-eye';
+                                    $actionStr = strtolower($log['ACTION'] ?? '');
+                                    if (strpos($actionStr, 'delete') !== false || strpos($actionStr, 'remove') !== false) {
+                                        $iconClass = 'cert'; $iconIcon = 'fa-trash-alt';
+                                    } elseif (strpos($actionStr, 'edit') !== false || strpos($actionStr, 'update') !== false) {
+                                        $iconClass = 'edit'; $iconIcon = 'fa-edit';
+                                    } elseif (strpos($actionStr, 'print') !== false) {
+                                        $iconClass = 'print'; $iconIcon = 'fa-print';
+                                    } elseif (strpos($actionStr, 'create') !== false || strpos($actionStr, 'add') !== false) {
+                                        $iconClass = 'success'; $iconIcon = 'fa-plus-circle';
+                                    }
+                                    ?>
+                                    <div class="rv-activity-item">
+                                        <div class="rv-activity-icon <?= $iconClass ?>">
+                                            <i class="fas <?= $iconIcon ?>"></i>
+                                        </div>
+                                        <div class="rv-activity-content">
+                                            <div class="rv-activity-action"><?= esc($log['ACTION']) ?></div>
+                                            <div class="rv-activity-user">
+                                                by <strong><?= esc($log['USER_NAME'] ?? 'System') ?></strong>
+                                            </div>
+                                            <div class="rv-activity-time">
+                                                <i class="fas fa-clock" style="font-size:0.65rem; margin-right:3px; opacity:0.6"></i>
+                                                <?= time_elapsed_string($log['DATELOG'] . ' ' . $log['TIMELOG']) ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
 
+                <!-- Quick Actions & User Info -->
                 <div class="col-md-4">
-                    <!-- Admin Quick Actions -->
                     <div class="card card-danger card-outline shadow-sm">
-                        <div class="card-header"><h3 class="card-title"><i class="fas fa-bolt mr-1"></i> Quick Actions</h3></div>
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-bolt mr-1"></i> Quick Actions</h3>
+                        </div>
                         <div class="card-body">
                             <a href="<?= base_url('resident/create') ?>" class="btn btn-primary btn-block mb-2">
                                 <i class="fas fa-user-plus mr-2"></i> Add New Resident
@@ -327,10 +368,10 @@
                             </a>
                         </div>
                     </div>
-
-                    <!-- Logged In As -->
                     <div class="card card-default shadow-sm">
-                        <div class="card-header"><h3 class="card-title"><i class="fas fa-user-circle mr-1"></i> Logged In As</h3></div>
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-user-circle mr-1"></i> Logged In As</h3>
+                        </div>
                         <div class="card-body text-center">
                             <i class="fas fa-user-shield fa-3x text-danger mb-2"></i>
                             <h5><?= esc(session()->get('name') ?? 'Admin User') ?></h5>
@@ -342,78 +383,36 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> <!-- end row 5 -->
 
         </div><!-- /.container-fluid -->
     </div><!-- /.content -->
 </div><!-- /.content-wrapper -->
 
+<!-- ================================================================
+     Pass server-side data to JavaScript as a clean JSON object
+     ================================================================ -->
 <script>
-    var BASE_URL         = "<?= base_url() ?>";
-    var CSRF_TOKEN_NAME  = "<?= csrf_token() ?>";
-    var CSRF_TOKEN_VALUE = "<?= csrf_hash() ?>";
-
-    var GENDER_DATA = {
-        male:   <?= (int)($totalMale   ?? 0) ?>,
-        female: <?= (int)($totalFemale ?? 0) ?>
+    // All data needed for dashboard charts and interactions
+    const DASHBOARD_DATA = {
+        baseUrl: "<?= base_url() ?>",
+        csrfTokenName: "<?= csrf_token() ?>",
+        csrfTokenValue: "<?= csrf_hash() ?>",
+        gender: {
+            male: <?= (int)($totalMale ?? 0) ?>,
+            female: <?= (int)($totalFemale ?? 0) ?>
+        },
+        purokLabels: <?= json_encode(array_column($purokCounts ?? [], 'sitio')) ?>,
+        purokValues: <?= json_encode(array_column($purokCounts ?? [], 'count')) ?>,
+        civilLabels: <?= json_encode(array_column($civilStatusData ?? [], 'civil_status')) ?>,
+        civilValues: <?= json_encode(array_column($civilStatusData ?? [], 'count')) ?>
     };
-
-    var PUROK_LABELS = <?= json_encode(array_column($purokCounts    ?? [], 'sitio'))        ?>;
-    var PUROK_VALUES = <?= json_encode(array_column($purokCounts    ?? [], 'count'))        ?>;
-    var CIVIL_LABELS = <?= json_encode(array_column($civilStatusData ?? [], 'civil_status')) ?>;
-    var CIVIL_VALUES = <?= json_encode(array_column($civilStatusData ?? [], 'count'))        ?>;
 </script>
 
-<!-- Remove this line if Chart.js is already loaded in your admin layout -->
+<!-- ================================================================
+     External JavaScript – handles all chart rendering and interactions
+     ================================================================ -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-
-<script>
-(function () {
-    var COLORS = ['#3c8dbc','#e91e8c','#00a65a','#f39c12','#605ca8','#00c0ef','#d81b60','#ff7701'];
-
-    // Gender Doughnut
-    var gCtx = document.getElementById('genderChart');
-    if (gCtx) {
-        new Chart(gCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Male', 'Female'],
-                datasets: [{ data: [GENDER_DATA.male, GENDER_DATA.female], backgroundColor: ['#3c8dbc','#e91e8c'], borderWidth: 2 }]
-            },
-            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } } }
-        });
-    }
-
-    // Residents per Purok Bar
-    var pCtx = document.getElementById('purokChart');
-    if (pCtx) {
-        new Chart(pCtx, {
-            type: 'bar',
-            data: {
-                labels: PUROK_LABELS.length ? PUROK_LABELS : ['No Data'],
-                datasets: [{ label: 'Residents', data: PUROK_VALUES.length ? PUROK_VALUES : [0], backgroundColor: COLORS.slice(0, PUROK_LABELS.length || 1), borderRadius: 4 }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { ticks: { maxRotation: 30 } } }
-            }
-        });
-    }
-
-    // Civil Status Pie
-    var cCtx = document.getElementById('civilStatusChart');
-    if (cCtx) {
-        new Chart(cCtx, {
-            type: 'pie',
-            data: {
-                labels: CIVIL_LABELS.length ? CIVIL_LABELS : ['No Data'],
-                datasets: [{ data: CIVIL_VALUES.length ? CIVIL_VALUES : [1], backgroundColor: COLORS, borderWidth: 2 }]
-            },
-            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } } }
-        });
-    }
-})();
-</script>
+<script src="<?= base_url('js/dashboard/admin.js') ?>"></script>
 
 <?= $this->endSection() ?>

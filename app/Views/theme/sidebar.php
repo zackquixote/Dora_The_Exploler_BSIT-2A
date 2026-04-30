@@ -226,14 +226,7 @@
                     </a>
                 </li>
 
-                <!-- RECORDS -->
-                <li class="nav-header">Records</li>
-                <li class="nav-item">
-                    <a href="<?= base_url('log') ?>" class="nav-link <?= $isActive('log') ?>">
-                        <i class="nav-icon fas fa-history"></i>
-                        <p>Activity Logs</p>
-                    </a>
-                </li>
+             
 
                 <li><div class="sidebar-divider"></div></li>
 

@@ -4,6 +4,34 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
+/**
+ * UserModel
+ * 
+ * Manages system user accounts, authentication, and roles.
+ * 
+ * TABLE: users
+ * - Stores login credentials and profile information for system users.
+ * 
+ * FIELDS:
+ * - uuid: Unique identifier (for API/public ID usage)
+ * - email: Login email (must be unique)
+ * - password: Hashed password
+ * - role: User role (e.g., admin, secretary, treasurer, captain)
+ * - status: Account status (active, inactive, etc.)
+ * - name: Display name
+ * - phone: Contact number
+ * 
+ * SOFT DELETE:
+ * - Uses soft deletes via `deleted_at` field.
+ * 
+ * TIMESTAMPS: created_at, updated_at, deleted_at
+ * 
+ * METHODS:
+ * - getRecords($start, $length, $searchValue): DataTables pagination + search.
+ *   Returns paginated users and total filtered count.
+ * 
+ * @package App\Models
+ */
 class UserModel extends Model
 {
     protected $table = 'users';

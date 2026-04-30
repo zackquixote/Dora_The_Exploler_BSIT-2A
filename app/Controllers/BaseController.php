@@ -18,6 +18,8 @@ use Psr\Log\LoggerInterface;
  *     class Home extends BaseController
  *
  * For security be sure to declare any new methods as protected or private.
+ *
+ * @package App\Controllers
  */
 abstract class BaseController extends Controller
 {

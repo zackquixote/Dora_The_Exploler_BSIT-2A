@@ -4,6 +4,33 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
+/**
+ * HouseholdModel
+ * 
+ * Manages household units and their primary address information.
+ * 
+ * TABLE: households
+ * - Represents a group of residents living under one house number/address.
+ * 
+ * FIELDS:
+ * - household_no: Unique household identifier
+ * - address: Full address text
+ * - street_address: Street part of the address
+ * - head_resident_id: FK to residents.id (household head)
+ * - sitio: Must be one of the 5 predefined puroks
+ * - house_type: Concrete, Semi-Concrete, Wood, Light Materials
+ * 
+ * CONSTRAINTS:
+ * - Allowed sitios: Purok Malipayon, Purok Masagana, Purok Cory, Purok Kawayan, Purok Pagla-um
+ * 
+ * METHODS:
+ * - getBySitio($sitio): Retrieve all households in a specific sitio
+ * - getAllWithHead(): Join residents to get head resident name
+ * - getResidentCount($householdId): Count residents belonging to a household
+ * - isUniqueHouseholdNo($no, $ignoreId): Check for duplicate household numbers
+ * 
+ * @package App\Models
+ */
 class HouseholdModel extends Model
 {
     protected $table = 'households';

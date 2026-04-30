@@ -1,0 +1,655 @@
+/* ============================================================
+   Blotter Views – Elevated Civic Authority Design
+   Applies to: /blotter, /blotter/create, /blotter/view
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* ── Design Tokens ── */
+:root {
+    --bl-primary:        #1B3A6B;
+    --bl-primary-mid:    #2251A3;
+    --bl-primary-light:  #3B6ED4;
+    --bl-accent:         #E8A020;
+    --bl-accent-dark:    #C4841A;
+    --bl-danger:         #C0392B;
+    --bl-danger-bg:      #FEF0EE;
+    --bl-success:        #0E7A52;
+    --bl-success-bg:     #E6F7F1;
+    --bl-warning:        #B45309;
+    --bl-warning-bg:     #FEF3CD;
+    --bl-info:           #1A5FA8;
+    --bl-info-bg:        #E8F0FD;
+
+    --bl-bg-page:        #F0F2F7;
+    --bl-card:           #FFFFFF;
+    --bl-card-alt:       #F8F9FC;
+
+    --bl-text:           #0D1B2A;
+    --bl-text-secondary: #3D4F63;
+    --bl-text-muted:     #7A8EA8;
+
+    --bl-border:         #D5DCE8;
+    --bl-border-light:   #EAEEf5;
+
+    --bl-radius-sm:      4px;
+    --bl-radius:         10px;
+    --bl-radius-lg:      14px;
+
+    --bl-shadow-xs:      0 1px 2px rgba(13,27,42,0.06);
+    --bl-shadow-sm:      0 2px 6px rgba(13,27,42,0.08), 0 1px 2px rgba(13,27,42,0.04);
+    --bl-shadow-md:      0 6px 20px rgba(13,27,42,0.10), 0 2px 6px rgba(13,27,42,0.06);
+    --bl-shadow-inset:   inset 0 1px 3px rgba(13,27,42,0.06);
+
+    --bl-font:           'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --bl-mono:           'JetBrains Mono', monospace;
+
+    --bl-transition:     all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Base Wrapper ── */
+.content-wrapper.blotter-scope,
+.content-wrapper {
+    font-family: var(--bl-font) !important;
+    background: var(--bl-bg-page) !important;
+    min-height: 100vh !important;
+}
+
+/* ── Page Header ── */
+.blotter-scope .content-header,
+.content-wrapper .content-header {
+    padding: 1.75rem 1.5rem 0.5rem !important;
+    background: transparent !important;
+}
+
+.blotter-scope .content-header h1,
+.content-wrapper .content-header h1 {
+    font-size: 1.55rem !important;
+    font-weight: 800 !important;
+    color: var(--bl-text) !important;
+    letter-spacing: -0.03em !important;
+    font-family: var(--bl-font) !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+    /* Subtle left accent bar */
+    padding-left: 0.9rem !important;
+    border-left: 3.5px solid var(--bl-accent) !important;
+}
+
+/* ── Breadcrumb ── */
+.blotter-scope .breadcrumb,
+.content-wrapper .breadcrumb {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 0.78rem !important;
+    font-family: var(--bl-font) !important;
+}
+
+.blotter-scope .breadcrumb-item a,
+.content-wrapper .breadcrumb-item a {
+    color: var(--bl-primary-light) !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    transition: var(--bl-transition) !important;
+}
+
+.blotter-scope .breadcrumb-item a:hover,
+.content-wrapper .breadcrumb-item a:hover {
+    color: var(--bl-primary) !important;
+}
+
+.blotter-scope .breadcrumb-item.active,
+.content-wrapper .breadcrumb-item.active {
+    color: var(--bl-text-muted) !important;
+}
+
+.blotter-scope .breadcrumb-item + .breadcrumb-item::before,
+.content-wrapper .breadcrumb-item + .breadcrumb-item::before {
+    content: '›' !important;
+    color: var(--bl-border) !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+}
+
+/* ── Cards ── */
+.blotter-scope .card,
+.content-wrapper .card {
+    background: var(--bl-card) !important;
+    border: 1px solid var(--bl-border-light) !important;
+    border-radius: var(--bl-radius-lg) !important;
+    box-shadow: var(--bl-shadow-sm) !important;
+    margin-bottom: 1.5rem !important;
+    overflow: hidden !important;
+    transition: box-shadow 0.2s ease !important;
+}
+
+.blotter-scope .card:hover,
+.content-wrapper .card:hover {
+    box-shadow: var(--bl-shadow-md) !important;
+}
+
+.blotter-scope .card-header,
+.content-wrapper .card-header {
+    background: var(--bl-card-alt) !important;
+    border-bottom: 1px solid var(--bl-border-light) !important;
+    padding: 1.1rem 1.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+/* Override AdminLTE colored card headers */
+.blotter-scope .card.card-warning .card-header,
+.content-wrapper .card.card-warning .card-header,
+.blotter-scope .card.card-info .card-header,
+.content-wrapper .card.card-info .card-header,
+.blotter-scope .card.card-primary .card-header,
+.content-wrapper .card.card-primary .card-header {
+    background: var(--bl-primary) !important;
+    border-bottom: none !important;
+}
+
+.blotter-scope .card.card-warning .card-header *,
+.content-wrapper .card.card-warning .card-header *,
+.blotter-scope .card.card-info .card-header *,
+.content-wrapper .card.card-info .card-header *,
+.blotter-scope .card.card-primary .card-header *,
+.content-wrapper .card.card-primary .card-header * {
+    color: #FFFFFF !important;
+}
+
+/* Accent top stripe on colored-header cards */
+.blotter-scope .card.card-warning,
+.content-wrapper .card.card-warning {
+    border-top: 3px solid var(--bl-accent) !important;
+}
+
+.blotter-scope .card.card-info,
+.content-wrapper .card.card-info {
+    border-top: 3px solid var(--bl-primary-light) !important;
+}
+
+.card-title {
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    margin: 0 !important;
+    font-family: var(--bl-font) !important;
+}
+
+.blotter-scope .card-body,
+.content-wrapper .card-body {
+    padding: 1.5rem !important;
+}
+
+.blotter-scope .card-footer,
+.content-wrapper .card-footer {
+    background: var(--bl-card-alt) !important;
+    border-top: 1px solid var(--bl-border-light) !important;
+    padding: 1rem 1.5rem !important;
+}
+
+/* p-0 utility override */
+.blotter-scope .card-body.p-0,
+.content-wrapper .card-body.p-0 {
+    padding: 0 !important;
+}
+
+/* ── Alerts ── */
+.blotter-scope .alert,
+.content-wrapper .alert {
+    border-radius: var(--bl-radius) !important;
+    border: none !important;
+    padding: 0.9rem 1.25rem !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    font-family: var(--bl-font) !important;
+}
+
+.blotter-scope .alert-success,
+.content-wrapper .alert-success {
+    background: var(--bl-success-bg) !important;
+    color: var(--bl-success) !important;
+    border-left: 4px solid var(--bl-success) !important;
+}
+
+.blotter-scope .alert-success::before,
+.content-wrapper .alert-success::before {
+    content: '✓' !important;
+    font-weight: 800 !important;
+    font-size: 1rem !important;
+}
+
+/* ── Tables ── */
+.blotter-scope .table,
+.content-wrapper .table {
+    font-family: var(--bl-font) !important;
+    background: transparent !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    width: 100% !important;
+    font-size: 0.88rem !important;
+}
+
+.blotter-scope .table thead th,
+.content-wrapper .table thead th {
+    background: var(--bl-primary) !important;
+    color: rgba(255,255,255,0.85) !important;
+    font-weight: 600 !important;
+    font-size: 0.72rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    border: none !important;
+    padding: 0.9rem 1rem !important;
+    white-space: nowrap !important;
+    font-family: var(--bl-font) !important;
+}
+
+/* Round the header corners */
+.blotter-scope .table thead th:first-child,
+.content-wrapper .table thead th:first-child {
+    border-radius: 0 !important;
+}
+
+.blotter-scope .table tbody td,
+.content-wrapper .table tbody td {
+    padding: 0.85rem 1rem !important;
+    border-bottom: 1px solid var(--bl-border-light) !important;
+    vertical-align: middle !important;
+    color: var(--bl-text) !important;
+    font-size: 0.875rem !important;
+    background: #FFFFFF !important;
+}
+
+.blotter-scope .table tbody tr:last-child td,
+.content-wrapper .table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+.blotter-scope .table tbody tr,
+.content-wrapper .table tbody tr {
+    transition: var(--bl-transition) !important;
+}
+
+.blotter-scope .table tbody tr:hover td,
+.content-wrapper .table tbody tr:hover td {
+    background: #F5F7FF !important;
+    cursor: default !important;
+}
+
+/* VS column */
+.blotter-scope .table .font-weight-bold,
+.content-wrapper .table .font-weight-bold {
+    color: var(--bl-text-muted) !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    font-family: var(--bl-mono) !important;
+}
+
+/* Date cells */
+.blotter-scope .table tbody td:first-child,
+.content-wrapper .table tbody td:first-child {
+    font-family: var(--bl-mono) !important;
+    font-size: 0.82rem !important;
+    color: var(--bl-text-secondary) !important;
+    font-weight: 500 !important;
+}
+
+.blotter-scope .table-responsive,
+.content-wrapper .table-responsive {
+    border-radius: 0 0 var(--bl-radius-lg) var(--bl-radius-lg) !important;
+    overflow: hidden !important;
+}
+
+/* ── Badges ── */
+.blotter-scope .badge,
+.content-wrapper .badge {
+    font-family: var(--bl-font) !important;
+    font-weight: 600 !important;
+    font-size: 0.7rem !important;
+    padding: 0.32em 0.7em !important;
+    border-radius: 20px !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+}
+
+/* Status-specific badge colors */
+.badge-warning  { background: var(--bl-warning-bg) !important;  color: var(--bl-warning)  !important; }
+.badge-info     { background: var(--bl-info-bg)    !important;  color: var(--bl-info)     !important; }
+.badge-success  { background: var(--bl-success-bg) !important;  color: var(--bl-success)  !important; }
+.badge-danger   { background: var(--bl-danger-bg)  !important;  color: var(--bl-danger)   !important; }
+.badge-secondary { background: var(--bl-border-light) !important; color: var(--bl-text-secondary) !important; }
+
+/* ── Buttons ── */
+.blotter-scope .btn,
+.content-wrapper .btn {
+    font-family: var(--bl-font) !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    border-radius: var(--bl-radius-sm) !important;
+    transition: var(--bl-transition) !important;
+    border: none !important;
+    letter-spacing: 0.01em !important;
+    padding: 0.5rem 1.1rem !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    text-decoration: none !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Ripple shimmer on hover */
+.blotter-scope .btn::after,
+.content-wrapper .btn::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: rgba(255,255,255,0.12) !important;
+    opacity: 0 !important;
+    transition: opacity 0.18s ease !important;
+}
+
+.blotter-scope .btn:hover::after,
+.content-wrapper .btn:hover::after {
+    opacity: 1 !important;
+}
+
+/* Primary */
+.blotter-scope .btn-primary,
+.content-wrapper .btn-primary {
+    background: var(--bl-primary) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 3px 8px rgba(27,58,107,0.30) !important;
+}
+.blotter-scope .btn-primary:hover,
+.content-wrapper .btn-primary:hover {
+    background: var(--bl-primary-mid) !important;
+    box-shadow: 0 5px 14px rgba(27,58,107,0.38) !important;
+    transform: translateY(-1px) !important;
+    color: #FFFFFF !important;
+}
+.blotter-scope .btn-primary:active,
+.content-wrapper .btn-primary:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 5px rgba(27,58,107,0.25) !important;
+}
+
+/* Warning (used as "Save" / "Update") */
+.blotter-scope .btn-warning,
+.content-wrapper .btn-warning {
+    background: var(--bl-accent) !important;
+    color: #1A1A1A !important;
+    box-shadow: 0 3px 8px rgba(232,160,32,0.30) !important;
+}
+.blotter-scope .btn-warning:hover,
+.content-wrapper .btn-warning:hover {
+    background: var(--bl-accent-dark) !important;
+    color: #1A1A1A !important;
+    box-shadow: 0 5px 14px rgba(232,160,32,0.38) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Info */
+.blotter-scope .btn-info,
+.content-wrapper .btn-info {
+    background: var(--bl-info) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 3px 8px rgba(26,95,168,0.25) !important;
+}
+.blotter-scope .btn-info:hover,
+.content-wrapper .btn-info:hover {
+    background: #1450A0 !important;
+    color: #FFFFFF !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 5px 14px rgba(26,95,168,0.35) !important;
+}
+
+/* Secondary / Ghost */
+.blotter-scope .btn-secondary,
+.content-wrapper .btn-secondary {
+    background: #FFFFFF !important;
+    color: var(--bl-text-secondary) !important;
+    border: 1px solid var(--bl-border) !important;
+    box-shadow: var(--bl-shadow-xs) !important;
+}
+.blotter-scope .btn-secondary:hover,
+.content-wrapper .btn-secondary:hover {
+    background: var(--bl-card-alt) !important;
+    border-color: var(--bl-primary-light) !important;
+    color: var(--bl-primary) !important;
+}
+
+/* btn-block */
+.blotter-scope .btn-block,
+.content-wrapper .btn-block {
+    width: 100% !important;
+    justify-content: center !important;
+}
+
+/* btn-sm */
+.blotter-scope .btn-sm,
+.content-wrapper .btn-sm {
+    font-size: 0.78rem !important;
+    padding: 0.35rem 0.85rem !important;
+}
+
+/* ── Form Labels ── */
+.blotter-scope label,
+.content-wrapper label {
+    display: block !important;
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+    color: var(--bl-text-muted) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    font-family: var(--bl-font) !important;
+    margin-bottom: 0.4rem !important;
+}
+
+/* ── Form Groups ── */
+.blotter-scope .form-group,
+.content-wrapper .form-group {
+    margin-bottom: 1.35rem !important;
+}
+
+/* ── Input / Select / Textarea ── */
+.blotter-scope .form-control,
+.content-wrapper .form-control {
+    width: 100% !important;
+    padding: 0.6rem 0.9rem !important;
+    font-size: 0.9rem !important;
+    font-family: var(--bl-font) !important;
+    color: var(--bl-text) !important;
+    background: #FFFFFF !important;
+    border: 1.5px solid var(--bl-border) !important;
+    border-radius: var(--bl-radius-sm) !important;
+    transition: var(--bl-transition) !important;
+    height: auto !important;
+    line-height: 1.5 !important;
+    box-shadow: var(--bl-shadow-inset) !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
+
+.blotter-scope .form-control::placeholder,
+.content-wrapper .form-control::placeholder {
+    color: var(--bl-text-muted) !important;
+    font-weight: 400 !important;
+    opacity: 0.65 !important;
+}
+
+.blotter-scope .form-control:hover,
+.content-wrapper .form-control:hover {
+    border-color: #A8BAD8 !important;
+}
+
+.blotter-scope .form-control:focus,
+.content-wrapper .form-control:focus {
+    outline: none !important;
+    border-color: var(--bl-primary-mid) !important;
+    box-shadow: 0 0 0 3px rgba(34,81,163,0.12), var(--bl-shadow-inset) !important;
+    background: #FAFCFF !important;
+}
+
+/* Select arrow */
+.blotter-scope select.form-control,
+.content-wrapper select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237A8EA8' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.85rem center !important;
+    padding-right: 2.2rem !important;
+    cursor: pointer !important;
+}
+
+/* Textarea */
+.blotter-scope textarea.form-control,
+.content-wrapper textarea.form-control {
+    resize: vertical !important;
+    min-height: 110px !important;
+    line-height: 1.6 !important;
+}
+
+/* ── View page: incident details panel ── */
+.blotter-scope .bg-light.border.rounded,
+.content-wrapper .bg-light.border.rounded {
+    background: var(--bl-card-alt) !important;
+    border: 1px solid var(--bl-border-light) !important;
+    border-radius: var(--bl-radius) !important;
+    padding: 1.2rem !important;
+    font-size: 0.9rem !important;
+    line-height: 1.75 !important;
+    color: var(--bl-text-secondary) !important;
+    box-shadow: var(--bl-shadow-inset) !important;
+}
+
+/* View detail rows */
+.blotter-scope .card-body p,
+.content-wrapper .card-body p {
+    margin-bottom: 0.75rem !important;
+    font-size: 0.9rem !important;
+    color: var(--bl-text-secondary) !important;
+    line-height: 1.5 !important;
+}
+
+.blotter-scope .card-body p strong,
+.content-wrapper .card-body p strong {
+    color: var(--bl-text) !important;
+    font-weight: 700 !important;
+    font-size: 0.78rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    display: inline-block !important;
+    min-width: 130px !important;
+}
+
+.blotter-scope .card-body h5,
+.content-wrapper .card-body h5 {
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    color: var(--bl-text-muted) !important;
+    margin-bottom: 0.6rem !important;
+    margin-top: 0.5rem !important;
+}
+
+/* ── Section content padding ── */
+.blotter-scope section.content,
+.content-wrapper section.content {
+    padding: 1rem 1.5rem 2rem !important;
+}
+
+/* ── Row gaps ── */
+.blotter-scope .row,
+.content-wrapper .row {
+    margin-right: -0.75rem !important;
+    margin-left: -0.75rem !important;
+}
+
+/* ── mt-2 spacing utility ── */
+.blotter-scope .mt-2,
+.content-wrapper .mt-2 {
+    margin-top: 0.6rem !important;
+}
+
+/* ── Scrollbar (table-responsive) ── */
+.blotter-scope .table-responsive::-webkit-scrollbar,
+.content-wrapper .table-responsive::-webkit-scrollbar {
+    height: 5px !important;
+}
+.blotter-scope .table-responsive::-webkit-scrollbar-thumb,
+.content-wrapper .table-responsive::-webkit-scrollbar-thumb {
+    background: var(--bl-border) !important;
+    border-radius: 10px !important;
+}
+
+/* ── Entry animation for cards ── */
+@keyframes blotter-fadein {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.blotter-scope .card,
+.content-wrapper .card {
+    animation: blotter-fadein 0.3s ease both !important;
+}
+
+.blotter-scope .card:nth-child(2),
+.content-wrapper .card:nth-child(2) {
+    animation-delay: 0.06s !important;
+}
+
+.blotter-scope .card:nth-child(3),
+.content-wrapper .card:nth-child(3) {
+    animation-delay: 0.12s !important;
+}
+
+/* ── Table row shimmer on page load ── */
+@keyframes blotter-rowfade {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.content-wrapper .table tbody tr {
+    animation: blotter-rowfade 0.22s ease both !important;
+}
+
+.content-wrapper .table tbody tr:nth-child(1)  { animation-delay: 0.05s !important; }
+.content-wrapper .table tbody tr:nth-child(2)  { animation-delay: 0.09s !important; }
+.content-wrapper .table tbody tr:nth-child(3)  { animation-delay: 0.13s !important; }
+.content-wrapper .table tbody tr:nth-child(4)  { animation-delay: 0.17s !important; }
+.content-wrapper .table tbody tr:nth-child(5)  { animation-delay: 0.21s !important; }
+.content-wrapper .table tbody tr:nth-child(6)  { animation-delay: 0.25s !important; }
+.content-wrapper .table tbody tr:nth-child(7)  { animation-delay: 0.29s !important; }
+.content-wrapper .table tbody tr:nth-child(8)  { animation-delay: 0.33s !important; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .content-wrapper .content-header h1 {
+        font-size: 1.2rem !important;
+    }
+
+    .blotter-scope .card-body,
+    .content-wrapper .card-body {
+        padding: 1rem !important;
+    }
+
+    .blotter-scope section.content,
+    .content-wrapper section.content {
+        padding: 0.75rem 0.75rem 2rem !important;
+    }
+
+    .blotter-scope .btn-block + .btn-block,
+    .content-wrapper .btn-block + .btn-block {
+        margin-top: 0.5rem !important;
+    }
+}

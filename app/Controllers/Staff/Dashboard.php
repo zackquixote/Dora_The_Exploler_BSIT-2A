@@ -5,22 +5,24 @@ namespace App\Controllers\Staff;
 use App\Controllers\BaseController;
 use App\Models\ResidentModel;
 use App\Models\HouseholdModel;
+use App\Models\LogModel; // <--- ADDED THIS
 
 class Dashboard extends BaseController
 {
     public function index()
     {
-        // ── Guard: must be logged in AND be staff ──────────────────────
+        // ── Guard: must be logged in ──────────────────────
         if (!session()->get('logged_in')) {
             return redirect()->to('/login');
         }
 
-        // If an admin somehow lands here, send them to their own dashboard
+        // If an admin lands here, send them to admin dashboard
         if (session()->get('role') !== 'staff') {
             return redirect()->to('/admin/dashboard');
         }
 
         $db = \Config\Database::connect();
+        $logModel = new LogModel(); // <--- ADDED THIS
 
         $totalResidents  = $db->table('residents')->where('deleted_at', null)->countAllResults();
         $totalHouseholds = $db->table('households')->countAllResults();
@@ -48,6 +50,12 @@ class Dashboard extends BaseController
             ->orderBy('count', 'DESC')
             ->get()->getResultArray();
 
+        // ── Recent Activity Logs ────────────────────────────────────────
+        // FIXED: Uses DATELOG and TIMELOG instead of created_at
+        $recentLogs = $logModel->orderBy('DATELOG DESC, TIMELOG DESC')
+                               ->limit(10)
+                               ->findAll();
+
         // ── Loads app/Views/Staff/dashboard.php ───────────────────────
         return view('Staff/dashboard', [
             'title'           => 'Staff Dashboard',
@@ -65,6 +73,7 @@ class Dashboard extends BaseController
             'civilStatusData' => $civilStatusData,
             'latestBlotters'  => [],
             'latestCerts'     => [],
+            'recentLogs'      => $recentLogs,
         ]);
     }
 }

@@ -31,21 +31,35 @@
                     <h3 class="card-title">Incident Details</h3>
                 </div>
                 <form action="<?= base_url('blotter/store') ?>" method="POST">
+
+                    <!-- DATALIST FOR RESIDENT AUTOCOMPLETE -->
+                    <datalist id="resident-list">
+                        <?php foreach($resident_names as $name): ?>
+                            <option value="<?= esc($name) ?>">
+                        <?php endforeach; ?>
+                    </datalist>
+
                     <div class="card-body">
                         <div class="row">
-                            <!-- Complainant Info -->
+                            <!-- Complainant Info (now with autocomplete) -->
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Complainant Name (Victim)</label>
-                                    <input type="text" name="complainant" class="form-control" placeholder="Full Name" required value="<?= old('complainant') ?>">
+                                    <input type="text" name="complainant" class="form-control"
+                                           placeholder="Type or select a resident"
+                                           list="resident-list"
+                                           required value="<?= old('complainant') ?>">
                                 </div>
                             </div>
                             
-                            <!-- Respondent Info -->
+                            <!-- Respondent Info (now with autocomplete) -->
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Respondent Name (Accused)</label>
-                                    <input type="text" name="respondent" class="form-control" placeholder="Full Name" required value="<?= old('respondent') ?>">
+                                    <input type="text" name="respondent" class="form-control"
+                                           placeholder="Type or select a resident"
+                                           list="resident-list"
+                                           required value="<?= old('respondent') ?>">
                                 </div>
                             </div>
                         </div>
@@ -108,4 +122,4 @@
     </section>
 </div>
 
-<?= $this->endSection() ?>
+<?= $this->endSection() ?>  

@@ -59,7 +59,7 @@ abstract class Migration
      */
     public function getDBGroup(): ?string
     {
-        return $this->DBGroup;
+        return $this->DBGroup;  
     }
 
     /**

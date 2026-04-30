@@ -1,0 +1,74 @@
+/* ================================================================
+   Dashboard custom styles
+   ================================================================ */
+
+/* Activity panel – ensure consistent spacing */
+.rv-activity-panel {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 0 8px rgba(0,0,0,0.05);
+}
+
+.rv-activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.rv-activity-title {
+    font-weight: 600;
+    color: #333;
+}
+
+.rv-activity-feed {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.rv-activity-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.rv-activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    color: #fff;
+}
+
+/* icon colors */
+.rv-activity-icon.view   { background: #17a2b8; }
+.rv-activity-icon.edit   { background: #ffc107; color: #212529; }
+.rv-activity-icon.cert   { background: #dc3545; }
+.rv-activity-icon.print  { background: #6c757d; }
+.rv-activity-icon.success{ background: #28a745; }
+
+.rv-activity-content {
+    flex: 1;
+}
+
+.rv-activity-action {
+    font-weight: 500;
+}
+
+.rv-activity-user,
+.rv-activity-time {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.rv-activity-empty {
+    text-align: center;
+    padding: 2rem;
+    color: #aaa;
+}

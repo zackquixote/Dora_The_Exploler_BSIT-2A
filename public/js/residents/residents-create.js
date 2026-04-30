@@ -158,7 +158,7 @@
      * @param {Array} households - List of households
      */
     function populateHouseholdOptions(households) {
-        let options = '<option value="">-- Select household (optional) --</option>';
+        let options = '<option value=""> Select household (optional) </option>';
         
         if (households.length > 0) {
             households.forEach(function(household) {

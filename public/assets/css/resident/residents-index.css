@@ -1,0 +1,384 @@
+/* ============================================================
+   residents-index.css
+   Modern Index Page Layout
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary: #2B4FBF;
+    --primary-hover: #1E3A9B;
+    --secondary: #64748B;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --border: #E2E8F0;
+    --bg-page: #F1F5F9;
+    --bg-card: #FFFFFF;
+    --radius: 10px;
+}
+
+/* --- Global Scope --- */
+.residents-page {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-page);
+    color: var(--text-main);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- Page Header --- */
+.rp-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 1.5rem 0;
+}
+
+.rp-page-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-main);
+    letter-spacing: -0.02em;
+}
+.rp-page-title i { color: var(--primary); }
+
+.rp-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+    font-weight: 400;
+}
+.rp-breadcrumb a { color: var(--primary); text-decoration: none; font-weight: 500; }
+.rp-breadcrumb a:hover { text-decoration: underline; }
+.rp-breadcrumb i { font-size: 0.6rem; color: #CBD5E0; }
+
+/* --- Alerts --- */
+.rp-alert {
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-left: 4px solid;
+}
+.rp-alert-success {
+    background: #ECFDF5;
+    color: #065F46;
+    border-color: var(--success);
+}
+.rp-alert-danger {
+    background: #FEF2F2;
+    color: #991B1B;
+    border-color: var(--danger);
+}
+.rp-alert button.close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.6;
+    color: inherit;
+}
+
+/* --- Main Card --- */
+.rp-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.rp-card-header {
+    padding: 1.125rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+}
+
+.rp-card-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-main);
+    letter-spacing: -0.01em;
+}
+
+.rp-filter-badge {
+    background: #EEF2FF;
+    color: var(--primary);
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    letter-spacing: 0.01em;
+}
+
+/* --- Toolbar (Filter & Actions) --- */
+.rp-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.rp-select {
+    padding: 0.45rem 2rem 0.45rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 500;
+    color: var(--text-main);
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+}
+.rp-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(43, 79, 191, 0.1);
+}
+
+/* --- Buttons --- */
+.rp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.875rem;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    border: 1px solid transparent;
+    letter-spacing: -0.01em;
+}
+.rp-btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 1px 3px rgba(43, 79, 191, 0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.rp-btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+.rp-btn-ghost {
+    background: white;
+    color: var(--text-muted);
+    border-color: var(--border);
+}
+.rp-btn-ghost:hover {
+    background: #F8FAFC;
+    color: var(--text-main);
+    border-color: #CBD5E0;
+}
+
+/* --- Table Styling --- */
+.residents-page .table-responsive {
+    overflow-x: auto;
+}
+
+.residents-page #residentsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+/* Table Header */
+.residents-page #residentsTable thead {
+    background: #F8FAFC;
+}
+.residents-page #residentsTable th {
+    text-align: left;
+    padding: 0.625rem 1rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #94A3B8;
+    border-bottom: 1px solid var(--border);
+}
+.residents-page #residentsTable th[style*="width"] {
+    white-space: nowrap;
+}
+
+/* Table Body */
+.residents-page #residentsTable tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+}
+.residents-page #residentsTable tbody tr:last-child {
+    border-bottom: none;
+}
+.residents-page #residentsTable tbody tr:hover {
+    background: #F8FAFF;
+}
+.residents-page #residentsTable td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    color: var(--text-main);
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
+/* Table Elements */
+.residents-page .rp-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.residents-page .td-name {
+    font-weight: 600;
+    color: var(--text-main);
+    letter-spacing: -0.01em;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+/* Badges */
+.residents-page .rp-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.rp-badge-voter-yes { background: #D1FAE5; color: #065F46; }
+.rp-badge-voter-no { background: #F1F5F9; color: #64748B; }
+.rp-badge-senior { background: #DBEAFE; color: #1E40AF; }
+.rp-badge-pwd { background: #FEF3C7; color: #92400E; }
+.rp-badge-purok { background: #EEF2FF; color: var(--primary); }
+.rp-badge-unassigned { background: #F1F5F9; color: var(--secondary); }
+
+/* Actions */
+.residents-page .rp-actions {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.residents-page .rp-action-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: #F8FAFC;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+.rp-action-view:hover { background: #DBEAFE; color: #1E40AF; }
+.rp-action-edit:hover { background: #FEF3C7; color: #92400E; }
+.rp-action-delete:hover { background: #FEE2E2; color: #991B1B; }
+
+/* Empty State */
+.residents-page .rp-empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    background: #F9FAFB;
+    border-radius: var(--radius);
+    margin: 1rem;
+    border: 1px dashed var(--border);
+    font-size: 0.875rem;
+}
+
+/* --- Stats Section --- */
+.rp-stats-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.rp-stats-header {
+    background: #1E293B;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.rp-stats-header h5 {
+    color: #fff;
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.rp-stats-header i { color: #93AADD; }
+
+.rp-stats-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* Purok Tiles */
+.rp-purok-tile {
+    flex: 1 1 140px;
+    min-width: 140px;
+    max-width: 160px;
+    text-decoration: none;
+    display: block;
+}
+
+.rp-purok-tile-inner {
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--tile-accent, var(--primary));
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.15s;
+    background: #fff;
+}
+.rp-purok-tile:hover .rp-purok-tile-inner {
+    border-color: var(--tile-accent, var(--primary));
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-3px);
+}
+.rp-purok-count {
+    font-size: 1.625rem;
+    font-weight: 700;
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: -0.03em;
+}
+.rp-purok-name {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}

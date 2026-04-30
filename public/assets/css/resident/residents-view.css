@@ -1,0 +1,564 @@
+/* ============================================================
+   residents-view.css — ACTIVITY MOVED TO BOTTOM
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* --- CSS Variables --- */
+:root {
+    --rv-primary: #3B82F6;         /* Modern Blue */
+    --rv-primary-dark: #2563EB;
+    --rv-primary-light: #EFF6FF;
+    --rv-success: #10B981;
+    --rv-success-bg: #ECFDF5;
+    --rv-warning: #F59E0B;
+    --rv-warning-bg: #FFFBEB;
+    --rv-danger: #EF4444;
+    --rv-danger-bg: #FEF2F2;
+    --rv-info: #0EA5E9;
+    --rv-info-bg: #E0F2FE;
+    --rv-gray: #64748B;
+    --rv-gray-bg: #F8FAFC;
+    --rv-border: #E2E8F0;
+    --rv-text: #1E293B;
+    --rv-text-muted: #64748B;
+    --rv-bg: #F1F5F9;
+    --rv-white: #FFFFFF;
+    
+    /* Polished shadows */
+    --rv-card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    
+    --rv-radius: 10px;
+    --rv-radius-sm: 6px;
+}
+
+/* --- Page Wrapper --- */
+.rv-page-wrapper {
+    background: var(--rv-bg);
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.residents-view-container {
+    /* Constrained width to avoid sidebar */
+    max-width: 1100px; 
+    margin: 0 auto;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--rv-text);
+}
+
+/* --- Header Section --- */
+.rv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.rv-title h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--rv-text);
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.rv-breadcrumb {
+    font-size: 0.75rem;
+    color: var(--rv-gray);
+    margin-top: 0.1rem;
+    font-weight: 500;
+}
+
+.rv-breadcrumb a {
+    color: var(--rv-primary);
+    text-decoration: none;
+}
+
+/* ============================================================
+   MAIN GRID — 2 COLUMN LAYOUT
+   ============================================================ */
+.rv-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+        "profile content"
+        "activity activity";
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .rv-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "profile"
+            "content"
+            "activity";
+    }
+}
+
+/* ============================================================
+   LEFT COLUMN: Profile Card
+   ============================================================ */
+.rv-profile-card {
+    background: var(--rv-white);
+    border-radius: var(--rv-radius);
+    box-shadow: var(--rv-card-shadow);
+    border: 1px solid var(--rv-border);
+    overflow: hidden;
+    grid-area: profile;
+}
+
+.rv-profile-header {
+    background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+    height: 80px;
+    position: relative;
+}
+
+.rv-profile-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 85% 10%, rgba(255,255,255,0.15) 0%, transparent 40%);
+}
+
+.rv-avatar-container {
+    position: relative;
+    margin-top: -40px;
+    display: inline-block;
+}
+
+.rv-avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--rv-white);
+    object-fit: cover;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.rv-profile-body {
+    padding: 0.75rem 0.75rem 1rem;
+    text-align: center;
+}
+
+.rv-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--rv-text);
+    margin: 0.5rem 0 0.1rem;
+}
+
+.rv-subtitle {
+    font-size: 0.8rem;
+    color: var(--rv-gray);
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.rv-meta-list {
+    text-align: left;
+    margin-bottom: 1rem;
+    background: var(--rv-gray-bg);
+    border-radius: var(--rv-radius-sm);
+    border: 1px solid var(--rv-border);
+}
+
+.rv-meta-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--rv-border);
+    font-size: 0.8rem;
+}
+
+.rv-meta-item:last-child { border-bottom: none; }
+
+.rv-meta-label {
+    color: var(--rv-gray);
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.rv-meta-value {
+    font-weight: 600;
+    color: var(--rv-text);
+    font-size: 0.85rem;
+}
+
+.rv-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: left;
+}
+
+.rv-action-link {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    color: var(--rv-text);
+    text-decoration: none;
+    border-radius: var(--rv-radius-sm);
+    transition: all 0.2s;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.rv-action-link i { 
+    width: 18px; 
+    text-align: center; 
+    margin-right: 0.5rem; 
+    color: var(--rv-gray); 
+}
+
+.rv-action-link:hover {
+    background: var(--rv-primary-light);
+    color: var(--rv-primary);
+}
+
+/* ============================================================
+   CENTER COLUMN: Details Card + Stack
+   ============================================================ */
+.rv-content-card {
+    background: var(--rv-white);
+    border-radius: var(--rv-radius);
+    box-shadow: var(--rv-card-shadow);
+    border: 1px solid var(--rv-border);
+    overflow: hidden;
+    grid-area: content;
+}
+
+/* --- Tabs --- */
+.rv-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--rv-border);
+    padding: 0 1rem;
+    background: #F8FAFC;
+}
+
+.rv-tab-btn {
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--rv-gray);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.rv-tab-btn i { font-size: 0.8rem; }
+
+.rv-tab-btn:hover { color: var(--rv-primary); }
+
+.rv-tab-btn.active {
+    color: var(--rv-primary);
+    border-bottom-color: var(--rv-primary);
+}
+
+.rv-tab-content {
+    display: none;
+    padding: 1.25rem;
+    animation: fadeIn 0.2s;
+}
+
+.rv-tab-content.active { display: block; }
+
+.rv-tab-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+@media (max-width: 800px) {
+    .rv-tab-two-col { grid-template-columns: 1fr; }
+}
+
+/* --- Data Tables --- */
+.rv-details-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.rv-details-table th {
+    text-align: left;
+    padding: 0.5rem 0;
+    background: transparent;
+    color: var(--rv-gray);
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--rv-border);
+}
+
+.rv-details-table td {
+    padding: 0.6rem 0;
+    color: var(--rv-text);
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 0.85rem;
+    vertical-align: middle;
+    font-weight: 500;
+}
+
+.rv-details-table tr:last-child td { border-bottom: none; }
+.rv-details-table tr:hover td { background: #F8FAFC; }
+
+/* ============================================================
+   ACTIVITY PANEL — NOW INSIDE THE RIGHT COLUMN STACK
+   ============================================================ */
+/* We remove absolute positioning or floats. It will sit naturally in the HTML flow. */
+
+.rv-activity-panel {
+    background: var(--rv-white);
+    border-radius: var(--rv-radius);
+    box-shadow: var(--rv-card-shadow);
+    border: 1px solid var(--rv-border);
+    overflow: hidden;
+    grid-area: activity;
+    margin-top: 0;
+}
+
+.rv-activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--rv-border);
+    background: #F8FAFC;
+}
+
+.rv-activity-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--rv-text);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.rv-activity-title i { color: var(--rv-primary); }
+
+.rv-activity-count {
+    background: var(--rv-primary-light);
+    color: var(--rv-primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+}
+
+.rv-activity-feed {
+    max-height: none;
+    overflow-y: visible;
+    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.75rem;
+}
+
+.rv-activity-feed::-webkit-scrollbar { width: 4px; }
+.rv-activity-feed::-webkit-scrollbar-thumb { background: var(--rv-border); border-radius: 4px; }
+
+.rv-activity-item {
+    display: flex;
+    gap: 0.85rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--rv-border);
+    border-radius: var(--rv-radius-sm);
+    transition: background 0.15s, box-shadow 0.15s;
+    background: #FAFBFC;
+}
+
+.rv-activity-item:last-child { border-bottom: none; }
+.rv-activity-item:hover { background: #F0F4FF; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+.rv-activity-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+}
+
+.rv-activity-icon.cert { background: var(--rv-info-bg); color: var(--rv-info); }
+.rv-activity-icon.print { background: var(--rv-success-bg); color: var(--rv-success); }
+.rv-activity-icon.edit { background: var(--rv-warning-bg); color: var(--rv-warning); }
+.rv-activity-icon.view { background: var(--rv-primary-light); color: var(--rv-primary); }
+
+.rv-activity-content { flex: 1; min-width: 0; }
+
+.rv-activity-action {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--rv-text);
+    margin-bottom: 0.1rem;
+    line-height: 1.3;
+}
+
+.rv-activity-user {
+    font-size: 0.8rem;
+    color: var(--rv-gray);
+    font-weight: 500;
+}
+
+.rv-activity-user strong { color: var(--rv-text); }
+
+.rv-activity-time {
+    font-size: 0.75rem;
+    color: var(--rv-gray);
+    margin-top: 0.25rem;
+}
+
+.rv-activity-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--rv-gray);
+    font-size: 0.875rem;
+}
+
+.rv-activity-empty i {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    opacity: 0.3;
+}
+
+.rv-activity-footer {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--rv-border);
+    text-align: center;
+    background: #F8FAFC;
+}
+
+.rv-activity-footer a {
+    font-size: 0.75rem;
+    color: var(--rv-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* ============================================================
+   BUTTONS — LOVELY & COMPACT
+   ============================================================ */
+.rv-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--rv-radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    border: 1px solid transparent;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.rv-btn-primary {
+    background: var(--rv-primary);
+    color: white;
+    border-color: transparent;
+}
+
+.rv-btn-primary:hover {
+    background: var(--rv-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25);
+}
+
+.rv-btn-secondary {
+    background: var(--rv-white);
+    color: #475569;
+    border-color: var(--rv-border);
+}
+
+.rv-btn-secondary:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    color: var(--rv-text);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+.rv-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.rv-badge-success { background: var(--rv-success-bg); color: #047857; }
+.rv-badge-info    { background: var(--rv-info-bg);    color: #0369A1; }
+.rv-badge-warning { background: var(--rv-warning-bg); color: #B45309; }
+.rv-badge-secondary { background: var(--rv-gray-bg);  color: var(--rv-text-muted); }
+.rv-badge-dark    { background: #1E293B; color: #fff; }
+
+/* ============================================================
+   FLASH MESSAGE
+   ============================================================ */
+.rv-flash-success {
+    background: var(--rv-success-bg);
+    color: #065F46;
+    padding: 0.75rem 1rem;
+    border-radius: var(--rv-radius-sm);
+    margin-bottom: 1rem;
+    border-left: 3px solid var(--rv-success);
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.rv-activity-item {
+    animation: fadeIn 0.2s ease-out both;
+}
+.rv-activity-item:nth-child(1)  { animation-delay: 0.05s; }
+.rv-activity-item:nth-child(2)  { animation-delay: 0.10s; }
+.rv-activity-item:nth-child(3)  { animation-delay: 0.15s; }
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+@media print {
+    .main-header, .main-sidebar, .main-footer, .content-wrapper > .content-header, .modal, .alert, .rv-header, .rv-actions, .rv-tabs, .rv-activity-panel, .modal-dialog {
+        display: none !important;
+    }
+    .rv-page-wrapper { padding: 0 !important; background: white !important; }
+    .rv-grid { display: block !important; }
+    .rv-tab-content { display: block !important; padding: 0 !important; border: none !important; }
+    .rv-profile-card, .rv-content-card { box-shadow: none !important; border: 1px solid #000 !important; }
+}

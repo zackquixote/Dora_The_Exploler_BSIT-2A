@@ -1,6 +1,9 @@
-<?= $this->extend('theme/template') ?>
+
+
+<?= $this->extend('theme/admin/template') ?>
 
 <?= $this->section('content') ?>
+
 <div class="content-wrapper">
   <div class="content-header">
     <div class="container-fluid">
@@ -11,10 +14,9 @@
       <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active">Dashboard v1</li>
+            <li class="breadcrumb-item active">Logs</li>
         </ol>
     </div>
-</div>
 </div>
 </div>
 
@@ -24,9 +26,10 @@
           <div class="form-group">
             <label for="filterDate"><strong>Filter by Date:</strong></label>
             <input type="date" id="filterDate" name="date" class="form-control" style="max-width: 250px;"
-            value="<?= esc($selectedDate ?? date('Y-m-d')) ?>">
-        </div>
+// NEW LINE (Allows blank for "All")
+value="<?= esc($selectedDate ?? '') ?>">        </div>
     </form>
+
     <?php if (!empty($logs)): ?>
         <div class="timeline timeline-inverse">
             <?php foreach ($logs as $log): ?>
@@ -61,20 +64,24 @@
                 <i class="fas fa-clock bg-gray"></i>
             </div>
         </div>
-        <?php else: ?>
-            <div class="alert alert-info">
-                No activity logs found.
-            </div>
-        <?php endif; ?>
+    <?php else: ?>
+        <div class="alert alert-info">
+            No activity logs found.
+        </div>
+    <?php endif; ?>
     </div>
 </section>
 </div>
+
 <div class="toasts-top-right fixed" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;"></div>
+
 <?= $this->endSection() ?>
+
 <?= $this->section('scripts') ?>
 <script>
   document.getElementById('filterDate').addEventListener('change', function () {
     document.getElementById('dateFilterForm').submit();
-});
+  });
 </script>
+
 <?= $this->endSection() ?>
