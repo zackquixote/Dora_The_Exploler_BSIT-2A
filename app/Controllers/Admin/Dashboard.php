@@ -8,169 +8,104 @@ use App\Models\HouseholdModel;
 use App\Models\LogModel;
 use App\Models\BlotterModel;
 use App\Models\CertificateModel;
+use App\Models\BlotterHearingModel;
 
-/**
- * Admin Dashboard Controller
- *
- * Displays aggregated statistics, charts, and recent activity
- * for the administrator's dashboard.
- *
- * @package App\Controllers\Admin
- */
 class Dashboard extends BaseController
 {
-    /**
-     * Dashboard main page
-     *
-     * Requires admin authentication.
-     * Collects data from multiple models and database tables,
-     * then renders the admin dashboard view.
-     *
-     * @return \CodeIgniter\HTTP\Response|string
-     */
     public function index()
     {
-        // ─────────────────────────────────────────────────────
-        // 1. Authentication Check
-        // ─────────────────────────────────────────────────────
-        if (! session()->get('logged_in') || session()->get('role') !== 'admin') {
+        if (!session()->get('logged_in') || session()->get('role') !== 'admin') {
             return redirect()->to('/login');
         }
 
-        // ─────────────────────────────────────────────────────
-        // 2. Load database connection and models
-        // ─────────────────────────────────────────────────────
         $db             = \Config\Database::connect();
         $residentModel  = new ResidentModel();
         $householdModel = new HouseholdModel();
         $logModel       = new LogModel();
         $blotterModel   = new BlotterModel();
         $certModel      = new CertificateModel();
+        $hearingModel   = new BlotterHearingModel();
 
-        // ─────────────────────────────────────────────────────
-        // 3. Primary Statistics
-        // ─────────────────────────────────────────────────────
-        
-        // Total residents (excluding soft-deleted)
-        $totalResidents = $db->table('residents')
-            ->where('deleted_at', null)
-            ->countAllResults();
-
-        // Total households
-        $totalHouseholds = $db->table('households')
-            ->countAllResults();
-
-        // Total certificates issued (all time)
+        // --- Existing stats (unchanged) ---
+        $totalResidents = $db->table('residents')->where('deleted_at', null)->countAllResults();
+        $totalHouseholds = $db->table('households')->countAllResults();
         $totalCerts = $certModel->countAll();
-
-        // Certificates issued today
-        $today      = date('Y-m-d');
+        $today = date('Y-m-d');
         $dailyCerts = $certModel->where('DATE(created_at)', $today)->countAllResults();
-
-        // Total blotter/incident records (using the correct table name)
         $blotterCount = $blotterModel->countAll();
 
-        // ─────────────────────────────────────────────────────
-        // 4. Secondary Statistics (demographic breakdowns)
-        // ─────────────────────────────────────────────────────
-        
-        // Registered voters
-        $totalVoters = $db->table('residents')
-            ->where('deleted_at', null)
-            ->where('is_voter', 1)
-            ->countAllResults();
+        $totalVoters  = $db->table('residents')->where('deleted_at', null)->where('is_voter', 1)->countAllResults();
+        $totalPwd     = $db->table('residents')->where('deleted_at', null)->where('is_pwd', 1)->countAllResults();
+        $totalSenior  = $db->table('residents')->where('deleted_at', null)->where('is_senior_citizen', 1)->countAllResults();
+        $totalMale    = $db->table('residents')->where('deleted_at', null)->where('sex', 'male')->countAllResults();
+        $totalFemale  = $db->table('residents')->where('deleted_at', null)->where('sex', 'female')->countAllResults();
+        $avgPerHousehold = $totalHouseholds > 0 ? round($totalResidents / $totalHouseholds, 1) : 0;
 
-        // Persons with disabilities
-        $totalPwd = $db->table('residents')
-            ->where('deleted_at', null)
-            ->where('is_pwd', 1)
-            ->countAllResults();
-
-        // Senior citizens
-        $totalSenior = $db->table('residents')
-            ->where('deleted_at', null)
-            ->where('is_senior_citizen', 1)
-            ->countAllResults();
-
-        // Gender counts
-        $totalMale   = $db->table('residents')
-            ->where('deleted_at', null)
-            ->where('sex', 'male')
-            ->countAllResults();
-        
-        $totalFemale = $db->table('residents')
-            ->where('deleted_at', null)
-            ->where('sex', 'female')
-            ->countAllResults();
-
-        // Average household size
-        $avgPerHousehold = $totalHouseholds > 0
-            ? round($totalResidents / $totalHouseholds, 1)
-            : 0;
-
-        // ─────────────────────────────────────────────────────
-        // 5. Chart Data
-        // ─────────────────────────────────────────────────────
-        
-        // Residents per Purok (sítio) for bar chart
         $purokCounts = $db->table('residents')
             ->select("COALESCE(NULLIF(sitio,''), 'Unassigned') as sitio, COUNT(*) as count")
             ->where('deleted_at', null)
             ->groupBy('sitio')
             ->orderBy('count', 'DESC')
-            ->get()
-            ->getResultArray();
+            ->get()->getResultArray();
 
-        // Civil status distribution for pie chart
         $civilStatusData = $db->table('residents')
             ->select("COALESCE(NULLIF(civil_status,''), 'Unknown') as civil_status, COUNT(*) as count")
             ->where('deleted_at', null)
             ->groupBy('civil_status')
             ->orderBy('count', 'DESC')
-            ->get()
-            ->getResultArray();
+            ->get()->getResultArray();
 
-        // ─────────────────────────────────────────────────────
-        // 6. System Accounts (admin only stats)
-        // ─────────────────────────────────────────────────────
-        
-        $totalStaff  = $db->table('users')
-            ->where('role', 'staff')
+        // --- Blotter Statistics ---
+        // Open cases (Pending, Investigating, Ongoing, For Hearing)
+        $openCases = $db->table('blotter_records')
+            ->whereIn('status', ['Pending','Investigating','Ongoing','For Hearing'])
             ->countAllResults();
 
-        $totalAdmins = $db->table('users')
-            ->where('role', 'admin')
+        // Cases settled this month
+        $settledThisMonth = $db->table('blotter_records')
+            ->where('status', 'Settled')
+            ->where('MONTH(updated_at)', date('m'))
+            ->where('YEAR(updated_at)', date('Y'))
             ->countAllResults();
 
-        // ─────────────────────────────────────────────────────
-        // 7. Recent Activity Logs
-        // ─────────────────────────────────────────────────────
-        
-        // Fetch the 10 most recent system logs
-        $recentLogs = $logModel
-            ->orderBy('DATELOG DESC, TIMELOG DESC')
-            ->limit(10)
-            ->findAll();
+        // Hearings today
+        $hearingsToday = $hearingModel
+            ->where('hearing_date', $today)
+            ->countAllResults();
 
-        // ─────────────────────────────────────────────────────
-        // 8. Latest Blotter Entries (for optional widget)
-        // ─────────────────────────────────────────────────────
-        
-        $latestBlotters = $blotterModel
-            ->orderBy('incident_date', 'DESC')
+        // Upcoming hearings (next 7 days)
+        $nextWeek = date('Y-m-d', strtotime('+7 days'));
+        $upcomingHearings = $hearingModel
+            ->where('hearing_date >=', $today)
+            ->where('hearing_date <=', $nextWeek)
+            ->orderBy('hearing_date', 'ASC')
+            ->orderBy('hearing_time', 'ASC')
+            ->findAll(5);
+
+        // Cases by purok (for a quick table)
+        $casesByPurok = $db->table('blotter_records')
+            ->select("COALESCE(NULLIF(purok,''), 'Unknown') as purok, COUNT(*) as total")
+            ->groupBy('purok')
+            ->orderBy('total', 'DESC')
+            ->get()->getResultArray();
+
+        // Recent cases
+        $recentCases = $blotterModel
+            ->select('case_number, incident_type, status, incident_date')
+            ->orderBy('id', 'DESC')
             ->limit(5)
             ->findAll();
 
-        // ─────────────────────────────────────────────────────
-        // 9. Load the dashboard view with all collected data
-        // ─────────────────────────────────────────────────────
-        
+        // Recent activity logs (unchanged but keep)
+        $recentLogs = $logModel->orderBy('DATELOG DESC, TIMELOG DESC')->limit(10)->findAll();
+
         return view('Admin/dashboard', [
             'title'           => 'Admin Dashboard',
+            // existing
             'totalResidents'  => $totalResidents,
             'totalHouseholds' => $totalHouseholds,
-            'pendingCerts'    => $totalCerts,     // now total certificates
-            'dailyCerts'      => $dailyCerts,     // issued today
+            'pendingCerts'    => $totalCerts,
+            'dailyCerts'      => $dailyCerts,
             'blotterCount'    => $blotterCount,
             'totalVoters'     => $totalVoters,
             'totalPwd'        => $totalPwd,
@@ -180,11 +115,18 @@ class Dashboard extends BaseController
             'avgPerHousehold' => $avgPerHousehold,
             'purokCounts'     => $purokCounts,
             'civilStatusData' => $civilStatusData,
-            'totalStaff'      => $totalStaff,
-            'totalAdmins'     => $totalAdmins,
-            'latestBlotters'  => $latestBlotters,
+            'totalStaff'      => $db->table('users')->where('role', 'staff')->countAllResults(),
+            'totalAdmins'     => $db->table('users')->where('role', 'admin')->countAllResults(),
+            'latestBlotters'  => [], // you can populate
             'latestCerts'     => [],
             'recentLogs'      => $recentLogs,
+            // new blotter stats
+            'openCases'        => $openCases,
+            'settledThisMonth' => $settledThisMonth,
+            'hearingsToday'    => $hearingsToday,
+            'upcomingHearings' => $upcomingHearings,
+            'casesByPurok'     => $casesByPurok,
+            'recentCases'      => $recentCases,
         ]);
     }
 }
