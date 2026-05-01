@@ -5,42 +5,36 @@ namespace App\Models;
 use CodeIgniter\Model;
 
 /**
- * BlotterModel
- * 
- * Handles barangay blotter (incident/complaint) records.
+ * BlotterModel – Incident / Case Records
  * 
  * TABLE: blotter_records
- * - Each record represents a reported incident with complainant,
- *   respondent, incident type, date, location, purok, and status.
  * 
- * FIELDS:
- * - complainant, respondent, incident_type, incident_date
- * - incident_location, purok, details, status, action_taken
- * - created_by (foreign key to users.id)
- * 
- * METHODS:
- * - getBlotters(): Joins with users to return creator name.
- * 
- * TIMESTAMPS: created_at, updated_at
- * 
- * @package App\Models
+ * UPGRADE NOTES (Case Management System):
+ * - `case_number` added (unique identifier, format BLT-YYYY-XXXX)
+ * - `updated_by` tracks last editor (FK to users.id)
+ * - `complainant` & `respondent` are KEPT TEMPORARILY during migration
+ *   They will be removed once the UI fully uses `blotter_parties`.
  */
 class BlotterModel extends Model
 {
     protected $table      = 'blotter_records';
     protected $primaryKey = 'id';
-    
+
+    // Allowed for mass assignment – mirrors current table columns.
+    // After full migration, remove 'complainant' and 'respondent'.
     protected $allowedFields = [
-        'complainant', 
-        'respondent', 
-        'incident_type', 
-        'incident_date', 
-        'incident_location', 
-        'purok', 
-        'details', 
-        'status', 
+        'case_number',          // NEW – unique case reference
+        'complainant',          // DEPRECATED – to be dropped
+        'respondent',           // DEPRECATED – to be dropped
+        'incident_type',
+        'incident_date',
+        'incident_location',
+        'purok',
+        'details',
+        'status',
         'action_taken',
-        'created_by'
+        'created_by',           // FK -> users.id (recording officer)
+        'updated_by'            // NEW – FK -> users.id (last editor)
     ];
 
     protected $useTimestamps = true;
@@ -48,14 +42,26 @@ class BlotterModel extends Model
     protected $updatedField  = 'updated_at';
 
     /**
-     * Get all blotters with creator name
-     * FIX: Changed users.username to users.name to match your DB structure
+     * Get all blotter records with creator name.
+     * NOTE: Complainant/respondent names now come from BlotterPartyModel.
      */
     public function getBlotters()
     {
-        return $this->select('blotter_records.*, users.name as created_by_name')
-                    ->join('users', 'users.id = blotter_records.created_by', 'left')
-                    ->orderBy('created_at', 'DESC')
-                    ->findAll();
+        return $this->select([
+                'blotter_records.id',
+                'case_number',
+                'incident_type',
+                'incident_date',
+                'incident_location',
+                'purok',
+                'details',
+                'status',
+                'action_taken',
+                'blotter_records.created_at',
+                'users.name as created_by_name'
+            ])
+            ->join('users', 'users.id = blotter_records.created_by', 'left')
+            ->orderBy('blotter_records.created_at', 'DESC')
+            ->findAll();
     }
 }
