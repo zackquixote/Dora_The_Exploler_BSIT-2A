@@ -1,17 +1,10 @@
 <?php
-// ---------------------------------------------------------
-// SMART THEME LOADER
-// ---------------------------------------------------------
- $role = strtolower(session()->get('role') ?? 'staff');
- $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+$role = strtolower(session()->get('role') ?? 'staff');
+$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
-
 <?= $this->extend($template) ?>
-
 <?= $this->section('content') ?>
 <div class="content-wrapper bg-light">
-    
-    <!-- HEADER -->
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2 align-items-center">
@@ -25,7 +18,7 @@
                             <p class="text-muted mb-0 small"><i class="fas fa-map-marker-alt mr-1"></i> <?= esc($household['address'] ?? 'Address not set') ?></p>
                         </div>
                     </div>
-                </div> 
+                </div>
                 <div class="col-sm-4 text-right">
                     <div class="dropdown">
                         <button class="btn btn-primary shadow-sm" data-toggle="dropdown">
@@ -54,19 +47,14 @@
 
     <section class="content">
         <div class="container-fluid">
-            
-            <!-- STATISTICS ROW -->
             <?php
-            $voterCount  = 0;
-            $seniorCount = 0;
-            $pwdCount    = 0;
+            $voterCount = $seniorCount = $pwdCount = 0;
             foreach ($residents as $r) {
                 if (!empty($r['is_voter']) && $r['is_voter'] == 1) $voterCount++;
                 if (!empty($r['is_senior_citizen']) && $r['is_senior_citizen'] == 1) $seniorCount++;
                 if (!empty($r['is_pwd']) && $r['is_pwd'] == 1) $pwdCount++;
             }
             ?>
-            
             <div class="row mb-4">
                 <div class="col-md-3">
                     <div class="card bg-primary text-white shadow-sm border-0 rounded-lg">
@@ -122,11 +110,8 @@
                 </div>
             </div>
 
-            <!-- MAIN CONTENT -->
             <div class="row">
-                <!-- LEFT PANEL -->
                 <div class="col-md-4">
-                    <!-- Head Profile Card -->
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-body box-profile text-center">
                             <?php 
@@ -140,41 +125,32 @@
                                  src="<?= base_url($profileSrc) ?>"
                                  alt="User profile picture"
                                  style="width: 120px; height: 120px; object-fit: cover;">
-                            
                             <h3 class="profile-username text-center mt-2 font-weight-bold">
                                 <?= esc($headName) ?>
                             </h3>
                             <p class="text-muted text-center mb-3">Head of Household</p>
-                            
                             <div class="d-flex justify-content-center mb-3">
-                                <?php if ($headResident && !empty($headResident['is_voter']) && $headResident['is_voter'] == 1): ?>
+                                <?php if ($headResident && !empty($headResident['is_voter'])): ?>
                                     <span class="badge badge-success mr-1"><i class="fas fa-check"></i> Voter</span>
                                 <?php endif; ?>
-                                <?php if ($headResident && !empty($headResident['is_senior_citizen']) && $headResident['is_senior_citizen'] == 1): ?>
+                                <?php if ($headResident && !empty($headResident['is_senior_citizen'])): ?>
                                     <span class="badge badge-info mr-1"><i class="fas fa-user-graduate"></i> Senior</span>
                                 <?php endif; ?>
                             </div>
-
                             <hr>
-                            
                             <div class="text-left small">
                                 <p class="mb-1 d-flex align-items-center">
                                     <strong class="w-25"><i class="fas fa-briefcase text-muted mr-2"></i></strong> 
-                                    <span class="text-truncate" title="<?= esc($headResident['occupation'] ?? 'N/A') ?>">
-                                        <?= esc($headResident['occupation'] ?? 'N/A') ?>
-                                    </span>
+                                    <span><?= esc($headResident['occupation'] ?? 'N/A') ?></span>
                                 </p>
                                 <p class="mb-1 d-flex align-items-center">
                                     <strong class="w-25"><i class="fas fa-phone text-muted mr-2"></i></strong> 
-                                    <span class="text-truncate" title="<?= esc($headResident['contact_number'] ?? 'N/A') ?>">
-                                        <?= esc($headResident['contact_number'] ?? 'N/A') ?>
-                                    </span>
+                                    <span><?= esc($headResident['contact_number'] ?? 'N/A') ?></span>
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Location & Details -->
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-white border-bottom-0">
                             <h5 class="card-title text-dark mb-0">Location Details</h5>
@@ -204,7 +180,6 @@
                     </div>
                 </div>
 
-                <!-- RIGHT PANEL - Members -->
                 <div class="col-md-8">
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
@@ -227,58 +202,97 @@
                                                 <th class="pl-4">Resident</th>
                                                 <th>Age</th>
                                                 <th>Relationship</th>
-                                                <th>Status</th>
+                                                <th>Membership</th>
+                                                <th>Flags</th>
                                                 <th class="pr-4">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php foreach ($residents as $r): 
-                                                $age = '';
-                                                if (!empty($r['birthdate'])) {
+                                                $age = $r['age'] ?? '';
+                                                if (empty($age) && !empty($r['birthdate'])) {
                                                     $age = (new DateTime($r['birthdate']))->diff(new DateTime())->y;
                                                 }
                                                 $isHead = ($headResident && $headResident['id'] == $r['id']);
                                                 $fullName = $r['first_name'] . ' ' . $r['last_name'];
-                                                $memberImg = 'https://ui-avatars.com/api/?name='.urlencode($fullName).'&background=random&color=fff&size=32';
-                                                if (!empty($r['profile_picture'])) {
-                                                    $memberImg = base_url('uploads/' . $r['profile_picture']);
-                                                }
+                                                $memberImg = !empty($r['profile_picture'])
+                                                    ? base_url('uploads/' . $r['profile_picture'])
+                                                    : 'https://ui-avatars.com/api/?name='.urlencode($fullName).'&background=random&color=fff&size=32';
+                                                $memberStatus = $r['member_status'] ?? 'Active';
+                                                $statusColors = [
+                                                    'Active'      => 'success',
+                                                    'Inactive'    => 'secondary',
+                                                    'Transferred' => 'warning',
+                                                    'Deceased'    => 'dark'
+                                                ];
+                                                $statusColor = $statusColors[$memberStatus] ?? 'secondary';
                                             ?>
-                                            <tr>
-                                                <td class="pl-4">
-                                                    <div class="d-flex align-items-center">
-                                                        <img src="<?= $memberImg ?>" 
-                                                             class="rounded-circle mr-3" style="width:32px;height:32px;object-fit:cover;" alt="">
-                                                        <div>
-                                                            <div class="font-weight-bold text-dark"><?= esc($fullName) ?></div>
-                                                            <?php if ($isHead): ?>
-                                                                <span class="badge badge-warning badge-pill badge-sm mt-1"><i class="fas fa-star mr-1"></i>Head</span>
-                                                            <?php endif; ?>
+                                                <tr id="member-row-<?= $r['id'] ?>">
+                                                    <td class="pl-4">
+                                                        <div class="d-flex align-items-center">
+                                                            <img src="<?= $memberImg ?>" class="rounded-circle mr-3" style="width:32px;height:32px;object-fit:cover;" alt="">
+                                                            <div>
+                                                                <div class="font-weight-bold text-dark"><?= esc($fullName) ?></div>
+                                                                <?php if ($isHead): ?>
+                                                                    <span class="badge badge-warning badge-pill badge-sm mt-1"><i class="fas fa-star mr-1"></i>Head</span>
+                                                                <?php endif; ?>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td class="text-muted"><?= $age ? $age . ' yrs' : '—' ?></td>
-                                                <td><?= esc(ucfirst($r['relationship_to_head'] ?? '—')) ?></td>
-                                                <td>
-                                                    <?php if (!empty($r['is_voter']) && $r['is_voter'] == 1): ?>
-                                                        <span class="badge badge-light text-success border mr-1" title="Voter"><i class="fas fa-check"></i></span>
-                                                    <?php endif; ?>
-                                                    <?php if (!empty($r['is_senior_citizen']) && $r['is_senior_citizen'] == 1): ?>
-                                                        <span class="badge badge-light text-info border mr-1" title="Senior"><i class="fas fa-user-graduate"></i></span>
-                                                    <?php endif; ?>
-                                                    <?php if (!empty($r['is_pwd']) && $r['is_pwd'] == 1): ?>
-                                                        <span class="badge badge-light text-warning border mr-1" title="PWD"><i class="fas fa-wheelchair"></i></span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td class="pr-4 text-right">
-                                                    <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="btn btn-sm btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="btn btn-sm btn-outline-secondary ml-1">
-                                                        <i class="fas fa-pen"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
+                                                    </td>
+                                                    <td class="text-muted"><?= $age ? $age . ' yrs' : '—' ?></td>
+                                                    <td><?= esc(ucfirst($r['relationship_to_head'] ?? '—')) ?></td>
+                                                    <td>
+                                                        <span id="membership-display-<?= $r['id'] ?>">
+                                                            <span class="badge badge-<?= $statusColor ?>" id="membership-badge-<?= $r['id'] ?>">
+                                                                <?= esc($memberStatus) ?>
+                                                            </span>
+                                                            <i class="fas fa-pencil-alt edit-membership-icon" 
+                                                               data-resident-id="<?= $r['id'] ?>"
+                                                               style="cursor:pointer; font-size:0.7rem; color:#64748B;" 
+                                                               title="Edit membership status"></i>
+                                                        </span>
+                                                        <span id="membership-editor-<?= $r['id'] ?>" style="display:none;">
+                                                            <select id="membership-select-<?= $r['id'] ?>"
+                                                                    class="form-control form-control-sm"
+                                                                    style="width:auto; display:inline-block; font-size:0.75rem; padding:2px 6px;">
+                                                                <option value="Active" <?= $memberStatus == 'Active' ? 'selected' : '' ?>>Active</option>
+                                                                <option value="Inactive" <?= $memberStatus == 'Inactive' ? 'selected' : '' ?>>Inactive</option>
+                                                                <option value="Transferred" <?= $memberStatus == 'Transferred' ? 'selected' : '' ?>>Transferred</option>
+                                                                <option value="Deceased" <?= $memberStatus == 'Deceased' ? 'selected' : '' ?>>Deceased</option>
+                                                            </select>
+                                                            <i class="fas fa-check text-success ml-1 save-membership-icon" 
+                                                               data-resident-id="<?= $r['id'] ?>"
+                                                               style="cursor:pointer; font-size:0.8rem;" 
+                                                               title="Save"></i>
+                                                            <i class="fas fa-times text-danger ml-1 cancel-membership-icon" 
+                                                               data-resident-id="<?= $r['id'] ?>"
+                                                               style="cursor:pointer; font-size:0.8rem;" 
+                                                               title="Cancel"></i>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <?php if (!empty($r['is_voter'])): ?>
+                                                            <span class="badge badge-light text-success border mr-1" title="Voter"><i class="fas fa-check"></i></span>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($r['is_senior_citizen'])): ?>
+                                                            <span class="badge badge-light text-info border mr-1" title="Senior"><i class="fas fa-user-graduate"></i></span>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($r['is_pwd'])): ?>
+                                                            <span class="badge badge-light text-warning border mr-1" title="PWD"><i class="fas fa-wheelchair"></i></span>
+                                                        <?php endif; ?>
+                                                        <?php if (empty($r['is_voter']) && empty($r['is_senior_citizen']) && empty($r['is_pwd'])): ?>
+                                                            <span class="text-muted">—</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td class="pr-4 text-right">
+                                                        <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="btn btn-sm btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="btn btn-sm btn-outline-secondary ml-1">
+                                                            <i class="fas fa-pen"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
                                             <?php endforeach; ?>
                                         </tbody>
                                     </table>
@@ -292,37 +306,26 @@
     </section>
 </div>
 
-<!-- ADD MEMBER MODAL -->
-<div class="modal fade" id="addMemberModal" tabindex="-1" role="dialog" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+<div class="modal fade" id="addMemberModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content shadow border-0">
             <div class="modal-header bg-light">
                 <h5 class="modal-title font-weight-bold">Add Member to Household</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
                 <p class="text-muted text-center mb-4">Choose an option below:</p>
-                
                 <div class="d-grid gap-3">
-                    <!-- Option 1: Add New -->
                     <a href="<?= base_url('resident/create?household_id='.$household['id']) ?>" class="card border-0 shadow-sm text-decoration-none text-dark">
                         <div class="card-body p-3 text-center">
-                            <div class="mb-2">
-                                <i class="fas fa-user-plus fa-2x text-primary"></i>
-                            </div>
+                            <div class="mb-2"><i class="fas fa-user-plus fa-2x text-primary"></i></div>
                             <h6 class="font-weight-bold mb-1">Create New Resident</h6>
                             <p class="small text-muted mb-0">Add a person who is not yet in the system.</p>
                         </div>
                     </a>
-
-                    <!-- Option 2: Add Existing -->
                     <a href="<?= base_url('resident/assign-search?household_id='.$household['id']) ?>" class="card border-0 shadow-sm text-decoration-none text-dark">
                         <div class="card-body p-3 text-center">
-                            <div class="mb-2">
-                                <i class="fas fa-search fa-2x text-success"></i>
-                            </div>
+                            <div class="mb-2"><i class="fas fa-search fa-2x text-success"></i></div>
                             <h6 class="font-weight-bold mb-1">Add Existing Resident</h6>
                             <p class="small text-muted mb-0">Search for a resident already in the database.</p>
                         </div>
@@ -333,7 +336,6 @@
     </div>
 </div>
 
-<!-- JS VARIABLES BRIDGE -->
 <div id="js-variables" style="display:none;"
      data-base-url="<?= base_url() ?>"
      data-csrf-token="<?= csrf_token() ?>"
