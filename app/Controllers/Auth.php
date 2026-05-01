@@ -31,18 +31,32 @@ class Auth extends BaseController
         $this->logModel = new LogModel();
     }
 
-    public function index()
-    {
-        if (session()->get('logged_in')) {
-            // Force lowercase to match Routes (admin or staff)
-            $redirectRole = strtolower(session()->get('role'));
-            return redirect()->to($redirectRole . '/dashboard');
-        }
-        
-        $data['lockout'] = 0;
-        return view('login', $data);
+  public function index()
+{
+    // Already logged in – redirect to role dashboard
+    if (session()->get('logged_in')) {
+        $redirectRole = strtolower(session()->get('role'));
+        return redirect()->to($redirectRole . '/dashboard');
     }
 
+    // Fetch barangay settings (only one row, id = 1)
+    $settingsModel = new \App\Models\BarangaySettingsModel();
+    $settings = $settingsModel->first();
+
+    // Fallback if no record exists
+    if (!$settings) {
+        $settings = [
+            'barangay_name' => 'Barangay',
+            'municipality'  => 'Municipality',
+            'province'      => 'Province',
+        ];
+    }
+
+    return view('login', [
+        'lockout'  => 0,
+        'settings' => $settings,    // <-- pass to view
+    ]);
+}
     public function auth()
     {
         $model = new UserModel();
