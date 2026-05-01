@@ -6,30 +6,6 @@ use App\Models\ResidentModel;
 use App\Models\HouseholdModel;
 use App\Models\LogModel;
 
-/**
- * Resident Controller
- * 
- * Manages all resident-related operations: listing, adding, editing, viewing, deleting,
- * household assignment, profile picture upload, and AJAX endpoints.
- * 
- * METHODS (key):
- * - index(): Lists residents with optional purok filter.
- * - create(): Shows add form with household dropdown.
- * - store(): Saves new resident, uploads photo, logs activity.
- * - edit($id): Shows edit form.
- * - update($id): Updates resident data and profile picture.
- * - delete($id): Soft-deletes resident and removes photo file.
- * - view($id): Displays resident details.
- * - assignSearch(): AJAX search for assigning residents to households.
- * - assignBulk(): Bulk assignment of residents to a household.
- * - list(): DataTables server-side processing.
- * - getHouseholdsBySitio(): AJAX endpoint to filter households by sitio.
- * 
- * DEPENDENCIES:
- * - ResidentModel, HouseholdModel, LogModel, Database connection
- * 
- * @package App\Controllers
- */
 class Resident extends BaseController
 {
     protected $residentModel;
@@ -45,11 +21,10 @@ class Resident extends BaseController
         $this->db             = \Config\Database::connect();
     }
 
-    // ── Auth helper ───────────────────────────────────────────────────
     private function requireLogin()
     {
-        if (!session()->get('logged_in')) { 
-            return redirect()->to('/login'); 
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/login');
         }
         return null;
     }
@@ -62,7 +37,7 @@ class Resident extends BaseController
         $selectedPurok = $this->request->getGet('purok') ?? 'all';
 
         $builder = $this->db->table('residents')
-            ->select('residents.*, households.household_no')
+            ->select('residents.*, households.household_no, TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) as age')
             ->join('households', 'households.id = residents.household_id', 'left')
             ->where('residents.deleted_at', null);
 
@@ -113,7 +88,7 @@ class Resident extends BaseController
         ]);
     }
 
-    // ── Store (Clean Version) ─────────────────────────────────
+    // ── Store (with duplicate protection & auto senior) ─────────────
     public function store()
     {
         if ($r = $this->requireLogin()) return $r;
@@ -127,7 +102,6 @@ class Resident extends BaseController
             'profile_picture' => 'is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
         ];
 
-        // 1. Handle AJAX Submission
         if ($this->request->isAJAX()) {
             if (!$this->validate($rules)) {
                 return $this->response->setJSON(['status' => 'error', 'errors' => $this->validator->getErrors()]);
@@ -135,17 +109,19 @@ class Resident extends BaseController
             $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
             $data       = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
-            if ($this->residentModel->insert($data)) {
-                // ── LOG THE ACTIVITY (Simple Concatenation) ──
+            try {
+                $this->residentModel->insert($data);
                 $fullName = $data['first_name'] . ' ' . $data['last_name'];
-                $this->logModel->addLog('Added Resident ' . $fullName); 
-
+                $this->logModel->addLog('Added Resident ' . $fullName);
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
+            } catch (\Exception $e) {
+                if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                    return $this->response->setJSON(['status' => 'error', 'message' => 'A resident with the same name and birthdate already exists.']);
+                }
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Database error.']);
             }
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to save resident.']);
         }
 
-        // 2. Handle Standard Submission
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
@@ -153,15 +129,17 @@ class Resident extends BaseController
         $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
         $data       = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
-        if ($this->residentModel->insert($data)) {
-            // ── LOG THE ACTIVITY (Simple Concatenation) ──
+        try {
+            $this->residentModel->insert($data);
             $fullName = $data['first_name'] . ' ' . $data['last_name'];
             $this->logModel->addLog('Added Resident ' . $fullName);
-
             return redirect()->to(base_url('resident'))->with('success', 'Resident added successfully.');
+        } catch (\Exception $e) {
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                return redirect()->back()->with('error', 'A resident with the same name and birthdate already exists.')->withInput();
+            }
+            return redirect()->back()->with('error', 'Database error. Please try again.')->withInput();
         }
-
-        return redirect()->back()->with('error', 'Failed to save resident.')->withInput();
     }
 
     // ── Edit ──────────────────────────────────────────────────────────
@@ -183,7 +161,7 @@ class Resident extends BaseController
         ]);
     }
 
-    // ── Update ────────────────────────────────────────────────────────
+    // ── Update (with duplicate protection & auto senior) ────────────
     public function update($id)
     {
         if ($r = $this->requireLogin()) return $r;
@@ -214,10 +192,15 @@ class Resident extends BaseController
             );
             $data = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
-            if ($this->residentModel->update($id, $data)) {
+            try {
+                $this->residentModel->update($id, $data);
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
+            } catch (\Exception $e) {
+                if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                    return $this->response->setJSON(['status' => 'error', 'message' => 'Another resident with the same name and birthdate already exists.']);
+                }
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Update failed.']);
             }
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Update failed.']);
         }
 
         if (!$this->validate($rules)) {
@@ -232,11 +215,15 @@ class Resident extends BaseController
         );
         $data = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
-        if ($this->residentModel->update($id, $data)) {
+        try {
+            $this->residentModel->update($id, $data);
             return redirect()->to(base_url('resident'))->with('success', 'Resident updated successfully.');
+        } catch (\Exception $e) {
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                return redirect()->back()->with('error', 'Another resident with the same name and birthdate already exists.')->withInput();
+            }
+            return redirect()->back()->with('error', 'Update failed.')->withInput();
         }
-
-        return redirect()->back()->with('error', 'Update failed.')->withInput();
     }
 
     // ── Delete ────────────────────────────────────────────────────────
@@ -267,7 +254,7 @@ class Resident extends BaseController
         return redirect()->back()->with('error', 'Invalid request');
     }
 
-    // ── View ──────────────────────────────────────────────────────────
+    // ── View (now includes age) ─────────────────────────────────────
     public function view($id = null)
     {
         if ($r = $this->requireLogin()) return $r;
@@ -277,7 +264,7 @@ class Resident extends BaseController
         }
 
         $resident = $this->db->table('residents r')
-            ->select('r.*, h.household_no, h.street_address as household_address')
+            ->select('r.*, h.household_no, h.street_address as household_address, TIMESTAMPDIFF(YEAR, r.birthdate, CURDATE()) as age')
             ->join('households h', 'h.id = r.household_id', 'left')
             ->where('r.id', $id)
             ->where('r.deleted_at', null)
@@ -295,13 +282,11 @@ class Resident extends BaseController
     public function getHouseholdsBySitio()
     {
         $sitio = $this->request->getGet('sitio');
-
         if (empty($sitio)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Sitio parameter is required']);
         }
 
         $households = $this->householdModel->where('sitio', $sitio)->findAll();
-
         return $this->response->setJSON(['status' => 'success', 'data' => $households]);
     }
 
@@ -368,7 +353,7 @@ class Resident extends BaseController
         return redirect()->back()->with('success', $successCount . ' resident(s) assigned successfully!');
     }
 
-    // ── List (AJAX/DataTable) ─────────────────────────────────────────
+    // ── DataTable List ────────────────────────────────────────────────
     public function list()
     {
         if ($r = $this->requireLogin()) return $r;
@@ -403,7 +388,6 @@ class Resident extends BaseController
     }
 
     // ── Private Helpers ───────────────────────────────────────────────
-
     private function uploadProfilePicture($file, $sitio, $currentPicture = null)
     {
         if ($file && $file->isValid() && !$file->hasMoved()) {
@@ -420,7 +404,6 @@ class Resident extends BaseController
 
             $newName = $file->getRandomName();
             $file->move($uploadPath, $newName);
-
             return $folderName . '/' . $newName;
         }
 
@@ -429,6 +412,11 @@ class Resident extends BaseController
 
     private function prepareResidentData($postData, $profilePic)
     {
+        // Auto‑compute senior citizen if not explicitly set
+        $isSenior = isset($postData['is_senior_citizen']) ? 1 : (
+            !empty($postData['birthdate']) && (date('Y') - date('Y', strtotime($postData['birthdate']))) >= 60 ? 1 : 0
+        );
+
         return [
             'household_id'         => !empty($postData['household_id']) ? (int)$postData['household_id'] : null,
             'first_name'           => $postData['first_name'],
@@ -445,12 +433,12 @@ class Resident extends BaseController
             'sitio'                => $postData['sitio'],
             'is_voter'             => isset($postData['is_voter'])        ? 1 : 0,
             'is_pwd'               => isset($postData['is_pwd'])          ? 1 : 0,
-            'is_senior_citizen'    => isset($postData['is_senior_citizen']) ? 1 : 0,
+            'is_senior_citizen'    => $isSenior,
             'profile_picture'      => $profilePic,
             'status'               => 'active',
             'registered_by'        => session()->get('user_id') ?? 1,
         ];
-    }   
+    }
 
     private function getSitioFolderName($sitio)
     {
@@ -463,4 +451,74 @@ class Resident extends BaseController
         ];
         return $folderMap[$sitio] ?? 'others';
     }
+    /**
+ * Quick AJAX update of resident status.
+ */
+public function updateStatus($id)
+{
+    if (!$this->request->isAJAX()) {
+        return $this->response->setStatusCode(403);
+    }
+
+    $newStatus = $this->request->getPost('status');
+    $allowed = ['active', 'inactive', 'deceased', 'transferred'];
+
+    if (!in_array($newStatus, $allowed)) {
+        return $this->response->setJSON([
+            'status'  => 'error',
+            'message' => 'Invalid status value.'
+        ]);
+    }
+
+    $resident = $this->residentModel->find($id);
+    if (!$resident) {
+        return $this->response->setJSON([
+            'status'  => 'error',
+            'message' => 'Resident not found.'
+        ]);
+    }
+
+    $this->residentModel->update($id, ['status' => $newStatus]);
+
+    $this->logModel->addLog(
+        "Updated status of {$resident['first_name']} {$resident['last_name']} to {$newStatus}"
+    );
+
+    return $this->response->setJSON([
+        'status'  => 'success',
+        'message' => 'Status updated.',
+        'new_status' => $newStatus
+    ]);
+}
+
+public function updateMemberStatus($id)
+{
+    if (!$this->request->isAJAX()) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request.']);
+    }
+
+    $newStatus = $this->request->getPost('member_status');
+    $allowed = ['Active', 'Inactive', 'Transferred', 'Deceased'];
+
+    if (!in_array($newStatus, $allowed)) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid status value.']);
+    }
+
+    $resident = $this->residentModel->find($id);
+    if (!$resident) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Resident not found.']);
+    }
+
+    $this->residentModel->update($id, ['member_status' => $newStatus]);
+
+    $this->logModel->addLog(
+        "Updated membership status of {$resident['first_name']} {$resident['last_name']} to {$newStatus}"
+    );
+
+    return $this->response->setJSON([
+        'status'     => 'success',
+        'message'    => 'Membership status updated.',
+        'new_status' => $newStatus
+    ]);
+}
 }
