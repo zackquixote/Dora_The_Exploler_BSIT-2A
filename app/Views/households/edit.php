@@ -1,9 +1,6 @@
 <?php
-// ---------------------------------------------------------
-// SMART THEME LOADER
-// ---------------------------------------------------------
- $role = strtolower(session()->get('role') ?? 'staff');
- $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+$role = strtolower(session()->get('role') ?? 'staff');
+$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
 
 <?= $this->extend($template) ?>
@@ -11,8 +8,6 @@
 <?= $this->section('content') ?>
 
 <div class="content-wrapper">
-
-    <!-- PAGE HEADER -->
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -34,7 +29,6 @@
     <section class="content">
         <div class="container-fluid">
             
-            <!-- FLASH ERRORS -->
             <?php if (session()->getFlashdata('errors')): ?>
             <div class="alert alert-danger alert-dismissible fade show">
                 <h5><i class="icon fas fa-ban"></i> Please fix the following:</h5>
@@ -51,7 +45,6 @@
                 <?= csrf_field() ?>
                 <input type="hidden" name="id" value="<?= $household['id'] ?>">
 
-                <!-- HOUSEHOLD INFO -->
                 <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title"><i class="fas fa-home mr-2"></i>Household Information</h3>
@@ -95,7 +88,6 @@
                     </div>
                 </div>
 
-                <!-- ADDRESS -->
                 <div class="card card-success">
                     <div class="card-header">
                         <h3 class="card-title"><i class="fas fa-map-marker-alt mr-2"></i>Address Information</h3>
@@ -116,7 +108,6 @@
                     </div>
                 </div>
 
-                <!-- HEAD OF HOUSEHOLD -->
                 <div class="card card-warning">
                     <div class="card-header">
                         <h3 class="card-title"><i class="fas fa-user-tie mr-2"></i>Head of Household</h3>
@@ -139,7 +130,6 @@
                     </div>
                 </div>
 
-                <!-- CURRENT MEMBERS SUMMARY -->
                 <?php if (!empty($residentCount) && $residentCount > 0): ?>
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i> 
@@ -147,7 +137,6 @@
                 </div>
                 <?php endif; ?>
 
-                <!-- HOUSEHOLD MEMBERS MANAGER -->
                 <div class="card card-info">
                     <div class="card-header">
                         <h3 class="card-title"><i class="fas fa-users mr-2"></i>Manage Household Members</h3>
@@ -159,25 +148,18 @@
                         </div>
                     </div>
                     <div class="card-body p-0">
-                        <!-- Members Table -->
                         <div id="membersTableContainer">
                             <table class="table table-striped table-hover" id="membersTable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 40px;">
-                                            <input type="checkbox" id="selectAllCheckbox">
-                                        </th>
+                                        <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox"></th>
                                         <th>Resident Name</th>
                                         <th style="width: 200px;">Relationship to Head</th>
                                     </tr>
                                 </thead>
-                                <tbody id="membersTableBody">
-                                    <!-- Dynamically populated -->
-                                </tbody>
+                                <tbody id="membersTableBody"></tbody>
                             </table>
                         </div>
-                        
-                        <!-- Empty state -->
                         <div id="emptyMembersState" class="text-center py-5 text-muted" style="display:none;">
                             <i class="fas fa-users fa-3x mb-3"></i>
                             <p>No residents available in this purok</p>
@@ -191,10 +173,8 @@
                     </div>
                 </div>
 
-                <!-- Hidden field for member data -->
                 <input type="hidden" name="household_members_data" id="householdMembersData" value="[]">
 
-                <!-- JS VARIABLES BRIDGE -->
                 <div id="js-variables" style="display:none;"
                      data-base-url="<?= base_url() ?>"
                      data-csrf-token="<?= csrf_token() ?>"
@@ -205,7 +185,6 @@
                      data-current-members='<?= json_encode($currentMembers ?? []) ?>'>
                 </div>
 
-                <!-- FORM ACTIONS -->
                 <div class="row mb-4">
                     <div class="col-12">
                         <a href="<?= base_url('households/view/'.$household['id']) ?>" class="btn btn-secondary">
@@ -224,7 +203,6 @@
 
 <?= $this->endSection() ?>
 
-<!-- Load Index Specific JS -->
 <?= $this->section('scripts') ?>
-<script src="<?= base_url('js/households/households-index.js') ?>"></script>
+<script src="<?= base_url('js/households/households-edit.js') ?>"></script>
 <?= $this->endSection() ?>
