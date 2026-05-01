@@ -1,0 +1,285 @@
+/* ============================================================
+   Enhanced Navbar Styles
+   ============================================================ */
+
+.main-header.navbar {
+    /* Enhancement: Deep gradient background with subtle texture */
+    background: linear-gradient(135deg, #13131f 0%, #1a1a2e 100%) !important;
+    border-bottom: 2px solid var(--role-primary, #e94560) !important; /* Fallback added */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); /* Added depth */
+    backdrop-filter: blur(10px); /* Glass effect support */
+    z-index: 1030;
+}
+
+.nav-avatar-icon {
+    width: 35px; /* Slightly larger for better visibility */
+    height: 35px;
+    border-radius: 50%;
+    /* Enhancement: Gradient for the avatar background */
+    background: linear-gradient(135deg, #e94560, #c03540);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    box-shadow: 0 0 10px rgba(233, 69, 96, 0.4); /* Subtle glow */
+    transition: transform 0.2s ease;
+}
+
+.nav-avatar-icon:hover {
+    transform: scale(1.05);
+}
+
+.nav-avatar-icon i {
+    font-size: 14px;
+    color: #fff;
+}
+
+.nav-user-email {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.btn-logout {
+    background: rgba(233, 69, 96, 0.9);
+    border-radius: 20px;
+    padding: 6px 16px; /* Increased padding for better click area */
+    color: #fff !important;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(233, 69, 96, 0.5);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.btn-logout:hover {
+    background: #ff5c77;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(233, 69, 96, 0.4);
+}
+
+/* ============================================================
+   Layout & General Template
+   ============================================================ */
+
+.content-wrapper {
+    background: #f0f2f8 !important;
+    transition: background 0.3s ease, color 0.3s ease;
+    min-height: calc(100vh - 120px); /* Ensure full height */
+}
+
+.main-footer {
+    /* Enhancement: Darker footer with glass effect top border */
+    background: #0d0d1a;
+    color: #a8b2c8;
+    border-top: 2px solid var(--role-primary, #e94560);
+    font-size: 12px;
+    padding: 20px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+}
+
+.main-footer a {
+    color: var(--role-primary, #e94560);
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.main-footer a:hover {
+    color: #ff5c77;
+    text-decoration: underline;
+}
+
+/* ============================================================
+   Cards & Components
+   ============================================================ */
+
+.card {
+    border: none;
+    border-radius: 14px; /* Softer roundness */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease;
+    background: #fff;
+    overflow: hidden; /* Ensures children respect border-radius */
+}
+
+.card:hover {
+    transform: translateY(-4px); /* More lift on hover */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.card-header {
+    border-radius: 14px 14px 0 0 !important;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-weight: 700;
+    background: #fff;
+    padding: 15px 20px;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    color: #333;
+}
+
+/* Small boxes */
+.small-box {
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.2s ease;
+}
+.small-box:hover {
+    transform: scale(1.02);
+}
+
+/* Breadcrumb */
+.content-header {
+    margin-bottom: 25px;
+}
+
+.content-header h1 {
+    font-weight: 800;
+    color: #1a1a2e;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+}
+
+.breadcrumb-item a {
+    color: #6c7a9c;
+    font-weight: 500;
+}
+.breadcrumb-item.active {
+    color: #1a1a2e;
+    font-weight: 600;
+}
+
+/* ============================================================
+   Enhanced Dark Mode
+   ============================================================ */
+
+body.dark-mode .content-wrapper {
+    background: #0f0f1a !important; /* Deep background */
+    color: #e0e0e0;
+}
+
+/* Body background override to prevent white flashes */
+body.dark-mode {
+    background-color: #0f0f1a;
+}
+
+body.dark-mode .content-header h1 {
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+body.dark-mode .card {
+    background: #161b22; /* Slightly lighter than wrapper */
+    border: 1px solid #2d3748;
+    color: #e0e0e0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+body.dark-mode .card:hover {
+    background: #1a202c;
+    border-color: #4a5568;
+}
+
+body.dark-mode .card-header {
+    background: #1f2937;
+    color: #f0f0f0;
+    border-bottom: 1px solid #374151;
+}
+
+body.dark-mode .main-footer {
+    background: #050508;
+    border-top-color: rgba(233, 69, 96, 0.3);
+    color: #6b7280;
+}
+
+body.dark-mode .table {
+    color: #e0e0e0;
+}
+
+body.dark-mode .table thead th {
+    background: #1f2937;
+    border-color: #374151;
+    color: #9ca3af;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+body.dark-mode .table td,
+body.dark-mode .table th {
+    border-color: #2d3748;
+    vertical-align: middle;
+}
+
+/* Hover effect on table rows */
+body.dark-mode .table tbody tr {
+    transition: background 0.2s;
+}
+body.dark-mode .table tbody tr:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+body.dark-mode .form-control {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f3f4f6;
+}
+
+body.dark-mode .form-control:focus {
+    background: #111827;
+    color: #fff;
+    border-color: #e94560; /* Focus color matches theme */
+    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.2);
+}
+
+body.dark-mode .form-control::placeholder {
+    color: #6b7280;
+}
+
+body.dark-mode .modal-content {
+    background: #1f2937;
+    color: #e0e0e0;
+    border: 1px solid #374151;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+    border-color: #374151;
+}
+
+body.dark-mode .close {
+    color: #e0e0e0;
+    text-shadow: none;
+}
+
+/* Small box adjustments for dark mode */
+body.dark-mode .small-box {
+    filter: brightness(0.9) contrast(1.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .text-muted {
+    color: #9ca3af !important;
+}
+
+/* Dropdowns in Dark Mode (Enhancement) */
+body.dark-mode .dropdown-menu {
+    background: #1f2937;
+    border: 1px solid #374151;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+body.dark-mode .dropdown-item {
+    color: #e0e0e0;
+}
+body.dark-mode .dropdown-item:hover {
+    background: #374151;
+    color: #fff;
+}

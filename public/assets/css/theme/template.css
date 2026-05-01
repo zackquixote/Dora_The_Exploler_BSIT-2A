@@ -1,0 +1,279 @@
+/* assets/css/theme/template.css */
+
+/* ============================================================
+   Layout & Base Structure
+   ============================================================ */
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.content-wrapper {
+    background: #f0f2f8 !important;
+    /* Using a subtle grid pattern for texture */
+    background-image: radial-gradient(#e94560 0.5px, transparent 0.5px), radial-gradient(#e94560 0.5px, #f0f2f8 0.5px);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    background-blend-mode: overlay;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.main-footer {
+    background: #0d0d1a; /* Deep dark footer */
+    color: #a8b2c8;
+    border-top: 2px solid var(--role-primary, #e94560);
+    font-size: 12px;
+    padding: 20px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+}
+
+.main-footer a {
+    color: var(--role-primary, #e94560);
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.main-footer a:hover {
+    color: #ff5c77;
+    text-decoration: underline;
+}
+
+/* ============================================================
+   Cards & Components
+   ============================================================ */
+
+.card {
+    border: none;
+    border-radius: 14px; /* Slightly softer modern radius */
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04); /* Softer, wider shadow */
+    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.card-header {
+    border-radius: 14px 14px 0 0 !important;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-weight: 700;
+    background: #fff;
+    padding: 1rem 1.25rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+    color: #1a1a2e;
+}
+
+/* Small Boxes (Stats Boxes) */
+.small-box {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.small-box:hover {
+    transform: scale(1.01);
+}
+
+/* Breadcrumb */
+.content-header {
+    margin-bottom: 1.5rem;
+}
+
+.content-header h1 {
+    font-weight: 800;
+    color: #1a1a2e;
+    font-size: 1.75rem;
+    letter-spacing: -0.5px;
+    margin-bottom: 5px;
+}
+
+.breadcrumb {
+    background: transparent;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.breadcrumb-item a {
+    color: #6c7a9c;
+    transition: color 0.2s;
+}
+
+.breadcrumb-item a:hover {
+    color: #e94560;
+}
+
+.breadcrumb-item.active {
+    color: #1a1a2e;
+}
+
+/* Navbar accent (fallback) */
+.main-header.navbar {
+    border-bottom: 2px solid var(--role-primary, #e94560) !important;
+}
+
+/* ============================================================
+   Forms & Inputs (Enhancement)
+   ============================================================ */
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 0.65rem 1rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    border-color: #e94560;
+    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+}
+
+/* ============================================================
+   Enhanced Dark Mode
+   ============================================================ */
+
+body.dark-mode {
+    background-color: #0f0f1a; /* Prevents white flash */
+}
+
+body.dark-mode .content-wrapper {
+    background: #0f0f1a !important;
+    background-image: none; /* Remove grid in dark mode for cleaner look */
+    color: #e0e0e0;
+}
+
+body.dark-mode .content-header h1 {
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+body.dark-mode .card {
+    background: #161b22; /* Matches the Deep Night theme */
+    border: 1px solid #2d3748;
+    color: #e0e0e0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+body.dark-mode .card:hover {
+    background: #1a202c;
+    border-color: #4a5568;
+}
+
+body.dark-mode .card-header {
+    background: #1f2937; /* Slightly lighter than card body */
+    color: #f0f0f0;
+    border-bottom: 1px solid #374151;
+}
+
+body.dark-mode .main-footer {
+    background: #0a0a14; /* Deepest dark for footer */
+    border-top-color: rgba(233, 69, 96, 0.3);
+    color: #6b7280;
+}
+
+body.dark-mode .main-footer a {
+    color: #e94560;
+}
+
+/* Small Box - Dark Mode Fix (Better than brightness filter) */
+body.dark-mode .small-box {
+    border: 1px solid rgba(255,255,255,0.05);
+    background-color: #16213e !important; /* Fallback base */
+}
+/* Override inner small-box elements */
+body.dark-mode .small-box .inner h3,
+body.dark-mode .small-box .inner p {
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+body.dark-mode .small-box .icon {
+    color: rgba(255,255,255,0.2);
+}
+
+/* Tables */
+body.dark-mode .table {
+    color: #e0e0e0;
+}
+
+body.dark-mode .table thead th {
+    background: #1f2937;
+    border-color: #374151;
+    color: #9ca3af;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+body.dark-mode .table td,
+body.dark-mode .table th {
+    border-color: #2d3748;
+    vertical-align: middle;
+}
+
+body.dark-mode .table-hover tbody tr:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+/* Form Controls - Dark Mode */
+body.dark-mode .form-control {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f3f4f6;
+}
+
+body.dark-mode .form-control:focus {
+    background: #111827;
+    color: #fff;
+    border-color: #e94560;
+    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.25);
+}
+
+body.dark-mode .form-control::placeholder {
+    color: #6b7280;
+}
+
+/* Modals - Dark Mode */
+body.dark-mode .modal-content {
+    background: #1f2937;
+    color: #e0e0e0;
+    border: 1px solid #374151;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+    border-color: #374151;
+}
+
+body.dark-mode .modal-title {
+    color: #fff;
+}
+
+body.dark-mode .close {
+    color: #9ca3af;
+    text-shadow: none;
+}
+body.dark-mode .close:hover {
+    color: #fff;
+}
+
+/* Text Utilities */
+body.dark-mode .text-muted {
+    color: #9ca3af !important;
+}
+
+body.dark-mode a:not(.btn):not(.nav-link) {
+    color: #e94560;
+}
+body.dark-mode a:not(.btn):not(.nav-link):hover {
+    color: #ff5c77;
+    text-decoration: underline;
+}
