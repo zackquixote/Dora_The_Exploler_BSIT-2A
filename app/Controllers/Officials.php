@@ -6,6 +6,12 @@ use App\Controllers\BaseController;
 use App\Models\BarangaySettingsModel;
 use App\Models\ResidentModel;
 
+/**
+ * Officials Controller (Public‑facing)
+ * 
+ * Displays the current set of barangay officials.
+ * Reads from the 'officials' table (only active ones).
+ */
 class Officials extends BaseController
 {
     protected $settingsModel;
@@ -20,38 +26,35 @@ class Officials extends BaseController
     }
 
     /**
-     * Public list of assigned barangay officials.
-     *
-     * Reads official_assignments, joins resident data, and builds a clean array
-     * for the view.
+     * Public list of active barangay officials.
      */
     public function index()
     {
-        // Get barangay settings (name, etc.)
         $settings = $this->settingsModel->first();
 
-        // 1. Fetch all assignments
-        $assignmentRows = $this->db->table('official_assignments')->get()->getResultArray();
+        // Fetch only active officials, ordered by position for grouping
+        $officials = $this->db->table('officials')
+            ->where('is_active', 1)
+            ->orderBy('FIELD(position, "Punong Barangay","Secretary","Treasurer","SK Chairperson",
+                          "Kagawad 1","Kagawad 2","Kagawad 3","Kagawad 4","Kagawad 5","Kagawad 6","Kagawad 7")')
+            ->get()
+            ->getResultArray();
 
-        $displayList = [];
-
-        // 2. For each assignment, retrieve the resident’s name, photo and purok
-        foreach ($assignmentRows as $row) {
-            $resident = $this->residentModel->find($row['resident_id']);
-            if ($resident) {
-                $displayList[] = [
-                    'full_name' => $resident['first_name'] . ' ' . $resident['last_name'],
-                    'position'  => $row['position_name'],
-                    'photo'     => $resident['profile_picture'] ?? 'default.png',
-                    'purok'     => $resident['sitio'],
-                ];
+        // Optionally attach resident's profile picture from residents table
+        // (if you prefer the photo stored in residents, merge it here)
+        foreach ($officials as &$off) {
+            if (!empty($off['resident_id'])) {
+                $resident = $this->residentModel->find($off['resident_id']);
+                if ($resident) {
+                    // Use resident's profile_picture as photo fallback
+                    $off['photo'] = $resident['profile_picture'] ?? null;
+                }
             }
         }
 
-        // 3. Pass data to the public officials view
         return view('officials/index', [
             'settings'  => $settings,
-            'officials' => $displayList
+            'officials' => $officials
         ]);
     }
-}
+}   
