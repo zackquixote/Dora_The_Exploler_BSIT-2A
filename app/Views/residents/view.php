@@ -2,20 +2,15 @@
 // ---------------------------------------------------------
 // SMART THEME LOADER
 // ---------------------------------------------------------
- $role = strtolower(session()->get('role') ?? 'staff');
- $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+$role = strtolower(session()->get('role') ?? 'staff');
+$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
-<!-- Link specific View Styles -->
 <link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-view.css') ?>">
-
 <?= $this->extend($template) ?>
-
 <?= $this->section('content') ?>
 
 <div class="rv-page-wrapper">
     <div class="residents-view-container">
-
-        <!-- Header -->
         <header class="rv-header">
             <div class="rv-title">
                 <h1>Resident Details</h1>
@@ -32,7 +27,6 @@
             </div>
         </header>
 
-        <!-- Flash Message -->
         <?php if (session()->getFlashdata('success')): ?>
             <div class="rv-flash-success">
                 <i class="fas fa-check-circle" style="margin-right:6px;"></i>
@@ -40,12 +34,8 @@
             </div>
         <?php endif; ?>
 
-        <!-- 3-Column Grid -->
         <div class="rv-grid">
-
-            <!-- ================================================
-                 LEFT: Profile Card
-                 ================================================ -->
+            <!-- LEFT: Profile Card -->
             <aside>
                 <div class="rv-profile-card">
                     <div class="rv-profile-header"></div>
@@ -55,22 +45,13 @@
                                  src="<?= base_url(!empty($resident['profile_picture']) ? 'uploads/' . $resident['profile_picture'] : 'assets/img/default.png') ?>"
                                  alt="Profile Photo">
                         </div>
-
                         <h2 class="rv-name"><?= esc($resident['first_name']) ?> <?= esc($resident['last_name']) ?></h2>
                         <p class="rv-subtitle"><?= ucfirst(esc($resident['civil_status'] ?? 'N/A')) ?></p>
 
-                        <!-- Mini Bio Stats -->
                         <div class="rv-meta-list">
                             <div class="rv-meta-item">
                                 <span class="rv-meta-label">Age</span>
-                                <span class="rv-meta-value">
-                                    <?php
-                                    if (!empty($resident['birthdate'])) {
-                                        $birth = new DateTime($resident['birthdate']);
-                                        echo $birth->diff(new DateTime())->y . ' yrs';
-                                    } else { echo 'N/A'; }
-                                    ?>
-                                </span>
+                                <span class="rv-meta-value"><?= esc($resident['age'] ?? 'N/A') ?> yrs</span>
                             </div>
                             <div class="rv-meta-item">
                                 <span class="rv-meta-label">Gender</span>
@@ -78,18 +59,36 @@
                             </div>
                             <div class="rv-meta-item">
                                 <span class="rv-meta-label">Status</span>
-                                <span class="rv-meta-value">
+                                <span class="rv-meta-value" id="status-container">
                                     <?php
-                                    $status = $resident['status'] ?? 'active';
                                     $statusBadge = [
                                         'active'      => 'rv-badge-success',
                                         'inactive'    => 'rv-badge-secondary',
                                         'deceased'    => 'rv-badge-dark',
                                         'transferred' => 'rv-badge-warning'
                                     ];
+                                    $currentStatus = $resident['status'] ?? 'active';
                                     ?>
-                                    <span class="rv-badge <?= $statusBadge[$status] ?? 'rv-badge-secondary' ?>">
-                                        <?= ucfirst($status) ?>
+                                    <span id="status-display">
+                                        <span class="rv-badge <?= $statusBadge[$currentStatus] ?? 'rv-badge-secondary' ?>" id="status-badge">
+                                            <?= ucfirst($currentStatus) ?>
+                                        </span>
+                                        <i class="fas fa-pencil-alt ml-2" id="edit-status-icon"
+                                           style="cursor:pointer; font-size:0.7rem; color:#64748B;"
+                                           title="Change status"></i>
+                                    </span>
+                                    <span id="status-editor" style="display:none;">
+                                        <select id="status-select" class="form-control form-control-sm"
+                                                style="width:auto; display:inline-block; font-size:0.75rem; padding:2px 6px;">
+                                            <option value="active" <?= $currentStatus == 'active' ? 'selected' : '' ?>>Active</option>
+                                            <option value="inactive" <?= $currentStatus == 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                                            <option value="deceased" <?= $currentStatus == 'deceased' ? 'selected' : '' ?>>Deceased</option>
+                                            <option value="transferred" <?= $currentStatus == 'transferred' ? 'selected' : '' ?>>Transferred</option>
+                                        </select>
+                                        <i class="fas fa-check text-success ml-1" id="save-status-icon"
+                                           style="cursor:pointer; font-size:0.8rem;" title="Save"></i>
+                                        <i class="fas fa-times text-danger ml-1" id="cancel-status-icon"
+                                           style="cursor:pointer; font-size:0.8rem;" title="Cancel"></i>
                                     </span>
                                 </span>
                             </div>
@@ -99,7 +98,6 @@
                             </div>
                         </div>
 
-                        <!-- Quick Actions -->
                         <div class="rv-actions">
                             <a href="#" onclick="printProfile(); return false;" class="rv-action-link">
                                 <i class="fas fa-print"></i> Print Profile
@@ -115,11 +113,8 @@
                 </div>
             </aside>
 
-            <!-- ================================================
-                 CENTER: Details Tabs
-                 ================================================ -->
+            <!-- CENTER: Details Tabs -->
             <main class="rv-content-card">
-                <!-- Tab Nav -->
                 <div class="rv-tabs">
                     <button class="rv-tab-btn active" onclick="switchTab('personal', this)">
                         <i class="fas fa-user"></i> Personal
@@ -131,28 +126,24 @@
                         <i class="fas fa-flag-checkered"></i> Status & Flags
                     </button>
                 </div>
-
-                <!-- Tab: Personal -->
                 <div id="personal" class="rv-tab-content active">
                     <div class="rv-tab-two-col">
                         <table class="rv-details-table">
-                            <tr><th>First Name</th>  <td><?= esc($resident['first_name']) ?></td></tr>
-                            <tr><th>Middle Name</th> <td><?= esc($resident['middle_name'] ?? '—') ?></td></tr>
-                            <tr><th>Last Name</th>   <td><?= esc($resident['last_name']) ?></td></tr>
-                            <tr><th>Birthdate</th>   <td><?= date('F d, Y', strtotime($resident['birthdate'])) ?></td></tr>
+                            <tr><th>First Name</th><td><?= esc($resident['first_name']) ?></td></tr>
+                            <tr><th>Middle Name</th><td><?= esc($resident['middle_name'] ?? '—') ?></td></tr>
+                            <tr><th>Last Name</th><td><?= esc($resident['last_name']) ?></td></tr>
+                            <tr><th>Birthdate</th><td><?= date('F d, Y', strtotime($resident['birthdate'])) ?></td></tr>
                             <tr><th>Civil Status</th><td><?= esc($resident['civil_status'] ?? '—') ?></td></tr>
                         </table>
                         <table class="rv-details-table">
-                            <tr><th>Occupation</th>    <td><?= esc($resident['occupation']     ?? '—') ?></td></tr>
-                            <tr><th>Citizenship</th>   <td><?= esc($resident['citizenship']    ?? '—') ?></td></tr>
-                            <tr><th>Contact No.</th>   <td><?= esc($resident['contact_number'] ?? '—') ?></td></tr>
-                            <tr><th>Registered</th>    <td><?= date('M d, Y', strtotime($resident['created_at'])) ?></td></tr>
-                            <tr><th>Last Updated</th>  <td><?= date('M d, Y h:i A', strtotime($resident['updated_at'])) ?></td></tr>
+                            <tr><th>Occupation</th><td><?= esc($resident['occupation'] ?? '—') ?></td></tr>
+                            <tr><th>Citizenship</th><td><?= esc($resident['citizenship'] ?? '—') ?></td></tr>
+                            <tr><th>Contact No.</th><td><?= esc($resident['contact_number'] ?? '—') ?></td></tr>
+                            <tr><th>Registered</th><td><?= date('M d, Y', strtotime($resident['created_at'])) ?></td></tr>
+                            <tr><th>Last Updated</th><td><?= date('M d, Y h:i A', strtotime($resident['updated_at'])) ?></td></tr>
                         </table>
                     </div>
                 </div>
-
-                <!-- Tab: Household -->
                 <div id="household" class="rv-tab-content">
                     <table class="rv-details-table">
                         <tr>
@@ -189,41 +180,25 @@
                         </tr>
                     </table>
                 </div>
-
-                <!-- Tab: Status & Flags -->
                 <div id="status" class="rv-tab-content">
                     <table class="rv-details-table">
                         <tr>
                             <th>Registered Voter</th>
-                            <td>
-                                <?= !empty($resident['is_voter'])
-                                    ? '<span class="rv-badge rv-badge-success"><i class="fas fa-check" style="margin-right:4px;"></i> Yes</span>'
-                                    : '<span class="rv-badge rv-badge-secondary">No</span>' ?>
-                            </td>
+                            <td><?= !empty($resident['is_voter']) ? '<span class="rv-badge rv-badge-success"><i class="fas fa-check" style="margin-right:4px;"></i> Yes</span>' : '<span class="rv-badge rv-badge-secondary">No</span>' ?></td>
                         </tr>
                         <tr>
                             <th>Senior Citizen</th>
-                            <td>
-                                <?= !empty($resident['is_senior_citizen'])
-                                    ? '<span class="rv-badge rv-badge-info"><i class="fas fa-user-graduate" style="margin-right:4px;"></i> Yes</span>'
-                                    : '<span class="rv-badge rv-badge-secondary">No</span>' ?>
-                            </td>
+                            <td><?= !empty($resident['is_senior_citizen']) ? '<span class="rv-badge rv-badge-info"><i class="fas fa-user-graduate" style="margin-right:4px;"></i> Yes</span>' : '<span class="rv-badge rv-badge-secondary">No</span>' ?></td>
                         </tr>
                         <tr>
                             <th>PWD</th>
-                            <td>
-                                <?= !empty($resident['is_pwd'])
-                                    ? '<span class="rv-badge rv-badge-warning"><i class="fas fa-wheelchair" style="margin-right:4px;"></i> Yes</span>'
-                                    : '<span class="rv-badge rv-badge-secondary">No</span>' ?>
-                            </td>
+                            <td><?= !empty($resident['is_pwd']) ? '<span class="rv-badge rv-badge-warning"><i class="fas fa-wheelchair" style="margin-right:4px;"></i> Yes</span>' : '<span class="rv-badge rv-badge-secondary">No</span>' ?></td>
                         </tr>
                     </table>
                 </div>
             </main>
 
-            <!-- ================================================
-                 RIGHT: Recent Activity Panel
-                 ================================================ -->
+            <!-- RIGHT: Recent Activity Panel -->
             <aside class="rv-activity-panel">
                 <div class="rv-activity-header">
                     <div class="rv-activity-title">
@@ -232,15 +207,12 @@
                     </div>
                     <span class="rv-activity-count" id="rv-activity-count" style="display:none;">0</span>
                 </div>
-
-                <!-- Feed renders here via JS -->
                 <div class="rv-activity-feed" id="rv-activity-feed">
                     <div class="rv-activity-empty">
                         <i class="fas fa-history"></i>
                         <p>Loading activity...</p>
                     </div>
                 </div>
-
                 <div class="rv-activity-footer">
                     <a href="<?= base_url('admin/activity-logs') ?>">
                         <i class="fas fa-list" style="margin-right:4px;font-size:0.7rem;"></i>
@@ -248,11 +220,9 @@
                     </a>
                 </div>
             </aside>
-
-        </div><!-- /.rv-grid -->
-    </div><!-- /.residents-view-container -->
-</div><!-- /.rv-page-wrapper -->
-
+        </div>
+    </div>
+</div>
 
 <!-- Generate Certificate Modal -->
 <div class="modal fade" id="generateCertificateModal" tabindex="-1" role="dialog">
@@ -296,7 +266,6 @@
     </div>
 </div>
 
-<!-- JS Config Variables -->
 <script>
     window.BASE_URL        = "<?= base_url() ?>";
     window.CSRF_TOKEN_NAME = "<?= csrf_token() ?>";
@@ -305,12 +274,14 @@
     window.RESIDENT_NAME   = "<?= esc($resident['first_name'] . ' ' . $resident['last_name'], 'js') ?>";
     window.CURRENT_USER    = "<?= esc(session()->get('name') ?? session()->get('username') ?? 'User', 'js') ?>";
     window.CURRENT_ROLE    = "<?= esc(session()->get('role') ?? 'staff', 'js') ?>";
+    window.STATUS_BADGES   = {
+        active:      'rv-badge-success',
+        inactive:    'rv-badge-secondary',
+        deceased:    'rv-badge-dark',
+        transferred: 'rv-badge-warning'
+    };
 </script>
-
-<!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<!-- Custom JS -->
 <script src="<?= base_url('js/residents/residents-view.js') ?>"></script>
 
 <?= $this->endSection() ?>
