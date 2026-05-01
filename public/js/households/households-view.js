@@ -3,13 +3,11 @@
 var HouseholdView = (function() {
     'use strict';
     
-    // Private variables
-    var BASE_URL = '';
-    var CSRF_TOKEN = '';
-    var CSRF_HASH = '';
-    var RESIDENT_COUNT = 0;
+    let BASE_URL = '';
+    let CSRF_TOKEN = '';
+    let CSRF_HASH = '';
+    let RESIDENT_COUNT = 0;
     
-    // Private methods
     function showToast(type, msg) {
         var bgColor = type === 'success' ? '#d4edda' : '#f8d7da';
         var textColor = type === 'success' ? '#155724' : '#721c24';
@@ -77,7 +75,6 @@ var HouseholdView = (function() {
                 dataType: 'json',
                 success: function (res) {
                     if (res.status === 'success') {
-                        // Redirect on success
                         window.location.href = BASE_URL + 'households';
                     } else {
                         showToast('error', res.message);
@@ -92,35 +89,86 @@ var HouseholdView = (function() {
         });
     }
     
-    // Public methods
-    function init(config) {
-        BASE_URL = config.baseUrl || '';
-        CSRF_TOKEN = config.csrfToken || 'csrf_token';
-        CSRF_HASH = config.csrfHash || '';
-        RESIDENT_COUNT = config.residentCount || 0;
+    function initMembershipEditor() {
+        // Edit icon click
+        $(document).on('click', '.edit-membership-icon', function(e) {
+            e.stopPropagation();
+            const residentId = $(this).data('resident-id');
+            $(`#membership-display-${residentId}`).hide();
+            $(`#membership-editor-${residentId}`).show();
+            $(`#membership-select-${residentId}`).focus();
+        });
         
-        if (typeof jQuery === 'undefined') {
-            setTimeout(function() { init(config); }, 50);
-            return;
-        }
+        // Cancel icon click
+        $(document).on('click', '.cancel-membership-icon', function(e) {
+            e.stopPropagation();
+            const residentId = $(this).data('resident-id');
+            $(`#membership-editor-${residentId}`).hide();
+            $(`#membership-display-${residentId}`).show();
+        });
         
-        jQuery(document).ready(function($) {
-            console.log('Household view initialized');
-            initDelete();
+        // Save icon click
+        $(document).on('click', '.save-membership-icon', function(e) {
+            e.stopPropagation();
+            const residentId = $(this).data('resident-id');
+            const select = $(`#membership-select-${residentId}`);
+            const newStatus = select.val();
+            const badge = $(`#membership-badge-${residentId}`);
+            
+            $.ajax({
+                url: BASE_URL + 'resident/updateMemberStatus/' + residentId,
+                type: 'POST',
+                data: {
+                    member_status: newStatus,
+                    [CSRF_TOKEN]: CSRF_HASH
+                },
+                dataType: 'json',
+                success: function(res) {
+                    if (res.status === 'success') {
+                        const badgeColors = {
+                            'Active': 'success',
+                            'Inactive': 'secondary',
+                            'Transferred': 'warning',
+                            'Deceased': 'dark'
+                        };
+                        const newClass = badgeColors[newStatus] || 'secondary';
+                        badge.text(newStatus).attr('class', 'badge badge-' + newClass);
+                        $(`#membership-editor-${residentId}`).hide();
+                        $(`#membership-display-${residentId}`).show();
+                        if (res.csrf_hash) updateCSRFToken(res.csrf_hash);
+                    } else {
+                        alert(res.message);
+                    }
+                },
+                error: function() {
+                    alert('Update failed. Please try again.');
+                }
+            });
         });
     }
     
-    // Public API
-    return {
-        init: init,
-        showToast: showToast
-    };
+    function init(config) {
+        BASE_URL = config.baseUrl;
+        CSRF_TOKEN = config.csrfToken;
+        CSRF_HASH = config.csrfHash;
+        RESIDENT_COUNT = config.residentCount;
+        
+        if (typeof jQuery === 'undefined') {
+            setTimeout(() => init(config), 50);
+            return;
+        }
+        
+        $(document).ready(function() {
+            initDelete();
+            initMembershipEditor();
+        });
+    }
     
+    return { init: init, showToast: showToast };
 })();
 
-// Initialize with data from the HTML bridge
-jQuery(document).ready(function() {
-    var vars = jQuery('#js-variables').data();
+$(document).ready(function() {
+    const vars = $('#js-variables').data();
     if (typeof HouseholdView !== 'undefined') {
         HouseholdView.init({
             baseUrl: vars.baseUrl,
