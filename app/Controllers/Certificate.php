@@ -11,21 +11,6 @@ use App\Models\ResidentModel;
  * Certificate Controller
  * 
  * Manages the issuance, printing, editing, and deletion of resident certificates.
- * 
- * METHODS:
- * - index(): Lists all issued certificates.
- * - create(): Displays form to issue a new certificate.
- * - store(): Saves certificate, logs action, redirects to print.
- * - print_view($id): Displays printable certificate with populated placeholders.
- * - edit($id): Shows edit form for certificate purpose.
- * - update($id): Updates certificate purpose.
- * - delete($id): Deletes a certificate and logs the action.
- * 
- * DEPENDENCIES:
- * - CertificateModel, ResidentModel, LogModel
- * - Uses helper: auth, form
- * 
- * @package App\Controllers
  */
 class Certificate extends BaseController
 {
@@ -44,30 +29,22 @@ class Certificate extends BaseController
      */
     public function index()
     {
-        // Get Certificates with Resident Names
         $certificatesRaw = $this->certModel
             ->select('certificates.*, residents.first_name, residents.last_name')
             ->join('residents', 'residents.id = certificates.resident_id')
             ->orderBy('certificates.id', 'DESC')
             ->findAll();
 
-        // Format types for view (Array of Arrays)
         $rawTypes = CertificateModel::getTypes();
         $formattedTypes = [];
-        
         foreach ($rawTypes as $t) {
-            $formattedTypes[] = [
-                'name'  => $t,
-                'value' => $t
-            ];
+            $formattedTypes[] = ['name' => $t, 'value' => $t];
         }
 
-        $data = [
-            'certificates' => $certificatesRaw, // Pass raw results
+        return view('certificate/index', [
+            'certificates' => $certificatesRaw,
             'types'        => $formattedTypes
-        ];
-
-        return view('certificate/index', $data);
+        ]);
     }
 
     /**
@@ -76,13 +53,10 @@ class Certificate extends BaseController
     public function create()
     {
         $residentModel = new ResidentModel();
-        
-        // Fetch residents for the dropdown
         $data = [
             'residents' => $residentModel->orderBy('last_name', 'ASC')->findAll(),
-            'types'     => CertificateModel::getTypes() 
+            'types'     => CertificateModel::getTypes()
         ];
-
         return view('certificate/create', $data);
     }
 
@@ -99,25 +73,21 @@ class Certificate extends BaseController
             return redirect()->back()->with('error', 'Missing required information.');
         }
 
-        // Validate type
         if (! in_array($type, CertificateModel::getTypes())) {
             return redirect()->back()->with('error', 'Invalid certificate type.');
         }
 
-        // Handle Session ID safely
-        $createdBy = session()->get('id');
-        if (!$createdBy) {
-            $createdBy = session()->get('user_id');
-        }
-        if (!$createdBy) {
-            $createdBy = 1; // Default fallback
-        }
+        // Generate certificate number
+        $certNumber = $this->certModel->generateCertificateNumber($type);
+
+        $createdBy = session()->get('id') ?? session()->get('user_id') ?? 1;
 
         $certId = $this->certModel->insert([
-            'resident_id'      => $residentId,
-            'certificate_type' => $type,
-            'purpose'          => $purpose,
-            'created_by'       => $createdBy,
+            'certificate_number' => $certNumber,    // NEW
+            'resident_id'        => $residentId,
+            'certificate_type'   => $type,
+            'purpose'            => $purpose,
+            'created_by'         => $createdBy,
         ]);
 
         if ($certId) {
@@ -126,7 +96,7 @@ class Certificate extends BaseController
 
             if ($resident) {
                 $name = $resident['first_name'] . ' ' . $resident['last_name'];
-                $this->logModel->addLog("Generated {$type} for {$name}");
+                $this->logModel->addLog("Generated {$type} ({$certNumber}) for {$name}");
             }
 
             return redirect()->to('certificate/print/' . $certId);
@@ -136,25 +106,23 @@ class Certificate extends BaseController
     }
 
     /**
-     * Display the Printable View (Renamed from 'print' to 'print_view')
+     * Display the Printable View
      */
     public function print_view($id)
     {
-        // Fetch data using the Model (SQL logic is in the Model now)
         $cert = $this->certModel->getCertificateForPrint($id);
 
         if (! $cert) {
             return redirect()->to('certificate')->with('error', 'Certificate not found.');
         }
 
-        // ── Replace template placeholders with actual data ──────────────
+        // Replace template placeholders with actual data
         $content = $cert['template_content'] ?? '';
 
         if (! empty($content)) {
             $fullName = trim(($cert['first_name'] ?? '') . ' ' . ($cert['last_name'] ?? ''));
 
             $replacements = [
-                // Resident
                 '{resident_name}'  => $fullName,
                 '{first_name}'     => $cert['first_name']     ?? '',
                 '{last_name}'      => $cert['last_name']      ?? '',
@@ -163,16 +131,12 @@ class Certificate extends BaseController
                 '{civil_status}'   => $cert['civil_status']   ?? '',
                 '{gender}'         => $cert['gender']         ?? '',
                 '{address}'        => $cert['address']        ?? '',
-                '{precinct_no}'    => '', // Column removed, keep empty
-                // Certificate
                 '{purpose}'        => $cert['purpose']        ?? '',
-                '{ctrl_number}'    => str_pad($cert['id'], 5, '0', STR_PAD_LEFT),
-                // Date
+                '{ctrl_number}'    => esc($cert['certificate_number']),   // USE THE NEW NUMBER
                 '{date_today}'     => date('F d, Y'),
                 '{date_issued}'    => date('F d, Y', strtotime($cert['created_at'])),
                 '{valid_until}'    => date('F d, Y', strtotime($cert['created_at'] . ' +1 year')),
                 '{year}'           => date('Y'),
-                // Barangay
                 '{barangay_name}'  => $cert['barangay_name']  ?? '',
                 '{municipality}'   => $cert['municipality']   ?? '',
                 '{province}'       => $cert['province']       ?? '',
@@ -233,11 +197,9 @@ class Certificate extends BaseController
             return redirect()->back()->with('error', 'Purpose is required.');
         }
 
-        $this->certModel->update($id, [
-            'purpose' => $purpose,
-        ]);
+        $this->certModel->update($id, ['purpose' => $purpose]);
 
-        $this->logModel->addLog('Updated certificate #' . $id);
+        $this->logModel->addLog('Updated certificate #' . $cert['certificate_number']);
 
         return redirect()->to('certificate/print/' . $id)
             ->with('success', 'Certificate updated successfully.');
@@ -255,7 +217,7 @@ class Certificate extends BaseController
         }
 
         $this->certModel->delete($id);
-        $this->logModel->addLog('Deleted certificate #' . $id);
+        $this->logModel->addLog('Deleted certificate #' . $cert['certificate_number']);
 
         return redirect()->to('certificate')->with('success', 'Certificate deleted successfully.');
     }
