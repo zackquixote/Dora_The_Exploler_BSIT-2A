@@ -52,7 +52,8 @@ $routes->group('', [
     $routes->get('resident/getHouseholdsBySitio', 'Resident::getHouseholdsBySitio');
     $routes->get('resident/assign-search', 'Resident::assignSearch');
     $routes->get('resident/assign/(:num)', 'Resident::assign/$1');
-
+$routes->post('resident/updateStatus/(:num)', 'Resident::updateStatus/$1');
+$routes->post('resident/updateMemberStatus/(:num)', 'Resident::updateMemberStatus/$1');
 
     // =========================
     // HOUSEHOLDS
@@ -97,14 +98,21 @@ $routes->group('', [
      $routes->get('officials', 'Officials::index');
 
 
-    // =========================
-    // BLOTTER
-    // =========================
-    $routes->get('blotter', 'Blotter::index');
-    $routes->get('blotter/create', 'Blotter::create');
-    $routes->post('blotter/store', 'Blotter::store');
-    $routes->get('blotter/view/(:num)', 'Blotter::view/$1');
-    $routes->post('blotter/update/(:num)', 'Blotter::update/$1');
+   
+  // Blotter Routes
+$routes->get('blotter', 'Blotter::index');
+$routes->get('blotter/create', 'Blotter::create');
+$routes->post('blotter/store', 'Blotter::store');
+$routes->get('blotter/view/(:num)', 'Blotter::view/$1');
+$routes->get('blotter/edit/(:num)', 'Blotter::edit/$1');    
+$routes->post('blotter/update/(:num)', 'Blotter::update/$1');
+$routes->delete('blotter/delete/(:num)', 'Blotter::delete/$1');
+// Additional AJAX endpoint
+$routes->get('blotter/searchResidents', 'Blotter::searchResidents');
+$routes->post('blotter/hearing/add/(:num)', 'Blotter::addHearing/$1');
+$routes->post('blotter/hearing/update/(:num)', 'Blotter::updateHearing/$1');
+$routes->delete('blotter/hearing/delete/(:num)', 'Blotter::deleteHearing/$1');
+$routes->get('blotter/print/(:num)', 'Blotter::printCase/$1');
 });
 
 
