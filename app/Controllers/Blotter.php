@@ -21,6 +21,8 @@ class Blotter extends BaseController
     protected $partyModel;
     protected $residentModel;
     protected $logModel;
+    protected $hearingModel;
+    protected $timelineModel; 
 
     public function __construct()
     {
@@ -28,6 +30,8 @@ class Blotter extends BaseController
         $this->partyModel    = new BlotterPartyModel();
         $this->residentModel = new ResidentModel();
         $this->logModel      = new LogModel();
+        $this->hearingModel  = new \App\Models\BlotterHearingModel();
+        $this->timelineModel = new \App\Models\BlotterTimelineModel();
     }
 
     // ──────────────────────────────────────────────────────────
@@ -203,30 +207,30 @@ class Blotter extends BaseController
     //  VIEW CASE DETAIL
     // ──────────────────────────────────────────────────────────
     public function view($id)
-    {
-        $case = $this->blotterModel->find($id);
-        if (!$case) {
-            return redirect()->to('blotter')->with('error', 'Case not found.');
-        }
-
-        // Load all parties with resident names
-        $parties = $this->partyModel->getByBlotter($id);
-
-        // Group by role for easier display
-        $grouped = [];
-        foreach ($parties as $p) {
-            $grouped[$p['role']][] = $p;
-        }
-
-        // Placeholder for timeline (future)
-        $timeline = [];
-
-        return view('blotter/view', [
-            'case'      => $case,
-            'parties'   => $grouped,
-            'timeline'  => $timeline,
-        ]);
+{
+    $case = $this->blotterModel->find($id);
+    if (!$case) {
+        return redirect()->to('blotter')->with('error', 'Case not found.');
     }
+
+    $parties = $this->partyModel->getByBlotter($id);
+    $grouped = [];
+    foreach ($parties as $p) {
+        $grouped[$p['role']][] = $p;
+    }
+
+    // Load hearings
+    $hearings = $this->hearingModel->getByBlotter($id);
+    $timeline = $this->timelineModel->getByBlotter($id);
+
+
+    return view('blotter/view', [
+        'case'      => $case,
+        'parties'   => $grouped,
+        'hearings'  => $hearings,
+        'timeline'  => $timeline,       
+    ]);
+}
 
     // ──────────────────────────────────────────────────────────
     //  EDIT CASE (basic fields)
@@ -251,48 +255,63 @@ class Blotter extends BaseController
     // ──────────────────────────────────────────────────────────
     //  UPDATE CASE + PARTIES
     // ──────────────────────────────────────────────────────────
+
     public function update($id)
-    {
-        $case = $this->blotterModel->find($id);
-        if (!$case) {
-            return redirect()->to('blotter')->with('error', 'Case not found.');
-        }
-
-        // Update main blotter fields
-        $this->blotterModel->update($id, [
-            'incident_type'    => $this->request->getPost('incident_type'),
-            'incident_date'    => $this->request->getPost('incident_date'),
-            'incident_location'=> $this->request->getPost('incident_location'),
-            'purok'            => $this->request->getPost('purok'),
-            'details'          => $this->request->getPost('details'),
-            'status'           => $this->request->getPost('status'),
-            'action_taken'     => $this->request->getPost('action_taken'),
-            'updated_by'       => session()->get('user_id') ?? session()->get('id'),
-        ]);
-
-        // Remove existing parties and re-insert (simplest approach)
-        $this->partyModel->where('blotter_id', $id)->delete();
-
-        $partyData = $this->request->getPost('parties') ?? [];
-        foreach ($partyData as $p) {
-            $insert = [
-                'blotter_id' => $id,
-                'role'       => $p['role'],
-            ];
-            if (($p['type'] ?? '') === 'resident' && !empty($p['resident_id'])) {
-                $insert['resident_id'] = $p['resident_id'];
-            } else {
-                $insert['outsider_name']    = $p['outsider_name'] ?? '';
-                $insert['outsider_address'] = $p['outsider_address'] ?? '';
-            }
-            $this->partyModel->insert($insert);
-        }
-
-        $this->logModel->addLog("Updated blotter case {$case['case_number']}");
-
-        return redirect()->to('blotter')->with('success', 'Case updated successfully.');
+{
+    $case = $this->blotterModel->find($id);
+    if (!$case) {
+        return redirect()->to('blotter')->with('error', 'Case not found.');
     }
 
+    // Capture status before update for timeline
+    $oldStatus = $case['status'];
+    $newStatus = $this->request->getPost('status');
+
+    // Update main blotter fields
+    $this->blotterModel->update($id, [
+        'incident_type'     => $this->request->getPost('incident_type'),
+        'incident_date'     => $this->request->getPost('incident_date'),
+        'incident_location' => $this->request->getPost('incident_location'),
+        'purok'             => $this->request->getPost('purok'),
+        'details'           => $this->request->getPost('details'),
+        'status'            => $newStatus,
+        'action_taken'      => $this->request->getPost('action_taken'),
+        'updated_by'        => session()->get('user_id') ?? session()->get('id'),
+    ]);
+
+    // Log timeline entry if status changed
+    if ($oldStatus !== $newStatus) {
+        $this->timelineModel->insert([
+            'blotter_id' => $id,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'remarks'    => $this->request->getPost('action_taken') ?? '',
+            'created_by' => session()->get('user_id') ?? session()->get('id'),
+        ]);
+    }
+
+    // Remove existing parties and re-insert
+    $this->partyModel->where('blotter_id', $id)->delete();
+
+    $partyData = $this->request->getPost('parties') ?? [];
+    foreach ($partyData as $p) {
+        $insert = [
+            'blotter_id' => $id,
+            'role'       => $p['role'],
+        ];
+        if (($p['type'] ?? '') === 'resident' && !empty($p['resident_id'])) {
+            $insert['resident_id'] = $p['resident_id'];
+        } else {
+            $insert['outsider_name']    = $p['outsider_name'] ?? '';
+            $insert['outsider_address'] = $p['outsider_address'] ?? '';
+        }
+        $this->partyModel->insert($insert);
+    }
+
+    $this->logModel->addLog("Updated blotter case {$case['case_number']}");
+
+    return redirect()->to('blotter')->with('success', 'Case updated successfully.');
+}
     // ──────────────────────────────────────────────────────────
     //  DELETE CASE (with cascading parties)
     // ──────────────────────────────────────────────────────────
@@ -312,23 +331,134 @@ class Blotter extends BaseController
     // ──────────────────────────────────────────────────────────
     //  AJAX: Search residents by name (for autocomplete/dropdown)
     // ──────────────────────────────────────────────────────────
-    public function searchResidents()
-    {
-        $term = $this->request->getGet('q');
-        if (empty($term)) {
-            return $this->response->setJSON([]);
-        }
+   public function searchResidents()
+{
+    $term = $this->request->getGet('q');
 
-        $residents = $this->residentModel
-            ->select('id, CONCAT(first_name, " ", last_name) as text')
-            ->groupStart()
+    // If a search term is provided, filter; otherwise return all active residents
+    $builder = $this->residentModel
+        ->select('id, CONCAT(first_name, " ", last_name) as text')
+        ->where('status', 'active')
+        ->orderBy('last_name', 'ASC')
+        ->orderBy('first_name', 'ASC');
+
+    if (!empty($term)) {
+        $builder->groupStart()
                 ->like('first_name', $term)
                 ->orLike('last_name', $term)
-            ->groupEnd()
-            ->where('status', 'active')
-            ->limit(20)
-            ->findAll();
-
-        return $this->response->setJSON($residents);
+                ->groupEnd();
     }
+
+    $residents = $builder->limit(500)->findAll();  // limit for performance
+
+    return $this->response->setJSON($residents);
+}
+/**
+ * AJAX – store a new hearing
+ */
+public function addHearing($blotterId)
+{
+    $case = $this->blotterModel->find($blotterId);
+    if (!$case) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Case not found.']);
+    }
+
+    $data = [
+        'blotter_id'         => $blotterId,
+        'hearing_date'       => $this->request->getPost('hearing_date'),
+        'hearing_time'       => $this->request->getPost('hearing_time'),
+        'venue'              => $this->request->getPost('venue'),
+        'presiding_officer'  => $this->request->getPost('presiding_officer'),
+        'notes'              => $this->request->getPost('notes'),
+        'status'             => $this->request->getPost('status') ?? 'Scheduled',
+        'created_by'         => session()->get('user_id') ?? session()->get('id'),
+    ];
+
+    if ($this->hearingModel->insert($data)) {
+        $this->logModel->addLog("Added hearing for case {$case['case_number']}");
+        return $this->response->setJSON(['status' => 'success', 'message' => 'Hearing added.']);
+    }
+
+    return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to save hearing.']);
+}
+
+/**
+ * AJAX – update an existing hearing
+ */
+public function updateHearing($hearingId)
+{
+    $hearing = $this->hearingModel->find($hearingId);
+    if (!$hearing) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Hearing not found.']);
+    }
+
+    $data = [
+        'hearing_date'       => $this->request->getPost('hearing_date'),
+        'hearing_time'       => $this->request->getPost('hearing_time'),
+        'venue'              => $this->request->getPost('venue'),
+        'presiding_officer'  => $this->request->getPost('presiding_officer'),
+        'notes'              => $this->request->getPost('notes'),
+        'outcome'            => $this->request->getPost('outcome'),
+        'status'             => $this->request->getPost('status'),
+    ];
+
+    if ($this->hearingModel->update($hearingId, $data)) {
+        $case = $this->blotterModel->find($hearing['blotter_id']);
+        $this->logModel->addLog("Updated hearing for case {$case['case_number']}");
+        return $this->response->setJSON(['status' => 'success', 'message' => 'Hearing updated.']);
+    }
+
+    return $this->response->setJSON(['status' => 'error', 'message' => 'Update failed.']);
+}
+
+/**
+ * AJAX – delete a hearing
+ */
+public function deleteHearing($hearingId)
+{
+    $hearing = $this->hearingModel->find($hearingId);
+    if (!$hearing) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Hearing not found.']);
+    }
+
+    $this->hearingModel->delete($hearingId);
+    $case = $this->blotterModel->find($hearing['blotter_id']);
+    $this->logModel->addLog("Deleted hearing for case {$case['case_number']}");
+    return $this->response->setJSON(['status' => 'success', 'message' => 'Hearing deleted.']);
+}
+
+/**
+ * Print-friendly case summary
+ */
+public function printCase($id)
+{
+    $case = $this->blotterModel->find($id);
+    if (!$case) {
+        return redirect()->to('blotter')->with('error', 'Case not found.');
+    }
+
+    // Load parties with resident names
+    $parties = $this->partyModel->getByBlotter($id);
+    $grouped = [];
+    foreach ($parties as $p) {
+        $grouped[$p['role']][] = $p;
+    }
+
+    // Hearings
+    $hearings = $this->hearingModel->getByBlotter($id);
+
+    // Status History
+    $timeline = $this->timelineModel->getByBlotter($id);
+
+    // Barangay info for the header
+    $barangay = (new \App\Models\BarangaySettingsModel())->first();
+
+    return view('blotter/print', [
+        'case'      => $case,
+        'parties'   => $grouped,
+        'hearings'  => $hearings,
+        'timeline'  => $timeline,
+        'barangay'  => $barangay,
+    ]);
+}
 }
