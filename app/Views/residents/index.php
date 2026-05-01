@@ -1,13 +1,8 @@
 <?php
-// ---------------------------------------------------------
-// SMART THEME LOADER
-// ---------------------------------------------------------
- $role = strtolower(session()->get('role') ?? 'staff');
- $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+$role = strtolower(session()->get('role') ?? 'staff');
+$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
-
 <?= $this->extend($template) ?>
-
 <?= $this->section('content') ?>
 
 <div class="content-wrapper residents-page">
@@ -28,8 +23,6 @@
 
     <section class="content">
         <div class="container-fluid">
-
-            <!-- Flash Messages -->
             <?php if (session()->getFlashdata('success')): ?>
                 <div class="rp-alert rp-alert-success alert-dismissible fade show" role="alert">
                     <div>
@@ -39,7 +32,6 @@
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                 </div>
             <?php endif; ?>
-
             <?php if (session()->getFlashdata('error')): ?>
                 <div class="rp-alert rp-alert-danger alert-dismissible fade show" role="alert">
                     <div>
@@ -50,7 +42,6 @@
                 </div>
             <?php endif; ?>
 
-            <!-- Main Table Card -->
             <div class="rp-card">
                 <div class="rp-card-header">
                     <h3 class="rp-card-title">
@@ -62,18 +53,16 @@
                             </span>
                         <?php endif; ?>
                     </h3>
-
                     <div class="rp-toolbar">
-                        <!-- Purok Filter -->
                         <form method="GET" action="<?= base_url('resident') ?>" id="purokFilterForm">
                             <select name="purok" id="purokFilter" class="rp-select" onchange="this.form.submit()">
-                                <option value="all"             <?= ($selectedPurok ?? 'all') == 'all'            ? 'selected' : '' ?>>All Puroks</option>
-                                <option value="Purok Malipayon" <?= ($selectedPurok ?? '') == 'Purok Malipayon'   ? 'selected' : '' ?>>Purok Malipayon</option>
-                                <option value="Purok Masagana"  <?= ($selectedPurok ?? '') == 'Purok Masagana'    ? 'selected' : '' ?>>Purok Masagana</option>
-                                <option value="Purok Cory"      <?= ($selectedPurok ?? '') == 'Purok Cory'        ? 'selected' : '' ?>>Purok Cory</option>
-                                <option value="Purok Kawayan"   <?= ($selectedPurok ?? '') == 'Purok Kawayan'     ? 'selected' : '' ?>>Purok Kawayan</option>
-                                <option value="Purok Pagla-um"  <?= ($selectedPurok ?? '') == 'Purok Pagla-um'    ? 'selected' : '' ?>>Purok Pagla-um</option>
-                                <option value="Unassigned"      <?= ($selectedPurok ?? '') == 'Unassigned'        ? 'selected' : '' ?>>Unassigned</option>
+                                <option value="all" <?= ($selectedPurok ?? 'all') == 'all' ? 'selected' : '' ?>>All Puroks</option>
+                                <option value="Purok Malipayon" <?= ($selectedPurok ?? '') == 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
+                                <option value="Purok Masagana" <?= ($selectedPurok ?? '') == 'Purok Masagana' ? 'selected' : '' ?>>Purok Masagana</option>
+                                <option value="Purok Cory" <?= ($selectedPurok ?? '') == 'Purok Cory' ? 'selected' : '' ?>>Purok Cory</option>
+                                <option value="Purok Kawayan" <?= ($selectedPurok ?? '') == 'Purok Kawayan' ? 'selected' : '' ?>>Purok Kawayan</option>
+                                <option value="Purok Pagla-um" <?= ($selectedPurok ?? '') == 'Purok Pagla-um' ? 'selected' : '' ?>>Purok Pagla-um</option>
+                                <option value="Unassigned" <?= ($selectedPurok ?? '') == 'Unassigned' ? 'selected' : '' ?>>Unassigned</option>
                             </select>
                             <?php if (($selectedPurok ?? 'all') != 'all'): ?>
                                 <a href="<?= base_url('resident') ?>" class="rp-btn rp-btn-ghost" id="clearFilterBtn">
@@ -81,7 +70,6 @@
                                 </a>
                             <?php endif; ?>
                         </form>
-
                         <a href="<?= base_url('resident/create') ?>" class="rp-btn rp-btn-primary">
                             <i class="fas fa-plus"></i> Add Resident
                         </a>
@@ -118,37 +106,21 @@
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($residents as $r): 
-                                        // Calculate Age
-                                        $age = '';
-                                        if (!empty($r['birthdate'])) {
-                                            $birth = new DateTime($r['birthdate']);
-                                            $today = new DateTime();
-                                            $age = $birth->diff($today)->y;
-                                        }
-
-                                        // Profile Image
+                                        // Use pre‑computed age from controller query
+                                        $age = $r['age'] ?? '';
                                         $profileImg = !empty($r['profile_picture'])
                                             ? base_url('uploads/' . $r['profile_picture'])
                                             : base_url('assets/img/default.png');
-
-                                        // Voter Badge
                                         $voterBadge = !empty($r['is_voter'])
                                             ? '<span class="rp-badge rp-badge-voter-yes">Yes</span>'
                                             : '<span class="rp-badge rp-badge-voter-no">No</span>';
-
-                                        // Senior Citizen Badge
                                         $seniorBadge = !empty($r['is_senior_citizen'])
                                             ? '<span class="rp-badge rp-badge-senior">Senior</span>'
                                             : '';
-
-                                        // PWD Badge
                                         $pwdBadge = !empty($r['is_pwd'])
                                             ? '<span class="rp-badge rp-badge-pwd">PWD</span>'
                                             : '';
-
                                         $flags = trim($seniorBadge . ' ' . $pwdBadge);
-
-                                        // Purok Display Logic
                                         $purokDisplay = !empty($r['sitio']) ? $r['sitio'] : 'Unassigned';
                                         $purokBadge = $purokDisplay != 'Unassigned'
                                             ? '<span class="rp-badge rp-badge-purok">' . esc($purokDisplay) . '</span>'
@@ -234,19 +206,14 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-    <!-- Config for JS -->
-    <script>
-        var RESIDENTS_CONFIG = {
-            baseUrl:      "<?= base_url() ?>",
-            csrfName:     "<?= csrf_token() ?>",
-            csrfHash:     "<?= csrf_hash() ?>",
-            currentPurok: "<?= $selectedPurok ?? 'all' ?>"
-        };
-    </script>
-
-    <!-- External JS -->
-     <link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-index.css') ?>">
-
-    <script src="<?= base_url('js/residents/residents-index.js') ?>"></script>
-    <!-- Link CSS (Put here if <head> section is not available in template) -->
+<script>
+    var RESIDENTS_CONFIG = {
+        baseUrl:      "<?= base_url() ?>",
+        csrfName:     "<?= csrf_token() ?>",
+        csrfHash:     "<?= csrf_hash() ?>",
+        currentPurok: "<?= $selectedPurok ?? 'all' ?>"
+    };
+</script>
+<link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-index.css') ?>">
+<script src="<?= base_url('js/residents/residents-index.js') ?>"></script>
 <?= $this->endSection() ?>
