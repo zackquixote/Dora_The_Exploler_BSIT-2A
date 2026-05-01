@@ -65,7 +65,6 @@ var HouseholdIndex = (function() {
             var id = $btn.data('id');
             var no = $btn.data('no');
             var $row = $btn.closest('tr');
-            // Find count in the badge
             var residentCount = parseInt($row.find('.resident-count').text()) || 0;
             
             var confirmMsg = 'Delete Household ' + no + '?';
@@ -79,7 +78,6 @@ var HouseholdIndex = (function() {
                 return;
             }
             
-            // Disable button and show loading
             $btn.html('<i class="fas fa-spinner fa-spin"></i>').prop('disabled', true);
             
             var requestData = {};
@@ -119,7 +117,6 @@ var HouseholdIndex = (function() {
         CSRF_TOKEN = config.csrfToken || 'csrf_token';
         CSRF_HASH = config.csrfHash || '';
         
-        // Wait for jQuery to be available
         if (typeof jQuery === 'undefined') {
             setTimeout(function() { init(config); }, 50);
             return;
@@ -127,14 +124,11 @@ var HouseholdIndex = (function() {
         
         jQuery(document).ready(function($) {
             console.log('Household index initialized');
-            
-            // Initialize functions
             initSearch();
             initDelete();
         });
     }
     
-    // Public API
     return {
         init: init,
         showToast: showToast
@@ -142,9 +136,8 @@ var HouseholdIndex = (function() {
     
 })();
 
-// Initialize with data from the HTML bridge
-jQuery(document).ready(function() {
-    var vars = jQuery('#js-variables').data();
+$(document).ready(function() {
+    var vars = $('#js-variables').data();
     if (typeof HouseholdIndex !== 'undefined') {
         HouseholdIndex.init({
             baseUrl: vars.baseUrl,
