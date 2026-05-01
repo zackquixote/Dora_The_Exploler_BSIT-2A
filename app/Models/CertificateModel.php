@@ -7,38 +7,42 @@ use CodeIgniter\Model;
 /**
  * CertificateModel
  * 
- * Manages certificate issuance.
- * 
- * TABLE: certificates
- * - id, resident_id, certificate_type, purpose, created_by, created_at
- * - NO updated_at column → timestamps disabled.
- * 
- * METHODS:
- * - getCertificateForPrint(): Returns certificate data with resident details.
- *   (Officials' names are omitted – they are not stored directly in barangay_settings)
+ * Manages certificate issuance with automatic sequential numbering
+ * per certificate type and year (e.g., CLEAR-2026-0001).
  */
 class CertificateModel extends Model
 {
     protected $table            = 'certificates';
     protected $primaryKey       = 'id';
-    protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
 
     protected $allowedFields = [
+        'certificate_number',   // NEW
         'resident_id',
         'certificate_type',
         'purpose',
         'created_by',
     ];
 
-    // Disabled because table lacks 'updated_at'
+    // No updated_at column, so timestamps disabled
     protected $useTimestamps = false;
 
     protected $validationRules = [
         'resident_id'      => 'required|integer',
         'certificate_type' => 'required|in_list[Barangay Clearance,Certificate of Indigency,Certificate of Residency,Business Permit,Solo Parent]',
         'purpose'          => 'required',
+    ];
+
+    /**
+     * Mapping of certificate types to short prefixes.
+     */
+    protected $typePrefixes = [
+        'Barangay Clearance'        => 'CLEAR',
+        'Certificate of Indigency'  => 'INDIG',
+        'Certificate of Residency'  => 'RESID',
+        'Business Permit'           => 'BUSPR',
+        'Solo Parent'               => 'SOLOP',
     ];
 
     public static function getTypes(): array
@@ -53,15 +57,57 @@ class CertificateModel extends Model
     }
 
     /**
-     * Get certificate data for printing.
-     * NOTE: Officials' names are NOT directly available in barangay_settings.
-     * You must join residents table using captain_id etc. if needed.
+     * Generate the next certificate number for a given type and year.
+     *
+     * Example: CLEAR-2026-0001
+     */
+    public function generateCertificateNumber(string $type, string $year = null): string
+    {
+        $year = $year ?? date('Y');
+        $prefix = $this->typePrefixes[$type] ?? 'CERT';
+
+        // Count how many of this type already exist for the year
+        $count = $this->where('certificate_type', $type)
+                      ->where('YEAR(created_at)', $year)
+                      ->countAllResults();
+
+        $next = $count + 1;
+        return $prefix . '-' . $year . '-' . str_pad($next, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Get certificate data for printing, including official names.
      */
     public function getCertificateForPrint(int $id): ?array
     {
+        // Fetch active officials
+        $officials = $this->db->table('officials')
+            ->select('position, full_name')
+            ->where('is_active', 1)
+            ->get()
+            ->getResultArray();
+
+        $captainName   = '';
+        $secretaryName = '';
+        $treasurerName = '';
+        foreach ($officials as $off) {
+            switch ($off['position']) {
+                case 'Punong Barangay':
+                    $captainName = $off['full_name'];
+                    break;
+                case 'Secretary':
+                    $secretaryName = $off['full_name'];
+                    break;
+                case 'Treasurer':
+                    $treasurerName = $off['full_name'];
+                    break;
+            }
+        }
+
         $result = $this->db->table('certificates c')
             ->select([
                 'c.id',
+                'c.certificate_number',   // Now included
                 'c.certificate_type',
                 'c.purpose',
                 'c.created_at',
@@ -76,7 +122,6 @@ class CertificateModel extends Model
                 'bs.barangay_name',
                 'bs.municipality',
                 'bs.province',
-                // Removed captain_name, secretary_name, treasurer_name (they don't exist)
             ])
             ->join('residents r',          'r.id = c.resident_id',          'left')
             ->join('certificate_types ct', 'ct.name = c.certificate_type',  'left')
@@ -84,6 +129,12 @@ class CertificateModel extends Model
             ->where('c.id', $id)
             ->get()
             ->getRowArray();
+
+        if ($result) {
+            $result['captain_name']   = $captainName;
+            $result['secretary_name'] = $secretaryName;
+            $result['treasurer_name'] = $treasurerName;
+        }
 
         return $result ?: null;
     }
