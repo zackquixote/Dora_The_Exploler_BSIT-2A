@@ -1,9 +1,6 @@
 <?php
-// ---------------------------------------------------------
-// SMART THEME LOADER
-// ---------------------------------------------------------
- $role = strtolower(session()->get('role') ?? 'staff');
- $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+$role = strtolower(session()->get('role') ?? 'staff');
+$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
 
 <?= $this->extend($template) ?>
@@ -30,7 +27,6 @@
     <section class="content">
         <div class="container-fluid">
             
-            <!-- FLASH MESSAGES -->
             <?php if (session()->getFlashdata('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show shadow-sm">
                     <i class="fas fa-check-circle mr-2"></i> <?= session()->getFlashdata('success') ?>
@@ -38,13 +34,10 @@
                 </div>
             <?php endif; ?>
 
-            <!-- TOOLBAR & STATS -->
             <div class="row">
-                <!-- Search & Filter -->
                 <div class="col-md-12 mb-3">
                     <div class="card border-0 shadow-sm rounded-lg">
                         <div class="card-body p-3 d-flex flex-wrap gap-2 align-items-center justify-content-between">
-                            
                             <div class="d-flex align-items-center" style="flex: 1;">
                                 <div class="input-group input-group-sm" style="max-width: 300px;">
                                     <div class="input-group-prepend bg-light border-right-0">
@@ -70,7 +63,6 @@
                     </div>
                 </div>
 
-                <!-- Stats Cards -->
                 <div class="col-md-4">
                     <div class="card card-primary card-outline shadow-sm">
                         <div class="card-body">
@@ -112,7 +104,6 @@
                 </div>
             </div>
 
-            <!-- TABLE -->
             <div class="card border-0 shadow-sm rounded-lg">
                 <div class="card-header bg-white border-0 pt-3">
                     <h3 class="card-title text-dark font-weight-bold">Household Directory</h3>
@@ -143,7 +134,6 @@
                                         $count = $h['resident_count'];
                                         $badgeClass = 'bg-secondary';
                                         $badgeText = 'Low';
-                                        
                                         if ($count >= 4 && $count < 7) { $badgeClass = 'bg-info'; $badgeText = 'Medium'; }
                                         if ($count >= 7) { $badgeClass = 'bg-warning'; $badgeText = 'High'; }
                                         if ($count >= 10) { $badgeClass = 'bg-danger'; $badgeText = 'Crowded'; }
@@ -197,7 +187,6 @@
     </section>
 </div>
 
-<!-- JS VARIABLES BRIDGE -->
 <div id="js-variables" style="display:none;"
      data-base-url="<?= base_url() ?>"
      data-csrf-token="<?= csrf_token() ?>"
@@ -206,7 +195,6 @@
 
 <?= $this->endSection() ?>
 
-<!-- Load Index Specific JS -->
 <?= $this->section('scripts') ?>
 <script src="<?= base_url('js/households/households-index.js') ?>"></script>
 <?= $this->endSection() ?>
