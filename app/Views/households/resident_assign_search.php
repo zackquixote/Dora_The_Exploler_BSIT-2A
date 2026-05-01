@@ -1,9 +1,6 @@
 <?php
-// ---------------------------------------------------------
-// SMART THEME LOADER
-// ---------------------------------------------------------
- $role = strtolower(session()->get('role') ?? 'staff');
- $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+$role = strtolower(session()->get('role') ?? 'staff');
+$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
 
 <?= $this->extend($template) ?>
@@ -31,7 +28,6 @@
     <section class="content">
         <div class="container-fluid">
             
-            <!-- ALERTS -->
             <?php if (session()->getFlashdata('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <strong><i class="fas fa-check-circle"></i> Done!</strong> <?= session()->getFlashdata('success') ?>
@@ -39,16 +35,13 @@
                 </div>
             <?php endif; ?>
 
-            <!-- TOP CARD: Filters & Search -->
             <div class="card mb-4">
                 <div class="card-header bg-white py-2">
                     <div class="row">
-                        
-                        <!-- FILTER BY LOCATION -->
                         <div class="col-md-4 border-right">
                             <small class="text-muted text-uppercase font-weight-bold">Filter Candidates by Location</small>
                             <div class="input-group input-group-sm mt-1">
-                                <select id="filter_purok" class="form-control" onchange="loadHouseholds('filter')">
+                                <select id="filter_purok" class="form-control">
                                     <option value="">All Purok</option>
                                     <?php 
                                     $puroks = ['Purok Malipayon', 'Purok Masagana', 'Purok Cory', 'Purok Kawayan', 'Purok Pagla-um'];
@@ -56,15 +49,12 @@
                                         <option value="<?= $p ?>" <?= ($filterPurok == $p) ? 'selected' : '' ?>><?= $p ?></option>
                                     <?php endforeach; ?>
                                 </select>
-                                
                                 <select id="filter_household_id" name="filter_household_id" class="form-control">
                                     <option value="">All Houses</option>
-                                    <!-- JS loads houses here if purok is selected -->
                                 </select>
                             </div>
                         </div>
 
-                        <!-- SEARCH BY NAME -->
                         <div class="col-md-8">
                             <small class="text-muted text-uppercase font-weight-bold">Search by Name</small>
                             <form action="" method="get" class="input-group input-group-sm mt-1">
@@ -87,15 +77,13 @@
                 </div>
             </div>
 
-            <!-- MAIN CARD: Resident List -->
             <form action="<?= base_url('resident/assignBulk') ?>" method="post" id="bulkForm">
                 <input type="hidden" name="target_household_id" value="<?= esc($household_id) ?>">
                 
                 <div class="card">
                     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                         <h3 class="card-title m-0">Available Residents</h3>
-                        
-                        <button type="button" onclick="validateAndSubmit()" class="btn btn-success btn-sm">
+                        <button type="button" class="btn btn-success btn-sm" id="assignSelectedBtn">
                             <i class="fas fa-users"></i> Assign Selected (Checked)
                         </button>
                     </div>
@@ -122,22 +110,17 @@
                                         if (!empty($r['birthdate'])) {
                                             $age = (new DateTime($r['birthdate']))->diff(new DateTime())->y;
                                         }
-                                        
-                                        // Image Logic
                                         $profileSrc = 'https://ui-avatars.com/api/?name='.urlencode($r['first_name'] . ' ' . $r['last_name']).'&background=random&color=fff&size=40';
                                         if (!empty($r['profile_picture'])) {
                                             $profileSrc = base_url('uploads/' . $r['profile_picture']);
                                         }
                                     ?>
                                     <tr>
-                                        <!-- Checkbox -->
                                         <td class="text-center align-middle">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="selected_residents[]" value="<?= $r['id'] ?>" id="check_<?= $r['id'] ?>" onchange="toggleRelation('<?= $r['id'] ?>')">
+                                                <input class="form-check-input" type="checkbox" name="selected_residents[]" value="<?= $r['id'] ?>" id="check_<?= $r['id'] ?>">
                                             </div>
                                         </td>
-
-                                        <!-- Info -->
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <img src="<?= $profileSrc ?>" class="img-circle elevation-2 mr-3" style="width:35px; height:35px; object-fit:cover;" alt="">
@@ -146,8 +129,6 @@
                                                 </div>
                                             </div>
                                         </td>
-
-                                        <!-- Current Status -->
                                         <td>
                                             <span class="badge badge-info"><?= esc($r['sitio']) ?></span>
                                             <?php if($r['household_id']): ?>
@@ -156,8 +137,6 @@
                                                 <br><span class="text-muted small">No Household</span>
                                             <?php endif; ?>
                                         </td>
-
-                                        <!-- Relationship Dropdown (Initially Disabled) -->
                                         <td>
                                             <select name="relationships[<?= $r['id'] ?>]" id="rel_<?= $r['id'] ?>" class="form-control form-control-sm" disabled>
                                                 <option value="">Select Relationship...</option>
@@ -189,92 +168,15 @@
     </section>
 </div>
 
-<script>
-// 1. Toggle Dropdown enable/disable based on checkbox
-function toggleRelation(id) {
-    var checkbox = document.getElementById('check_' + id);
-    var dropdown = document.getElementById('rel_' + id);
-    
-    if (checkbox.checked) {
-        dropdown.disabled = false;
-        dropdown.focus();
-    } else {
-        dropdown.disabled = true;
-        dropdown.value = ""; // Reset value
-    }
-}
+<div id="js-variables" style="display:none;"
+     data-base-url="<?= base_url() ?>"
+     data-csrf-token="<?= csrf_token() ?>"
+     data-csrf-hash="<?= csrf_hash() ?>"
+     data-household-id="<?= esc($household_id) ?>">
+</div>
 
-// 2. Validate before submitting
-function validateAndSubmit() {
-    var checkboxes = document.querySelectorAll('input[name="selected_residents[]"]:checked');
-    
-    if (checkboxes.length === 0) {
-        alert("Please select at least one resident.");
-        return;
-    }
+<?= $this->endSection() ?>
 
-    var valid = true;
-    checkboxes.forEach(function(box) {
-        var id = box.value;
-        var dropdown = document.getElementById('rel_' + id);
-        if (dropdown.value === "") {
-            valid = false;
-            alert("Please select a relationship for " + dropdown.parentElement.parentElement.parentElement.querySelector('strong').innerText);
-        }
-    });
-
-    if (valid) {
-        document.getElementById('bulkForm').submit();
-    }
-}
-
-// 3. Filter Logic: Load Houses based on Purok
- $(document).ready(function() {
-    // Set initial house if it exists in URL
-    var initialPurok = "<?= esc($filterPurok) ?>";
-    var initialHouse = "<?= esc($filterHouseId) ?>";
-    
-    if (initialPurok) {
-        loadHouseholds('filter', initialHouse);
-    }
-
-    // Listen for changes on the Filter Purok dropdown
-    $('#filter_purok').on('change', function() {
-        var purok = $(this).val();
-        $('#hidden_purok').val(purok);
-        $('#hidden_household').val(''); // Reset house when purok changes
-        loadHouseholds('filter');
-    });
-
-    // Listen for changes on the Filter House dropdown
-    $('#filter_household_id').on('change', function() {
-        $('#hidden_household').val($(this).val());
-    });
-});
-
-function loadHouseholds(type, preSelectId = null) {
-    var purok = $('#filter_purok').val();
-    var targetId = (type === 'filter') ? '#filter_household_id' : '';
-    
-    if (!purok) {
-        $(targetId).html('<option value="">All Houses</option>');
-        return;
-    }
-
-    $.ajax({
-        url: "<?= base_url('resident/getHouseholdsBySitio') ?>",
-        type: "GET",
-        data: { sitio: purok },
-        dataType: "json",
-        success: function(data) {
-            $(targetId).empty().append('<option value="">All Houses</option>');
-            $.each(data.data, function(i, item) {
-                var selected = (preSelectId && item.id == preSelectId) ? 'selected' : '';
-                $(targetId).append('<option value="'+ item.id +'" '+ selected +'>Household #'+ item.household_no +'</option>');
-            });
-        }
-    });
-}
-</script>
-
+<?= $this->section('scripts') ?>
+<script src="<?= base_url('js/residents/resident-assign-search.js') ?>"></script>
 <?= $this->endSection() ?>
