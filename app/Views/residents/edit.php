@@ -2,21 +2,15 @@
 // ---------------------------------------------------------
 // SMART THEME LOADER
 // ---------------------------------------------------------
- $role = strtolower(session()->get('role') ?? 'staff');
- $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+$role = strtolower(session()->get('role') ?? 'staff');
+$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
 
-<!-- Reuse the same CSS file -->
 <link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-create.css') ?>">
-
 <?= $this->extend($template) ?>
-
 <?= $this->section('content') ?>
 
-<!-- This wrapper ensures it fits inside sidebar layout -->
 <div class="content-wrapper">
-    
-    <!-- Standard AdminLTE Content Header -->
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -35,10 +29,7 @@
 
     <section class="content">
         <div class="container-fluid">
-            
             <div class="rc-container">
-                
-                <!-- Custom Header -->
                 <div class="rc-header">
                     <div class="rc-title">
                         <a href="<?= base_url('resident') ?>" class="text-muted text-decoration-none small">
@@ -89,17 +80,14 @@
                                     <label class="rc-label">First Name <span>*</span></label>
                                     <input type="text" name="first_name" class="rc-input" value="<?= old('first_name', $resident['first_name']) ?>" required>
                                 </div>
-
                                 <div class="rc-field">
                                     <label class="rc-label">Middle Name</label>
                                     <input type="text" name="middle_name" class="rc-input" value="<?= old('middle_name', $resident['middle_name'] ?? '') ?>">
                                 </div>
-
                                 <div class="rc-field">
                                     <label class="rc-label">Last Name <span>*</span></label>
                                     <input type="text" name="last_name" class="rc-input" value="<?= old('last_name', $resident['last_name']) ?>" required>
                                 </div>
-
                                 <div class="rc-field">
                                     <label class="rc-label">Gender <span>*</span></label>
                                     <select name="sex" class="rc-select" required>
@@ -108,12 +96,10 @@
                                         <option value="female" <?= old('sex', $resident['sex'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
                                     </select>
                                 </div>
-
                                 <div class="rc-field">
                                     <label class="rc-label">Birthdate <span>*</span></label>
                                     <input type="date" name="birthdate" class="rc-input" value="<?= old('birthdate', $resident['birthdate']) ?>" required>
                                 </div>
-
                                 <div class="rc-field">
                                     <label class="rc-label">Civil Status</label>
                                     <select name="civil_status" class="rc-select">
@@ -123,21 +109,16 @@
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-
                                 <div class="rc-field">
                                     <label class="rc-label">Occupation</label>
                                     <input type="text" name="occupation" class="rc-input" value="<?= old('occupation', $resident['occupation'] ?? '') ?>">
                                 </div>
-
                                 <div class="rc-field">
                                     <label class="rc-label">Citizenship</label>
                                     <input type="text" name="citizenship" class="rc-input" value="<?= old('citizenship', $resident['citizenship'] ?? 'Filipino') ?>">
                                 </div>
-
                                 <div class="rc-field">
                                     <label class="rc-label">Profile Picture</label>
-                                    
-                                    <!-- Upload Area -->
                                     <div class="rc-file-area">
                                         <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                                         <p class="text-muted small mb-0">Click to upload new photo</p>
@@ -145,8 +126,6 @@
                                         <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
                                         <div id="fileName" class="small text-muted mt-2">No file chosen</div>
                                     </div>
-
-                                    <!-- Current Photo Preview -->
                                     <?php if (!empty($resident['profile_picture'])): ?>
                                         <div style="margin-top: 10px; padding: 10px; background: #F8FAFC; border-radius: 6px; text-align: center;">
                                             <small class="text-muted d-block mb-1">Current Photo:</small>
@@ -169,10 +148,8 @@
                             <div class="rc-grid">
                                 <div class="rc-field full-width">
                                     <label class="rc-label">Street / House Number</label>
-                                    <input type="text" name="street_address" class="rc-input" 
-                                           value="<?= old('street_address', $resident['street_address'] ?? '') ?>">
+                                    <input type="text" name="street_address" class="rc-input" value="<?= old('street_address', $resident['street_address'] ?? '') ?>">
                                 </div>
-
                                 <div class="rc-field">
                                     <label class="rc-label">Sitio / Zone <span>*</span></label>
                                     <select name="sitio" id="sitioSelect" class="rc-select" required>
@@ -184,31 +161,26 @@
                                         <option value="Purok Pagla-um"  <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Pagla-um'  ? 'selected' : '' ?>>Purok Pagla-um</option>
                                     </select>
                                 </div>
-
                                 <div class="rc-field">
                                     <label class="rc-label">Household (Optional)</label>
                                     <div style="position: relative;">
                                         <select name="household_id" id="householdSelect" class="rc-select">
                                             <option value="">Select Household</option>
                                         </select>
-                                        <div id="householdLoading" class="spinner-border spinner-border-sm text-primary" 
-                                             style="position: absolute; right: 12px; top: 10px; display: none;" role="status"></div>
+                                        <div id="householdLoading" class="spinner-border spinner-border-sm text-primary" style="position: absolute; right: 12px; top: 10px; display: none;" role="status"></div>
                                     </div>
                                 </div>
-
                                 <div class="rc-field">
                                     <label class="rc-label">Relationship to Head</label>
                                     <select name="relationship_to_head" class="rc-select">
                                         <option value="" disabled selected>Select Relationship</option>
                                         <?php 
                                         $currentRel = old('relationship_to_head', $resident['relationship_to_head'] ?? '');
-                                        $relOptions = [
-                                            'Head', 'Spouse', 'Son', 'Daughter', 'Father', 'Mother',
+                                        $relOptions = ['Head', 'Spouse', 'Son', 'Daughter', 'Father', 'Mother',
                                             'Grandfather', 'Grandmother', 'Grandson', 'Granddaughter',
                                             'Brother', 'Sister', 'Uncle', 'Aunt', 'Nephew', 'Niece',
                                             'Cousin', 'Son-in-law', 'Daughter-in-law', 'Brother-in-law',
-                                            'Sister-in-law', 'Other Relative', 'Non-Relative'
-                                        ];
+                                            'Sister-in-law', 'Other Relative', 'Non-Relative'];
                                         foreach ($relOptions as $opt): ?>
                                             <option value="<?= $opt ?>" <?= $currentRel == $opt ? 'selected' : '' ?>><?= $opt ?></option>
                                         <?php endforeach; ?>
@@ -228,8 +200,7 @@
                             <div class="rc-grid">
                                 <label class="rc-checkbox-group">
                                     <div class="rc-checkbox">
-                                        <input type="checkbox" name="is_voter" id="is_voter" value="1" 
-                                               <?= !empty(old('is_voter', $resident['is_voter'])) ? 'checked' : '' ?>>
+                                        <input type="checkbox" name="is_voter" id="is_voter" value="1" <?= !empty(old('is_voter', $resident['is_voter'])) ? 'checked' : '' ?>>
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                     </div>
                                     <div class="rc-check-label">
@@ -237,11 +208,9 @@
                                         <p>Eligible to vote in elections</p>
                                     </div>
                                 </label>
-
                                 <label class="rc-checkbox-group">
                                     <div class="rc-checkbox">
-                                        <input type="checkbox" name="is_senior_citizen" id="is_senior_citizen" value="1" 
-                                               <?= !empty(old('is_senior_citizen', $resident['is_senior_citizen'])) ? 'checked' : '' ?>>
+                                        <input type="checkbox" name="is_senior_citizen" id="is_senior_citizen" value="1" <?= !empty(old('is_senior_citizen', $resident['is_senior_citizen'])) ? 'checked' : '' ?>>
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                     </div>
                                     <div class="rc-check-label">
@@ -249,11 +218,9 @@
                                         <p>60+ years old eligible for benefits</p>
                                     </div>
                                 </label>
-
                                 <label class="rc-checkbox-group">
                                     <div class="rc-checkbox">
-                                        <input type="checkbox" name="is_pwd" id="is_pwd" value="1" 
-                                               <?= !empty(old('is_pwd', $resident['is_pwd'])) ? 'checked' : '' ?>>
+                                        <input type="checkbox" name="is_pwd" id="is_pwd" value="1" <?= !empty(old('is_pwd', $resident['is_pwd'])) ? 'checked' : '' ?>>
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                     </div>
                                     <div class="rc-check-label">
@@ -280,7 +247,6 @@
 
                 </form>
             </div>
-            <!-- End rc-container -->
         </div>
     </section>
 </div>
@@ -290,49 +256,9 @@
     var BASE_URL             = "<?= base_url() ?>";
     var CSRF_TOKEN_NAME      = "<?= csrf_token() ?>";
     var CSRF_TOKEN_VALUE     = "<?= csrf_hash() ?>";
-    
-    // Variables specifically for Edit logic (if your JS needs them)
     var CURRENT_SITIO        = "<?= esc($resident['sitio'] ?? '') ?>";
     var CURRENT_HOUSEHOLD_ID = "<?= esc($resident['household_id'] ?? '') ?>";
-
-    // File Upload Preview logic
-    document.getElementById('profile_picture').addEventListener('change', function(e) {
-        const fileName = e.target.value.split('\\').pop();
-        document.getElementById('fileName').textContent = fileName;
-    });
-
-    // Toggle Checkbox Styling Logic
-    document.querySelectorAll('.rc-checkbox input').forEach(input => {
-        input.addEventListener('change', function() {
-            const svg = this.nextElementSibling;
-            if(this.checked) {
-                svg.style.display = 'block';
-                this.parentElement.style.backgroundColor = 'var(--primary)';
-                this.parentElement.style.borderColor = 'var(--primary)';
-            } else {
-                svg.style.display = 'none';
-                this.parentElement.style.backgroundColor = 'transparent';
-                this.parentElement.style.borderColor = '#CBD5E0';
-            }
-        });
-        // Init state
-        if(input.checked) {
-            input.nextElementSibling.style.display = 'block';
-            input.parentElement.style.backgroundColor = 'var(--primary)';
-            input.parentElement.style.borderColor = 'var(--primary)';
-        }
-    });
-
-    function loadResidentsEditScript() {
-        if (typeof jQuery !== 'undefined') {
-            var script = document.createElement('script');
-            script.src = BASE_URL + 'js/residents/residents-edit.js';
-            document.body.appendChild(script);
-        } else {
-            setTimeout(loadResidentsEditScript, 50);
-        }
-    }
-    loadResidentsEditScript();
 </script>
+<script src="<?= base_url('js/residents/residents-edit.js') ?>"></script>
 
 <?= $this->endSection() ?>
