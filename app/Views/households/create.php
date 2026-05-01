@@ -2,8 +2,8 @@
 // ---------------------------------------------------------
 // SMART THEME LOADER
 // ---------------------------------------------------------
- $role = strtolower(session()->get('role') ?? 'staff');
- $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+$role = strtolower(session()->get('role') ?? 'staff');
+$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
 
 <?= $this->extend($template) ?>
@@ -31,7 +31,6 @@
     <section class="content">
         <div class="container-fluid">
             
-            <!-- FLASH ERRORS -->
             <?php if (session()->getFlashdata('errors')): ?>
             <div class="alert alert-danger alert-dismissible fade show">
                 <h5><i class="icon fas fa-ban"></i> Please fix the following errors:</h5>
@@ -108,10 +107,7 @@
                         <h3 class="card-title"><i class="fas fa-map-marker-alt mr-2"></i>Address Information</h3>
                     </div>
                     <div class="card-body">
-                        
-                        <!-- HIDDEN INPUT: Generates address in background for DB storage -->
                         <input type="hidden" name="address" id="completeAddress" value="<?= old('address') ?>">
-
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -175,25 +171,18 @@
                             <a href="<?= base_url('resident/create') ?>" class="alert-link">Add a resident first →</a>
                         </div>
                         
-                        <!-- Members Table -->
                         <div id="membersTableContainer" style="display:none;">
                             <table class="table table-striped table-hover" id="membersTable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 40px;">
-                                            <input type="checkbox" id="selectAllCheckbox">
-                                        </th>
+                                        <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox"></th>
                                         <th>Resident Name</th>
                                         <th style="width: 200px;">Relationship to Head</th>
                                     </tr>
                                 </thead>
-                                <tbody id="membersTableBody">
-                                    <!-- Dynamically populated -->
-                                </tbody>
+                                <tbody id="membersTableBody"></tbody>
                             </table>
                         </div>
-                        
-                        <!-- Empty state -->
                         <div id="emptyMembersState" class="text-center py-5 text-muted">
                             <i class="fas fa-users fa-3x mb-3"></i>
                             <p>Select a Purok above to load residents</p>
@@ -207,10 +196,8 @@
                     </div>
                 </div>
 
-                <!-- Hidden field to store member data -->
                 <input type="hidden" name="household_members_data" id="householdMembersData" value="[]">
 
-                <!-- FORM ACTIONS -->
                 <div class="row mb-4">
                     <div class="col-12">
                         <a href="<?= base_url('households') ?>" class="btn btn-secondary">
@@ -227,19 +214,15 @@
     </section>
 </div>
 
-
-
-
 <div id="js-variables" style="display:none;"
      data-base-url="<?= base_url() ?>"
      data-csrf-token="<?= csrf_token() ?>"
      data-csrf-hash="<?= csrf_hash() ?>"
      data-old-household-no="<?= old('household_no') ?>">
 </div>
+
 <?= $this->endSection() ?>
 
-<!-- Load Create Specific JS -->
 <?= $this->section('scripts') ?>
-<!-- REMOVED 'assets/' to match your folder structure -->
-<script src="<?= base_url('js/households/household-create.js') ?>"></script>
+<script src="<?= base_url('js/households/households-create.js') ?>"></script>
 <?= $this->endSection() ?>
