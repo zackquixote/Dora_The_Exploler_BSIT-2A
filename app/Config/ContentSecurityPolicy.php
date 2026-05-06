@@ -99,7 +99,7 @@ class ContentSecurityPolicy extends BaseConfig
      *
      * @var list<string>|string
      */
-    public $connectSrc = ["'self'", "http://localhost:*", "http://127.0.0.1:*"];
+    public $connectSrc = ["'self'", "http://localhost:*", "http://127.0.0.1:*", "https://cdn.jsdelivr.net"];
 
     /**
      * Specifies the origins that can serve web fonts.

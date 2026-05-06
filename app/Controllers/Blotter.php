@@ -23,7 +23,6 @@ class Blotter extends BaseController
     protected $logModel;
     protected $hearingModel;
     protected $timelineModel; 
-
     public function __construct()
     {
         $this->blotterModel  = new BlotterModel();
@@ -32,6 +31,7 @@ class Blotter extends BaseController
         $this->logModel      = new LogModel();
         $this->hearingModel  = new \App\Models\BlotterHearingModel();
         $this->timelineModel = new \App\Models\BlotterTimelineModel();
+
     }
 
     // ──────────────────────────────────────────────────────────
@@ -459,6 +459,45 @@ public function printCase($id)
         'hearings'  => $hearings,
         'timeline'  => $timeline,
         'barangay'  => $barangay,
+    ]);
+}
+/**
+ * AJAX: Get upcoming hearing notifications.
+ * 
+ * @return \CodeIgniter\HTTP\ResponseInterface
+ */
+public function getUpcomingNotifications()
+{
+    // Check authentication
+    if (!session()->get('logged_in')) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+    }
+
+    $days = $this->request->getGet('days') ?? 3;
+    $hearings = $this->hearingModel->getUpcomingHearings($days);
+
+    $notifications = [];
+    foreach ($hearings as $h) {
+        $notifications[] = [
+            'id'          => $h['id'],
+            'title'       => 'Blotter Hearing',
+            'case_number' => $h['case_number'],
+            'message'     => 'Hearing scheduled for ' . date('M d, Y', strtotime($h['hearing_date'])),
+            'date'        => $h['hearing_date'],
+            'time'        => $h['hearing_time'] ? date('h:i A', strtotime($h['hearing_time'])) : '',
+            'venue'       => $h['venue'],
+            'url'         => site_url('blotter/view/' . $h['blotter_id'])
+        ];
+    }
+
+    // Optionally, you could auto-mark as notified when fetched, but better to let user click "mark read".
+    // For now, we only return the list.
+
+    return $this->response->setJSON([
+        'status'        => 'success',
+        'notifications' => $notifications,
+        'count'         => count($notifications),
+        'csrf_hash'     => csrf_hash()
     ]);
 }
 }

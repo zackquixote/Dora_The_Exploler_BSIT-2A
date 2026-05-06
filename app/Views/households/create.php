@@ -47,35 +47,35 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                 <?= csrf_field() ?>
 
                 <!-- HOUSEHOLD INFO -->
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-home mr-2"></i>Household Information</h3>
+                <div class="card border-0 shadow-sm rounded-lg mb-4">
+                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                        <h4 class="card-title text-primary font-weight-bold"><i class="fas fa-home mr-2"></i>Household Information</h4>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Household Number <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <input type="text" name="household_no" id="householdNo" class="form-control"
+                                    <label class="font-weight-bold text-dark">Household Number <span class="text-danger">*</span></label>
+                                    <div class="input-group shadow-sm border-0 rounded">
+                                        <input type="text" name="household_no" id="householdNo" class="form-control border-light bg-light"
                                                value="<?= old('household_no', $generatedHouseholdNo ?? '') ?>"
                                                placeholder="e.g., HH-2024-001">
                                         <div class="input-group-append">
-                                            <button type="button" class="btn btn-outline-secondary" id="generateHouseholdNo" title="Generate new household number">
+                                            <button type="button" class="btn btn-primary" id="generateHouseholdNo" title="Generate new household number">
                                                 <i class="fas fa-sync-alt"></i>
                                             </button>
-                                            <button type="button" class="btn btn-outline-success" id="checkHouseholdNo" title="Check availability">
+                                            <button type="button" class="btn btn-success" id="checkHouseholdNo" title="Check availability">
                                                 <i class="fas fa-check"></i>
                                             </button>
                                         </div>
                                     </div>
-                                    <small class="text-muted" id="householdNoFeedback">Auto-generated unique number (you can edit)</small>
+                                    <small class="text-muted mt-2 d-block" id="householdNoFeedback">Auto-generated unique number (you can edit)</small>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Purok / Sitio <span class="text-danger">*</span></label>
-                                    <select name="sitio" id="sitioSelect" class="form-control" required>
+                                    <label class="font-weight-bold text-dark">Purok / Sitio <span class="text-danger">*</span></label>
+                                    <select name="sitio" id="sitioSelect" class="form-control border-light bg-light shadow-sm custom-select" required>
                                         <option value="">— Select Purok —</option>
                                         <option value="Purok Malipayon" <?= old('sitio')=='Purok Malipayon'?'selected':'' ?>>Purok Malipayon</option>
                                         <option value="Purok Masagana"  <?= old('sitio')=='Purok Masagana' ?'selected':'' ?>>Purok Masagana</option>
@@ -87,8 +87,8 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>House Type</label>
-                                    <select name="house_type" class="form-control">
+                                    <label class="font-weight-bold text-dark">House Type</label>
+                                    <select name="house_type" class="form-control border-light bg-light shadow-sm custom-select">
                                         <option value="">— Select Type —</option>
                                         <option value="Concrete"        <?= old('house_type')=='Concrete'       ?'selected':'' ?>>Concrete</option>
                                         <option value="Semi-Concrete"   <?= old('house_type')=='Semi-Concrete'  ?'selected':'' ?>>Semi-Concrete</option>
@@ -102,20 +102,20 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                 </div>
 
                 <!-- ADDRESS -->
-                <div class="card card-success">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-map-marker-alt mr-2"></i>Address Information</h3>
+                <div class="card border-0 shadow-sm rounded-lg mb-4">
+                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                        <h4 class="card-title text-success font-weight-bold"><i class="fas fa-map-marker-alt mr-2"></i>Address Information</h4>
                     </div>
                     <div class="card-body">
                         <input type="hidden" name="address" id="completeAddress" value="<?= old('address') ?>">
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Street Address</label>
-                                    <input type="text" name="street_address" id="streetAddress" class="form-control"
+                                    <label class="font-weight-bold text-dark">Street Address</label>
+                                    <input type="text" name="street_address" id="streetAddress" class="form-control border-light bg-light shadow-sm"
                                            value="<?= old('street_address') ?>"
                                            placeholder="e.g., Block 1, Lot 2, House #12">
-                                    <small class="text-muted">Enter specific house details (Block/Lot #). The full address will be auto-generated.</small>
+                                    <small class="text-muted mt-2 d-block">Enter specific house details (Block/Lot #). The full address will be auto-generated.</small>
                                 </div>
                             </div>
                         </div>
@@ -123,74 +123,84 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                 </div>
 
                 <!-- HEAD OF HOUSEHOLD -->
-                <div class="card card-warning">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-user-tie mr-2"></i>Head of Household</h3>
+                <div class="card border-0 shadow-sm rounded-lg mb-4">
+                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                        <h4 class="card-title text-warning font-weight-bold"><i class="fas fa-user-tie mr-2"></i>Head of Household</h4>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Select Head Resident</label>
-                                    <select name="head_resident_id" id="headResidentSelect" class="form-control" disabled>
+                                    <label class="font-weight-bold text-dark">Select Head Resident</label>
+                                    <select name="head_resident_id" id="headResidentSelect" class="form-control border-light bg-light shadow-sm custom-select" disabled>
                                         <option value=""> Select Purok/Sitio first </option>
                                     </select>
-                                    <small class="text-muted">Shows residents from selected purok and unassigned residents.</small>
+                                    <small class="text-muted mt-2 d-block">Shows residents from selected purok and unassigned residents.</small>
                                 </div>
                             </div>
                         </div>
-                        <div id="loadingAlert" class="alert alert-info" style="display:none;">
-                            <i class="fas fa-spinner fa-spin"></i> Loading residents from selected purok…
+                        <div id="loadingAlert" class="alert alert-light border shadow-sm text-info mt-3" style="display:none;">
+                            <i class="fas fa-spinner fa-spin mr-2"></i> Loading residents from selected purok…
                         </div>
-                        <div id="noResidentsAlert" class="alert alert-warning" style="display:none;">
-                            <i class="fas fa-exclamation-triangle"></i> 
+                        <div id="noResidentsAlert" class="alert alert-light border shadow-sm text-warning mt-3" style="display:none;">
+                            <i class="fas fa-exclamation-triangle mr-2"></i> 
                             No residents found in this purok. 
-                            <a href="<?= base_url('resident/create') ?>" class="alert-link">Add a resident first →</a>
+                            <a href="<?= base_url('resident/create') ?>" class="alert-link ml-2">Add a resident first →</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- HOUSEHOLD MEMBERS MANAGER -->
-                <div class="card card-info">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-users mr-2"></i>Household Members</h3>
+                <div class="card border-0 shadow-sm rounded-lg mb-4">
+                    <div class="card-header bg-white border-0 pt-4 pb-2 d-flex justify-content-between align-items-center">
+                        <h4 class="card-title text-info font-weight-bold mb-0"><i class="fas fa-users mr-2"></i>Household Members</h4>
                         <div class="card-tools">
-                            <span class="badge badge-light mr-2" id="selectedCount">0 selected</span>
-                            <button type="button" class="btn btn-tool" id="toggleAllMembers" title="Toggle All" disabled>
-                                <i class="fas fa-check-double"></i>
+                            <span class="badge badge-primary px-3 py-2 mr-2 shadow-sm rounded-pill" id="selectedCount">0 selected</span>
+                            <button type="button" class="btn btn-outline-info btn-sm shadow-sm" id="toggleAllMembers" title="Toggle All" disabled>
+                                <i class="fas fa-check-double mr-1"></i> Toggle All
                             </button>
                         </div>
                     </div>
                     <div class="card-body p-0">
-                        <div id="membersLoadingAlert" class="alert alert-info m-3" style="display:none;">
-                            <i class="fas fa-spinner fa-spin"></i> Loading members list…
+                        <div id="membersLoadingAlert" class="alert alert-light border shadow-sm text-info m-4" style="display:none;">
+                            <i class="fas fa-spinner fa-spin mr-2"></i> Loading members list…
                         </div>
-                        <div id="noResidentsWarning" class="alert alert-warning m-3" style="display:none;">
-                            <i class="fas fa-exclamation-triangle"></i> 
+                        <div id="noResidentsWarning" class="alert alert-light border shadow-sm text-warning m-4" style="display:none;">
+                            <i class="fas fa-exclamation-triangle mr-2"></i> 
                             No residents found in this purok. 
-                            <a href="<?= base_url('resident/create') ?>" class="alert-link">Add a resident first →</a>
+                            <a href="<?= base_url('resident/create') ?>" class="alert-link ml-2">Add a resident first →</a>
                         </div>
                         
                         <div id="membersTableContainer" style="display:none;">
-                            <table class="table table-striped table-hover" id="membersTable">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox"></th>
-                                        <th>Resident Name</th>
-                                        <th style="width: 200px;">Relationship to Head</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="membersTableBody"></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="membersTable">
+                                    <thead class="bg-light text-secondary">
+                                        <tr>
+                                            <th class="border-top-0 pl-4" style="width: 40px;">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="selectAllCheckbox">
+                                                    <label class="custom-control-label" for="selectAllCheckbox"></label>
+                                                </div>
+                                            </th>
+                                            <th class="border-top-0 font-weight-bold">Resident Name</th>
+                                            <th class="border-top-0 font-weight-bold pr-4" style="width: 250px;">Relationship to Head</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="membersTableBody"></tbody>
+                                </table>
+                            </div>
                         </div>
                         <div id="emptyMembersState" class="text-center py-5 text-muted">
-                            <i class="fas fa-users fa-3x mb-3"></i>
-                            <p>Select a Purok above to load residents</p>
+                            <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-users fa-2x text-secondary"></i>
+                            </div>
+                            <h5 class="font-weight-bold text-dark">No Purok Selected</h5>
+                            <p class="mb-0">Select a Purok above to load residents</p>
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle"></i> 
+                    <div class="card-footer bg-light border-0 rounded-bottom">
+                        <small class="text-muted font-weight-bold">
+                            <i class="fas fa-info-circle mr-1 text-info"></i> 
                             Check residents to add them to this household. Set their relationship to the head.
                         </small>
                     </div>
@@ -198,13 +208,13 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 
                 <input type="hidden" name="household_members_data" id="householdMembersData" value="[]">
 
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <a href="<?= base_url('households') ?>" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancel
+                <div class="row mb-5">
+                    <div class="col-12 d-flex justify-content-between align-items-center">
+                        <a href="<?= base_url('households') ?>" class="btn btn-light shadow-sm font-weight-bold px-4">
+                            <i class="fas fa-arrow-left mr-2"></i> Cancel & Return
                         </a>
-                        <button type="submit" class="btn btn-primary float-right" id="submitBtn">
-                            <i class="fas fa-save"></i> Save Household
+                        <button type="submit" class="btn btn-primary shadow px-5 font-weight-bold" id="submitBtn">
+                            <i class="fas fa-save mr-2"></i> Save Household
                         </button>
                     </div>
                 </div>
@@ -224,5 +234,5 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-<script src="<?= base_url('js/households/households-create.js') ?>"></script>
+<script src="<?= base_url('js/households/household-create.js') ?>"></script>
 <?= $this->endSection() ?>

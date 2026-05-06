@@ -1,6 +1,16 @@
 /**
  * Household create page JS
- * Relies on #js-variables data attributes
+ * 
+ * Manages:
+ * - Auto-generation of household number with uniqueness check.
+ * - Dynamic address building from street and sitio.
+ * - Loading residents by selected Sitio.
+ * - Selection of household members with relationship assignment.
+ * 
+ * FIXES:
+ * - Clears `selectedMembers` when changing Sitio to prevent stale selections.
+ * - Synchronises "Select All" checkbox state with individual checkboxes.
+ * - Updates CSRF token after every AJAX response.
  */
 $(document).ready(function() {
     const vars = $('#js-variables').data();
@@ -20,7 +30,7 @@ $(document).ready(function() {
         'Sister-in-law', 'Other Relative', 'Non-Relative'
     ];
     
-    // Auto address generation
+    // ------------------- Address Auto-generation -------------------
     function updateCompleteAddress() {
         const street = $('#streetAddress').val().trim();
         const sitio = $('#sitioSelect').find("option:selected").text();
@@ -38,13 +48,14 @@ $(document).ready(function() {
     $('#sitioSelect').on('change', updateCompleteAddress);
     updateCompleteAddress();
     
-    // Generate household number
+    // ------------------- Household Number -------------------
     $('#generateHouseholdNo').on('click', function() {
         $.ajax({
             url: BASE_URL + 'households/getNextHouseholdNo',
             type: 'GET',
             dataType: 'json',
             success: function(res) {
+                if (res.csrf_hash) refreshCsrf(res.csrf_hash);
                 if (res.status === 'success') {
                     $('#householdNo').val(res.household_no);
                     checkHouseholdNumber(res.household_no);
@@ -63,6 +74,7 @@ $(document).ready(function() {
             data: { household_no: hhNo },
             dataType: 'json',
             success: function(res) {
+                if (res.csrf_hash) refreshCsrf(res.csrf_hash);
                 $field.removeClass('is-valid is-invalid');
                 if (res.exists) {
                     $field.addClass('is-invalid');
@@ -90,11 +102,13 @@ $(document).ready(function() {
     });
     if ($('#householdNo').val()) checkHouseholdNumber($('#householdNo').val());
     
-    // Load residents when sitio changes
+    // ------------------- Load Residents by Sitio -------------------
     $('#sitioSelect').on('change', function() {
         const sitio = $(this).val();
         const headSelect = $('#headResidentSelect');
-        $('#noResidentsAlert, #membersLoadingAlert').hide();
+        
+        // Hide all alerts initially
+        $('#loadingAlert, #noResidentsAlert, #membersLoadingAlert, #noResidentsWarning').hide();
         $('#membersTableContainer').hide();
         $('#emptyMembersState').show();
         $('#toggleAllMembers').prop('disabled', true);
@@ -103,13 +117,14 @@ $(document).ready(function() {
             headSelect.html('<option value="">— Select Purok/Sitio first —</option>').prop('disabled', true);
             $('#membersTableBody').empty();
             allResidents = [];
-            selectedMembers = {};
+            selectedMembers = {};               // ✅ FIX: Clear previous selections
             updateSelectedCount();
             return;
         }
         
-        $('#membersLoadingAlert').show();
+        $('#loadingAlert, #membersLoadingAlert').show();
         headSelect.html('<option value="">Loading…</option>').prop('disabled', true);
+        $('#emptyMembersState').hide();
         
         $.ajax({
             url: BASE_URL + 'households/getResidentsBySitio',
@@ -117,13 +132,12 @@ $(document).ready(function() {
             data: { sitio: sitio, [CSRF_TOKEN_NAME]: CSRF_HASH },
             dataType: 'json',
             success: function(res) {
-                $('#membersLoadingAlert').hide();
-                if (res.csrf_hash) {
-                    $('input[name="' + CSRF_TOKEN_NAME + '"]').val(res.csrf_hash);
-                    CSRF_HASH = res.csrf_hash;
-                }
+                $('#loadingAlert, #membersLoadingAlert').hide();
+                if (res.csrf_hash) refreshCsrf(res.csrf_hash);
+                
                 if (res.status === 'success' && res.residents && res.residents.length > 0) {
                     allResidents = res.residents;
+                    selectedMembers = {};                     // ✅ FIX: Reset members for new Sitio
                     let headOpts = '<option value="">— Select Head of Household —</option>';
                     $.each(res.residents, function(i, r) {
                         let name = r.last_name + ', ' + r.first_name;
@@ -135,25 +149,26 @@ $(document).ready(function() {
                     headSelect.html(headOpts).prop('disabled', false);
                     renderMembersTable(res.residents);
                     $('#membersTableContainer').show();
-                    $('#emptyMembersState').hide();
                     $('#toggleAllMembers').prop('disabled', false);
                 } else {
                     headSelect.html('<option value="">— No residents found —</option>').prop('disabled', true);
                     $('#membersTableBody').empty();
-                    $('#noResidentsAlert').show();
+                    $('#noResidentsAlert, #noResidentsWarning').show();
                     allResidents = [];
                     selectedMembers = {};
                     updateSelectedCount();
                 }
             },
             error: function() {
-                $('#membersLoadingAlert').hide();
+                $('#loadingAlert, #membersLoadingAlert').hide();
                 headSelect.html('<option value="">— Request failed —</option>').prop('disabled', true);
+                $('#emptyMembersState').show();
                 alert('Failed to load residents. Please try again.');
             }
         });
     });
     
+    // ------------------- Render Members Table -------------------
     function renderMembersTable(residents) {
         let html = '';
         $.each(residents, function(i, r) {
@@ -177,11 +192,13 @@ $(document).ready(function() {
         $('#membersTableBody').html(html);
     }
     
+    // ------------------- Event Delegation for Checkboxes & Relationships -------------------
     $(document).on('change', '.member-checkbox', function() {
         const id = $(this).data('id');
         const isChecked = $(this).is(':checked');
         const row = $(this).closest('tr');
         row.find('.relationship-select').prop('disabled', !isChecked);
+        
         if (isChecked) {
             const resident = allResidents.find(r => r.id == id);
             if (resident) {
@@ -197,6 +214,7 @@ $(document).ready(function() {
         }
         updateSelectedCount();
         updateHiddenField();
+        syncSelectAllCheckbox();   // ✅ FIX: Keep master checkbox in sync
     });
     
     $(document).on('change', '.relationship-select', function() {
@@ -207,36 +225,55 @@ $(document).ready(function() {
         }
     });
     
+    // Master checkbox "Select All"
     $('#selectAllCheckbox').on('change', function() {
         const isChecked = $(this).is(':checked');
         $('.member-checkbox').prop('checked', isChecked).trigger('change');
     });
     
+    // Toggle all members button
     $('#toggleAllMembers').on('click', function() {
         const anyUnchecked = $('.member-checkbox:not(:checked)').length > 0;
         $('.member-checkbox').prop('checked', anyUnchecked).trigger('change');
         $('#selectAllCheckbox').prop('checked', anyUnchecked);
     });
     
+    // Synchronise master checkbox when individual checkboxes change
+    function syncSelectAllCheckbox() {
+        const total = $('.member-checkbox').length;
+        const checked = $('.member-checkbox:checked').length;
+        $('#selectAllCheckbox').prop('checked', total > 0 && checked === total);
+        $('#selectAllCheckbox').prop('indeterminate', checked > 0 && checked < total);
+    }
+    
+    // Head of household selection: auto-check and set relationship to "Head"
     $('#headResidentSelect').on('change', function() {
         const headId = $(this).val();
         if (headId) {
             if (!selectedMembers[headId]) {
                 $('.member-checkbox[data-id="' + headId + '"]').prop('checked', true).trigger('change');
             }
-            $('.relationship-select[data-id="' + headId + '"]').val('Head');
-            if (selectedMembers[headId]) selectedMembers[headId].relationship = 'Head';
-            updateHiddenField();
+            $('.relationship-select[data-id="' + headId + '"]').val('Head').trigger('change');
         }
     });
     
+    // ------------------- Helper Functions -------------------
     function updateSelectedCount() {
         $('#selectedCount').text(Object.keys(selectedMembers).length + ' selected');
     }
+    
     function updateHiddenField() {
         $('#householdMembersData').val(JSON.stringify(selectedMembers));
     }
     
+    function refreshCsrf(newHash) {
+        if (newHash) {
+            CSRF_HASH = newHash;
+            $('input[name="' + CSRF_TOKEN_NAME + '"]').val(newHash);
+        }
+    }
+    
+    // ------------------- Form Validation -------------------
     $('#householdForm').on('submit', function(e) {
         const hhNo = $('input[name="household_no"]').val().trim();
         const sitio = $('#sitioSelect').val();

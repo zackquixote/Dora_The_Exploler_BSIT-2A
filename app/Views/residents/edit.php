@@ -6,7 +6,6 @@ $role = strtolower(session()->get('role') ?? 'staff');
 $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
 
-<link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-create.css') ?>">
 <?= $this->extend($template) ?>
 <?= $this->section('content') ?>
 
@@ -15,11 +14,12 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Residents</h1>
+                    <h1>Edit Resident</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item"><a href="<?= base_url('resident') ?>">Residents</a></li>
                         <li class="breadcrumb-item active">Edit Resident</li>
                     </ol>
                 </div>
@@ -29,224 +29,193 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 
     <section class="content">
         <div class="container-fluid">
-            <div class="rc-container">
-                <div class="rc-header">
-                    <div class="rc-title">
-                        <a href="<?= base_url('resident') ?>" class="text-muted text-decoration-none small">
-                            &larr; Back to List
-                        </a>
-                        <h1>Edit Resident</h1>
-                        <p>Modifying profile for: <strong><?= esc($resident['first_name'] . ' ' . $resident['last_name']) ?></strong></p>
+            <div class="mb-3">
+                <p>Modifying profile for: <strong><?= esc($resident['first_name'] . ' ' . $resident['last_name']) ?></strong></p>
+            </div>
+
+            <?php if (session()->getFlashdata('errors')): ?>
+                <div class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-ban"></i> Please fix following errors:</h5>
+                    <ul>
+                        <?php foreach (session()->getFlashdata('errors') as $error): ?>
+                            <li><?= esc($error) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <form id="residentForm" action="<?= base_url('resident/update/' . $resident['id']) ?>" method="POST" enctype="multipart/form-data">
+                <?= csrf_field() ?>
+                <input type="hidden" name="_method" value="PUT">
+
+                <!-- SECTION 1: BASIC INFO -->
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-user-circle mr-1"></i> Basic Information</h3>
                     </div>
-                    <div class="rc-header-actions">
-                        <button type="button" class="rc-btn rc-btn-secondary" onclick="window.history.back()">
-                            Cancel
-                        </button>
-                        <button type="submit" form="residentForm" class="rc-btn rc-btn-primary">
-                            <i class="fas fa-save"></i> Update Resident
-                        </button>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 form-group">
+                                <label>First Name <span class="text-danger">*</span></label>
+                                <input type="text" name="first_name" class="form-control" value="<?= old('first_name', $resident['first_name']) ?>" required>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Middle Name</label>
+                                <input type="text" name="middle_name" class="form-control" value="<?= old('middle_name', $resident['middle_name'] ?? '') ?>">
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Last Name <span class="text-danger">*</span></label>
+                                <input type="text" name="last_name" class="form-control" value="<?= old('last_name', $resident['last_name']) ?>" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 form-group">
+                                <label>Gender <span class="text-danger">*</span></label>
+                                <select name="sex" class="custom-select" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="male"   <?= old('sex', $resident['sex'] ?? '') === 'male'   ? 'selected' : '' ?>>Male</option>
+                                    <option value="female" <?= old('sex', $resident['sex'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Birthdate <span class="text-danger">*</span></label>
+                                <input type="date" name="birthdate" class="form-control" value="<?= old('birthdate', $resident['birthdate']) ?>" required>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Civil Status</label>
+                                <select name="civil_status" class="custom-select">
+                                    <option value="">Select Status</option>
+                                    <?php foreach (['Single', 'Married', 'Widowed', 'Separated'] as $cs): ?>
+                                        <option value="<?= $cs ?>" <?= old('civil_status', $resident['civil_status'] ?? '') === $cs ? 'selected' : '' ?>><?= $cs ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 form-group">
+                                <label>Occupation</label>
+                                <input type="text" name="occupation" class="form-control" value="<?= old('occupation', $resident['occupation'] ?? '') ?>">
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Citizenship</label>
+                                <input type="text" name="citizenship" class="form-control" value="<?= old('citizenship', $resident['citizenship'] ?? 'Filipino') ?>">
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Profile Picture</label>
+                                <div class="custom-file">
+                                    <input type="file" name="profile_picture" class="custom-file-input" id="profile_picture" accept="image/*">
+                                    <label class="custom-file-label" for="profile_picture">Choose new file</label>
+                                </div>
+                                <?php if (!empty($resident['profile_picture'])): ?>
+                                    <div class="mt-2 p-2 bg-light rounded text-center border">
+                                        <small class="text-muted d-block mb-1">Current Photo:</small>
+                                        <img src="<?= base_url('uploads/' . $resident['profile_picture']) ?>"
+                                             height="60" class="rounded-circle shadow-sm border border-white">
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <?php if (session()->getFlashdata('errors')): ?>
-                    <div class="rc-alert">
-                        <div style="flex-shrink: 0;">
-                            <i class="fas fa-exclamation-circle fa-2x"></i>
+                <!-- SECTION 2: ADDRESS -->
+                <div class="card card-success card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-home mr-1"></i> Address & Household</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 form-group">
+                                <label>Street / House Number</label>
+                                <input type="text" name="street_address" class="form-control" value="<?= old('street_address', $resident['street_address'] ?? '') ?>">
+                            </div>
                         </div>
-                        <div style="margin-left: 1rem;">
-                            <h4 style="margin: 0 0 0.5rem 0;">Please fix following errors:</h4>
-                            <ul>
-                                <?php foreach (session()->getFlashdata('errors') as $error): ?>
-                                    <li><?= esc($error) ?></li>
-                                <?php endforeach; ?>
-                            </ul>
+                        <div class="row">
+                            <div class="col-md-4 form-group">
+                                <label>Sitio / Zone <span class="text-danger">*</span></label>
+                                <select name="sitio" id="sitioSelect" class="custom-select" required>
+                                    <option value="">Select Sitio</option>
+                                    <option value="Purok Malipayon" <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
+                                    <option value="Purok Masagana"  <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Masagana'  ? 'selected' : '' ?>>Purok Masagana</option>
+                                    <option value="Purok Cory"      <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Cory'      ? 'selected' : '' ?>>Purok Cory</option>
+                                    <option value="Purok Kawayan"   <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Kawayan'   ? 'selected' : '' ?>>Purok Kawayan</option>
+                                    <option value="Purok Pagla-um"  <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Pagla-um'  ? 'selected' : '' ?>>Purok Pagla-um</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Household (Optional)</label>
+                                <div class="input-group">
+                                    <select name="household_id" id="householdSelect" class="custom-select">
+                                        <option value="">Select Household</option>
+                                    </select>
+                                    <div class="input-group-append" id="householdLoading" style="display: none;">
+                                        <span class="input-group-text"><i class="fas fa-spinner fa-spin"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Relationship to Head</label>
+                                <select name="relationship_to_head" class="custom-select">
+                                    <option value="" disabled selected>Select Relationship</option>
+                                    <?php 
+                                    $currentRel = old('relationship_to_head', $resident['relationship_to_head'] ?? '');
+                                    $relOptions = ['Head', 'Spouse', 'Son', 'Daughter', 'Father', 'Mother',
+                                        'Grandfather', 'Grandmother', 'Grandson', 'Granddaughter',
+                                        'Brother', 'Sister', 'Uncle', 'Aunt', 'Nephew', 'Niece',
+                                        'Cousin', 'Son-in-law', 'Daughter-in-law', 'Brother-in-law',
+                                        'Sister-in-law', 'Other Relative', 'Non-Relative'];
+                                    foreach ($relOptions as $opt): ?>
+                                        <option value="<?= $opt ?>" <?= $currentRel == $opt ? 'selected' : '' ?>><?= $opt ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                <?php endif; ?>
+                </div>
 
-                <form id="residentForm" action="<?= base_url('resident/update/' . $resident['id']) ?>" method="POST" enctype="multipart/form-data">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="_method" value="PUT">
-
-                    <!-- SECTION 1: BASIC INFO -->
-                    <div class="rc-card">
-                        <div class="rc-section-header">
-                            <i class="fas fa-user-circle rc-section-icon"></i>
-                            <h2 class="rc-section-title">Basic Information</h2>
-                        </div>
-                        <div class="rc-card-body">
-                            <div class="rc-grid">
-                                <div class="rc-field">
-                                    <label class="rc-label">First Name <span>*</span></label>
-                                    <input type="text" name="first_name" class="rc-input" value="<?= old('first_name', $resident['first_name']) ?>" required>
+                <!-- SECTION 3: STATUS & FLAGS -->
+                <div class="card card-warning card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-flag-checkered mr-1"></i> Government Status & Benefits</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input custom-control-input-primary custom-control-input-outline" type="checkbox" name="is_voter" id="is_voter" value="1" <?= !empty(old('is_voter', $resident['is_voter'])) ? 'checked' : '' ?>>
+                                    <label for="is_voter" class="custom-control-label">Registered Voter</label>
+                                    <p class="text-muted small">Eligible to vote in elections</p>
                                 </div>
-                                <div class="rc-field">
-                                    <label class="rc-label">Middle Name</label>
-                                    <input type="text" name="middle_name" class="rc-input" value="<?= old('middle_name', $resident['middle_name'] ?? '') ?>">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input custom-control-input-success custom-control-input-outline" type="checkbox" name="is_senior_citizen" id="is_senior_citizen" value="1" <?= !empty(old('is_senior_citizen', $resident['is_senior_citizen'])) ? 'checked' : '' ?>>
+                                    <label for="is_senior_citizen" class="custom-control-label">Senior Citizen</label>
+                                    <p class="text-muted small">60+ years old eligible for benefits</p>
                                 </div>
-                                <div class="rc-field">
-                                    <label class="rc-label">Last Name <span>*</span></label>
-                                    <input type="text" name="last_name" class="rc-input" value="<?= old('last_name', $resident['last_name']) ?>" required>
-                                </div>
-                                <div class="rc-field">
-                                    <label class="rc-label">Gender <span>*</span></label>
-                                    <select name="sex" class="rc-select" required>
-                                        <option value="">Select Gender</option>
-                                        <option value="male"   <?= old('sex', $resident['sex'] ?? '') === 'male'   ? 'selected' : '' ?>>Male</option>
-                                        <option value="female" <?= old('sex', $resident['sex'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
-                                    </select>
-                                </div>
-                                <div class="rc-field">
-                                    <label class="rc-label">Birthdate <span>*</span></label>
-                                    <input type="date" name="birthdate" class="rc-input" value="<?= old('birthdate', $resident['birthdate']) ?>" required>
-                                </div>
-                                <div class="rc-field">
-                                    <label class="rc-label">Civil Status</label>
-                                    <select name="civil_status" class="rc-select">
-                                        <option value="">Select Status</option>
-                                        <?php foreach (['Single', 'Married', 'Widowed', 'Separated'] as $cs): ?>
-                                            <option value="<?= $cs ?>" <?= old('civil_status', $resident['civil_status'] ?? '') === $cs ? 'selected' : '' ?>><?= $cs ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="rc-field">
-                                    <label class="rc-label">Occupation</label>
-                                    <input type="text" name="occupation" class="rc-input" value="<?= old('occupation', $resident['occupation'] ?? '') ?>">
-                                </div>
-                                <div class="rc-field">
-                                    <label class="rc-label">Citizenship</label>
-                                    <input type="text" name="citizenship" class="rc-input" value="<?= old('citizenship', $resident['citizenship'] ?? 'Filipino') ?>">
-                                </div>
-                                <div class="rc-field">
-                                    <label class="rc-label">Profile Picture</label>
-                                    <div class="rc-file-area">
-                                        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
-                                        <p class="text-muted small mb-0">Click to upload new photo</p>
-                                        <label for="profile_picture" class="rc-file-trigger">Choose New File</label>
-                                        <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
-                                        <div id="fileName" class="small text-muted mt-2">No file chosen</div>
-                                    </div>
-                                    <?php if (!empty($resident['profile_picture'])): ?>
-                                        <div style="margin-top: 10px; padding: 10px; background: #F8FAFC; border-radius: 6px; text-align: center;">
-                                            <small class="text-muted d-block mb-1">Current Photo:</small>
-                                            <img src="<?= base_url('uploads/' . $resident['profile_picture']) ?>"
-                                                 height="60" class="rounded-circle shadow-sm" style="border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                        </div>
-                                    <?php endif; ?>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input custom-control-input-info custom-control-input-outline" type="checkbox" name="is_pwd" id="is_pwd" value="1" <?= !empty(old('is_pwd', $resident['is_pwd'])) ? 'checked' : '' ?>>
+                                    <label for="is_pwd" class="custom-control-label">PWD</label>
+                                    <p class="text-muted small">Person with Disability</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- SECTION 2: ADDRESS -->
-                    <div class="rc-card">
-                        <div class="rc-section-header">
-                            <i class="fas fa-home rc-section-icon" style="color: var(--success);"></i>
-                            <h2 class="rc-section-title">Address & Household</h2>
-                        </div>
-                        <div class="rc-card-body">
-                            <div class="rc-grid">
-                                <div class="rc-field full-width">
-                                    <label class="rc-label">Street / House Number</label>
-                                    <input type="text" name="street_address" class="rc-input" value="<?= old('street_address', $resident['street_address'] ?? '') ?>">
-                                </div>
-                                <div class="rc-field">
-                                    <label class="rc-label">Sitio / Zone <span>*</span></label>
-                                    <select name="sitio" id="sitioSelect" class="rc-select" required>
-                                        <option value="">Select Sitio</option>
-                                        <option value="Purok Malipayon" <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
-                                        <option value="Purok Masagana"  <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Masagana'  ? 'selected' : '' ?>>Purok Masagana</option>
-                                        <option value="Purok Cory"      <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Cory'      ? 'selected' : '' ?>>Purok Cory</option>
-                                        <option value="Purok Kawayan"   <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Kawayan'   ? 'selected' : '' ?>>Purok Kawayan</option>
-                                        <option value="Purok Pagla-um"  <?= old('sitio', $resident['sitio'] ?? '') === 'Purok Pagla-um'  ? 'selected' : '' ?>>Purok Pagla-um</option>
-                                    </select>
-                                </div>
-                                <div class="rc-field">
-                                    <label class="rc-label">Household (Optional)</label>
-                                    <div style="position: relative;">
-                                        <select name="household_id" id="householdSelect" class="rc-select">
-                                            <option value="">Select Household</option>
-                                        </select>
-                                        <div id="householdLoading" class="spinner-border spinner-border-sm text-primary" style="position: absolute; right: 12px; top: 10px; display: none;" role="status"></div>
-                                    </div>
-                                </div>
-                                <div class="rc-field">
-                                    <label class="rc-label">Relationship to Head</label>
-                                    <select name="relationship_to_head" class="rc-select">
-                                        <option value="" disabled selected>Select Relationship</option>
-                                        <?php 
-                                        $currentRel = old('relationship_to_head', $resident['relationship_to_head'] ?? '');
-                                        $relOptions = ['Head', 'Spouse', 'Son', 'Daughter', 'Father', 'Mother',
-                                            'Grandfather', 'Grandmother', 'Grandson', 'Granddaughter',
-                                            'Brother', 'Sister', 'Uncle', 'Aunt', 'Nephew', 'Niece',
-                                            'Cousin', 'Son-in-law', 'Daughter-in-law', 'Brother-in-law',
-                                            'Sister-in-law', 'Other Relative', 'Non-Relative'];
-                                        foreach ($relOptions as $opt): ?>
-                                            <option value="<?= $opt ?>" <?= $currentRel == $opt ? 'selected' : '' ?>><?= $opt ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
+                    <div class="card-footer">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle mr-1"></i> Required fields are marked with <span class="text-danger">*</span>
+                        </small>
+                        <div class="float-right">
+                            <button type="button" class="btn btn-default mr-2" onclick="window.history.back()">Cancel</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Update Resident</button>
                         </div>
                     </div>
+                </div>
 
-                    <!-- SECTION 3: STATUS & FLAGS -->
-                    <div class="rc-card">
-                        <div class="rc-section-header">
-                            <i class="fas fa-flag-checkered rc-section-icon" style="color: #F59E0B;"></i>
-                            <h2 class="rc-section-title">Government Status & Benefits</h2>
-                        </div>
-                        <div class="rc-card-body">
-                            <div class="rc-grid">
-                                <label class="rc-checkbox-group">
-                                    <div class="rc-checkbox">
-                                        <input type="checkbox" name="is_voter" id="is_voter" value="1" <?= !empty(old('is_voter', $resident['is_voter'])) ? 'checked' : '' ?>>
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    </div>
-                                    <div class="rc-check-label">
-                                        <h4>Registered Voter</h4>
-                                        <p>Eligible to vote in elections</p>
-                                    </div>
-                                </label>
-                                <label class="rc-checkbox-group">
-                                    <div class="rc-checkbox">
-                                        <input type="checkbox" name="is_senior_citizen" id="is_senior_citizen" value="1" <?= !empty(old('is_senior_citizen', $resident['is_senior_citizen'])) ? 'checked' : '' ?>>
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    </div>
-                                    <div class="rc-check-label">
-                                        <h4>Senior Citizen</h4>
-                                        <p>60+ years old eligible for benefits</p>
-                                    </div>
-                                </label>
-                                <label class="rc-checkbox-group">
-                                    <div class="rc-checkbox">
-                                        <input type="checkbox" name="is_pwd" id="is_pwd" value="1" <?= !empty(old('is_pwd', $resident['is_pwd'])) ? 'checked' : '' ?>>
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    </div>
-                                    <div class="rc-check-label">
-                                        <h4>PWD</h4>
-                                        <p>Person with Disability</p>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Footer Actions -->
-                    <div class="rc-card">
-                        <div class="rc-footer">
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle mr-1"></i> Required fields are marked with <span style="color: var(--danger)">*</span>
-                            </small>
-                            <div style="display: flex; gap: 0.75rem;">
-                                <button type="button" class="rc-btn rc-btn-secondary" onclick="window.history.back()">Cancel</button>
-                                <button type="submit" class="rc-btn rc-btn-primary"><i class="fas fa-save"></i> Update Resident</button>
-                            </div>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
+            </form>
         </div>
     </section>
 </div>

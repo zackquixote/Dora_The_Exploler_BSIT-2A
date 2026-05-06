@@ -108,6 +108,9 @@ class Resident extends BaseController
             }
             $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
             $data       = $this->prepareResidentData($this->request->getPost(), $profilePic);
+            $data['status'] = 'active';
+            $data['member_status'] = 'Active';
+            $data['registered_by'] = session()->get('user_id') ?? 1;
 
             try {
                 $this->residentModel->insert($data);
@@ -128,6 +131,9 @@ class Resident extends BaseController
 
         $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
         $data       = $this->prepareResidentData($this->request->getPost(), $profilePic);
+        $data['status'] = 'active';
+        $data['member_status'] = 'Active';
+        $data['registered_by'] = session()->get('user_id') ?? 1;
 
         try {
             $this->residentModel->insert($data);
@@ -435,8 +441,6 @@ class Resident extends BaseController
             'is_pwd'               => isset($postData['is_pwd'])          ? 1 : 0,
             'is_senior_citizen'    => $isSenior,
             'profile_picture'      => $profilePic,
-            'status'               => 'active',
-            'registered_by'        => session()->get('user_id') ?? 1,
         ];
     }
 
@@ -478,7 +482,10 @@ public function updateStatus($id)
         ]);
     }
 
-    $this->residentModel->update($id, ['status' => $newStatus]);
+    $this->residentModel->update($id, [
+        'status' => $newStatus,
+        'member_status' => ucfirst($newStatus)
+    ]);
 
     $this->logModel->addLog(
         "Updated status of {$resident['first_name']} {$resident['last_name']} to {$newStatus}"
@@ -509,7 +516,10 @@ public function updateMemberStatus($id)
         return $this->response->setJSON(['status' => 'error', 'message' => 'Resident not found.']);
     }
 
-    $this->residentModel->update($id, ['member_status' => $newStatus]);
+    $this->residentModel->update($id, [
+        'member_status' => $newStatus,
+        'status' => strtolower($newStatus)
+    ]);
 
     $this->logModel->addLog(
         "Updated membership status of {$resident['first_name']} {$resident['last_name']} to {$newStatus}"

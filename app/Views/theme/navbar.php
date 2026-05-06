@@ -26,10 +26,14 @@
                 <span style="font-size:13px;"><?= esc(session()->get('email')) ?></span>
             </a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link btn btn-sm ml-2" href="<?= base_url('logout') ?>" style="background:#27ae60;border-radius:20px;padding:4px 14px;">
-                <i class="fas fa-sign-out-alt mr-1"></i> Logout
-            </a>
-        </li>
+      <li class="nav-item dropdown">
+    <a class="nav-link" data-toggle="dropdown" href="#" id="notifications-bell">
+        <i class="fas fa-bell"></i>
+        <span class="badge badge-warning navbar-badge notifications-badge" style="display: none;"></span>
+    </a>
+    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" id="notifications-dropdown-menu">
+        <div class="dropdown-item text-muted text-center">Loading...</div>
+    </div>
+</li>
     </ul>
 </nav>

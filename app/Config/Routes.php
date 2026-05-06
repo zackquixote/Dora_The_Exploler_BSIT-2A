@@ -109,6 +109,7 @@ $routes->post('blotter/update/(:num)', 'Blotter::update/$1');
 $routes->delete('blotter/delete/(:num)', 'Blotter::delete/$1');
 // Additional AJAX endpoint
 $routes->get('blotter/searchResidents', 'Blotter::searchResidents');
+$routes->get('blotter/getUpcomingNotifications', 'Blotter::getUpcomingNotifications');
 $routes->post('blotter/hearing/add/(:num)', 'Blotter::addHearing/$1');
 $routes->post('blotter/hearing/update/(:num)', 'Blotter::updateHearing/$1');
 $routes->delete('blotter/hearing/delete/(:num)', 'Blotter::deleteHearing/$1');

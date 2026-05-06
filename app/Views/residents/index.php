@@ -5,162 +5,176 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 <?= $this->extend($template) ?>
 <?= $this->section('content') ?>
 
-<div class="content-wrapper residents-page">
+<div class="content-wrapper residents-index">
     <div class="content-header">
         <div class="container-fluid">
-            <div class="rp-page-header">
-                <h1 class="rp-page-title">
-                    <i class="fas fa-users"></i> Residents Management
-                </h1>
-                <nav class="rp-breadcrumb">
-                    <a href="<?= base_url(strtolower(session()->get('role') . '/dashboard')) ?>">Home</a>
-                    <i class="fas fa-chevron-right"></i>
-                    <span>Residents</span>
-                </nav>
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">👥 Residents Management</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="<?= base_url(strtolower(session()->get('role') . '/dashboard')) ?>">Home</a></li>
+                        <li class="breadcrumb-item active">Residents</li>
+                    </ol>
+                </div>
             </div>
         </div>
     </div>
 
     <section class="content">
         <div class="container-fluid">
+            <!-- Flash messages -->
             <?php if (session()->getFlashdata('success')): ?>
-                <div class="rp-alert rp-alert-success alert-dismissible fade show" role="alert">
-                    <div>
-                        <i class="fas fa-check-circle mr-1"></i> 
-                        <span><?= session()->getFlashdata('success') ?></span>
-                    </div>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle mr-1"></i> <?= session()->getFlashdata('success') ?>
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                 </div>
             <?php endif; ?>
             <?php if (session()->getFlashdata('error')): ?>
-                <div class="rp-alert rp-alert-danger alert-dismissible fade show" role="alert">
-                    <div>
-                        <i class="fas fa-exclamation-circle mr-1"></i> 
-                        <span><?= session()->getFlashdata('error') ?></span>
-                    </div>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle mr-1"></i> <?= session()->getFlashdata('error') ?>
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                 </div>
             <?php endif; ?>
 
-            <div class="rp-card">
-                <div class="rp-card-header">
-                    <h3 class="rp-card-title">
-                        List of Residents
-                        <?php if ($selectedPurok !== 'all'): ?>
-                            <span class="rp-filter-badge">
-                                <i class="fas fa-filter"></i>
-                                <?= esc($selectedPurok) ?>
-                            </span>
-                        <?php endif; ?>
-                    </h3>
-                    <div class="rp-toolbar">
-                        <form method="GET" action="<?= base_url('resident') ?>" id="purokFilterForm">
-                            <select name="purok" id="purokFilter" class="rp-select" onchange="this.form.submit()">
-                                <option value="all" <?= ($selectedPurok ?? 'all') == 'all' ? 'selected' : '' ?>>All Puroks</option>
-                                <option value="Purok Malipayon" <?= ($selectedPurok ?? '') == 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
-                                <option value="Purok Masagana" <?= ($selectedPurok ?? '') == 'Purok Masagana' ? 'selected' : '' ?>>Purok Masagana</option>
-                                <option value="Purok Cory" <?= ($selectedPurok ?? '') == 'Purok Cory' ? 'selected' : '' ?>>Purok Cory</option>
-                                <option value="Purok Kawayan" <?= ($selectedPurok ?? '') == 'Purok Kawayan' ? 'selected' : '' ?>>Purok Kawayan</option>
-                                <option value="Purok Pagla-um" <?= ($selectedPurok ?? '') == 'Purok Pagla-um' ? 'selected' : '' ?>>Purok Pagla-um</option>
-                                <option value="Unassigned" <?= ($selectedPurok ?? '') == 'Unassigned' ? 'selected' : '' ?>>Unassigned</option>
-                            </select>
-                            <?php if (($selectedPurok ?? 'all') != 'all'): ?>
-                                <a href="<?= base_url('resident') ?>" class="rp-btn rp-btn-ghost" id="clearFilterBtn">
-                                    <i class="fas fa-times"></i> Clear
-                                </a>
-                            <?php endif; ?>
-                        </form>
-                        <a href="<?= base_url('resident/create') ?>" class="rp-btn rp-btn-primary">
-                            <i class="fas fa-plus"></i> Add Resident
-                        </a>
+            <!-- Statistics Cards -->
+            <div class="row">
+                <div class="col-md-3 col-sm-6">
+                    <div class="info-box bg-gradient-info">
+                        <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total Residents</span>
+                            <span class="info-box-number"><?= array_sum($purokCounts) ?></span>
+                        </div>
                     </div>
                 </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="info-box bg-gradient-success">
+                        <span class="info-box-icon"><i class="fas fa-user-graduate"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Senior Citizens</span>
+                            <span class="info-box-number" id="seniorCount">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="info-box bg-gradient-warning">
+                        <span class="info-box-icon"><i class="fas fa-wheelchair"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">PWD</span>
+                            <span class="info-box-number" id="pwdCount">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="info-box bg-gradient-primary">
+                        <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Voters</span>
+                            <span class="info-box-number" id="voterCount">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                <div class="rp-card-body">
+            <!-- Filter Card -->
+            <div class="card card-outline card-primary">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-filter"></i> Filter Residents</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Search by name</label>
+                                <input type="text" id="searchName" class="form-control" placeholder="First or last name...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Purok / Sitio</label>
+                                <select id="filterPurok" class="form-control">
+                                    <option value="all" <?= ($selectedPurok ?? 'all') == 'all' ? 'selected' : '' ?>>All Puroks</option>
+                                    <?php foreach (['Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um','Unassigned'] as $p): ?>
+                                        <option value="<?= $p ?>" <?= ($selectedPurok ?? '') == $p ? 'selected' : '' ?>><?= $p ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Household No.</label>
+                                <input type="text" id="filterHousehold" class="form-control" placeholder="e.g., HH-2025-001">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button id="clearFilters" class="btn btn-secondary btn-block">Clear Filters</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Residents Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Resident Directory</h3>
+                    <a href="<?= base_url('resident/create') ?>" class="btn btn-primary btn-sm float-right">
+                        <i class="fas fa-plus-circle"></i> Add Resident
+                    </a>
+                </div>
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table id="residentsTable" class="table">
+                        <table class="table table-striped table-hover" id="residentsTable">
                             <thead>
                                 <tr>
-                                    <th style="width: 40px;">ID</th>
-                                    <th style="width: 60px;">Profile</th>
+                                    <th>ID</th>
+                                    <th>Photo</th>
                                     <th>Full Name</th>
-                                    <th style="width: 60px;">Sex</th>
-                                    <th style="width: 50px;">Age</th>
-                                    <th style="width: 100px;">Civil Status</th>
-                                    <th style="width: 130px;">Purok / Sitio</th>
-                                    <th style="width: 90px;">Household</th>
+                                    <th>Sex</th>
+                                    <th>Age</th>
+                                    <th>Civil Status</th>
+                                    <th>Purok / Sitio</th>
+                                    <th>Household No.</th>
                                     <th>Occupation</th>
-                                    <th>Citizenship</th>
-                                    <th style="text-align: center; width: 80px;">Voter</th>
-                                    <th style="width: 110px;">Flags</th>
-                                    <th style="width: 100px;">Actions</th>
+                                    <th>Flags</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (empty($residents)): ?>
-                                    <tr>
-                                        <td colspan="13" class="rp-empty">
-                                            <i class="fas fa-inbox mb-2 d-block" style="font-size: 2rem; opacity: 0.3;"></i>
-                                            <p style="margin:0;">No residents found<?= $selectedPurok != 'all' ? ' in ' . esc($selectedPurok) : '' ?>.</p>
-                                        </td>
-                                    </tr>
+                                    <tr><td colspan="11" class="text-center py-4 text-muted">No residents found.<?= $this->endSection() ?>
                                 <?php else: ?>
                                     <?php foreach ($residents as $r): 
-                                        // Use pre‑computed age from controller query
-                                        $age = $r['age'] ?? '';
-                                        $profileImg = !empty($r['profile_picture'])
-                                            ? base_url('uploads/' . $r['profile_picture'])
-                                            : base_url('assets/img/default.png');
-                                        $voterBadge = !empty($r['is_voter'])
-                                            ? '<span class="rp-badge rp-badge-voter-yes">Yes</span>'
-                                            : '<span class="rp-badge rp-badge-voter-no">No</span>';
-                                        $seniorBadge = !empty($r['is_senior_citizen'])
-                                            ? '<span class="rp-badge rp-badge-senior">Senior</span>'
-                                            : '';
-                                        $pwdBadge = !empty($r['is_pwd'])
-                                            ? '<span class="rp-badge rp-badge-pwd">PWD</span>'
-                                            : '';
-                                        $flags = trim($seniorBadge . ' ' . $pwdBadge);
-                                        $purokDisplay = !empty($r['sitio']) ? $r['sitio'] : 'Unassigned';
-                                        $purokBadge = $purokDisplay != 'Unassigned'
-                                            ? '<span class="rp-badge rp-badge-purok">' . esc($purokDisplay) . '</span>'
-                                            : '<span class="rp-badge rp-badge-unassigned">Unassigned</span>';
+                                        $profileImg = !empty($r['profile_picture']) ? base_url('uploads/' . $r['profile_picture']) : base_url('assets/img/default.png');
+                                        $flags = [];
+                                        if (!empty($r['is_senior_citizen'])) $flags[] = '<span class="badge badge-info">Senior</span>';
+                                        if (!empty($r['is_pwd'])) $flags[] = '<span class="badge badge-warning">PWD</span>';
+                                        if (!empty($r['is_voter'])) $flags[] = '<span class="badge badge-success">Voter</span>';
                                     ?>
                                         <tr>
                                             <td><?= $r['id'] ?></td>
-                                            <td>
-                                                <img src="<?= $profileImg ?>" class="rp-avatar" alt="Profile">
-                                            </td>
-                                            <td class="td-name">
-                                                <?= esc($r['first_name']) ?> <?= esc($r['middle_name'] ?? '') ?> <?= esc($r['last_name']) ?>
-                                            </td>
+                                            <td><img src="<?= $profileImg ?>" class="img-circle elevation-1" width="35" height="35" style="object-fit: cover;"></td>
+                                            <td class="font-weight-bold"><?= esc($r['first_name']) ?> <?= esc($r['last_name']) ?></td>
                                             <td><?= ucfirst($r['sex']) ?></td>
-                                            <td><?= $age ?></td>
-                                            <td><?= ucfirst($r['civil_status'] ?? '') ?></td>
-                                            <td><?= $purokBadge ?></td>
+                                            <td><?= $r['age'] ?? '—' ?></td>
+                                            <td><?= esc($r['civil_status'] ?? '—') ?></td>
+                                            <td><span class="badge badge-secondary"><?= esc($r['sitio'] ?? 'Unassigned') ?></span></td>
                                             <td><?= esc($r['household_no'] ?? '—') ?></td>
                                             <td><?= esc($r['occupation'] ?? '—') ?></td>
-                                            <td><?= esc($r['citizenship'] ?? '—') ?></td>
-                                            <td style="text-align:center;"><?= $voterBadge ?></td>
-                                            <td>
-                                                <?php if ($flags): ?>
-                                                    <div style="display:flex;gap:0.25rem;flex-wrap:wrap;"><?= $flags ?></div>
-                                                <?php else: ?>
-                                                    <span style="color:#CBD5E0;">—</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td>
-                                                <div class="rp-actions">
-                                                    <a href="<?= base_url('resident/view/' . $r['id']) ?>" class="rp-action-btn rp-action-view" title="View">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="<?= base_url('resident/edit/' . $r['id']) ?>" class="rp-action-btn rp-action-edit" title="Edit">
-                                                        <i class="fas fa-pen"></i>
-                                                    </a>
-                                                    <button type="button" class="rp-action-btn rp-action-delete delete-resident" data-id="<?= $r['id'] ?>" title="Delete">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
+                                            <td><?= implode(' ', $flags) ?: '—' ?></td>
+                                            <td class="text-nowrap">
+                                                <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="btn btn-sm btn-outline-info" title="View"><i class="fas fa-eye"></i></a>
+                                                <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="btn btn-sm btn-outline-warning" title="Edit"><i class="fas fa-edit"></i></a>
+                                                <button class="btn btn-sm btn-outline-danger delete-resident" data-id="<?= $r['id'] ?>" data-name="<?= esc($r['first_name'].' '.$r['last_name']) ?>" title="Delete"><i class="fas fa-trash"></i></button>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -171,49 +185,67 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                 </div>
             </div>
 
-            <!-- Purok Statistics Cards -->
-            <div class="rp-stats-card">
-                <div class="rp-stats-header">
-                    <i class="fas fa-chart-pie"></i>
-                    <h5>Residents per Purok</h5>
+            <!-- Purok Tiles -->
+            <div class="row mt-4">
+                <?php foreach ($purokCounts as $purok => $count): 
+                    $color = match($purok) {
+                        'Purok Malipayon' => 'primary',
+                        'Purok Masagana'  => 'success',
+                        'Purok Cory'      => 'info',
+                        'Purok Kawayan'   => 'warning',
+                        'Purok Pagla-um'  => 'secondary',
+                        default => 'dark'
+                    };
+                ?>
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <a href="?purok=<?= urlencode($purok) ?>" class="small-box bg-gradient-<?= $color ?> text-white text-center p-3 rounded d-block" style="text-decoration: none;">
+                        <h3><?= $count ?></h3>
+                        <p><?= esc($purok) ?></p>
+                    </a>
                 </div>
-                <div class="rp-stats-body">
-                    <?php
-                    $tileAccents = ['#2B4FBF','#2D7F4E','#B45309','#B91C1C','#1D5FAD','#6B7280'];
-                    $i = 0;
-                    foreach ($purokCounts as $purok => $count):
-                        $accent = $tileAccents[$i % count($tileAccents)];
-                    ?>
-                        <a href="<?= base_url('resident?purok=' . urlencode($purok)) ?>" 
-                           class="rp-purok-tile"
-                           data-purok-name="<?= esc($purok) ?>">
-                            <div class="rp-purok-tile-inner" style="--tile-accent: <?= $accent ?>;">
-                                <div class="rp-purok-count"><?= $count ?></div>
-                                <div class="rp-purok-name"><?= esc($purok) ?></div>
-                            </div>
-                        </a>
-                    <?php
-                        $i++;
-                    endforeach;
-                    ?>
-                </div>
+                <?php endforeach; ?>
             </div>
-
         </div>
     </section>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="deleteResidentName"></strong>?</p>
+                <p class="text-muted small">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
 <script>
-    var RESIDENTS_CONFIG = {
-        baseUrl:      "<?= base_url() ?>",
-        csrfName:     "<?= csrf_token() ?>",
-        csrfHash:     "<?= csrf_hash() ?>",
+    window.ResidentConfig = {
+        baseUrl: "<?= base_url() ?>",
+        csrfName: "<?= csrf_token() ?>",
+        csrfHash: "<?= csrf_hash() ?>"
+    };
+</script>
+<script>
+    window.RESIDENTS_CONFIG = {
+        baseUrl: "<?= base_url() ?>",
+        csrfName: "<?= csrf_token() ?>",
+        csrfHash: "<?= csrf_hash() ?>",
         currentPurok: "<?= $selectedPurok ?? 'all' ?>"
     };
 </script>
-<link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-index.css') ?>">
 <script src="<?= base_url('js/residents/residents-index.js') ?>"></script>
 <?= $this->endSection() ?>

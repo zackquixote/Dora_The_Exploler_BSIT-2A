@@ -11,7 +11,7 @@ use CodeIgniter\Model;
  * 
  * Stores barangay info and key official positions (currently by resident_id).
  * 
- * TODO: After creating 'officials' table, consider changing captain_id etc.
+ *  After creating 'officials' table, consider changing captain_id etc.
  * to reference officials.id for consistency.
  */
 class BarangaySettingsModel extends Model
@@ -26,7 +26,7 @@ class BarangaySettingsModel extends Model
         'municipality',
         'province',
         'contact_number',
-        'captain_id',
+        'captain_id',   
         'secretary_id',
         'treasurer_id',
     ];

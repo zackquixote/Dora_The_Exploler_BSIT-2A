@@ -339,51 +339,57 @@ class HouseholdController extends BaseController
     }
 
     // ── Delete (AJAX) ─────────────────────────────────────────────────
-    public function delete($id)
-    {
-        if ($r = $this->requireLogin()) return $r;
+  /**
+ * Delete household (AJAX)
+ * 
+ * @param int $id Household ID
+ * @return \CodeIgniter\HTTP\ResponseInterface
+ */
+public function delete($id)
+{
+    if ($r = $this->requireLogin()) return $r;
 
-        $household = $this->householdModel->find($id);
-        if (!$household) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Household not found', 'csrf_hash' => csrf_hash()]);
-        }
-
-        $hasResidents = $this->db->table('residents')
-            ->where('household_id', $id)
-            ->where('deleted_at', null)
-            ->countAllResults();
-
-        $force = $this->request->getPost('force') === 'true';
-
-        if ($hasResidents > 0 && !$force) {
-            return $this->response->setJSON([
-                'status'    => 'error',
-                'message'   => "Cannot delete household with {$hasResidents} resident(s). Please transfer or delete residents first.",
-                'csrf_hash' => csrf_hash(),
-            ]);
-        }
-
-        if ($force && $hasResidents > 0) {
-            $this->db->table('residents')
-                ->where('household_id', $id)
-                ->where('deleted_at', null)
-                ->update([
-                    'household_id'       => null,
-                    'is_household_head'  => 0,
-                    'member_status'      => 'Transferred',
-                    'left_household_date' => date('Y-m-d'),
-                ]);
-        }
-
-        if ($this->householdModel->delete($id)) {
-            $message = 'Household deleted successfully';
-            if ($force && $hasResidents > 0) $message .= ". {$hasResidents} resident(s) transferred.";
-            return $this->response->setJSON(['status' => 'success', 'message' => $message, 'csrf_hash' => csrf_hash()]);
-        }
-
-        return $this->response->setJSON(['status' => 'error', 'message' => 'Delete failed', 'csrf_hash' => csrf_hash()]);
+    $household = $this->householdModel->find($id);
+    if (!$household) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Household not found', 'csrf_hash' => csrf_hash()]);
     }
 
+    $hasResidents = $this->db->table('residents')
+        ->where('household_id', $id)
+        ->where('deleted_at', null)
+        ->countAllResults();
+
+    // Improved boolean conversion: accepts 'true', '1', 'yes', true
+    $force = filter_var($this->request->getPost('force'), FILTER_VALIDATE_BOOLEAN);
+
+    if ($hasResidents > 0 && !$force) {
+        return $this->response->setJSON([
+            'status'    => 'error',
+            'message'   => "Cannot delete household with {$hasResidents} resident(s). Please transfer or delete residents first.",
+            'csrf_hash' => csrf_hash(),
+        ]);
+    }
+
+    if ($force && $hasResidents > 0) {
+        $this->db->table('residents')
+            ->where('household_id', $id)
+            ->where('deleted_at', null)
+            ->update([
+                'household_id'        => null,
+                'is_household_head'   => 0,
+                'member_status'       => 'Transferred',
+                'left_household_date' => date('Y-m-d'),
+            ]);
+    }
+
+    if ($this->householdModel->delete($id)) {
+        $message = 'Household deleted successfully';
+        if ($force && $hasResidents > 0) $message .= ". {$hasResidents} resident(s) transferred.";
+        return $this->response->setJSON(['status' => 'success', 'message' => $message, 'csrf_hash' => csrf_hash()]);
+    }
+
+    return $this->response->setJSON(['status' => 'error', 'message' => 'Delete failed', 'csrf_hash' => csrf_hash()]);
+}
     // ── AJAX: Get members of a household ──────────────────────────────
     public function getMembers($householdId)
     {

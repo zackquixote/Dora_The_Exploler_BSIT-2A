@@ -1,8 +1,3 @@
-/**
- * Blotter View Page
- * Handles delete confirmation, hearing modal, AJAX for hearings
- */
-
 $(function() {
     // Delete case modal
     $('.delete-btn').click(function() {
@@ -21,7 +16,7 @@ $(function() {
         $('#hearing-form').attr('action', window.blotterConfig.hearingAddUrl);
     });
 
-    // Edit hearing - populate modal
+    // Edit hearing
     $(document).on('click', '.edit-hearing', function(e) {
         e.preventDefault();
         let btn = $(this);
@@ -32,13 +27,12 @@ $(function() {
         $('input[name="presiding_officer"]').val(btn.data('officer'));
         $('textarea[name="notes"]').val(btn.data('notes'));
         $('select[name="status"]').val(btn.data('status'));
-        let hearingId = btn.data('id');
-        $('#hearing-form').attr('action', window.blotterConfig.hearingUpdateUrl + '/' + hearingId);
+        $('#hearing-form').attr('action', window.blotterConfig.hearingUpdateUrl + '/' + btn.data('id'));
         $('#modal-save-btn').text('Update');
         $('#addHearingModal').modal('show');
     });
 
-    // AJAX submit hearing form
+    // AJAX submit hearing form with CSRF refresh
     $('#hearing-form').submit(function(e) {
         e.preventDefault();
         let form = $(this);
@@ -47,6 +41,9 @@ $(function() {
                 location.reload();
             } else {
                 alert(resp.message);
+            }
+            if (resp.csrf_hash) {
+                $('input[name="<?= csrf_token() ?>"]').val(resp.csrf_hash);
             }
         }, 'json');
     });
@@ -65,6 +62,10 @@ $(function() {
                 success: function(resp) {
                     if (resp.status === 'success') location.reload();
                     else alert(resp.message);
+                    if (resp.csrf_hash) {
+                        window.blotterConfig.csrfHash = resp.csrf_hash;
+                        $('input[name="<?= csrf_token() ?>"]').val(resp.csrf_hash);
+                    }
                 }
             });
         }

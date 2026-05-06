@@ -1,8 +1,3 @@
-/**
- * Blotter Create Page
- * Handles dynamic party management and TomSelect init
- */
-
 $(document).ready(function() {
     let partyIndex = window.blotterConfig.partyIndex || 2;
 
@@ -20,17 +15,7 @@ $(document).ready(function() {
                         callback(res);
                     });
                 },
-                render: {
-                    option: function(data, escape) {
-                        return '<div>' + escape(data.text) + '</div>';
-                    },
-                    item: function(data, escape) {
-                        return '<div>' + escape(data.text) + '</div>';
-                    }
-                },
-                shouldLoad: function(query) {
-                    return query.length >= 2;
-                }
+                shouldLoad: function(query) { return query.length >= 2; }
             });
         });
     }
@@ -39,62 +24,65 @@ $(document).ready(function() {
 
     $('#add-party-btn').click(function() {
         let html = `
-        <div class="party-entry card card-outline card-secondary mb-3">
+        <div class="party-entry card mb-3 border-primary">
             <div class="card-body">
-                <div class="row">
+                <div class="row align-items-end">
                     <div class="col-md-3">
-                        <select name="parties[${partyIndex}][role]" class="form-control role-select" required>
-                            <option value="complainant">Complainant</option>
-                            <option value="respondent">Respondent</option>
-                            <option value="witness">Witness</option>
+                        <label>Role</label>
+                        <select name="parties[${partyIndex}][role]" class="form-control" required>
+                            <option value="complainant">👤 Complainant</option>
+                            <option value="respondent">👥 Respondent</option>
+                            <option value="witness">👁️ Witness</option>
                         </select>
                     </div>
-                    <div class="col-md-9">
+                    <div class="col-md-2">
                         <label>Type</label>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input type-toggle" type="radio" name="parties[${partyIndex}][type]" value="resident" data-index="${partyIndex}">
-                            <label class="form-check-label">Resident</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input type-toggle" type="radio" name="parties[${partyIndex}][type]" value="outsider" checked data-index="${partyIndex}">
-                            <label class="form-check-label">Outsider</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="resident-fields" style="display:none;">
-                    <div class="form-group">
-                        <label>Select Resident</label>
-                        <select name="parties[${partyIndex}][resident_id]" class="resident-select" style="width:100%;"></select>
-                    </div>
-                </div>
-                <div class="outsider-fields">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <input type="text" name="parties[${partyIndex}][outsider_name]" class="form-control" placeholder="Full name">
-                        </div>
-                        <div class="col-md-6">
-                            <input type="text" name="parties[${partyIndex}][outsider_address]" class="form-control" placeholder="Address">
+                        <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                            <label class="btn btn-outline-primary btn-sm">
+                                <input type="radio" name="parties[${partyIndex}][type]" value="resident" autocomplete="off"> Resident
+                            </label>
+                            <label class="btn btn-outline-secondary btn-sm active">
+                                <input type="radio" name="parties[${partyIndex}][type]" value="outsider" autocomplete="off" checked> Outsider
+                            </label>
                         </div>
                     </div>
+                    <div class="col-md-7">
+                        <div class="resident-fields" style="display:none;">
+                            <label>Search Resident</label>
+                            <select name="parties[${partyIndex}][resident_id]" class="resident-select" style="width:100%"></select>
+                        </div>
+                        <div class="outsider-fields">
+                            <div class="row">
+                                <div class="col-md-6"><input type="text" name="parties[${partyIndex}][outsider_name]" class="form-control" placeholder="Full name"></div>
+                                <div class="col-md-6"><input type="text" name="parties[${partyIndex}][outsider_address]" class="form-control" placeholder="Address"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-auto mt-2">
+                        <button type="button" class="btn btn-danger btn-sm remove-party"><i class="fas fa-trash-alt"></i> Remove</button>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-sm btn-danger remove-party">Remove</button>
             </div>
         </div>`;
-        let newEntry = $(html);
-        $('#parties-container').append(newEntry);
-        initTomSelect(newEntry.find('.resident-select'));
+        let $new = $(html);
+        $('#parties-container').append($new);
+        initTomSelect($new.find('.resident-select'));
         partyIndex++;
     });
 
-    $(document).on('change', '.type-toggle', function() {
-        let index = $(this).data('index');
-        let val = $(this).val();
-        let entry = $(this).closest('.party-entry');
-        entry.find('.resident-fields').toggle(val === 'resident');
-        entry.find('.outsider-fields').toggle(val === 'outsider');
+    $(document).on('change', '.btn-group-toggle input', function() {
+        let $entry = $(this).closest('.party-entry');
+        let isResident = $(this).val() === 'resident';
+        $entry.find('.resident-fields').toggle(isResident);
+        $entry.find('.outsider-fields').toggle(!isResident);
     });
 
     $(document).on('click', '.remove-party', function() {
         $(this).closest('.party-entry').remove();
+    });
+
+    // Trigger initial toggle for existing radio buttons
+    $('.btn-group-toggle input:checked').each(function() {
+        $(this).trigger('change');
     });
 });

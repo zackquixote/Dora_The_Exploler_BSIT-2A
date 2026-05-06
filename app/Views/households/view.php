@@ -4,49 +4,52 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
 <?= $this->extend($template) ?>
 <?= $this->section('content') ?>
-<div class="content-wrapper bg-light">
-    <div class="content-header">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?= base_url('assets/css/household/view.css') ?>">
+
+<div class="content-wrapper">
+    <section class="content px-3 pt-4">
         <div class="container-fluid">
-            <div class="row mb-2 align-items-center">
-                <div class="col-sm-8">
-                    <div class="d-flex align-items-center">
-                        <a href="<?= base_url('households') ?>" class="btn btn-light btn-sm rounded-circle mr-3 shadow-sm">
+            
+            <div class="hh-hero">
+                <div class="hh-hero-content">
+                    <div class="hh-title-group">
+                        <a href="<?= base_url('households') ?>" class="hh-back-btn" title="Back to Directory">
                             <i class="fas fa-arrow-left"></i>
                         </a>
                         <div>
-                            <h1 class="m-0 text-dark font-weight-bold">Household #<?= esc($household['household_no']) ?></h1>
-                            <p class="text-muted mb-0 small"><i class="fas fa-map-marker-alt mr-1"></i> <?= esc($household['address'] ?? 'Address not set') ?></p>
+                            <h1 class="hh-title">Household #<?= esc($household['household_no']) ?></h1>
+                            <p class="hh-subtitle">
+                                <i class="fas fa-map-marker-alt"></i> 
+                                <?= esc($household['address'] ?? 'Address not set') ?>
+                            </p>
                         </div>
                     </div>
-                </div>
-                <div class="col-sm-4 text-right">
-                    <div class="dropdown">
-                        <button class="btn btn-primary shadow-sm" data-toggle="dropdown">
-                            <i class="fas fa-ellipsis-v"></i> Actions
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right shadow-sm border-0">
-                            <a class="dropdown-item" href="<?= base_url('households/edit/'.$household['id']) ?>">
-                                <i class="fas fa-edit text-primary mr-2"></i> Edit Details
-                            </a>
-                            <a class="dropdown-item" href="<?= base_url('resident/create?household_id='.$household['id']) ?>">
-                                <i class="fas fa-user-plus text-success mr-2"></i> Quick Add New Member
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-danger delete-household-view"
-                               href="#"
-                               data-id="<?= $household['id'] ?>"
-                               data-no="<?= esc($household['household_no']) ?>">
-                                <i class="fas fa-trash-alt mr-2"></i> Delete Household
-                            </a>
+                    
+                    <div class="hh-actions">
+                        <div class="dropdown">
+                            <button class="hh-btn" data-toggle="dropdown">
+                                <i class="fas fa-cog"></i> Manage
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right shadow-sm border-0 mt-2" style="border-radius: 12px; overflow: hidden;">
+                                <a class="dropdown-item py-2" href="<?= base_url('households/edit/'.$household['id']) ?>">
+                                    <i class="fas fa-edit text-primary mr-2 w-20px text-center"></i> Edit Details
+                                </a>
+                                <a class="dropdown-item py-2" href="<?= base_url('resident/create?household_id='.$household['id']) ?>">
+                                    <i class="fas fa-user-plus text-success mr-2 w-20px text-center"></i> Quick Add Member
+                                </a>
+                                <div class="dropdown-divider my-0"></div>
+                                <a class="dropdown-item py-2 text-danger delete-household-view" href="#"
+                                   data-id="<?= $household['id'] ?>"
+                                   data-no="<?= esc($household['household_no']) ?>">
+                                    <i class="fas fa-trash-alt mr-2 w-20px text-center"></i> Delete Household
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <section class="content">
-        <div class="container-fluid">
             <?php
             $voterCount = $seniorCount = $pwdCount = 0;
             foreach ($residents as $r) {
@@ -55,65 +58,51 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                 if (!empty($r['is_pwd']) && $r['is_pwd'] == 1) $pwdCount++;
             }
             ?>
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card bg-primary text-white shadow-sm border-0 rounded-lg">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h3 class="mb-0 font-weight-bold"><?= $residentCount ?></h3>
-                                    <small>Members</small>
-                                </div>
-                                <i class="fas fa-users fa-2x opacity-50"></i>
-                            </div>
-                        </div>
+            <div class="hh-stats-grid">
+                <div class="hh-stat-card hh-stat-primary">
+                    <div class="hh-stat-info">
+                        <h3><?= $residentCount ?></h3>
+                        <p>Total Members</p>
+                    </div>
+                    <div class="hh-stat-icon">
+                        <i class="fas fa-users"></i>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card bg-white text-dark shadow-sm border-0 rounded-lg">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h3 class="mb-0 font-weight-bold"><?= $voterCount ?></h3>
-                                    <small class="text-muted">Voters</small>
-                                </div>
-                                <i class="fas fa-vote-yea fa-2x text-success opacity-20"></i>
-                            </div>
-                        </div>
+                <div class="hh-stat-card hh-stat-success">
+                    <div class="hh-stat-info">
+                        <h3><?= $voterCount ?></h3>
+                        <p>Registered Voters</p>
+                    </div>
+                    <div class="hh-stat-icon">
+                        <i class="fas fa-vote-yea"></i>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card bg-white text-dark shadow-sm border-0 rounded-lg">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h3 class="mb-0 font-weight-bold"><?= $seniorCount ?></h3>
-                                    <small class="text-muted">Seniors</small>
-                                </div>
-                                <i class="fas fa-user-clock fa-2x text-warning opacity-20"></i>
-                            </div>
-                        </div>
+                <div class="hh-stat-card hh-stat-warning">
+                    <div class="hh-stat-info">
+                        <h3><?= $seniorCount ?></h3>
+                        <p>Senior Citizens</p>
+                    </div>
+                    <div class="hh-stat-icon">
+                        <i class="fas fa-user-clock"></i>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card bg-white text-dark shadow-sm border-0 rounded-lg">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h3 class="mb-0 font-weight-bold"><?= $pwdCount ?></h3>
-                                    <small class="text-muted">PWD</small>
-                                </div>
-                                <i class="fas fa-wheelchair fa-2x text-secondary opacity-20"></i>
-                            </div>
-                        </div>
+                <div class="hh-stat-card hh-stat-secondary">
+                    <div class="hh-stat-info">
+                        <h3><?= $pwdCount ?></h3>
+                        <p>PWD Members</p>
+                    </div>
+                    <div class="hh-stat-icon">
+                        <i class="fas fa-wheelchair"></i>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-body box-profile text-center">
+            <div class="hh-main-grid">
+                
+                <!-- Left Sidebar -->
+                <div class="hh-sidebar">
+                    <div class="hh-card">
+                        <div class="hh-head-profile">
                             <?php 
                                 $profileSrc = 'assets/img/default.png';
                                 if ($headResident && !empty($headResident['profile_picture'])) {
@@ -121,58 +110,65 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                                 }
                                 $headName = $headResident ? ($headResident['first_name'] . ' ' . $headResident['last_name']) : 'Unassigned';
                             ?>
-                            <img class="profile-user-img img-fluid img-circle"
-                                 src="<?= base_url($profileSrc) ?>"
-                                 alt="User profile picture"
-                                 style="width: 120px; height: 120px; object-fit: cover;">
-                            <h3 class="profile-username text-center mt-2 font-weight-bold">
-                                <?= esc($headName) ?>
-                            </h3>
-                            <p class="text-muted text-center mb-3">Head of Household</p>
-                            <div class="d-flex justify-content-center mb-3">
+                            <div class="hh-avatar-wrapper">
+                                <img class="hh-avatar" src="<?= base_url($profileSrc) ?>" alt="Head Profile">
+                                <div class="hh-head-badge" title="Head of Household">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <h3 class="hh-head-name"><?= esc($headName) ?></h3>
+                            <div class="hh-head-role">Head of Household</div>
+                            
+                            <div class="hh-head-flags">
                                 <?php if ($headResident && !empty($headResident['is_voter'])): ?>
-                                    <span class="badge badge-success mr-1"><i class="fas fa-check"></i> Voter</span>
+                                    <span class="hh-flag-badge hh-flag-voter"><i class="fas fa-check"></i> Voter</span>
                                 <?php endif; ?>
                                 <?php if ($headResident && !empty($headResident['is_senior_citizen'])): ?>
-                                    <span class="badge badge-info mr-1"><i class="fas fa-user-graduate"></i> Senior</span>
+                                    <span class="hh-flag-badge hh-flag-senior"><i class="fas fa-user-graduate"></i> Senior</span>
                                 <?php endif; ?>
                             </div>
-                            <hr>
-                            <div class="text-left small">
-                                <p class="mb-1 d-flex align-items-center">
-                                    <strong class="w-25"><i class="fas fa-briefcase text-muted mr-2"></i></strong> 
-                                    <span><?= esc($headResident['occupation'] ?? 'N/A') ?></span>
-                                </p>
-                                <p class="mb-1 d-flex align-items-center">
-                                    <strong class="w-25"><i class="fas fa-phone text-muted mr-2"></i></strong> 
-                                    <span><?= esc($headResident['contact_number'] ?? 'N/A') ?></span>
-                                </p>
+                            
+                            <div class="hh-head-details">
+                                <div class="hh-detail-item">
+                                    <div class="hh-detail-icon"><i class="fas fa-briefcase"></i></div>
+                                    <div class="hh-detail-text">
+                                        <span class="hh-detail-label">Occupation</span>
+                                        <span class="hh-detail-value"><?= esc($headResident['occupation'] ?? 'N/A') ?></span>
+                                    </div>
+                                </div>
+                                <div class="hh-detail-item">
+                                    <div class="hh-detail-icon"><i class="fas fa-phone"></i></div>
+                                    <div class="hh-detail-text">
+                                        <span class="hh-detail-label">Contact No.</span>
+                                        <span class="hh-detail-value"><?= esc($headResident['contact_number'] ?? 'N/A') ?></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-white border-bottom-0">
-                            <h5 class="card-title text-dark mb-0">Location Details</h5>
+                    <div class="hh-card">
+                        <div class="hh-card-header">
+                            <h3 class="hh-card-title"><i class="fas fa-map-marked-alt"></i> Location Details</h3>
                         </div>
-                        <div class="card-body">
+                        <div class="hh-card-body p-0">
                             <div class="list-group list-group-flush">
-                                <div class="list-group-item px-0 pb-2 border-0">
-                                    <small class="text-muted text-uppercase font-weight-bold" style="font-size: 10px;">Sitio / Purok</small>
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-map-pin text-primary mr-2"></i> <?= esc($household['sitio'] ?? '—') ?>
+                                <div class="list-group-item px-4 py-3 border-0">
+                                    <small class="text-muted text-uppercase font-weight-bold d-block mb-1" style="font-size: 10px;">Sitio / Purok</small>
+                                    <div class="font-weight-bold text-dark d-flex align-items-center">
+                                        <i class="fas fa-map-pin text-primary mr-2 opacity-50"></i> <?= esc($household['sitio'] ?? '—') ?>
                                     </div>
                                 </div>
-                                <div class="list-group-item px-0 pb-2 border-0">
-                                    <small class="text-muted text-uppercase font-weight-bold" style="font-size: 10px;">Street Address</small>
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-road text-primary mr-2"></i> <?= esc($household['street_address'] ?? '—') ?>
+                                <div class="list-group-item px-4 py-3 border-0 border-top">
+                                    <small class="text-muted text-uppercase font-weight-bold d-block mb-1" style="font-size: 10px;">Street Address</small>
+                                    <div class="font-weight-bold text-dark d-flex align-items-center">
+                                        <i class="fas fa-road text-primary mr-2 opacity-50"></i> <?= esc($household['street_address'] ?? '—') ?>
                                     </div>
                                 </div>
-                                <div class="list-group-item px-0 pb-2 border-0">
-                                    <small class="text-muted text-uppercase font-weight-bold" style="font-size: 10px;">House Type</small>
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-home text-primary mr-2"></i> <?= esc($household['house_type'] ?? '—') ?>
+                                <div class="list-group-item px-4 py-3 border-0 border-top">
+                                    <small class="text-muted text-uppercase font-weight-bold d-block mb-1" style="font-size: 10px;">House Type</small>
+                                    <div class="font-weight-bold text-dark d-flex align-items-center">
+                                        <i class="fas fa-home text-primary mr-2 opacity-50"></i> <?= esc($household['house_type'] ?? '—') ?>
                                     </div>
                                 </div>
                             </div>
@@ -180,31 +176,32 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                     </div>
                 </div>
 
-                <div class="col-md-8">
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
-                            <h5 class="card-title text-dark mb-0 font-weight-bold">Household Members (<?= $residentCount ?>)</h5>
-                            <button type="button" class="btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#addMemberModal">
-                                <i class="fas fa-plus"></i> Add Member
+                <div class="hh-main-content">
+                    <div class="hh-card">
+                        <div class="hh-card-header">
+                            <h3 class="hh-card-title"><i class="fas fa-users"></i> Household Members (<?= $residentCount ?>)</h3>
+                            <button type="button" class="btn btn-primary btn-sm shadow-sm font-weight-bold px-3" data-toggle="modal" data-target="#addMemberModal">
+                                <i class="fas fa-plus mr-1"></i> Add Member
                             </button>
                         </div>
-                        <div class="card-body p-0">
+                        <div class="hh-card-body p-0">
                             <?php if (empty($residents)): ?>
-                                <div class="text-center py-5">
-                                    <img src="<?= base_url('assets/img/default.png') ?>" class="rounded-circle mb-3 opacity-50" style="width:80px;height:80px;">
-                                    <p class="text-muted">No members assigned to this household yet.</p>
+                                <div class="hh-empty-state">
+                                    <div class="hh-empty-icon"><i class="fas fa-user-slash"></i></div>
+                                    <h3>No Members Found</h3>
+                                    <p>There are no members assigned to this household yet.</p>
                                 </div>
                             <?php else: ?>
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0 table-align-middle">
-                                        <thead class="bg-light">
+                                <div class="table-responsive hh-table-wrapper">
+                                    <table class="hh-table">
+                                        <thead>
                                             <tr>
-                                                <th class="pl-4">Resident</th>
+                                                <th>Resident</th>
                                                 <th>Age</th>
                                                 <th>Relationship</th>
                                                 <th>Membership</th>
                                                 <th>Flags</th>
-                                                <th class="pr-4">Action</th>
+                                                <th class="text-right">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -225,72 +222,78 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                                                     'Transferred' => 'warning',
                                                     'Deceased'    => 'dark'
                                                 ];
-                                                $statusColor = $statusColors[$memberStatus] ?? 'secondary';
+                                                $statusClass = $statusColors[$memberStatus] ?? 'secondary';
                                             ?>
                                                 <tr id="member-row-<?= $r['id'] ?>">
-                                                    <td class="pl-4">
-                                                        <div class="d-flex align-items-center">
-                                                            <img src="<?= $memberImg ?>" class="rounded-circle mr-3" style="width:32px;height:32px;object-fit:cover;" alt="">
-                                                            <div>
-                                                                <div class="font-weight-bold text-dark"><?= esc($fullName) ?></div>
+                                                    <td>
+                                                        <div class="hh-member-cell">
+                                                            <img src="<?= $memberImg ?>" class="hh-member-avatar" alt="">
+                                                            <div class="hh-member-info">
+                                                                <h4><?= esc($fullName) ?></h4>
                                                                 <?php if ($isHead): ?>
-                                                                    <span class="badge badge-warning badge-pill badge-sm mt-1"><i class="fas fa-star mr-1"></i>Head</span>
+                                                                    <span class="badge badge-warning badge-pill badge-sm" style="font-size:0.6rem;"><i class="fas fa-star mr-1"></i>Head</span>
                                                                 <?php endif; ?>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td class="text-muted"><?= $age ? $age . ' yrs' : '—' ?></td>
-                                                    <td><?= esc(ucfirst($r['relationship_to_head'] ?? '—')) ?></td>
+                                                    <td>
+                                                        <span class="font-weight-bold"><?= $age ? $age . ' <span class="text-muted font-weight-normal">yrs</span>' : '—' ?></span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="font-weight-bold text-dark"><?= esc(ucfirst($r['relationship_to_head'] ?? '—')) ?></span>
+                                                    </td>
                                                     <td>
                                                         <span id="membership-display-<?= $r['id'] ?>">
-                                                            <span class="badge badge-<?= $statusColor ?>" id="membership-badge-<?= $r['id'] ?>">
+                                                            <span class="hh-badge hh-badge-<?= $statusClass ?>" id="membership-badge-<?= $r['id'] ?>">
                                                                 <?= esc($memberStatus) ?>
                                                             </span>
-                                                            <i class="fas fa-pencil-alt edit-membership-icon" 
-                                                               data-resident-id="<?= $r['id'] ?>"
-                                                               style="cursor:pointer; font-size:0.7rem; color:#64748B;" 
-                                                               title="Edit membership status"></i>
+                                                            <button type="button" class="btn btn-link btn-sm p-0 ml-2 text-muted edit-membership-icon" 
+                                                                    data-resident-id="<?= $r['id'] ?>" title="Edit status">
+                                                                <i class="fas fa-pencil-alt" style="font-size: 0.8rem;"></i>
+                                                            </button>
                                                         </span>
-                                                        <span id="membership-editor-<?= $r['id'] ?>" style="display:none;">
+                                                        <span id="membership-editor-<?= $r['id'] ?>" style="display:none;" class="d-flex align-items-center gap-1">
                                                             <select id="membership-select-<?= $r['id'] ?>"
-                                                                    class="form-control form-control-sm"
-                                                                    style="width:auto; display:inline-block; font-size:0.75rem; padding:2px 6px;">
+                                                                    class="form-control form-control-sm border-light shadow-sm"
+                                                                    style="width:auto; font-size:0.8rem; height: 28px;">
                                                                 <option value="Active" <?= $memberStatus == 'Active' ? 'selected' : '' ?>>Active</option>
                                                                 <option value="Inactive" <?= $memberStatus == 'Inactive' ? 'selected' : '' ?>>Inactive</option>
                                                                 <option value="Transferred" <?= $memberStatus == 'Transferred' ? 'selected' : '' ?>>Transferred</option>
                                                                 <option value="Deceased" <?= $memberStatus == 'Deceased' ? 'selected' : '' ?>>Deceased</option>
                                                             </select>
-                                                            <i class="fas fa-check text-success ml-1 save-membership-icon" 
-                                                               data-resident-id="<?= $r['id'] ?>"
-                                                               style="cursor:pointer; font-size:0.8rem;" 
-                                                               title="Save"></i>
-                                                            <i class="fas fa-times text-danger ml-1 cancel-membership-icon" 
-                                                               data-resident-id="<?= $r['id'] ?>"
-                                                               style="cursor:pointer; font-size:0.8rem;" 
-                                                               title="Cancel"></i>
+                                                            <button type="button" class="btn btn-link btn-sm p-0 ml-1 text-success save-membership-icon" 
+                                                                    data-resident-id="<?= $r['id'] ?>" title="Save">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-link btn-sm p-0 ml-1 text-danger cancel-membership-icon" 
+                                                                    data-resident-id="<?= $r['id'] ?>" title="Cancel">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
                                                         </span>
                                                     </td>
                                                     <td>
                                                         <?php if (!empty($r['is_voter'])): ?>
-                                                            <span class="badge badge-light text-success border mr-1" title="Voter"><i class="fas fa-check"></i></span>
+                                                            <span class="hh-badge hh-badge-success mr-1" title="Voter" style="padding: 0.35rem;"><i class="fas fa-check"></i></span>
                                                         <?php endif; ?>
                                                         <?php if (!empty($r['is_senior_citizen'])): ?>
-                                                            <span class="badge badge-light text-info border mr-1" title="Senior"><i class="fas fa-user-graduate"></i></span>
+                                                            <span class="hh-badge hh-badge-secondary mr-1" title="Senior" style="padding: 0.35rem;"><i class="fas fa-user-graduate"></i></span>
                                                         <?php endif; ?>
                                                         <?php if (!empty($r['is_pwd'])): ?>
-                                                            <span class="badge badge-light text-warning border mr-1" title="PWD"><i class="fas fa-wheelchair"></i></span>
+                                                            <span class="hh-badge hh-badge-warning mr-1" title="PWD" style="padding: 0.35rem;"><i class="fas fa-wheelchair"></i></span>
                                                         <?php endif; ?>
                                                         <?php if (empty($r['is_voter']) && empty($r['is_senior_citizen']) && empty($r['is_pwd'])): ?>
-                                                            <span class="text-muted">—</span>
+                                                            <span class="text-muted" style="font-size:0.8rem">—</span>
                                                         <?php endif; ?>
                                                     </td>
-                                                    <td class="pr-4 text-right">
-                                                        <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="btn btn-sm btn-outline-primary">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="btn btn-sm btn-outline-secondary ml-1">
-                                                            <i class="fas fa-pen"></i>
-                                                        </a>
+                                                    <td>
+                                                        <div class="hh-actions-cell">
+                                                            <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="hh-action-btn" title="View Profile">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
+                                                            <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="hh-action-btn" title="Edit Profile">
+                                                                <i class="fas fa-pen"></i>
+                                                            </a>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>

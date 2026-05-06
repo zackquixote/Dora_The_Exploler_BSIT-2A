@@ -1,5 +1,5 @@
 <?php
-// Dynamic values from the controller
+// Dynamic values from the database (with fallbacks)
 $barangay     = $settings['barangay_name'] ?? 'Barangay';
 $municipality = $settings['municipality']  ?? 'Municipality';
 $province     = $settings['province']      ?? 'Province';

@@ -7,39 +7,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>BMIS | <?= isset($title) ? esc($title) : 'Dashboard' ?></title>
 
-    <!-- Fonts & Icons -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/fontawesome-free/css/all.min.css') ?>">
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    
-    <!-- AdminLTE Plugins -->
-    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/jqvmap/jqvmap.min.css') ?>">
+    <!-- CRITICAL: System Fonts (fallback) & Bootstrap -->
     <link rel="stylesheet" href="<?= base_url('assets/adminlte/dist/css/adminlte.min.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/overlayScrollbars/css/OverlayScrollbars.min.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/daterangepicker/daterangepicker.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/summernote/summernote-bs4.min.css') ?>">
-    
-    <!-- DataTables -->
-    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') ?>">
-    
-    <!-- Notifications -->
-    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/toastr/toastr.min.css') ?>">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
-    <!-- Custom Theme CSS -->
     <link rel="stylesheet" href="<?= base_url('assets/css/user/user.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('asset/css/blotter/blotter.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-create.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-index.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-view.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/dashboard/style.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/resident/residents-create.css') ?>">
     
-    <!-- TomSelect -->
-    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    <!-- NON-CRITICAL CSS - Deferred (loads asynchronously) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"></noscript>
+    
+    <link rel="preload" href="<?= base_url('assets/adminlte/plugins/fontawesome-free/css/all.min.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/fontawesome-free/css/all.min.css') ?>"></noscript>
+    
+    <link rel="preload" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"></noscript>
+    
+    <!-- Plugin CSS - Deferred (only loaded if needed) -->
+    <link rel="preload" href="<?= base_url('assets/adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="<?= base_url('assets/adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="<?= base_url('assets/adminlte/plugins/jqvmap/jqvmap.min.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="<?= base_url('assets/adminlte/plugins/overlayScrollbars/css/OverlayScrollbars.min.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="<?= base_url('assets/adminlte/plugins/daterangepicker/daterangepicker.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="<?= base_url('assets/adminlte/plugins/summernote/summernote-bs4.min.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- DataTables CSS - Deferred -->
+    <link rel="preload" href="<?= base_url('assets/adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="<?= base_url('assets/adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="<?= base_url('assets/adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- External Libraries - Deferred -->
+    <link rel="preload" href="<?= base_url('assets/adminlte/plugins/toastr/toastr.min.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/toastr/toastr.min.css') ?>">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css">
+    </noscript>>
 
     <style>
         /* ============================================================
@@ -247,38 +252,52 @@
 
     <aside class="control-sidebar control-sidebar-dark"></aside>
 </div>
-
 <!-- Scripts -->
+<!-- CRITICAL: jQuery & Bootstrap (required for page interactivity) -->
 <script src="<?= base_url('assets/adminlte/plugins/jquery/jquery.min.js') ?>"></script>
+<script src="<?= base_url('assets/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
+
+<!-- CRITICAL: jQuery-UI & Dependencies (dashboard.js needs these) -->
 <script src="<?= base_url('assets/adminlte/plugins/jquery-ui/jquery-ui.min.js') ?>"></script>
 <script>$.widget.bridge('uibutton', $.ui.button)</script>
-<script src="<?= base_url('assets/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
 <script src="<?= base_url('assets/adminlte/plugins/chart.js/Chart.min.js') ?>"></script>
 <script src="<?= base_url('assets/adminlte/plugins/sparklines/sparkline.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/jqvmap/jquery.vmap.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/jquery-knob/jquery.knob.min.js') ?>"></script>
 <script src="<?= base_url('assets/adminlte/plugins/moment/moment.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/daterangepicker/daterangepicker.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/summernote/summernote-bs4.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/dist/js/adminlte.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/dist/js/pages/dashboard.js') ?>"></script>
+
+<!-- IMPORTANT: JQVMap must load BEFORE dashboard.js (which uses it to render charts) -->
+<script src="<?= base_url('assets/adminlte/plugins/jqvmap/jquery.vmap.min.js') ?>"></script>
+<script src="<?= base_url('assets/adminlte/plugins/jqvmap/maps/jquery.vmap.usa.js') ?>"></script>
+
+<!-- DEFERRED: Non-Critical Libraries (can load after page paint) -->
+<script defer src="<?= base_url('assets/adminlte/plugins/jquery-knob/jquery.knob.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/daterangepicker/daterangepicker.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/summernote/summernote-bs4.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/dist/js/adminlte.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/dist/js/pages/dashboard.js') ?>"></script>
+
+<!-- DataTables Core (synchronous for table pages) -->
 <script src="<?= base_url('assets/adminlte/plugins/datatables/jquery.dataTables.min.js') ?>"></script>
 <script src="<?= base_url('assets/adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/datatables-buttons/js/dataTables.buttons.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/jszip/jszip.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/pdfmake/pdfmake.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/pdfmake/vfs_fonts.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/datatables-buttons/js/buttons.html5.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/datatables-buttons/js/buttons.print.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/datatables-buttons/js/buttons.colVis.min.js') ?>"></script>
-<script src="<?= base_url('assets/adminlte/plugins/toastr/toastr.min.js') ?>"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+<!-- DataTables Extensions (deferred - load after core) -->
+<script defer src="<?= base_url('assets/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/datatables-buttons/js/dataTables.buttons.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/jszip/jszip.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/pdfmake/pdfmake.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/pdfmake/vfs_fonts.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/datatables-buttons/js/buttons.html5.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/datatables-buttons/js/buttons.print.min.js') ?>"></script>
+<script defer src="<?= base_url('assets/adminlte/plugins/datatables-buttons/js/buttons.colVis.min.js') ?>"></script>
+
+<!-- External Libraries (deferred) -->
+<script defer src="<?= base_url('assets/adminlte/plugins/toastr/toastr.min.js') ?>"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script defer src="<?= base_url('js/blotter/notifications.js') ?>"></script>
 
 <?= $this->renderSection('scripts') ?>
 
