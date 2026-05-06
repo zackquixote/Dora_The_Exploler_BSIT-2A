@@ -260,7 +260,7 @@ class Resident extends BaseController
         return redirect()->back()->with('error', 'Invalid request');
     }
 
-    // ── View (now includes age) ─────────────────────────────────────
+    // ── View (now includes age and history) ─────────────────────────────────────
     public function view($id = null)
     {
         if ($r = $this->requireLogin()) return $r;
@@ -281,7 +281,24 @@ class Resident extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Resident not found');
         }
 
-        return view('residents/view', ['resident' => $resident]);
+        $certificates = $this->db->table('certificates')
+            ->select('id, certificate_number, certificate_type, created_at, purpose')
+            ->where('resident_id', $id)
+            ->orderBy('created_at', 'DESC')
+            ->get()->getResultArray();
+
+        $blotterHistory = $this->db->table('blotter_parties bp')
+            ->select('br.id, br.case_number, br.incident_type, br.incident_date, br.status, bp.role')
+            ->join('blotter_records br', 'br.id = bp.blotter_id')
+            ->where('bp.resident_id', $id)
+            ->orderBy('br.incident_date', 'DESC')
+            ->get()->getResultArray();
+
+        return view('residents/view', [
+            'resident' => $resident,
+            'certificates' => $certificates,
+            'blotterHistory' => $blotterHistory
+        ]);
     }
 
     // ── Households by Sitio (AJAX) ────────────────────────────────────
@@ -531,4 +548,64 @@ public function updateMemberStatus($id)
         'new_status' => $newStatus
     ]);
 }
+
+
+    // ── Export to CSV ──────────────────────────────────────────────────
+    public function exportCsv()
+    {
+        if ($r = $this->requireLogin()) return $r;
+
+        $selectedPurok = $this->request->getGet('purok') ?? 'all';
+
+        $builder = $this->db->table('residents')
+            ->select('residents.first_name, residents.last_name, residents.middle_name, residents.birthdate, residents.sex, residents.civil_status, residents.contact_number, residents.occupation, residents.sitio, residents.is_voter, residents.is_pwd, residents.is_senior_citizen, households.household_no')
+            ->join('households', 'households.id = residents.household_id', 'left')
+            ->where('residents.deleted_at', null);
+
+        if ($selectedPurok !== 'all') {
+            if ($selectedPurok === 'Unassigned') {
+                $builder->groupStart()
+                    ->where('residents.sitio', null)
+                    ->orWhere('residents.sitio', '')
+                    ->groupEnd();
+            } else {
+                $builder->where('residents.sitio', $selectedPurok);
+            }
+        }
+
+        $residents = $builder->orderBy('residents.last_name', 'ASC')->get()->getResultArray();
+
+        $filename = 'Residents_' . date('Ymd_His') . '.csv';
+
+        header("Content-Description: File Transfer");
+        header("Content-Disposition: attachment; filename=$filename");
+        header("Content-Type: text/csv; charset=UTF-8");
+
+        $file = fopen('php://output', 'w');
+
+        // CSV Header
+        $header = ['First Name', 'Last Name', 'Middle Name', 'Birthdate', 'Sex', 'Civil Status', 'Contact', 'Occupation', 'Purok/Sitio', 'Household No', 'Voter', 'PWD', 'Senior'];
+        fputcsv($file, $header);
+
+        foreach ($residents as $r) {
+            fputcsv($file, [
+                $r['first_name'],
+                $r['last_name'],
+                $r['middle_name'],
+                $r['birthdate'],
+                ucfirst($r['sex']),
+                $r['civil_status'],
+                $r['contact_number'],
+                $r['occupation'],
+                $r['sitio'],
+                $r['household_no'],
+                $r['is_voter'] ? 'Yes' : 'No',
+                $r['is_pwd'] ? 'Yes' : 'No',
+                $r['is_senior_citizen'] ? 'Yes' : 'No'
+            ]);
+        }
+
+        fclose($file);
+        exit;
+    }
 }

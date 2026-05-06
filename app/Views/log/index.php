@@ -1,87 +1,81 @@
-
-
 <?= $this->extend('theme/admin/template') ?>
-
 <?= $this->section('content') ?>
 
-<div class="content-wrapper">
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1 class="m-0">Activity Logs</h1>
-      </div>
-      <div class="col-sm-6">
-          <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active">Logs</li>
-        </ol>
+<div class="bmis-content">
+
+    <!-- Filter -->
+    <div class="ds-card" style="margin-bottom:14px">
+        <div class="ds-card-body" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div class="ds-filter-header" style="margin-bottom:0"><i class="fas fa-filter"></i> Advanced Filters</div>
+            <form id="logFilterForm" method="get" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <input type="date" name="date" class="ds-input" style="width:160px;height:34px;font-size:12px" value="<?= esc($selectedDate ?? '') ?>" onchange="this.form.submit()">
+                
+                <select name="user" class="ds-select" style="width:160px;height:34px;font-size:12px" onchange="this.form.submit()">
+                    <option value="">All Users</option>
+                    <?php if(!empty($users)): foreach($users as $u): ?>
+                        <option value="<?= esc($u['USER_NAME']) ?>" <?= ($selectedUser ?? '') === $u['USER_NAME'] ? 'selected' : '' ?>><?= esc($u['USER_NAME']) ?></option>
+                    <?php endforeach; endif; ?>
+                </select>
+
+                <select name="action" class="ds-select" style="width:160px;height:34px;font-size:12px" onchange="this.form.submit()">
+                    <option value="">All Actions</option>
+                    <option value="create" <?= ($selectedAction ?? '') === 'create' ? 'selected' : '' ?>>Create/Add</option>
+                    <option value="update" <?= ($selectedAction ?? '') === 'update' ? 'selected' : '' ?>>Update/Edit</option>
+                    <option value="delete" <?= ($selectedAction ?? '') === 'delete' ? 'selected' : '' ?>>Delete/Remove</option>
+                    <option value="login" <?= ($selectedAction ?? '') === 'login' ? 'selected' : '' ?>>Login/Logout</option>
+                </select>
+
+                <a href="<?= base_url('logs') ?>" class="ds-btn ds-btn-ghost" style="height:34px;font-size:11px"><i class="fas fa-times"></i> Clear</a>
+            </form>
+        </div>
     </div>
-</div>
-</div>
 
-<section class="content">
-    <div class="container-fluid">
-        <form id="dateFilterForm" method="get" class="mb-3">
-          <div class="form-group">
-            <label for="filterDate"><strong>Filter by Date:</strong></label>
-            <input type="date" id="filterDate" name="date" class="form-control" style="max-width: 250px;"
-// NEW LINE (Allows blank for "All")
-value="<?= esc($selectedDate ?? '') ?>">        </div>
-    </form>
-
-    <?php if (!empty($logs)): ?>
-        <div class="timeline timeline-inverse">
-            <?php foreach ($logs as $log): ?>
-                <!-- timeline item -->
-                <div class="time-label">
-                    <span class="bg-white">
-                        <?= esc($log['DATELOG']) ?>
-                    </span>
-                </div>
-                <div>
-                    <i class="fas fa-user bg-info"></i>
-                    <div class="timeline-item">
-                        <span class="time">
-                            <i class="far fa-clock"></i>
-                            <?= esc(date('h:i A', strtotime($log['TIMELOG']))) ?>
-                        </span>
-                        <h3 class="timeline-header">
-                            <?= esc($log['USER_NAME']) ?> (ID: <?= esc($log['USERID']) ?>)
-                        </h3>
-                        <div class="timeline-body">
-                            <strong>Action:</strong> <?= esc($log['ACTION']) ?><br>
-                            <strong>IP Address:</strong> <?= esc($log['user_ip_address']) ?><br>
-                            <strong>Device:</strong> <?= esc($log['device_used']) ?><br>
+    <!-- Logs -->
+    <div class="ds-card">
+        <div class="ds-card-head">
+            <div class="ds-card-title"><i class="fas fa-history"></i> Activity Logs</div>
+            <span class="ds-badge ds-badge-gray"><?= count($logs ?? []) ?> entries</span>
+        </div>
+        <div class="ds-card-body">
+            <?php if (!empty($logs)): ?>
+            <div class="ds-activity-feed" style="max-height:none">
+                <?php foreach ($logs as $log):
+                    $a = strtolower($log['ACTION'] ?? '');
+                    $ic='ds-ai-view'; $ii='fa-eye';
+                    if (strpos($a,'delete')!==false||strpos($a,'remove')!==false){$ic='ds-ai-delete';$ii='fa-trash-alt';}
+                    elseif (strpos($a,'edit')!==false||strpos($a,'update')!==false){$ic='ds-ai-edit';$ii='fa-edit';}
+                    elseif (strpos($a,'create')!==false||strpos($a,'add')!==false||strpos($a,'register')!==false){$ic='ds-ai-create';$ii='fa-plus-circle';}
+                    elseif (strpos($a,'print')!==false){$ic='ds-ai-print';$ii='fa-print';}
+                    elseif (strpos($a,'certif')!==false){$ic='ds-ai-cert';$ii='fa-file-alt';}
+                    elseif (strpos($a,'login')!==false||strpos($a,'logout')!==false){$ic='ds-ai-view';$ii='fa-sign-in-alt';}
+                ?>
+                <div class="ds-activity-item">
+                    <div class="ds-activity-icon <?= $ic ?>"><i class="fas <?= $ii ?>"></i></div>
+                    <div style="flex:1">
+                        <div class="ds-activity-action"><?= esc($log['ACTION']) ?></div>
+                        <div class="ds-activity-meta">
+                            by <strong><?= esc($log['USER_NAME']) ?></strong> (ID: <?= esc($log['USERID']) ?>)
+                            · <?= esc($log['DATELOG']) ?> at <?= esc(date('h:i A', strtotime($log['TIMELOG']))) ?>
+                        </div>
+                        <div style="margin-top:4px;display:flex;gap:12px;font-size:10px;color:var(--ink-soft)">
+                            <span><i class="fas fa-globe" style="margin-right:3px"></i> <?= esc($log['user_ip_address']) ?></span>
+                            <span><i class="fas fa-desktop" style="margin-right:3px"></i> <?= esc($log['device_used']) ?></span>
                             <?php if (!empty($log['identifier'])): ?>
-                                <strong>Identifier:</strong> <span class="badge badge-primary"><?= esc($log['identifier']) ?></span>
+                                <span class="ds-badge ds-badge-blue"><?= esc($log['identifier']) ?></span>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
-            <?php endforeach; ?>
-            <div>
-                <i class="fas fa-clock bg-gray"></i>
+                <?php endforeach; ?>
             </div>
+            <?php else: ?>
+            <div style="text-align:center;padding:32px;color:var(--ink-soft)">
+                <i class="fas fa-history" style="font-size:24px;opacity:.3;display:block;margin-bottom:8px"></i>
+                No activity logs found.
+            </div>
+            <?php endif; ?>
         </div>
-    <?php else: ?>
-        <div class="alert alert-info">
-            No activity logs found.
-        </div>
-    <?php endif; ?>
     </div>
-</section>
 </div>
-
-<div class="toasts-top-right fixed" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;"></div>
-
-<?= $this->endSection() ?>
-
-<?= $this->section('scripts') ?>
-<script>
-  document.getElementById('filterDate').addEventListener('change', function () {
-    document.getElementById('dateFilterForm').submit();
-  });
-</script>
 
 <?= $this->endSection() ?>

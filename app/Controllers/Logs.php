@@ -26,16 +26,29 @@ class Logs extends BaseController
         $logModel = new \App\Models\LogModel();
         
         $date = $this->request->getGet('date');
+        $user = $this->request->getGet('user');
+        $action = $this->request->getGet('action');
 
-        // IF NO DATE IS SELECTED, SHOW ALL LOGS
-        if (empty($date)) {
-            $data['logs'] = $logModel->orderBy('DATELOG DESC, TIMELOG DESC')->findAll();
-            $data['selectedDate'] = ''; // Empty so the date input is blank
-        } else {
-            // IF DATE IS SELECTED, FILTER BY THAT DATE
-            $data['logs'] = $logModel->getLogsByDate($date);
-            $data['selectedDate'] = $date;
+        $builder = $logModel->builder();
+        $builder->orderBy('DATELOG DESC, TIMELOG DESC');
+
+        if (!empty($date)) {
+            $builder->where('DATELOG', $date);
         }
+        if (!empty($user)) {
+            $builder->where('USER_NAME', $user);
+        }
+        if (!empty($action)) {
+            $builder->like('ACTION', $action);
+        }
+
+        $data['logs'] = $builder->get()->getResultArray();
+        $data['selectedDate'] = $date;
+        $data['selectedUser'] = $user;
+        $data['selectedAction'] = $action;
+
+        // Get unique users for the dropdown
+        $data['users'] = $logModel->builder()->select('USER_NAME')->distinct()->orderBy('USER_NAME', 'ASC')->get()->getResultArray();
 
         return view('log/index', $data);
     }

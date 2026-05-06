@@ -1,82 +1,35 @@
 <?= $this->extend('theme/admin/template') ?>
-
 <?= $this->section('content') ?>
-<div class="content-wrapper">
-    <section class="content">
-        <div class="container-fluid">
-            <div class="card" style="position: relative; z-index: 99;">
-                <div class="card-header">
-                    <h3 class="card-title">Edit User</h3>
-                    <a href="<?= base_url('admin/users') ?>" class="btn btn-secondary float-right">
-                        <i class="fas fa-arrow-left"></i> Back to List
-                    </a>
+
+<div class="bmis-content">
+    <div class="ds-card">
+        <div class="ds-card-head">
+            <div class="ds-card-title"><i class="fas fa-user-edit"></i> Edit User</div>
+            <a href="<?= base_url('admin/users') ?>" class="ds-btn ds-btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>
+        </div>
+        <form action="<?= base_url('admin/users/update/' . $user['id']) ?>" method="POST">
+            <?= csrf_field() ?>
+            <input type="hidden" name="userId" value="<?= $user['id'] ?>">
+            <div class="ds-card-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                    <div><label class="ds-input-label">Full Name <span style="color:var(--c-rose)">*</span></label><input type="text" name="name" class="ds-input" value="<?= old('name', $user['name']) ?>" required></div>
+                    <div><label class="ds-input-label">Email Address <span style="color:var(--c-rose)">*</span></label><input type="email" name="email" class="ds-input" value="<?= old('email', $user['email']) ?>" required></div>
                 </div>
-                <div class="card-body">
-                    <form action="<?= base_url('admin/users/update/' . $user['id']) ?>" method="POST" role="form" style="position: relative; z-index: 100;">
-                        
-                        <?= csrf_field() ?> 
-                        
-                        <input type="hidden" name="userId" value="<?= $user['id'] ?>">
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="name">Full Name</label>
-                                    <input type="text" name="name" class="form-control" id="name" value="<?= old('name', $user['name']) ?>" required autofocus>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="email">Email Address</label>
-                                    <input type="email" name="email" class="form-control" id="email" value="<?= old('email', $user['email']) ?>" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="password">Password (leave blank to keep current)</label>
-                                    <input type="password" name="password" class="form-control" id="password" placeholder="Enter new password if changing">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="phone">Phone Number</label>
-                                    <input type="text" name="phone" class="form-control" id="phone" value="<?= old('phone', $user['phone']) ?>" placeholder="Enter phone number">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="role">Role</label>
-                                    <select name="role" class="form-control" id="role">
-                                        <option value="staff" <?= ($user['role'] == 'staff') ? 'selected' : '' ?>>Staff</option>
-                                        <option value="admin" <?= ($user['role'] == 'admin') ? 'selected' : '' ?>>Admin</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="status">Status</label>
-                                    <select name="status" class="form-control" id="status">
-                                        <option value="active" <?= ($user['status'] == 'active') ? 'selected' : '' ?>>Active</option>
-                                        <option value="inactive" <?= ($user['status'] == 'inactive') ? 'selected' : '' ?>>Inactive</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group mt-3" style="position: relative; z-index: 101;">
-                            <button type="submit" class="btn btn-primary">Update User</button>
-                            <a href="<?= base_url('admin/users') ?>" class="btn btn-default">Cancel</a>
-                        </div>
-                    </form>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+                    <div><label class="ds-input-label">Password (leave blank to keep)</label><input type="password" name="password" class="ds-input" placeholder="Enter new password"></div>
+                    <div><label class="ds-input-label">Phone Number</label><input type="text" name="phone" class="ds-input" value="<?= old('phone', $user['phone']) ?>"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+                    <div><label class="ds-input-label">Role</label><select name="role" class="ds-select"><option value="staff" <?= ($user['role']=='staff')?'selected':'' ?>>Staff</option><option value="admin" <?= ($user['role']=='admin')?'selected':'' ?>>Admin</option></select></div>
+                    <div><label class="ds-input-label">Status</label><select name="status" class="ds-select"><option value="active" <?= ($user['status']=='active')?'selected':'' ?>>Active</option><option value="inactive" <?= ($user['status']=='inactive')?'selected':'' ?>>Inactive</option></select></div>
                 </div>
             </div>
-        </div>
-    </section>
+            <div style="padding:12px 18px;border-top:.5px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+                <a href="<?= base_url('admin/users') ?>" class="ds-btn ds-btn-ghost">Cancel</a>
+                <button type="submit" class="ds-btn ds-btn-primary"><i class="fas fa-save"></i> Update User</button>
+            </div>
+        </form>
+    </div>
 </div>
+
 <?= $this->endSection() ?>

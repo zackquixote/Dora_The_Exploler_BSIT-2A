@@ -401,6 +401,45 @@ public function delete($id)
         }
     }
 
+    // ── AJAX: Set as Household Head ───────────────────────────────────
+    public function setHead($residentId)
+    {
+        if ($r = $this->requireLogin()) return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+
+        $resident = $this->residentModel->find($residentId);
+        if (!$resident || !$resident['household_id']) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Resident or Household not found']);
+        }
+
+        $householdId = $resident['household_id'];
+
+        $this->db->transStart();
+        
+        // Remove head status from everyone in this household
+        $this->db->table('residents')
+            ->where('household_id', $householdId)
+            ->update(['is_household_head' => 0]);
+
+        // Set this resident as the head
+        $this->residentModel->update($residentId, [
+            'is_household_head' => 1,
+            'relationship_to_head' => 'Head'
+        ]);
+
+        // Update the household record
+        $this->householdModel->update($householdId, [
+            'head_resident_id' => $residentId
+        ]);
+
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === false) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to update household head', 'csrf_hash' => csrf_hash()]);
+        }
+
+        return $this->response->setJSON(['status' => 'success', 'message' => 'Household head updated successfully', 'csrf_hash' => csrf_hash()]);
+    }
+
     // ── AJAX: Residents by sitio ──────────────────────────────────────
     public function getResidentsBySitio()
     {

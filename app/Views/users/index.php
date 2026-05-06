@@ -1,122 +1,62 @@
 <?= $this->extend('theme/admin/template') ?>
-
 <?= $this->section('content') ?>
-<div class="content-wrapper">
-    <section class="content">
-        <div class="container-fluid">
-            
-            <!-- Flash Messages (For Create/Update/Delete Feedback) -->
-            <?php if (session()->get('success')): ?>
-                <div class="alert alert-success alert-dismissible fade show">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <?= session()->get('success') ?>
-                </div>
-            <?php endif; ?>
 
-            <?php if (session()->get('error')): ?>
-                <div class="alert alert-danger alert-dismissible fade show">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <?= session()->get('error') ?>
-                </div>
-            <?php endif; ?>
+<div class="bmis-content">
 
-            <!-- Table Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">User Accounts</h3>
-                    
-                    <!-- Link to separate Create Page -->
-                    <a href="<?= base_url('admin/users/create') ?>" class="btn btn-primary float-right">
-                        <i class="fas fa-plus"></i> Add New
-                    </a>
-                </div>
-                <div class="card-body">
-                    <table id="users-table" class="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
+    <?php if (session()->get('success')): ?>
+        <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:10px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px">
+            <i class="fas fa-check-circle"></i> <?= session()->get('success') ?>
         </div>
-    </section>
+    <?php endif; ?>
+    <?php if (session()->get('error')): ?>
+        <div style="background:var(--c-rose-bg);color:var(--c-rose);padding:10px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px">
+            <i class="fas fa-exclamation-circle"></i> <?= session()->get('error') ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="ds-card">
+        <div class="ds-card-head">
+            <div class="ds-card-title"><i class="fas fa-user-lock"></i> User Accounts</div>
+            <a href="<?= base_url('admin/users/create') ?>" class="ds-btn ds-btn-primary"><i class="fas fa-plus"></i> Add New</a>
+        </div>
+        <div class="ds-card-body">
+            <table id="users-table" class="ds-table">
+                <thead><tr><th>No.</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- MODAL: EDIT USER -->
-<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="editUserForm">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit User</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" name="userId" id="userId">
-                    <div class="form-group">
-                        <label>Name</label>
-                        <input type="text" name="name" id="name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" id="email" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Password (leave blank to keep current)</label>
-                        <input type="password" name="password" id="password" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Role</label>
-                        <select name="role" id="role" class="form-control">
-                            <option value="staff">Staff</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select name="status" id="status" class="form-control">
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Update</button>
-                </div>
-            </form>
-        </div>
+<div class="ds-modal-overlay" id="editUserOverlay">
+    <div class="ds-modal" style="max-width:480px">
+        <div class="ds-modal-icon" style="background:var(--c-blue-bg);color:var(--c-blue)"><i class="fas fa-user-edit"></i></div>
+        <h3>Edit User</h3>
+        <form id="editUserForm">
+            <input type="hidden" name="userId" id="userId">
+            <div style="margin-bottom:12px"><label class="ds-input-label">Name</label><input type="text" name="name" id="name" class="ds-input" required></div>
+            <div style="margin-bottom:12px"><label class="ds-input-label">Email</label><input type="email" name="email" id="email" class="ds-input" required></div>
+            <div style="margin-bottom:12px"><label class="ds-input-label">Password (leave blank to keep)</label><input type="password" name="password" id="password" class="ds-input"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+                <div><label class="ds-input-label">Role</label><select name="role" id="role" class="ds-select"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+                <div><label class="ds-input-label">Status</label><select name="status" id="status" class="ds-select"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+            </div>
+            <div class="ds-modal-actions">
+                <button type="button" class="ds-btn ds-btn-ghost" onclick="document.getElementById('editUserOverlay').classList.remove('show')">Close</button>
+                <button type="submit" class="ds-btn ds-btn-primary">Update</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-<!-- 1. Dependencies -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-<!-- 2. Configuration -->
 <script>
     window.baseUrl = "<?= site_url('admin/users') ?>";
     window.csrfName = "<?= csrf_token() ?>";
     window.csrfHash = "<?= csrf_hash() ?>";
 </script>
-
-<!-- 3. External JS File (Contains all logic) -->
 <script src="<?= base_url('js/users/users.js') ?>"></script>
-
 <?= $this->endSection() ?>
-

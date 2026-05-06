@@ -2,196 +2,78 @@
 $role = strtolower(session()->get('role') ?? 'staff');
 $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 ?>
-
 <?= $this->extend($template) ?>
-
 <?= $this->section('content') ?>
 
-<div class="content-wrapper bg-light">
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0 text-dark">Household Management</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="<?= base_url(strtolower(session()->get('role') . '/dashboard')) ?>">Home</a></li>
-                        <li class="breadcrumb-item active">Households</li>
-                    </ol>
-                </div>
+<div class="bmis-content">
+
+    <?php if (session()->getFlashdata('success')): ?>
+        <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:10px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px">
+            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
+        </div>
+    <?php endif; ?>
+
+    <!-- STAT CARDS -->
+    <div class="ds-grid-3">
+        <div class="ds-stat"><div class="ds-stat-stripe str-teal"></div><div class="ds-stat-top"><div class="ds-stat-icon ic-teal"><i class="fas fa-home"></i></div></div><div class="ds-stat-num"><?= $totalHouseholds ?? 0 ?></div><div class="ds-stat-label">Total Households</div><a href="<?= base_url('households') ?>" class="ds-stat-footer ft-teal"><i class="fas fa-arrow-right"></i> View All</a></div>
+        <div class="ds-stat"><div class="ds-stat-stripe str-blue"></div><div class="ds-stat-top"><div class="ds-stat-icon ic-blue"><i class="fas fa-users"></i></div></div><div class="ds-stat-num"><?= $totalResidents ?? 0 ?></div><div class="ds-stat-label">Total Residents</div><a href="<?= base_url('resident') ?>" class="ds-stat-footer ft-blue"><i class="fas fa-arrow-right"></i> View</a></div>
+        <div class="ds-stat"><div class="ds-stat-stripe" style="background:var(--c-amber)"></div><div class="ds-stat-top"><div class="ds-stat-icon ic-amber"><i class="fas fa-chart-pie"></i></div></div><div class="ds-stat-num"><?= $avgPerHousehold ?? 0 ?></div><div class="ds-stat-label">Avg. Members</div><div class="ds-stat-footer" style="color:var(--c-amber);cursor:default"><i class="fas fa-info-circle"></i> Per Household</div></div>
+    </div>
+
+    <!-- FILTER + ADD -->
+    <div class="ds-card" style="margin-bottom:14px">
+        <div class="ds-card-body" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div style="display:flex;gap:12px;align-items:center;flex:1">
+                <input type="text" id="hhSearch" class="ds-input" placeholder="Search HH #, Head name..." style="max-width:280px">
+                <select id="purokFilter" class="ds-select" style="width:auto;min-width:160px" onchange="location.href='<?= base_url('households') ?>?purok='+encodeURIComponent(this.value)">
+                    <option value="all" <?= ($selectedPurok ?? 'all') == 'all' ? 'selected' : '' ?>>All Puroks</option>
+                    <?php foreach (['Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um'] as $p): ?>
+                        <option value="<?= $p ?>" <?= ($selectedPurok ?? '') == $p ? 'selected' : '' ?>><?= $p ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
+            <a href="<?= base_url('households/create') ?>" class="ds-btn ds-btn-teal"><i class="fas fa-plus"></i> New Household</a>
         </div>
     </div>
 
-    <section class="content">
-        <div class="container-fluid">
-            
-            <?php if (session()->getFlashdata('success')): ?>
-                <div class="alert alert-success alert-dismissible fade show shadow-sm">
-                    <i class="fas fa-check-circle mr-2"></i> <?= session()->getFlashdata('success') ?>
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                </div>
-            <?php endif; ?>
-
-            <div class="row">
-                <div class="col-md-12 mb-3">
-                    <div class="card border-0 shadow-sm rounded-lg">
-                        <div class="card-body p-3 d-flex flex-wrap gap-2 align-items-center justify-content-between">
-                            <div class="d-flex align-items-center" style="flex: 1;">
-                                <div class="input-group input-group-sm" style="max-width: 300px;">
-                                    <div class="input-group-prepend bg-light border-right-0">
-                                        <span class="input-group-text bg-transparent border-right-0"><i class="fas fa-search text-muted"></i></span>
-                                    </div>
-                                    <input type="text" id="hhSearch" class="form-control border-left-0 bg-light" placeholder="Search HH #, Head name...">
-                                </div>
-                                
-                                <select class="form-control form-control-sm ml-3" style="width: auto;" id="purokFilter" onchange="location.href='<?= base_url('households') ?>?purok='+encodeURIComponent(this.value)">
-                                    <option value="all" <?= ($selectedPurok ?? 'all') == 'all' ? 'selected' : '' ?>>All Puroks</option>
-                                    <option value="Purok Malipayon" <?= ($selectedPurok ?? '') == 'Purok Malipayon' ? 'selected' : '' ?>>Purok Malipayon</option>
-                                    <option value="Purok Masagana"  <?= ($selectedPurok ?? '') == 'Purok Masagana'  ? 'selected' : '' ?>>Purok Masagana</option>
-                                    <option value="Purok Cory"      <?= ($selectedPurok ?? '') == 'Purok Cory'      ? 'selected' : '' ?>>Purok Cory</option>
-                                    <option value="Purok Kawayan"   <?= ($selectedPurok ?? '') == 'Purok Kawayan'   ? 'selected' : '' ?>>Purok Kawayan</option>
-                                    <option value="Purok Pagla-um"  <?= ($selectedPurok ?? '') == 'Purok Pagla-um'  ? 'selected' : '' ?>>Purok Pagla-um</option>
-                                </select>
-                            </div>
-
-                            <a href="<?= base_url('households/create') ?>" class="btn btn-primary btn-sm shadow-sm">
-                                <i class="fas fa-plus mr-1"></i> New Household
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card card-primary card-outline shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="text-primary mb-1"><?= $totalHouseholds ?? 0 ?></h5>
-                                    <span class="text-muted text-uppercase font-weight-bold text-xs">Total Households</span>
-                                </div>
-                                <i class="fas fa-home fa-2x text-primary opacity-20"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card card-success card-outline shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="text-success mb-1"><?= $totalResidents ?? 0 ?></h5>
-                                    <span class="text-muted text-uppercase font-weight-bold text-xs">Total Residents</span>
-                                </div>
-                                <i class="fas fa-users fa-2x text-success opacity-20"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card card-warning card-outline shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="text-warning mb-1"><?= $avgPerHousehold ?? 0 ?></h5>
-                                    <span class="text-muted text-uppercase font-weight-bold text-xs">Avg. Members</span>
-                                </div>
-                                <i class="fas fa-chart-pie fa-2x text-warning opacity-20"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- TABLE -->
+    <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title"><i class="fas fa-house-user"></i> Household Directory</div></div>
+        <div class="ds-card-body p0">
+            <div style="overflow-x:auto">
+                <table class="ds-table" id="hhTable">
+                    <thead><tr><th>Household No</th><th>Head of Family</th><th>Sitio</th><th>Address</th><th>Members</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        <?php if (empty($households)): ?>
+                            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--ink-soft)"><i class="fas fa-home" style="font-size:20px;opacity:.3;display:block;margin-bottom:8px"></i>No households found.</td></tr>
+                        <?php else: foreach ($households as $h):
+                            $count = $h['resident_count'];
+                            $bc = 'ds-badge-gray'; $bt = 'Low';
+                            if ($count >= 4 && $count < 7) { $bc = 'ds-badge-blue'; $bt = 'Medium'; }
+                            if ($count >= 7) { $bc = 'ds-badge-amber'; $bt = 'High'; }
+                            if ($count >= 10) { $bc = 'ds-badge-rose'; $bt = 'Crowded'; }
+                        ?>
+                        <tr>
+                            <td><a href="<?= base_url('households/view/'.$h['id']) ?>" style="color:var(--c-teal);font-weight:700;text-decoration:none;font-family:var(--mono);font-size:11.5px"><?= esc($h['household_no']) ?></a></td>
+                            <td><strong><?= esc($h['head_name']) ?></strong></td>
+                            <td style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--ink-muted)"><?= esc($h['sitio']) ?></td>
+                            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<?= esc($h['address'] ?: $h['street_address']) ?>"><?= esc($h['address'] ?: $h['street_address']) ?></td>
+                            <td><span class="ds-badge <?= $bc ?>"><?= $count ?></span> <span style="font-size:10px;color:var(--ink-soft)"><?= $bt ?></span></td>
+                            <td style="white-space:nowrap">
+                                <a href="<?= base_url('households/view/'.$h['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-eye"></i></a>
+                                <a href="<?= base_url('households/edit/'.$h['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-pen"></i></a>
+                                <button class="ds-action-btn ab-rose delete-household" data-id="<?= $h['id'] ?>" data-no="<?= esc($h['household_no']) ?>" title="Delete"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <?php endforeach; endif; ?>
+                    </tbody>
+                </table>
             </div>
-
-            <div class="card border-0 shadow-sm rounded-lg">
-                <div class="card-header bg-white border-0 pt-3">
-                    <h3 class="card-title text-dark font-weight-bold">Household Directory</h3>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover table-align-middle mb-0" id="hhTable">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="pl-4">Household No</th>
-                                    <th>Head of Family</th>
-                                    <th>Sitio</th>
-                                    <th>Address</th>
-                                    <th>Members</th>
-                                    <th class="text-right pr-4">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($households)): ?>
-                                    <tr>
-                                        <td colspan="6" class="text-center py-5">
-                                            <i class="fas fa-home fa-3x text-muted mb-3 opacity-50"></i>
-                                            <p class="text-muted mb-0">No households found.</p>
-                                        </td>
-                                    </tr>
-                                <?php else: ?>
-                                    <?php foreach ($households as $h): 
-                                        $count = $h['resident_count'];
-                                        $badgeClass = 'bg-secondary';
-                                        $badgeText = 'Low';
-                                        if ($count >= 4 && $count < 7) { $badgeClass = 'bg-info'; $badgeText = 'Medium'; }
-                                        if ($count >= 7) { $badgeClass = 'bg-warning'; $badgeText = 'High'; }
-                                        if ($count >= 10) { $badgeClass = 'bg-danger'; $badgeText = 'Crowded'; }
-                                    ?>
-                                    <tr>
-                                        <td class="pl-4">
-                                            <a href="<?= base_url('households/view/'.$h['id']) ?>" class="text-primary font-weight-bold text-decoration-none">
-                                                <?= esc($h['household_no']) ?>
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <img src="https://ui-avatars.com/api/?name=<?= urlencode($h['head_name']) ?>&background=random&color=fff&size=32" 
-                                                     class="rounded-circle mr-2" alt="">
-                                                <span class="font-weight-bold text-dark"><?= esc($h['head_name']) ?></span>
-                                            </div>
-                                        </td>
-                                        <td><span class="badge badge-light border text-muted"><?= esc($h['sitio']) ?></span></td>
-                                        <td class="text-muted text-truncate" style="max-width: 200px;" title="<?= esc($h['address'] ?: $h['street_address']) ?>">
-                                            <?= esc($h['address'] ?: $h['street_address']) ?>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <span class="badge <?= $badgeClass ?> mr-2 resident-count"><?= $count ?></span>
-                                                <small class="text-muted"><?= $badgeText ?></small>
-                                            </div>
-                                        </td>
-                                        <td class="text-right pr-4">
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="<?= base_url('households/view/'.$h['id']) ?>" class="btn btn-info" title="View Details">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="<?= base_url('households/edit/'.$h['id']) ?>" class="btn btn-warning" title="Edit">
-                                                    <i class="fas fa-pen"></i>
-                                                </a>
-                                                <button class="btn btn-danger delete-household" data-id="<?= $h['id'] ?>" data-no="<?= esc($h['household_no']) ?>" title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </section>
+    </div>
 </div>
 
-<div id="js-variables" style="display:none;"
-     data-base-url="<?= base_url() ?>"
-     data-csrf-token="<?= csrf_token() ?>"
-     data-csrf-hash="<?= csrf_hash() ?>">
-</div>
+<div id="js-variables" style="display:none;" data-base-url="<?= base_url() ?>" data-csrf-token="<?= csrf_token() ?>" data-csrf-hash="<?= csrf_hash() ?>"></div>
 
 <?= $this->endSection() ?>
 

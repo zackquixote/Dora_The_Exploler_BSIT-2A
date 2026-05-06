@@ -25,7 +25,8 @@ class BlotterHearingModel extends Model
         'notes',
         'outcome',
         'status',
-        'created_by'
+        'created_by',
+        'notification_sent'
     ];
 
     protected $useTimestamps = true;

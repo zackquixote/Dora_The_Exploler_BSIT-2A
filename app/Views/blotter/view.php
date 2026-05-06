@@ -1,345 +1,246 @@
 <?php
-// SMART THEME LOADER
 $role = session()->get('role');
 $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+$status = $case['status'];
+$sc = match($status) {
+    'Pending'=>'ds-badge-amber','Settled'=>'ds-badge-teal','Dismissed'=>'ds-badge-gray',
+    'For Hearing'=>'ds-badge-blue','Unsettled'=>'ds-badge-rose','Referred'=>'ds-badge-violet',
+    default=>'ds-badge-blue'
+};
 ?>
 <?= $this->extend($template) ?>
-
 <?= $this->section('content') ?>
 
-<div class="content-wrapper">
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Blotter Case <?= esc($case['case_number']) ?></h1>
+<div class="bmis-content">
+
+    <!-- HEADER BAR -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:14px 18px;background:var(--white);border-radius:var(--r);border:.5px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:12px">
+            <a href="<?= base_url('blotter') ?>" class="ds-action-btn ab-blue"><i class="fas fa-arrow-left"></i></a>
+            <div>
+                <div style="font-size:15px;font-weight:700;color:var(--ink)">Case #<?= esc($case['case_number']) ?></div>
+                <div style="font-size:11px;color:var(--ink-muted);display:flex;gap:12px;margin-top:2px">
+                    <span><i class="far fa-calendar-alt" style="margin-right:4px"></i><?= date('F d, Y', strtotime($case['incident_date'])) ?></span>
+                    <span><i class="fas fa-map-marker-alt" style="margin-right:4px"></i><?= esc($case['purok'] ?? 'N/A') ?></span>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="<?= base_url('blotter') ?>">Blotter</a></li>
-                        <li class="breadcrumb-item active">View</li>
-                    </ol>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+            <span class="ds-badge <?= $sc ?>"><?= esc($status) ?></span>
+            <a href="<?= base_url('blotter/edit/' . $case['id']) ?>" class="ds-btn ds-btn-ghost"><i class="fas fa-edit"></i> Edit</a>
+            <a href="<?= base_url('blotter/print/' . $case['id']) ?>" target="_blank" class="ds-btn" style="background:var(--c-blue);color:#fff;height:32px;font-size:11px"><i class="fas fa-print"></i> Print</a>
+        </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 280px;gap:14px">
+
+        <!-- MAIN CONTENT -->
+        <div>
+            <!-- Incident Details -->
+            <div class="ds-card" style="margin-bottom:14px">
+                <div class="ds-card-head"><div class="ds-card-title"><i class="fas fa-file-alt"></i> Incident Report</div></div>
+                <div class="ds-card-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+                        <?php foreach ([['Type',$case['incident_type']],['Location',$case['incident_location']??'Not specified'],['Recorded On',date('F d, Y h:i A', strtotime($case['created_at']))],['Created By',$case['created_by_name']??'System'],['Action Taken',nl2br(esc($case['action_taken']??'None recorded'))]] as $d): ?>
+                        <div style="padding:10px 0;border-bottom:.5px solid var(--border)">
+                            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-soft)"><?= $d[0] ?></div>
+                            <div style="font-size:12.5px;font-weight:600;color:var(--ink);margin-top:2px"><?= $d[1] ?></div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="ds-section-label" style="margin-top:16px">Narrative</div>
+                    <div style="padding:14px;background:var(--bg);border-radius:var(--r-sm);font-size:12px;color:var(--ink);white-space:pre-wrap;line-height:1.6"><?= esc($case['details']) ?></div>
+                </div>
+            </div>
+
+            <!-- Involved Parties -->
+            <div class="ds-card" style="margin-bottom:14px">
+                <div class="ds-card-head"><div class="ds-card-title"><i class="fas fa-users"></i> Involved Parties</div></div>
+                <div class="ds-card-body">
+                    <?php foreach (['complainant','respondent','witness'] as $prole):
+                        if (empty($parties[$prole])) continue;
+                        $rc = ['complainant'=>['c-amber','fa-user-edit'],'respondent'=>['c-rose','fa-user-alt-slash'],'witness'=>['c-blue','fa-eye']];
+                    ?>
+                    <div class="ds-section-label"><?= ucfirst($prole) ?>s</div>
+                    <?php foreach ($parties[$prole] as $p): ?>
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:6px">
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <div style="width:28px;height:28px;border-radius:6px;background:var(--<?= $rc[$prole][0] ?>-bg);color:var(--<?= $rc[$prole][0] ?>);display:flex;align-items:center;justify-content:center;font-size:11px"><i class="fas <?= $rc[$prole][1] ?>"></i></div>
+                            <div>
+                                <?php if (!empty($p['resident_id'])): ?>
+                                    <strong style="font-size:12px;color:var(--ink)"><?= esc($p['resident_name']) ?></strong>
+                                    <span style="font-size:10px;color:var(--ink-muted);margin-left:4px">Resident #<?= $p['resident_id'] ?></span>
+                                <?php else: ?>
+                                    <strong style="font-size:12px;color:var(--ink)"><?= esc($p['outsider_name']) ?></strong>
+                                    <?php if (!empty($p['outsider_address'])): ?>
+                                        <span style="font-size:10px;color:var(--ink-muted);margin-left:4px"><?= esc($p['outsider_address']) ?></span>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <span class="ds-badge ds-badge-<?= $rc[$prole][0] == 'c-amber' ? 'amber' : ($rc[$prole][0] == 'c-rose' ? 'rose' : 'blue') ?>"><?= ucfirst($prole) ?></span>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <!-- Hearings -->
+            <div class="ds-card" style="margin-bottom:14px">
+                <div class="ds-card-head">
+                    <div class="ds-card-title"><i class="fas fa-gavel"></i> Hearings</div>
+                    <button type="button" class="ds-btn ds-btn-teal" style="height:30px;font-size:11px" data-toggle="modal" data-target="#addHearingModal"><i class="fas fa-plus"></i> Add</button>
+                </div>
+                <div class="ds-card-body">
+                    <?php if (empty($hearings)): ?>
+                        <div style="text-align:center;padding:24px;color:var(--ink-soft);font-size:12px">No hearings recorded.</div>
+                    <?php else: ?>
+                    <div class="ds-activity-feed" style="max-height:none">
+                        <?php foreach ($hearings as $h):
+                            $hc = $h['status']=='Completed'?'ds-ai-create':($h['status']=='Cancelled'?'ds-ai-delete':'ds-ai-edit');
+                        ?>
+                        <div class="ds-activity-item">
+                            <div class="ds-activity-icon <?= $hc ?>"><i class="fas fa-gavel"></i></div>
+                            <div style="flex:1">
+                                <div class="ds-activity-action"><?= date('M d, Y', strtotime($h['hearing_date'])) ?><?= $h['hearing_time'] ? ' · ' . date('h:i A', strtotime($h['hearing_time'])) : '' ?></div>
+                                <div class="ds-activity-meta"><strong><?= esc($h['presiding_officer'] ?? 'N/A') ?></strong> — <?= esc($h['venue'] ?? 'No venue') ?></div>
+                                <?php if ($h['notes']): ?><div style="font-size:11px;color:var(--ink);margin-top:4px"><?= nl2br(esc($h['notes'])) ?></div><?php endif; ?>
+                                <?php if ($h['outcome']): ?><div style="font-size:11px;color:var(--c-teal);margin-top:4px;font-weight:600">Outcome: <?= esc($h['outcome']) ?></div><?php endif; ?>
+                                <div style="margin-top:6px;display:flex;gap:6px">
+                                    <span class="ds-badge <?= $h['status']=='Completed'?'ds-badge-teal':($h['status']=='Cancelled'?'ds-badge-rose':'ds-badge-amber') ?>"><?= $h['status'] ?></span>
+                                    <a href="<?= base_url('blotter/print-summon/' . $case['id'] . '/' . $h['id']) ?>" target="_blank" class="ds-action-btn ab-violet" style="width:auto;height:22px;font-size:9px;padding:0 8px;border-radius:4px"><i class="fas fa-envelope" style="margin-right:4px"></i> Summon</a>
+                                    <a href="#" class="ds-action-btn ab-blue edit-hearing" style="width:22px;height:22px;font-size:9px"
+                                       data-id="<?= $h['id'] ?>" data-date="<?= $h['hearing_date'] ?>" data-time="<?= $h['hearing_time'] ?>"
+                                       data-venue="<?= esc($h['venue']) ?>" data-officer="<?= esc($h['presiding_officer']) ?>"
+                                       data-notes="<?= esc($h['notes']) ?>" data-outcome="<?= esc($h['outcome']) ?>" data-status="<?= $h['status'] ?>"><i class="fas fa-edit"></i></a>
+                                    <a href="#" class="ds-action-btn ab-rose delete-hearing" style="width:22px;height:22px;font-size:9px" data-id="<?= $h['id'] ?>"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Status History -->
+            <div class="ds-card">
+                <div class="ds-card-head"><div class="ds-card-title"><i class="fas fa-history"></i> Status History</div></div>
+                <div class="ds-card-body">
+                    <?php if (empty($timeline)): ?>
+                        <div style="color:var(--ink-soft);font-size:12px">No status changes recorded.</div>
+                    <?php else: ?>
+                        <?php foreach ($timeline as $entry): ?>
+                        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--border)">
+                            <div style="font-size:12px">
+                                <?php if ($entry['old_status']): ?>
+                                    Changed from <strong><?= esc($entry['old_status']) ?></strong> → <strong><?= esc($entry['new_status']) ?></strong>
+                                <?php else: ?>
+                                    Initial: <strong><?= esc($entry['new_status']) ?></strong>
+                                <?php endif; ?>
+                                <?php if (!empty($entry['remarks'])): ?><br><span style="font-size:10.5px;color:var(--ink-soft)"><?= esc($entry['remarks']) ?></span><?php endif; ?>
+                            </div>
+                            <div style="font-size:10.5px;color:var(--ink-soft);white-space:nowrap"><?= date('M d, Y H:i', strtotime($entry['created_at'])) ?></div>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div>
+            <!-- Document Generation -->
+            <div class="ds-card" style="margin-bottom:14px">
+                <div class="ds-card-head"><div class="ds-card-title" style="font-size:11px"><i class="fas fa-file-signature"></i> Legal Documents</div></div>
+                <div class="ds-card-body" style="display:flex;flex-direction:column;gap:8px">
+                    <?php if(strtolower($case['status']) === 'settled'): ?>
+                        <a href="<?= base_url('blotter/print-settlement/' . $case['id']) ?>" target="_blank" class="ds-btn" style="background:var(--c-teal);color:#fff;width:100%;justify-content:center"><i class="fas fa-handshake"></i> Settlement Contract</a>
+                    <?php else: ?>
+                        <button class="ds-btn ds-btn-ghost" style="width:100%;justify-content:center" disabled title="Case must be Settled first"><i class="fas fa-handshake"></i> Settlement Contract</button>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Quick Update -->
+            <div class="ds-card" style="margin-bottom:14px">
+                <div class="ds-card-head"><div class="ds-card-title" style="font-size:11px"><i class="fas fa-bolt"></i> Quick Update</div></div>
+                <form action="<?= base_url('blotter/update/' . $case['id']) ?>" method="POST">
+                    <?= csrf_field() ?>
+                    <div class="ds-card-body">
+                        <div style="margin-bottom:10px">
+                            <label class="ds-input-label">Status</label>
+                            <select name="status" class="ds-select">
+                                <?php foreach (['Pending','Investigating','Ongoing','For Hearing','Settled','Dismissed','Referred','Unsettled'] as $s): ?>
+                                    <option value="<?= $s ?>" <?= $case['status'] == $s ? 'selected' : '' ?>><?= $s ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="ds-input-label">Action Taken</label>
+                            <textarea name="action_taken" class="ds-input" rows="4" style="resize:vertical"><?= esc($case['action_taken'] ?? '') ?></textarea>
+                        </div>
+                    </div>
+                    <div style="padding:10px 18px;border-top:.5px solid var(--border)">
+                        <button type="submit" class="ds-btn ds-btn-primary" style="width:100%"><i class="fas fa-save"></i> Update</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="ds-card">
+                <div class="ds-card-head"><div class="ds-card-title" style="font-size:11px;color:var(--c-rose)"><i class="fas fa-exclamation-triangle"></i> Danger Zone</div></div>
+                <div class="ds-card-body">
+                    <button type="button" class="ds-btn ds-btn-rose delete-btn" style="width:100%" data-id="<?= $case['id'] ?>" data-case="<?= esc($case['case_number']) ?>"><i class="fas fa-trash-alt"></i> Delete This Case</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <section class="content">
-        <div class="container-fluid">
-            <!-- Case Header -->
-            <div class="callout callout-info">
-                <h4><i class="fas fa-file-alt"></i> Case # <?= esc($case['case_number']) ?></h4>
-                <p class="mb-0">
-                    Status: <span class="badge badge-<?= 
-                        $status = $case['status'];
-                        $color = 'secondary';
-                        if ($status == 'Pending') $color = 'warning';
-                        elseif ($status == 'Investigating' || $status == 'Ongoing') $color = 'info';
-                        elseif ($status == 'For Hearing') $color = 'primary';
-                        elseif ($status == 'Settled') $color = 'success';
-                        elseif ($status == 'Dismissed') $color = 'dark';
-                        elseif ($status == 'Referred') $color = 'purple';
-                        elseif ($status == 'Unsettled') $color = 'danger';
-                        echo $color;
-                    ?>"><?= esc($status) ?></span>
-                    &nbsp; | &nbsp;
-                    <i class="far fa-calendar-alt"></i> Incident Date: <?= date('F d, Y', strtotime($case['incident_date'])) ?>
-                    &nbsp; | &nbsp;
-                    <i class="fas fa-map-marker-alt"></i> Purok: <?= esc($case['purok'] ?? 'Not specified') ?>
-                </p>
-            </div>
-
-            <div class="row">
-                <div class="col-md-8">
-                    <!-- Incident Details -->
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Incident Report</h3>
-                            <div class="card-tools">
-                                <a href="<?= base_url('blotter/edit/' . $case['id']) ?>" class="btn btn-tool text-warning">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <dl class="row">
-                                <dt class="col-sm-3">Type</dt>
-                                <dd class="col-sm-9"><?= esc($case['incident_type']) ?></dd>
-
-                                <dt class="col-sm-3">Location</dt>
-                                <dd class="col-sm-9"><?= esc($case['incident_location'] ?? 'Not specified') ?></dd>
-
-                                <dt class="col-sm-3">Recorded On</dt>
-                                <dd class="col-sm-9"><?= date('F d, Y h:i A', strtotime($case['created_at'])) ?></dd>
-
-                                <dt class="col-sm-3">Created By</dt>
-                                <dd class="col-sm-9"><?= esc($case['created_by_name'] ?? 'System') ?></dd>
-
-                                <dt class="col-sm-3">Action Taken</dt>
-                                <dd class="col-sm-9"><?= nl2br(esc($case['action_taken'] ?? 'None recorded')) ?></dd>
-                            </dl>
-
-                            <h5 class="mt-4">Narrative</h5>
-                            <div class="p-3 bg-light border rounded" style="white-space: pre-wrap;"><?= esc($case['details']) ?></div>
-                        </div>
-                    </div>
-
-                    <!-- Involved Parties -->
-                    <div class="card card-outline card-secondary">
-                        <div class="card-header">
-                            <h3 class="card-title">Involved Parties</h3>
-                        </div>
-                        <div class="card-body">
-                            <?php foreach (['complainant','respondent','witness'] as $role): ?>
-                                <?php if (!empty($parties[$role])): ?>
-                                    <h5 class="text-uppercase">
-                                        <i class="fas <?= $role == 'complainant' ? 'fa-user-edit' : ($role == 'respondent' ? 'fa-user-alt-slash' : 'fa-eye') ?>"></i> 
-                                        <?= $role ?>s
-                                    </h5>
-                                    <ul class="list-group mb-3">
-                                        <?php foreach ($parties[$role] as $p): ?>
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <span>
-                                                    <?php if (!empty($p['resident_id'])): ?>
-                                                        <i class="fas fa-check-circle text-success"></i>
-                                                        <strong><?= esc($p['resident_name']) ?></strong> (Resident #<?= $p['resident_id'] ?>)
-                                                    <?php else: ?>
-                                                        <i class="fas fa-user text-secondary"></i>
-                                                        <?= esc($p['outsider_name']) ?>
-                                                        <?php if (!empty($p['outsider_address'])): ?>
-                                                            <small class="text-muted"> — <?= esc($p['outsider_address']) ?></small>
-                                                        <?php endif; ?>
-                                                    <?php endif; ?>
-                                                </span>
-                                                <span class="badge badge-<?= $role == 'complainant' ? 'warning' : ($role == 'respondent' ? 'danger' : 'info') ?>">
-                                                    <?= ucfirst($role) ?>
-                                                </span>
-                                            </li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-
-                    <!-- Hearings / Proceedings -->
-                    <div class="card card-outline card-success">
-                        <div class="card-header">
-                            <h3 class="card-title">Hearings / Proceedings</h3>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#addHearingModal">
-                                    <i class="fas fa-plus"></i> Add Hearing
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <?php if (empty($hearings)): ?>
-                                <p class="text-muted">No hearings recorded yet.</p>
-                            <?php else: ?>
-                                <div class="timeline">
-                                    <?php foreach ($hearings as $h): ?>
-                                        <div class="time-label">
-                                            <span class="bg-green">
-                                                <?= date('F d, Y', strtotime($h['hearing_date'])) ?>
-                                                <?= $h['hearing_time'] ? ' at ' . date('h:i A', strtotime($h['hearing_time'])) : '' ?>
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <i class="fas fa-gavel bg-primary"></i>
-                                            <div class="timeline-item">
-                                                <span class="time">
-                                                    <span class="badge badge-<?= $h['status'] == 'Completed' ? 'success' : ($h['status'] == 'Cancelled' ? 'danger' : 'warning') ?>">
-                                                        <?= $h['status'] ?>
-                                                    </span>
-                                                </span>
-                                                <h3 class="timeline-header">
-                                                    <strong><?= esc($h['presiding_officer'] ?? 'N/A') ?></strong> – <?= esc($h['venue'] ?? 'No venue') ?>
-                                                </h3>
-                                                <div class="timeline-body">
-                                                    <?= nl2br(esc($h['notes'] ?? '')) ?>
-                                                    <?php if ($h['outcome']): ?>
-                                                        <p class="mt-2"><strong>Outcome:</strong> <?= esc($h['outcome']) ?></p>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div class="timeline-footer">
-                                                    <a href="#" class="btn btn-xs btn-info edit-hearing"
-                                                       data-id="<?= $h['id'] ?>"
-                                                       data-date="<?= $h['hearing_date'] ?>"
-                                                       data-time="<?= $h['hearing_time'] ?>"
-                                                       data-venue="<?= esc($h['venue']) ?>"
-                                                       data-officer="<?= esc($h['presiding_officer']) ?>"
-                                                       data-notes="<?= esc($h['notes']) ?>"
-                                                       data-outcome="<?= esc($h['outcome']) ?>"
-                                                       data-status="<?= $h['status'] ?>">
-                                                        <i class="fas fa-edit"></i> Edit
-                                                    </a>
-                                                    <a href="#" class="btn btn-xs btn-danger delete-hearing" data-id="<?= $h['id'] ?>">
-                                                        <i class="fas fa-trash"></i> Delete
-                                                    </a>
-                                                    <a href="<?= base_url('blotter/print/' . $case['id']) ?>" class="btn btn-outline-primary btn-block mt-2" target="_blank">
-                                                        <i class="fas fa-print"></i> Print Case Summary
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
-                    <!-- Status History -->
-                    <div class="card card-outline card-info">
-                        <div class="card-header">
-                            <h3 class="card-title">Status History</h3>
-                        </div>
-                        <div class="card-body">
-                            <?php if (empty($timeline)): ?>
-                                <p class="text-muted">No status changes recorded yet.</p>
-                            <?php else: ?>
-                                <ul class="list-group">
-                                    <?php foreach ($timeline as $entry): ?>
-                                        <li class="list-group-item">
-                                            <div class="d-flex justify-content-between">
-                                                <div>
-                                                    <?php if ($entry['old_status']): ?>
-                                                        Changed from <strong><?= esc($entry['old_status']) ?></strong> to <strong><?= esc($entry['new_status']) ?></strong>
-                                                    <?php else: ?>
-                                                        Initial status: <strong><?= esc($entry['new_status']) ?></strong>
-                                                    <?php endif; ?>
-                                                    <?php if (!empty($entry['remarks'])): ?>
-                                                        <br><small class="text-muted"><?= esc($entry['remarks']) ?></small>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div class="text-muted text-sm">
-                                                    <?= date('M d, Y H:i', strtotime($entry['created_at'])) ?>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sidebar -->
-                <div class="col-md-4">
-                    <!-- Status Update Form -->
-                    <div class="card card-warning card-outline">
-                        <div class="card-header">
-                            <h3 class="card-title">Update Status / Action</h3>
-                        </div>
-                        <form action="<?= base_url('blotter/update/' . $case['id']) ?>" method="POST">
-                            <div class="card-body">
-                                <div class="form-group">
-                                    <label>Status</label>
-                                    <select name="status" class="form-control">
-                                        <?php 
-                                        $statuses = ['Pending','Investigating','Ongoing','For Hearing','Settled','Dismissed','Referred','Unsettled'];
-                                        foreach ($statuses as $s): ?>
-                                            <option value="<?= $s ?>" <?= $case['status'] == $s ? 'selected' : '' ?>><?= $s ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Action Taken</label>
-                                    <textarea name="action_taken" class="form-control" rows="4"><?= esc($case['action_taken'] ?? '') ?></textarea>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-warning btn-block"><i class="fas fa-save"></i> Update Case</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Danger Zone -->
-                    <div class="card card-outline card-danger">
-                        <div class="card-header"><h3 class="card-title">Danger Zone</h3></div>
-                        <div class="card-body">
-                            <button type="button" class="btn btn-outline-danger btn-block delete-btn"
-                                    data-id="<?= $case['id'] ?>"
-                                    data-case="<?= esc($case['case_number']) ?>">
-                                <i class="fas fa-trash-alt"></i> Delete This Case
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 </div>
 
 <!-- Add Hearing Modal -->
 <div class="modal fade" id="addHearingModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
+        <div class="modal-content shadow border-0" style="border-radius:var(--r)">
             <form id="hearing-form" action="<?= base_url('blotter/hearing/add/' . $case['id']) ?>" method="POST">
-                <div class="modal-header bg-success">
-                    <h5 class="modal-title">Add Hearing / Proceeding</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div style="padding:16px 20px;border-bottom:.5px solid var(--border)">
+                    <h5 style="font-size:14px;font-weight:700;color:var(--ink);margin:0"><i class="fas fa-gavel" style="margin-right:6px;color:var(--c-teal)"></i> Add Hearing</h5>
                 </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Date</label>
-                        <input type="date" name="hearing_date" class="form-control" required>
+                <div style="padding:16px 20px">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+                        <div><label class="ds-input-label">Date *</label><input type="date" name="hearing_date" class="ds-input" required></div>
+                        <div><label class="ds-input-label">Time</label><input type="time" name="hearing_time" class="ds-input"></div>
                     </div>
-                    <div class="form-group">
-                        <label>Time</label>
-                        <input type="time" name="hearing_time" class="form-control">
+                    <div style="margin-bottom:10px"><label class="ds-input-label">Venue</label><input type="text" name="venue" class="ds-input" placeholder="e.g., Barangay Hall"></div>
+                    <div style="margin-bottom:10px"><label class="ds-input-label">Presiding Officer</label><input type="text" name="presiding_officer" class="ds-input" placeholder="Name of official"></div>
+                    <div style="margin-bottom:10px"><label class="ds-input-label">Status</label>
+                        <select name="status" class="ds-select"><option>Scheduled</option><option>In Progress</option><option>Completed</option><option>Cancelled</option></select>
                     </div>
-                    <div class="form-group">
-                        <label>Venue</label>
-                        <input type="text" name="venue" class="form-control" placeholder="e.g., Barangay Hall">
-                    </div>
-                    <div class="form-group">
-                        <label>Presiding Officer</label>
-                        <input type="text" name="presiding_officer" class="form-control" placeholder="Name of official">
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select name="status" class="form-control">
-                            <option value="Scheduled">Scheduled</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Notes</label>
-                        <textarea name="notes" class="form-control" rows="3" placeholder="Details of the hearing..."></textarea>
-                    </div>
+                    <div><label class="ds-input-label">Notes</label><textarea name="notes" class="ds-input" rows="3" style="resize:vertical" placeholder="Details..."></textarea></div>
                     <input type="hidden" name="hearing_id" id="hearing-id">
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success" id="modal-save-btn">Save</button>
+                <div style="padding:12px 20px;border-top:.5px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+                    <button type="button" class="ds-btn ds-btn-ghost" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="ds-btn ds-btn-teal" id="modal-save-btn">Save</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-danger">
-                <h5 class="modal-title">Confirm Delete</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete <strong id="delete-case-ref"></strong>?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <form id="delete-form" method="POST" action="">
-                    <?= csrf_field() ?>
-                    <button type="submit" class="btn btn-danger">Delete Forever</button>
-                </form>
+    <div class="modal-dialog"><div class="modal-content shadow border-0" style="border-radius:var(--r)">
+        <div style="padding:20px;text-align:center">
+            <div style="width:48px;height:48px;border-radius:50%;background:var(--c-rose-bg);color:var(--c-rose);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:18px"><i class="fas fa-trash-alt"></i></div>
+            <h5 style="font-size:14px;font-weight:700;color:var(--ink)">Confirm Delete</h5>
+            <p style="font-size:12px;color:var(--ink-muted)">Delete <strong id="delete-case-ref"></strong>?</p>
+            <div style="display:flex;justify-content:center;gap:8px;margin-top:16px">
+                <button class="ds-btn ds-btn-ghost" data-dismiss="modal">Cancel</button>
+                <form id="delete-form" method="POST" action=""><?= csrf_field() ?><button type="submit" class="ds-btn ds-btn-rose">Delete</button></form>
             </div>
         </div>
-    </div>
+    </div></div>
 </div>
 
 <?= $this->endSection() ?>

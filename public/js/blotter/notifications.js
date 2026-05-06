@@ -9,7 +9,7 @@
         config: {
             refreshInterval: 60000,
             notificationDays: 3,
-            apiUrl: '/blotter/getUpcomingNotifications'
+            apiUrl: (window.baseUrl || '/') + 'blotter/getUpcomingNotifications'
         },
 
         init: function() {

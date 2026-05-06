@@ -23,7 +23,7 @@ $routes->addPlaceholder('segment', '[^/]+');
 // ------------------------------------------------
 // AUTH (PUBLIC)
 // ------------------------------------------------
-$routes->get('/', 'Auth::index');
+$routes->get('/', 'Portal::index');
 $routes->match(['get', 'post'], 'login', 'Auth::index');
 $routes->post('auth', 'Auth::auth');
 $routes->get('logout', 'Auth::logout');
@@ -42,18 +42,19 @@ $routes->group('', [
     // =========================
     $routes->get('resident', 'Resident::index');
     $routes->get('residents', 'Resident::index');
+    $routes->get('resident/exportCsv', 'Resident::exportCsv');
     $routes->match(['get', 'post'], 'resident/create', 'Resident::create');
     $routes->post('resident/store', 'Resident::store');
     $routes->match(['get', 'post'], 'resident/edit/(:num)', 'Resident::edit/$1');
-    $routes->post('resident/update/(:num)', 'Resident::update/$1');
+    $routes->match(['post', 'put'], 'resident/update/(:num)', 'Resident::update/$1');
     $routes->get('resident/view/(:num)', 'Resident::view/$1');
     $routes->post('resident/delete/(:num)', 'Resident::delete/$1');
 
     $routes->get('resident/getHouseholdsBySitio', 'Resident::getHouseholdsBySitio');
     $routes->get('resident/assign-search', 'Resident::assignSearch');
     $routes->get('resident/assign/(:num)', 'Resident::assign/$1');
-$routes->post('resident/updateStatus/(:num)', 'Resident::updateStatus/$1');
-$routes->post('resident/updateMemberStatus/(:num)', 'Resident::updateMemberStatus/$1');
+    $routes->match(['post', 'put'], 'resident/updateStatus/(:num)', 'Resident::updateStatus/$1');
+    $routes->match(['post', 'put'], 'resident/updateMemberStatus/(:num)', 'Resident::updateMemberStatus/$1');
 
     // =========================
     // HOUSEHOLDS
@@ -63,9 +64,10 @@ $routes->post('resident/updateMemberStatus/(:num)', 'Resident::updateMemberStatu
         $routes->match(['get', 'post'], 'create', 'HouseholdController::create');
         $routes->post('store', 'HouseholdController::store');
         $routes->match(['get', 'post'], 'edit/(:num)', 'HouseholdController::edit/$1');
-        $routes->post('update/(:num)', 'HouseholdController::update/$1');
+        $routes->match(['post', 'put'], 'update/(:num)', 'HouseholdController::update/$1');
         $routes->get('view/(:num)', 'HouseholdController::view/$1');
         $routes->post('delete/(:num)', 'HouseholdController::delete/$1');
+        $routes->post('set-head/(:num)', 'HouseholdController::setHead/$1');
 
         $routes->post('getResidentsBySitio', 'HouseholdController::getResidentsBySitio');
         $routes->post('get-by-sitio', 'HouseholdController::getBySitio');
@@ -82,7 +84,7 @@ $routes->post('resident/updateMemberStatus/(:num)', 'Resident::updateMemberStatu
     $routes->post('certificate/store', 'Certificate::store');
     $routes->get('certificate/print/(:num)', 'Certificate::print_view/$1');
     $routes->get('certificate/edit/(:num)', 'Certificate::edit/$1');
-    $routes->post('certificate/update/(:num)', 'Certificate::update/$1');
+    $routes->match(['post', 'put'], 'certificate/update/(:num)', 'Certificate::update/$1');
     $routes->delete('certificate/delete/(:num)', 'Certificate::delete/$1');
 
 
@@ -93,7 +95,7 @@ $routes->post('resident/updateMemberStatus/(:num)', 'Resident::updateMemberStatu
     $routes->get('officials/create', 'Officials::create');
     $routes->post('officials/store', 'Officials::store');
     $routes->get('officials/edit/(:num)', 'Officials::edit/$1');
-    $routes->post('officials/update/(:num)', 'Officials::update/$1');
+    $routes->match(['post', 'put'], 'officials/update/(:num)', 'Officials::update/$1');
     $routes->get('officials/delete/(:num)', 'Officials::delete/$1');
      $routes->get('officials', 'Officials::index');
 
@@ -101,11 +103,14 @@ $routes->post('resident/updateMemberStatus/(:num)', 'Resident::updateMemberStatu
    
   // Blotter Routes
 $routes->get('blotter', 'Blotter::index');
+$routes->get('blotter/exportCsv', 'Blotter::exportCsv');
 $routes->get('blotter/create', 'Blotter::create');
 $routes->post('blotter/store', 'Blotter::store');
 $routes->get('blotter/view/(:num)', 'Blotter::view/$1');
-$routes->get('blotter/edit/(:num)', 'Blotter::edit/$1');    
-$routes->post('blotter/update/(:num)', 'Blotter::update/$1');
+$routes->get('blotter/edit/(:num)', 'Blotter::edit/$1');
+$routes->get('blotter/print-settlement/(:num)', 'Blotter::printSettlement/$1');
+$routes->get('blotter/print-summon/(:num)/(:num)', 'Blotter::printSummon/$1/$2');
+$routes->match(['post', 'put'], 'blotter/update/(:num)', 'Blotter::update/$1');
 $routes->delete('blotter/delete/(:num)', 'Blotter::delete/$1');
 // Additional AJAX endpoint
 $routes->get('blotter/searchResidents', 'Blotter::searchResidents');

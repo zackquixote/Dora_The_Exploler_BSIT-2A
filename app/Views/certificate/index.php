@@ -5,74 +5,49 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 <?= $this->extend($template) ?>
 <?= $this->section('content') ?>
 
-<div class="content-wrapper">
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Certificates</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">Certificates</li>
-                    </ol>
-                </div>
+<div class="bmis-content">
+
+    <?php if (session()->getFlashdata('success')): ?>
+        <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:10px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px">
+            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="ds-card">
+        <div class="ds-card-head">
+            <div class="ds-card-title"><i class="fas fa-file-contract"></i> Issued Certificates</div>
+            <a href="<?= base_url('certificate/create') ?>" class="ds-btn ds-btn-primary"><i class="fas fa-plus"></i> Issue New</a>
+        </div>
+        <div class="ds-card-body p0">
+            <div style="overflow-x:auto">
+                <table class="ds-table">
+                    <thead><tr><th>Certificate No.</th><th>Type</th><th>Resident</th><th>Purpose</th><th>Date</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        <?php if (empty($certificates)): ?>
+                            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--ink-soft)">No certificates issued yet.</td></tr>
+                        <?php else: foreach($certificates as $c):
+                            $tc = 'ds-badge-violet';
+                            if (stripos($c['certificate_type'],'Clearance')!==false) $tc='ds-badge-blue';
+                            elseif (stripos($c['certificate_type'],'Indigency')!==false) $tc='ds-badge-amber';
+                            elseif (stripos($c['certificate_type'],'Residency')!==false) $tc='ds-badge-teal';
+                        ?>
+                        <tr>
+                            <td class="mono"><strong><?= esc($c['certificate_number'] ?? 'N/A') ?></strong></td>
+                            <td><span class="ds-badge <?= $tc ?>"><?= esc($c['certificate_type']) ?></span></td>
+                            <td><strong><?= esc($c['first_name'] . ' ' . $c['last_name']) ?></strong></td>
+                            <td><?= esc($c['purpose']) ?></td>
+                            <td><?= date('M d, Y', strtotime($c['created_at'])) ?></td>
+                            <td style="white-space:nowrap">
+                                <a href="<?= base_url('certificate/print/' . $c['id']) ?>" class="ds-action-btn ab-blue" title="Print"><i class="fas fa-print"></i></a>
+                                <a href="<?= base_url('certificate/edit/' . $c['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-edit"></i></a>
+                            </td>
+                        </tr>
+                        <?php endforeach; endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-
-    <section class="content">
-        <div class="container-fluid">
-            <?php if (session()->getFlashdata('success')): ?>
-                <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
-            <?php endif; ?>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Issued Certificates</h3>
-                    <a href="<?= base_url('certificate/create') ?>" class="btn btn-primary btn-sm float-right">
-                        <i class="fas fa-plus"></i> Issue New
-                    </a>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Certificate No.</th>
-                                    <th>Type</th>
-                                    <th>Resident</th>
-                                    <th>Purpose</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach($certificates as $c): ?>
-                                <tr>
-                                    <td><strong><?= esc($c['certificate_number'] ?? 'N/A') ?></strong></td>
-                                    <td><?= esc($c['certificate_type']) ?></td>
-                                    <td><?= esc($c['first_name'] . ' ' . $c['last_name']) ?></td>
-                                    <td><?= esc($c['purpose']) ?></td>
-                                    <td><?= date('M d, Y', strtotime($c['created_at'])) ?></td>
-                                    <td>
-                                        <a href="<?= base_url('certificate/print/' . $c['id']) ?>" class="btn btn-sm btn-info">
-                                            <i class="fas fa-print"></i> Print
-                                        </a>
-                                        <a href="<?= base_url('certificate/edit/' . $c['id']) ?>" class="btn btn-sm btn-warning">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 </div>
 
 <?= $this->endSection() ?>

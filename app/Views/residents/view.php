@@ -1,396 +1,342 @@
 <?php
 $role = strtolower(session()->get('role') ?? 'staff');
 $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
+$profileImg = base_url(!empty($resident['profile_picture']) ? 'uploads/' . $resident['profile_picture'] : 'assets/img/default.png');
+$currentStatus = $resident['status'] ?? 'active';
+$statusBadge = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','deceased'=>'ds-badge-rose','transferred'=>'ds-badge-amber'];
 ?>
 <?= $this->extend($template) ?>
-
 <?= $this->section('content') ?>
-<link rel="stylesheet" href="<?= base_url('assets/css/resident/view.css') ?>">
 
-<div class="rv-page-wrapper">
+<style>
+.rv-grid{display:grid;grid-template-columns:260px 1fr 240px;gap:14px}
+.rv-tab-btn{padding:8px 16px;border:none;background:none;font-family:var(--font);font-size:11.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.rv-tab-btn.active{color:var(--c-teal);border-bottom-color:var(--c-teal)}
+.rv-tab-content{display:none}.rv-tab-content.active{display:block}
+.rv-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.rv-detail-row{padding:10px 0;border-bottom:.5px solid var(--border);display:flex;flex-direction:column;gap:2px}
+.rv-detail-row:last-child{border-bottom:none}
+.rv-detail-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
+.rv-detail-val{font-size:12.5px;font-weight:600;color:var(--ink)}
+.rv-flag{padding:14px;border-radius:var(--r-sm);display:flex;align-items:center;gap:10px}
+.rv-flag.yes{background:var(--c-teal-bg)}.rv-flag.no{background:var(--bg)}
+.rv-flag-dot{width:32px;height:32px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:13px}
+.rv-flag.yes .rv-flag-dot{background:var(--c-teal);color:#fff}
+.rv-flag.no .rv-flag-dot{background:#e2e8f0;color:var(--ink-soft)}
+@media(max-width:1200px){.rv-grid{grid-template-columns:1fr}}
+</style>
 
-    <!-- ── HERO BANNER ── -->
-    <div class="rv-hero">
-        <div class="rv-hero-content">
-            <div class="rv-hero-icon">
-                <i class="fas fa-id-card"></i>
-            </div>
-            <div class="rv-hero-text">
-                <h2><?= esc($resident['first_name']) ?> <?= esc($resident['last_name']) ?></h2>
-                <p>Resident Profile &nbsp;·&nbsp; ID #<?= esc($resident['id']) ?> &nbsp;·&nbsp; <?= ucfirst(esc($resident['status'] ?? 'active')) ?></p>
-            </div>
-            <div class="rv-hero-pills">
-                <span class="rv-hero-pill">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <?= esc($resident['sitio'] ?? 'No Sitio') ?>
-                </span>
-                <span class="rv-hero-pill">
-                    <i class="fas fa-calendar-alt"></i>
-                    Since <?= date('Y', strtotime($resident['created_at'])) ?>
-                </span>
-                <?php if (!empty($resident['is_voter'])): ?>
-                <span class="rv-hero-pill">
-                    <i class="fas fa-vote-yea"></i> Voter
-                </span>
-                <?php endif; ?>
-            </div>
+<div class="bmis-content">
+
+    <?php if (session()->getFlashdata('success')): ?>
+        <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:10px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px">
+            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
         </div>
-    </div>
+    <?php endif; ?>
 
-    <!-- ── MAIN CONTAINER ── -->
-    <div style="max-width:100%; padding: 0 0.25rem;">
+    <!-- ── THREE-COLUMN GRID ── -->
+    <div class="rv-grid">
 
-        <!-- BREADCRUMB + EDIT BUTTON (above grid) -->
-        <div class="rv-header" style="margin-bottom:1.25rem;">
-            <div class="rv-title">
-                <div class="rv-breadcrumb">
-                    <a href="<?= base_url(strtolower(session()->get('role') . '/dashboard')) ?>">
-                        <i class="fas fa-home" style="margin-right:3px;"></i> Dashboard
-                    </a>
-                    <span class="sep">/</span>
-                    <a href="<?= base_url('resident') ?>">Residents</a>
-                    <span class="sep">/</span>
-                    <span>View Profile</span>
-                </div>
-                <h1>Resident Details</h1>
-            </div>
-            <a href="<?= base_url('resident/edit/' . $resident['id']) ?>" class="rv-btn rv-btn-primary">
-                <i class="fas fa-edit"></i> Edit Profile
-            </a>
-        </div>
-
-        <?php if (session()->getFlashdata('success')): ?>
-            <div class="rv-flash-success">
-                <i class="fas fa-check-circle"></i>
-                <?= session()->getFlashdata('success') ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- ── THREE-COLUMN GRID ── -->
-        <div class="rv-grid">
-
-            <!-- ═══════════════════════════════
-                 LEFT: PROFILE CARD
-            ════════════════════════════════ -->
-            <aside>
-                <div class="rv-profile-card">
-                    <!-- Avatar + Name -->
-                    <div class="rv-avatar-zone">
-                        <div class="rv-avatar-ring">
-                            <img class="rv-avatar-large"
-                                 src="<?= base_url(!empty($resident['profile_picture']) ? 'uploads/' . $resident['profile_picture'] : 'assets/img/default.png') ?>"
-                                 alt="Profile Photo">
-                            <?php if (($resident['status'] ?? 'active') === 'active'): ?>
-                                <span class="rv-avatar-status-dot"></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="rv-resident-name"><?= esc($resident['first_name']) ?> <?= esc($resident['last_name']) ?></div>
-                        <div class="rv-resident-sub"><?= ucfirst(esc($resident['civil_status'] ?? 'N/A')) ?> &nbsp;·&nbsp; <?= ucfirst(esc($resident['sex'])) ?></div>
+        <!-- LEFT: PROFILE CARD -->
+        <div>
+            <div class="ds-card" style="text-align:center">
+                <div class="ds-card-body" style="padding:24px 18px">
+                    <!-- Avatar -->
+                    <div style="position:relative;display:inline-block;margin-bottom:12px">
+                        <img src="<?= $profileImg ?>" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--c-teal-bg)">
+                        <?php if ($currentStatus === 'active'): ?>
+                            <span style="position:absolute;bottom:2px;right:2px;width:14px;height:14px;border-radius:50%;background:var(--c-teal);border:2.5px solid var(--white)"></span>
+                        <?php endif; ?>
                     </div>
+                    <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px"><?= esc($resident['first_name']) ?> <?= esc($resident['last_name']) ?></div>
+                    <div style="font-size:11px;color:var(--ink-muted);margin-bottom:10px"><?= ucfirst(esc($resident['civil_status'] ?? 'N/A')) ?> · <?= ucfirst(esc($resident['sex'])) ?></div>
 
-                    <!-- Stats Strip -->
-                    <div class="rv-stats-strip">
-                        <div class="rv-stat-item">
-                            <span class="rv-stat-val"><?= esc($resident['age'] ?? '—') ?></span>
-                            <span class="rv-stat-lbl">Age</span>
-                        </div>
-                        <div class="rv-stat-item">
-                            <span class="rv-stat-val"><?= !empty($resident['is_voter']) ? 'Yes' : 'No' ?></span>
-                            <span class="rv-stat-lbl">Voter</span>
-                        </div>
-                        <div class="rv-stat-item">
-                            <span class="rv-stat-val"><?= !empty($resident['household_no']) ? esc($resident['household_no']) : '—' ?></span>
-                            <span class="rv-stat-lbl">HH No.</span>
-                        </div>
+                    <!-- Mini Stats -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:16px;padding:10px;background:var(--bg);border-radius:var(--r-sm)">
+                        <div><div style="font-size:16px;font-weight:800;color:var(--ink)"><?= esc($resident['age'] ?? '—') ?></div><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink-soft)">Age</div></div>
+                        <div><div style="font-size:16px;font-weight:800;color:var(--ink)"><?= !empty($resident['is_voter']) ? 'Yes' : 'No' ?></div><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink-soft)">Voter</div></div>
+                        <div><div style="font-size:11px;font-weight:700;color:var(--ink);font-family:var(--mono)"><?= !empty($resident['household_no']) ? esc($resident['household_no']) : '—' ?></div><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink-soft)">HH No.</div></div>
                     </div>
 
                     <!-- Info Rows -->
-                    <div class="rv-info-list">
-
-                        <div class="rv-info-row">
-                            <span class="rv-info-label"><i class="fas fa-phone"></i> Contact</span>
-                            <span class="rv-info-value"><?= esc($resident['contact_number'] ?? 'N/A') ?></span>
+                    <div style="text-align:left">
+                        <?php
+                        $infoRows = [
+                            ['icon'=>'fa-phone','label'=>'Contact','val'=>$resident['contact_number']??'N/A'],
+                            ['icon'=>'fa-briefcase','label'=>'Occupation','val'=>$resident['occupation']??'N/A'],
+                            ['icon'=>'fa-flag','label'=>'Citizenship','val'=>$resident['citizenship']??'N/A'],
+                        ];
+                        foreach ($infoRows as $ir): ?>
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--border)">
+                            <span style="font-size:11px;color:var(--ink-muted);display:flex;align-items:center;gap:6px"><i class="fas <?= $ir['icon'] ?>" style="width:12px;text-align:center"></i> <?= $ir['label'] ?></span>
+                            <span style="font-size:11.5px;font-weight:600;color:var(--ink)"><?= esc($ir['val']) ?></span>
                         </div>
+                        <?php endforeach; ?>
 
-                        <div class="rv-info-row">
-                            <span class="rv-info-label"><i class="fas fa-briefcase"></i> Occupation</span>
-                            <span class="rv-info-value"><?= esc($resident['occupation'] ?? 'N/A') ?></span>
-                        </div>
-
-                        <div class="rv-info-row">
-                            <span class="rv-info-label"><i class="fas fa-flag"></i> Citizenship</span>
-                            <span class="rv-info-value"><?= esc($resident['citizenship'] ?? 'N/A') ?></span>
-                        </div>
-
-                        <!-- Inline Status Editor -->
-                        <div class="rv-info-row">
-                            <span class="rv-info-label"><i class="fas fa-circle"></i> Status</span>
+                        <!-- Status -->
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">
+                            <span style="font-size:11px;color:var(--ink-muted);display:flex;align-items:center;gap:6px"><i class="fas fa-circle" style="width:12px;text-align:center"></i> Status</span>
                             <span id="status-container">
-                                <?php
-                                $statusBadge = [
-                                    'active'      => 'rv-badge-success',
-                                    'inactive'    => 'rv-badge-secondary',
-                                    'deceased'    => 'rv-badge-dark',
-                                    'transferred' => 'rv-badge-warning',
-                                ];
-                                $currentStatus = $resident['status'] ?? 'active';
-                                ?>
-                                <span id="status-display" style="display:flex;align-items:center;gap:0.35rem;">
-                                    <span class="rv-badge <?= $statusBadge[$currentStatus] ?? 'rv-badge-secondary' ?>" id="status-badge">
-                                        <?= ucfirst($currentStatus) ?>
-                                    </span>
-                                    <i class="fas fa-pencil-alt" id="edit-status-icon"
-                                       style="cursor:pointer;font-size:0.65rem;color:var(--ink-soft);"
-                                       title="Change status"></i>
+                                <span id="status-display" style="display:flex;align-items:center;gap:6px">
+                                    <span class="ds-badge <?= $statusBadge[$currentStatus] ?? 'ds-badge-gray' ?>" id="status-badge"><?= ucfirst($currentStatus) ?></span>
+                                    <i class="fas fa-pencil-alt" id="edit-status-icon" style="cursor:pointer;font-size:10px;color:var(--ink-soft)" title="Change"></i>
                                 </span>
-                                <span id="status-editor" style="display:none;align-items:center;gap:0.4rem;">
-                                    <select id="status-select" class="form-control form-control-sm"
-                                            style="font-size:0.75rem;padding:2px 6px;border-radius:6px;border:1.5px solid var(--accent);font-family:var(--font);font-weight:600;">
-                                        <option value="active"      <?= $currentStatus=='active'      ?'selected':'' ?>>Active</option>
-                                        <option value="inactive"    <?= $currentStatus=='inactive'    ?'selected':'' ?>>Inactive</option>
-                                        <option value="deceased"    <?= $currentStatus=='deceased'    ?'selected':'' ?>>Deceased</option>
-                                        <option value="transferred" <?= $currentStatus=='transferred' ?'selected':'' ?>>Transferred</option>
+                                <span id="status-editor" style="display:none;align-items:center;gap:4px">
+                                    <select id="status-select" class="ds-select" style="height:28px;font-size:11px;padding:0 8px">
+                                        <option value="active" <?= $currentStatus=='active'?'selected':'' ?>>Active</option>
+                                        <option value="inactive" <?= $currentStatus=='inactive'?'selected':'' ?>>Inactive</option>
+                                        <option value="deceased" <?= $currentStatus=='deceased'?'selected':'' ?>>Deceased</option>
+                                        <option value="transferred" <?= $currentStatus=='transferred'?'selected':'' ?>>Transferred</option>
                                     </select>
-                                    <i class="fas fa-check text-success" id="save-status-icon"   style="cursor:pointer;font-size:0.8rem;" title="Save"></i>
-                                    <i class="fas fa-times text-danger"  id="cancel-status-icon" style="cursor:pointer;font-size:0.8rem;" title="Cancel"></i>
+                                    <i class="fas fa-check" id="save-status-icon" style="cursor:pointer;font-size:11px;color:var(--c-teal)" title="Save"></i>
+                                    <i class="fas fa-times" id="cancel-status-icon" style="cursor:pointer;font-size:11px;color:var(--c-rose)" title="Cancel"></i>
                                 </span>
                             </span>
                         </div>
-
-                    </div><!-- /rv-info-list -->
-
-                    <!-- Action Buttons -->
-                    <div class="rv-card-actions">
-                        <a href="#" onclick="printProfile(); return false;" class="rv-action-btn print">
-                            <i class="fas fa-print"></i> Print Profile
-                        </a>
-                        <a href="#" onclick="generateCertificate(); return false;" class="rv-action-btn cert">
-                            <i class="fas fa-file-alt"></i> Generate Certificate
-                        </a>
-                        <a href="<?= base_url('resident') ?>" class="rv-action-btn back">
-                            <i class="fas fa-arrow-left"></i> Back to List
-                        </a>
-                    </div>
-
-                </div>
-            </aside>
-
-            <!-- ═══════════════════════════════
-                 CENTER: TABS
-            ════════════════════════════════ -->
-            <main class="rv-content-card">
-
-                <div class="rv-tabs">
-                    <button class="rv-tab-btn active" onclick="switchTab('personal', this)">
-                        <i class="fas fa-user"></i> Personal
-                    </button>
-                    <button class="rv-tab-btn" onclick="switchTab('household', this)">
-                        <i class="fas fa-home"></i> Household
-                    </button>
-                    <button class="rv-tab-btn" onclick="switchTab('status', this)">
-                        <i class="fas fa-flag"></i> Status & Flags
-                    </button>
-                </div>
-
-                <!-- PERSONAL TAB -->
-                <div id="personal" class="rv-tab-content active">
-                    <p class="rv-section-heading"><i class="fas fa-user-circle"></i> Personal Information</p>
-                    <div class="rv-details-grid">
-                        <div class="rv-detail-item">
-                            <div class="rv-detail-label">First Name</div>
-                            <div class="rv-detail-value"><?= esc($resident['first_name']) ?></div>
-                        </div>
-                        <div class="rv-detail-item">
-                            <div class="rv-detail-label">Middle Name</div>
-                            <div class="rv-detail-value"><?= esc($resident['middle_name'] ?? '—') ?></div>
-                        </div>
-                        <div class="rv-detail-item">
-                            <div class="rv-detail-label">Last Name</div>
-                            <div class="rv-detail-value"><?= esc($resident['last_name']) ?></div>
-                        </div>
-                        <div class="rv-detail-item">
-                            <div class="rv-detail-label">Birthdate</div>
-                            <div class="rv-detail-value"><?= date('F d, Y', strtotime($resident['birthdate'])) ?></div>
-                        </div>
-                        <div class="rv-detail-item">
-                            <div class="rv-detail-label">Sex</div>
-                            <div class="rv-detail-value"><?= ucfirst(esc($resident['sex'])) ?></div>
-                        </div>
-                        <div class="rv-detail-item">
-                            <div class="rv-detail-label">Civil Status</div>
-                            <div class="rv-detail-value"><?= esc($resident['civil_status'] ?? '—') ?></div>
-                        </div>
-                        <div class="rv-detail-item">
-                            <div class="rv-detail-label">Occupation</div>
-                            <div class="rv-detail-value"><?= esc($resident['occupation'] ?? '—') ?></div>
-                        </div>
-                        <div class="rv-detail-item">
-                            <div class="rv-detail-label">Citizenship</div>
-                            <div class="rv-detail-value"><?= esc($resident['citizenship'] ?? '—') ?></div>
-                        </div>
-                        <div class="rv-detail-item">
-                            <div class="rv-detail-label">Contact No.</div>
-                            <div class="rv-detail-value"><?= esc($resident['contact_number'] ?? '—') ?></div>
-                        </div>
-                        <div class="rv-detail-item">
-                            <div class="rv-detail-label">Registered On</div>
-                            <div class="rv-detail-value"><?= date('M d, Y', strtotime($resident['created_at'])) ?></div>
-                        </div>
-                        <div class="rv-detail-item" style="grid-column: 1 / -1;">
-                            <div class="rv-detail-label">Last Updated</div>
-                            <div class="rv-detail-value"><?= date('M d, Y · h:i A', strtotime($resident['updated_at'])) ?></div>
-                        </div>
                     </div>
                 </div>
 
-                <!-- HOUSEHOLD TAB -->
-                <div id="household" class="rv-tab-content">
-                    <p class="rv-section-heading"><i class="fas fa-home"></i> Household Information</p>
-
-                    <div class="rv-household-block" style="margin-bottom:1rem;">
-                        <div class="rv-household-icon">
-                            <i class="fas fa-hashtag"></i>
-                        </div>
-                        <div class="rv-household-info">
-                            <h4>Household Number</h4>
-                            <?php if (!empty($resident['household_no'])): ?>
-                                <p>
-                                    <span class="rv-badge rv-badge-success" style="margin-right:8px;"><?= esc($resident['household_no']) ?></span>
-                                    <a href="<?= base_url('households/view/' . $resident['household_id']) ?>"
-                                       class="rv-btn rv-btn-secondary" style="padding:0.3rem 0.8rem;font-size:0.75rem;display:inline-flex;">
-                                        <i class="fas fa-external-link-alt"></i> View Household
-                                    </a>
-                                </p>
-                            <?php else: ?>
-                                <p><span class="rv-badge rv-badge-secondary">Not Assigned</span></p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
-                    <div class="rv-household-block" style="margin-bottom:1rem;">
-                        <div class="rv-household-icon" style="background:var(--danger-light);color:var(--danger);">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div class="rv-household-info">
-                            <h4>Address</h4>
-                            <p><?= esc($resident['household_address'] ?? 'No address on file') ?></p>
-                        </div>
-                    </div>
-
-                    <div class="rv-household-block">
-                        <div class="rv-household-icon" style="background:var(--purple-light);color:var(--purple);">
-                            <i class="fas fa-layer-group"></i>
-                        </div>
-                        <div class="rv-household-info">
-                            <h4>Sitio / Zone</h4>
-                            <p>
-                                <?php if (!empty($resident['sitio'])): ?>
-                                    <span class="rv-badge rv-badge-info"><?= esc($resident['sitio']) ?></span>
-                                <?php else: ?>
-                                    <span class="rv-badge rv-badge-secondary">Unassigned</span>
-                                <?php endif; ?>
-                            </p>
-                        </div>
-                    </div>
+                <!-- Action Buttons -->
+                <div style="border-top:.5px solid var(--border);padding:12px 18px;display:flex;flex-direction:column;gap:6px">
+                    <a href="#" onclick="printProfile();return false;" class="ds-quick-btn qb-blue" style="justify-content:center;width:100%"><i class="fas fa-print"></i> Print Profile</a>
+                    <a href="#" onclick="generateCertificate();return false;" class="ds-quick-btn qb-violet" style="justify-content:center;width:100%"><i class="fas fa-file-alt"></i> Generate Certificate</a>
+                    <a href="<?= base_url('resident') ?>" class="ds-quick-btn qb-slate" style="justify-content:center;width:100%"><i class="fas fa-arrow-left"></i> Back to List</a>
                 </div>
-
-                <!-- STATUS & FLAGS TAB -->
-                <div id="status" class="rv-tab-content">
-                    <p class="rv-section-heading"><i class="fas fa-shield-alt"></i> Classification Flags</p>
-                    <div class="rv-flags-grid">
-                        <?php
-                        $flags = [
-                            ['key' => 'is_voter',          'label' => 'Registered Voter', 'icon' => 'fa-vote-yea'],
-                            ['key' => 'is_senior_citizen', 'label' => 'Senior Citizen',   'icon' => 'fa-user-graduate'],
-                            ['key' => 'is_pwd',            'label' => 'PWD',              'icon' => 'fa-wheelchair'],
-                        ];
-                        foreach ($flags as $f):
-                            $yes = !empty($resident[$f['key']]);
-                        ?>
-                        <div class="rv-flag-card <?= $yes ? 'yes' : 'no' ?>">
-                            <div class="rv-flag-icon">
-                                <i class="fas <?= $f['icon'] ?>"></i>
-                            </div>
-                            <div class="rv-flag-name"><?= $f['label'] ?></div>
-                            <div class="rv-flag-status"><?= $yes ? '✓ Yes' : '— No' ?></div>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
-            </main>
-
-            <!-- ═══════════════════════════════
-                 RIGHT: ACTIVITY PANEL
-            ════════════════════════════════ -->
-            <aside class="rv-activity-panel">
-                <div class="rv-activity-header">
-                    <div class="rv-activity-title">
-                        <i class="fas fa-history"></i> Recent Activity
-                    </div>
-                    <span class="rv-activity-count" id="rv-activity-count" style="display:none;">0</span>
-                </div>
-
-                <div class="rv-activity-feed" id="rv-activity-feed">
-                    <div class="rv-activity-empty">
-                        <i class="fas fa-history"></i>
-                        <p>Loading activity…</p>
-                    </div>
-                </div>
-
-                <div class="rv-activity-footer">
-                    <a href="<?= base_url('logs') ?>">
-                        <i class="fas fa-list"></i> View All Logs
-                    </a>
-                </div>
-            </aside>
-
-        </div><!-- /rv-grid -->
-    </div><!-- /container -->
-</div><!-- /rv-page-wrapper -->
-
-
-<!-- ── Generate Certificate Modal ── -->
-<div class="modal fade" id="generateCertificateModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border-radius:14px;overflow:hidden;border:1px solid var(--border);">
-            <div class="modal-header" style="background:var(--canvas);border-bottom:1px solid var(--border);padding:1.25rem 1.5rem;">
-                <h4 class="modal-title" style="font-size:1rem;font-weight:800;margin:0;color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;">
-                    <i class="fas fa-file-alt" style="color:var(--accent);margin-right:8px;"></i>
-                    Generate Certificate
-                </h4>
-                <button type="button" class="close" data-dismiss="modal" style="color:var(--ink-soft);">&times;</button>
             </div>
-            <form action="<?= base_url('certificate/store') ?>" method="POST">
-                <div class="modal-body" style="padding:1.5rem;">
-                    <input type="hidden" name="resident_id" value="<?= $resident['id'] ?>">
-                    <div class="form-group" style="margin-bottom:1rem;">
-                        <label style="display:block;margin-bottom:0.4rem;font-weight:700;font-size:0.85rem;color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;">Certificate Type</label>
-                        <select name="certificate_type" class="form-control" style="border-radius:8px;border:1px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;">
-                            <option>Barangay Clearance</option>
-                            <option>Certificate of Indigency</option>
-                            <option>Certificate of Residency</option>
-                            <option>Business Permit</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label style="display:block;margin-bottom:0.4rem;font-weight:700;font-size:0.85rem;color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;">Purpose</label>
-                        <input type="text" name="purpose" class="form-control"
-                               placeholder="e.g. Employment Requirement"
-                               required
-                               style="border-radius:8px;border:1px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;">
-                    </div>
-                </div>
-                <div class="modal-footer" style="background:var(--canvas);border-top:1px solid var(--border);padding:1rem 1.5rem;gap:0.5rem;">
-                    <button type="button" class="rv-btn rv-btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="rv-btn rv-btn-primary">
-                        <i class="fas fa-file-download"></i> Generate
-                    </button>
-                </div>
-            </form>
         </div>
+
+        <!-- CENTER: TABS -->
+        <div>
+            <div class="ds-card">
+                <div style="padding:0 18px;border-bottom:.5px solid var(--border);display:flex;gap:0;overflow-x:auto">
+                    <button class="rv-tab-btn active" onclick="switchTab('personal',this)"><i class="fas fa-user" style="margin-right:4px"></i> Personal</button>
+                    <button class="rv-tab-btn" onclick="switchTab('household',this)"><i class="fas fa-home" style="margin-right:4px"></i> Household</button>
+                    <button class="rv-tab-btn" onclick="switchTab('status',this)"><i class="fas fa-flag" style="margin-right:4px"></i> Status</button>
+                    <button class="rv-tab-btn" onclick="switchTab('documents',this)"><i class="fas fa-file-alt" style="margin-right:4px"></i> Documents</button>
+                    <button class="rv-tab-btn" onclick="switchTab('cases',this)"><i class="fas fa-balance-scale" style="margin-right:4px"></i> Cases</button>
+                </div>
+                <div class="ds-card-body">
+
+                    <!-- PERSONAL TAB -->
+                    <div id="personal" class="rv-tab-content active">
+                        <div class="ds-section-label" style="margin-top:0">Personal Information</div>
+                        <div class="rv-detail-grid">
+                            <?php
+                            $details = [
+                                ['First Name', $resident['first_name']],
+                                ['Middle Name', $resident['middle_name'] ?? '—'],
+                                ['Last Name', $resident['last_name']],
+                                ['Birthdate', date('F d, Y', strtotime($resident['birthdate']))],
+                                ['Sex', ucfirst($resident['sex'])],
+                                ['Civil Status', $resident['civil_status'] ?? '—'],
+                                ['Occupation', $resident['occupation'] ?? '—'],
+                                ['Citizenship', $resident['citizenship'] ?? '—'],
+                                ['Contact No.', $resident['contact_number'] ?? '—'],
+                                ['Registered On', date('M d, Y', strtotime($resident['created_at']))],
+                            ];
+                            foreach ($details as $d): ?>
+                            <div class="rv-detail-row">
+                                <div class="rv-detail-lbl"><?= $d[0] ?></div>
+                                <div class="rv-detail-val"><?= esc($d[1]) ?></div>
+                            </div>
+                            <?php endforeach; ?>
+                            <div class="rv-detail-row" style="grid-column:1/-1">
+                                <div class="rv-detail-lbl">Last Updated</div>
+                                <div class="rv-detail-val"><?= date('M d, Y · h:i A', strtotime($resident['updated_at'])) ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HOUSEHOLD TAB -->
+                    <div id="household" class="rv-tab-content">
+                        <div class="ds-section-label" style="margin-top:0">Household Information</div>
+                        <div style="display:flex;flex-direction:column;gap:12px">
+                            <div class="ds-mini">
+                                <div class="ds-mini-icon ic-teal"><i class="fas fa-hashtag"></i></div>
+                                <div>
+                                    <div class="rv-detail-lbl">Household Number</div>
+                                    <?php if (!empty($resident['household_no'])): ?>
+                                        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+                                            <span class="ds-badge ds-badge-teal" style="font-size:11px"><?= esc($resident['household_no']) ?></span>
+                                            <a href="<?= base_url('households/view/' . $resident['household_id']) ?>" class="ds-btn ds-btn-ghost" style="height:26px;font-size:10px;padding:0 10px"><i class="fas fa-external-link-alt"></i> View</a>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="ds-badge ds-badge-gray" style="margin-top:4px">Not Assigned</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="ds-mini">
+                                <div class="ds-mini-icon ic-rose"><i class="fas fa-map-marker-alt"></i></div>
+                                <div><div class="rv-detail-lbl">Address</div><div class="rv-detail-val" style="margin-top:4px"><?= esc($resident['household_address'] ?? 'No address on file') ?></div></div>
+                            </div>
+                            <div class="ds-mini">
+                                <div class="ds-mini-icon ic-violet"><i class="fas fa-layer-group"></i></div>
+                                <div><div class="rv-detail-lbl">Sitio / Zone</div><span class="ds-badge ds-badge-blue" style="margin-top:4px"><?= esc($resident['sitio'] ?? 'Unassigned') ?></span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STATUS & FLAGS TAB -->
+                    <div id="status" class="rv-tab-content">
+                        <div class="ds-section-label" style="margin-top:0">Classification Flags</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+                            <?php
+                            $flags = [
+                                ['key'=>'is_voter','label'=>'Registered Voter','icon'=>'fa-vote-yea','color'=>'blue'],
+                                ['key'=>'is_senior_citizen','label'=>'Senior Citizen','icon'=>'fa-user-graduate','color'=>'green'],
+                                ['key'=>'is_pwd','label'=>'PWD','icon'=>'fa-wheelchair','color'=>'amber'],
+                            ];
+                            foreach ($flags as $f):
+                                $yes = !empty($resident[$f['key']]);
+                            ?>
+                            <div class="rv-flag <?= $yes ? 'yes' : 'no' ?>">
+                                <div class="rv-flag-dot"><i class="fas <?= $f['icon'] ?>"></i></div>
+                                <div>
+                                    <div style="font-size:12px;font-weight:700;color:var(--ink)"><?= $f['label'] ?></div>
+                                    <div style="font-size:10px;font-weight:700;color:<?= $yes ? 'var(--c-teal)' : 'var(--ink-soft)' ?>"><?= $yes ? '✓ Yes' : '— No' ?></div>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- DOCUMENTS TAB -->
+                    <div id="documents" class="rv-tab-content">
+                        <div class="ds-section-label" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+                            <span>Document History</span>
+                            <span class="ds-badge ds-badge-violet"><?= count($certificates ?? []) ?> issued</span>
+                        </div>
+                        <?php if(!empty($certificates)): ?>
+                            <div style="display:flex;flex-direction:column;gap:8px">
+                                <?php foreach($certificates as $cert): ?>
+                                    <div style="padding:12px;border:1px solid var(--border);border-radius:var(--r-sm);display:flex;justify-content:space-between;align-items:center">
+                                        <div>
+                                            <div style="font-weight:700;color:var(--ink);font-size:12px"><?= esc($cert['certificate_type']) ?></div>
+                                            <div style="font-size:10px;color:var(--ink-soft);margin-top:2px">
+                                                <i class="fas fa-hashtag" style="margin-right:3px"></i><?= esc($cert['certificate_number']) ?> · 
+                                                <i class="fas fa-calendar" style="margin-right:3px"></i><?= date('M d, Y', strtotime($cert['created_at'])) ?>
+                                            </div>
+                                            <div style="font-size:11px;color:var(--ink-muted);margin-top:4px;font-style:italic">"<?= esc($cert['purpose']) ?>"</div>
+                                        </div>
+                                        <a href="<?= base_url('certificate/print/' . $cert['id']) ?>" target="_blank" class="ds-btn ds-btn-ghost" style="height:28px;padding:0 10px;font-size:10px;color:var(--c-violet)"><i class="fas fa-print"></i> Reprint</a>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div style="text-align:center;padding:30px;color:var(--ink-soft);font-size:12px">
+                                <i class="fas fa-folder-open" style="font-size:24px;opacity:0.3;display:block;margin-bottom:8px"></i>
+                                No documents issued yet.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- CASES TAB -->
+                    <div id="cases" class="rv-tab-content">
+                        <div class="ds-section-label" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+                            <span>Blotter History</span>
+                            <span class="ds-badge ds-badge-rose"><?= count($blotterHistory ?? []) ?> records</span>
+                        </div>
+                        <?php if(!empty($blotterHistory)): ?>
+                            <div style="display:flex;flex-direction:column;gap:8px">
+                                <?php foreach($blotterHistory as $blotter): 
+                                    $roleColor = $blotter['role'] == 'complainant' ? 'c-blue' : ($blotter['role'] == 'respondent' ? 'c-rose' : 'c-amber');
+                                    $statusColor = strtolower($blotter['status']) == 'settled' ? 'c-teal' : 'c-amber';
+                                ?>
+                                    <div style="padding:12px;border:1px solid var(--border);border-left:3px solid var(--<?= $roleColor ?>);border-radius:var(--r-sm);display:flex;justify-content:space-between;align-items:center">
+                                        <div>
+                                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                                                <span style="font-weight:700;color:var(--ink);font-size:12px"><?= esc($blotter['case_number']) ?></span>
+                                                <span class="ds-badge" style="background:var(--<?= $roleColor ?>-bg);color:var(--<?= $roleColor ?>);font-size:9px;padding:2px 6px"><?= ucfirst(esc($blotter['role'])) ?></span>
+                                            </div>
+                                            <div style="font-size:11px;color:var(--ink);font-weight:600"><?= esc($blotter['incident_type']) ?></div>
+                                            <div style="font-size:10px;color:var(--ink-soft);margin-top:2px">
+                                                <i class="fas fa-calendar" style="margin-right:3px"></i><?= date('M d, Y', strtotime($blotter['incident_date'])) ?>
+                                            </div>
+                                        </div>
+                                        <div style="text-align:right">
+                                            <span style="font-size:10px;font-weight:700;color:var(--<?= $statusColor ?>);text-transform:uppercase;display:block;margin-bottom:4px"><i class="fas fa-circle" style="font-size:6px;vertical-align:middle;margin-right:3px"></i><?= esc($blotter['status']) ?></span>
+                                            <a href="<?= base_url('blotter/view/' . $blotter['id']) ?>" class="ds-btn ds-btn-ghost" style="height:24px;padding:0 8px;font-size:10px"><i class="fas fa-folder-open"></i> View Case</a>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div style="text-align:center;padding:30px;color:var(--ink-soft);font-size:12px">
+                                <i class="fas fa-check-circle" style="font-size:24px;color:var(--c-teal);opacity:0.5;display:block;margin-bottom:8px"></i>
+                                Clean record. No blotter cases found.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: ACTIVITY PANEL -->
+        <div>
+            <div class="ds-card" style="height:100%">
+                <div class="ds-card-head">
+                    <div class="ds-card-title" style="font-size:11px"><i class="fas fa-history"></i> Activity</div>
+                    <span class="ds-badge ds-badge-gray" id="rv-activity-count" style="display:none">0</span>
+                </div>
+                <div class="ds-card-body" style="padding:0">
+                    <div class="ds-activity-feed" id="rv-activity-feed" style="padding:14px;max-height:400px">
+                        <div style="text-align:center;padding:24px;color:var(--ink-soft);font-size:11px"><i class="fas fa-spinner fa-spin" style="margin-right:4px"></i> Loading activity…</div>
+                    </div>
+                </div>
+                <div style="padding:10px 14px;border-top:.5px solid var(--border);text-align:center">
+                    <a href="<?= base_url('logs') ?>" style="font-size:10.5px;font-weight:700;color:var(--c-blue);text-decoration:none"><i class="fas fa-list" style="margin-right:4px"></i> View All Logs</a>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
+
+<!-- Generate Certificate Modal -->
+<div class="ds-modal-overlay" id="certModalOverlay">
+    <div class="ds-modal">
+        <div class="ds-modal-icon" style="background:var(--c-violet-bg);color:var(--c-violet)"><i class="fas fa-file-alt"></i></div>
+        <h3>Generate Certificate</h3>
+        <div class="subtitle">For <?= esc($resident['first_name'] . ' ' . $resident['last_name']) ?></div>
+        <form action="<?= base_url('certificate/store') ?>" method="POST">
+            <?= csrf_field() ?>
+            <input type="hidden" name="resident_id" value="<?= $resident['id'] ?>">
+            <div style="margin-bottom:12px">
+                <label class="ds-input-label">Certificate Type</label>
+                <select name="certificate_type" class="ds-select">
+                    <option>Barangay Clearance</option>
+                    <option>Certificate of Indigency</option>
+                    <option>Certificate of Residency</option>
+                    <option>Business Permit</option>
+                </select>
+            </div>
+            <div style="margin-bottom:16px">
+                <label class="ds-input-label">Purpose</label>
+                <input type="text" name="purpose" class="ds-input" placeholder="e.g. Employment Requirement" required>
+            </div>
+            <div class="ds-modal-actions">
+                <button type="button" class="ds-btn ds-btn-ghost" onclick="document.getElementById('certModalOverlay').classList.remove('show')">Cancel</button>
+                <button type="submit" class="ds-btn" style="background:var(--c-violet);color:#fff"><i class="fas fa-file-download"></i> Generate</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function switchTab(id, btn) {
+    document.querySelectorAll('.rv-tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.rv-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+}
+function generateCertificate() {
+    document.getElementById('certModalOverlay').classList.add('show');
+}
+document.getElementById('certModalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('show');
+});
+</script>
 
 <?= $this->endSection() ?>
 
@@ -404,12 +350,11 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
     window.CURRENT_USER     = "<?= esc(session()->get('name') ?? session()->get('username') ?? 'User', 'js') ?>";
     window.CURRENT_ROLE     = "<?= esc(session()->get('role') ?? 'staff', 'js') ?>";
     window.STATUS_BADGES    = {
-        active:      'rv-badge-success',
-        inactive:    'rv-badge-secondary',
-        deceased:    'rv-badge-dark',
-        transferred: 'rv-badge-warning'
+        active:      'ds-badge-teal',
+        inactive:    'ds-badge-gray',
+        deceased:    'ds-badge-rose',
+        transferred: 'ds-badge-amber'
     };
 </script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="<?= base_url('js/residents/residents-view.js') ?>"></script>
 <?= $this->endSection() ?>

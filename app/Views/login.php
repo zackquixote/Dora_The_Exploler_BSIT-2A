@@ -10,152 +10,153 @@ $province     = $settings['province']      ?? 'Province';
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= esc($barangay) ?> · Smart Governance Portal</title>
-
+  
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  
   <!-- Font Awesome -->
   <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/fontawesome-free/css/all.min.css') ?>">
+  
+  <!-- Design System -->
+  <link rel="stylesheet" href="<?= base_url('assets/css/bmis-design-system.css') ?>">
 
-  <!-- External CSS -->
-  <link rel="stylesheet" href="<?= base_url('assets/css/login/style.css') ?>">
+  <style>
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--bg);
+        background-image: radial-gradient(circle at 50% 0%, var(--c-blue-bg) 0%, transparent 70%);
+        font-family: 'DM Sans', sans-serif;
+        color: var(--ink);
+    }
+    .login-wrapper {
+        width: 100%;
+        max-width: 400px;
+        padding: 20px;
+    }
+    .logo-container {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    .logo-container img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 3px solid var(--white);
+        box-shadow: var(--shadow);
+        margin-bottom: 16px;
+        object-fit: cover;
+    }
+    .portal-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--c-navy);
+        margin: 0;
+    }
+    .portal-subtitle {
+        font-size: 13px;
+        color: var(--ink-muted);
+        margin-top: 4px;
+    }
+    .flash-error {
+        background: var(--c-rose-bg);
+        color: var(--c-rose);
+        padding: 12px 16px;
+        border-radius: var(--r-sm);
+        margin-bottom: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .login-footer {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 11px;
+        color: var(--ink-soft);
+    }
+    .login-footer a {
+        color: var(--c-blue);
+        text-decoration: none;
+    }
+  </style>
 </head>
 <body>
 
-  <canvas id="canvas"></canvas>
-  <!-- Background image (inline because of PHP URL) -->
-  <div class="bg-photo" style="background-image: url('<?= base_url('assets/img/wowow.jpg') ?>');"></div>
-  <div class="grain"></div>
-  <div class="vignette"></div>
+  <div class="login-wrapper">
+    <div class="logo-container">
+      <img src="<?= base_url('assets/img/tabu.jpg') ?>" alt="Barangay Logo">
+      <h1 class="portal-title"><?= esc($barangay) ?>, <?= esc($municipality) ?></h1>
+      <div class="portal-subtitle">Smart Governance Portal</div>
+    </div>
 
-  <div class="page">
-    <div class="layout">
-
-      <!-- LEFT PANEL -->
-      <div class="left">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-
-        <div class="left-top">
-
-          <h1 class="left-headline">
-            Smart<br>
-            <span class="gold italic">Governance</span><br>
-            Portal
-          </h1>
-
-          <p class="tagline">
-            A unified digital platform for <?= esc($barangay) ?>, <?= esc($municipality) ?> — delivering transparent, efficient, and citizen-centered public service to every household.
-          </p>
-
-          <div class="gold-rule">
-            <div class="gold-rule-line"></div>
-            <div class="gold-rule-diamond"></div>
-          </div>
-
-          <div class="left-stats">
-            <div class="stat"><div class="stat-n">24/7</div><div class="stat-l">Uptime</div></div>
-            <div class="stat"><div class="stat-n">AES</div><div class="stat-l">Encrypted</div></div>
-            <div class="stat"><div class="stat-n">ISO</div><div class="stat-l">Certified</div></div>
-          </div>
-        </div>
-
-        <div class="left-bottom">
-          <div class="seal-row">
-            <div class="seal-icon"><i class="fas fa-shield-alt"></i></div>
-            <div class="seal-text">
-              <strong>Authorized Personnel Only</strong><br>
-              All access attempts are logged and monitored.<br>
-              <small style="opacity:0.6;"><?= esc($province) ?> · <?= esc($municipality) ?></small>
-            </div>
-          </div>
-        </div>
+    <?php if (session()->getFlashdata('error')): ?>
+      <div class="flash-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <?= session()->getFlashdata('error') ?>
       </div>
+    <?php endif; ?>
 
-      <!-- RIGHT PANEL (login form) -->
-      <div class="right">
-        <div class="beam"></div>
-        <div class="right-inner">
-
-          <div class="logo-wrap">
-            <div class="logo-ring-wrap">
-              <div class="logo-ring"></div>
-              <div class="logo-ring-2"></div>
-              <img src="<?= base_url('assets/img/tabu.jpg') ?>" alt="Barangay Logo" class="logo-img">
-            </div>
-            <div class="portal-name"><?= esc($barangay) ?>, <?= esc($municipality) ?></div>
-            <span class="portal-sub">Smart Governance Portal</span>
-            <div class="live-clock">
-              <i class="fas fa-circle" style="font-size:0.4rem;color:#4adb86;"></i>
-              <span id="clock">--:-- --</span>
-            </div>
-          </div>
-
-          <?php if (session()->getFlashdata('error')): ?>
-            <div class="flash-error">
-              <i class="fas fa-exclamation-triangle"></i>
-              <?= session()->getFlashdata('error') ?>
-            </div>
-          <?php endif; ?>
-
-          <form id="loginForm" action="<?= base_url('/auth') ?>" method="post" autocomplete="off">
-            <?= csrf_field() ?>
-
-            <div class="form-divider">
-              <div class="form-divider-line"></div>
-              <span>Secure Sign-In</span>
-              <div class="form-divider-line"></div>
-            </div>
-
-            <div class="fields">
-              <div class="field">
-                <div class="field-label"><i class="fas fa-circle"></i> Administrator Email</div>
-                <div class="field-wrap">
-                  <input type="email" name="email" placeholder="admin@<?= esc(strtolower(str_replace(' ', '', $municipality))) ?>.gov.ph" required autocomplete="username">
-                  <button type="button" class="field-icon-btn" tabindex="-1"><i class="fas fa-user-shield"></i></button>
+    <div class="ds-card">
+      <form id="loginForm" action="<?= base_url('/auth') ?>" method="post" autocomplete="off">
+        <?= csrf_field() ?>
+        
+        <div class="ds-card-body">
+            <div style="margin-bottom:16px">
+                <label class="ds-input-label">Administrator Email</label>
+                <div style="position:relative">
+                    <i class="fas fa-envelope" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-soft);font-size:12px"></i>
+                    <input type="email" name="email" class="ds-input" placeholder="admin@example.gov.ph" required autocomplete="username" style="padding-left:36px">
                 </div>
-              </div>
-
-              <div class="field">
-                <div class="field-label"><i class="fas fa-circle"></i> Access Key</div>
-                <div class="field-wrap">
-                  <input type="password" name="password" id="passwordField" placeholder="••••••••••••" required autocomplete="current-password">
-                  <button type="button" class="field-icon-btn" id="togglePwd" tabindex="-1"><i class="fas fa-eye-slash" id="eyeIcon"></i></button>
+            </div>
+            
+            <div style="margin-bottom:20px">
+                <label class="ds-input-label">Access Key</label>
+                <div style="position:relative">
+                    <i class="fas fa-lock" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-soft);font-size:12px"></i>
+                    <input type="password" name="password" id="passwordField" class="ds-input" placeholder="••••••••••••" required autocomplete="current-password" style="padding-left:36px;padding-right:36px">
+                    <button type="button" id="togglePwd" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--ink-soft);cursor:pointer;padding:4px"><i class="fas fa-eye-slash" id="eyeIcon"></i></button>
                 </div>
-              </div>
             </div>
 
-            <div class="remember">
-              <input type="checkbox" id="remember" name="remember">
-              <label for="remember">Keep me signed in on this device</label>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px">
+                <input type="checkbox" id="remember" name="remember" style="accent-color:var(--c-teal);width:14px;height:14px;cursor:pointer">
+                <label for="remember" style="font-size:12px;color:var(--ink-muted);cursor:pointer;user-select:none;margin:0">Keep me signed in</label>
             </div>
 
-            <button type="submit" class="btn-auth" id="submitBtn">
-              <span class="btn-label">Authenticate &nbsp;<i class="fas fa-fingerprint"></i></span>
-              <span class="btn-spinner"><span class="spinner-ring"></span></span>
+            <button type="submit" class="ds-btn" style="width:100%;background:var(--c-teal);color:#fff;justify-content:center;height:40px;font-size:13px">
+                Authenticate <i class="fas fa-arrow-right" style="margin-left:6px"></i>
             </button>
-          </form>
-
-          <div class="security-badges">
-            <div class="badge"><i class="fas fa-lock"></i><span>SSL</span></div>
-            <div class="badge"><i class="fas fa-shield-alt"></i><span>Secured</span></div>
-            <div class="badge"><i class="fas fa-eye-slash"></i><span>Private</span></div>
-            <div class="badge"><i class="fas fa-fingerprint"></i><span>Auth</span></div>
-          </div>
-
-          <div class="copy">
-            &copy; 2026 MISO &mdash; <?= esc($barangay) ?>, <?= esc($municipality) ?>, <?= esc($province) ?><br>
-            <a href="#">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="#">Terms of Use</a>
-          </div>
-
         </div>
-      </div>
+      </form>
+    </div>
 
+    <div class="login-footer">
+      &copy; <?= date('Y') ?> &mdash; <?= esc($barangay) ?><br>
+      <a href="#">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="#">Terms of Use</a>
     </div>
   </div>
 
-  <script src="<?= base_url('js/login/login.js') ?>"></script>
+  <script>
+    document.getElementById('togglePwd').addEventListener('click', function() {
+        var pwdField = document.getElementById('passwordField');
+        var eyeIcon = document.getElementById('eyeIcon');
+        if (pwdField.type === 'password') {
+            pwdField.type = 'text';
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye');
+        } else {
+            pwdField.type = 'password';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        }
+    });
+  </script>
 </body>
 </html>

@@ -461,6 +461,62 @@ public function printCase($id)
         'barangay'  => $barangay,
     ]);
 }
+
+/**
+ * Print Amicable Settlement Contract
+ */
+public function printSettlement($id)
+{
+    $case = $this->blotterModel->find($id);
+    if (!$case || strtolower($case['status']) !== 'settled') {
+        return redirect()->to('blotter')->with('error', 'Case is not eligible for a settlement contract.');
+    }
+
+    $parties = $this->partyModel->getByBlotter($id);
+    $grouped = [];
+    foreach ($parties as $p) {
+        $grouped[$p['role']][] = $p;
+    }
+
+    $barangay = (new \App\Models\BarangaySettingsModel())->first();
+
+    return view('blotter/print_settlement', [
+        'case'     => $case,
+        'parties'  => $grouped,
+        'barangay' => $barangay,
+    ]);
+}
+
+/**
+ * Print Summon for a specific hearing
+ */
+public function printSummon($caseId, $hearingId)
+{
+    $case = $this->blotterModel->find($caseId);
+    if (!$case) {
+        return redirect()->to('blotter')->with('error', 'Case not found.');
+    }
+
+    $hearing = $this->hearingModel->find($hearingId);
+    if (!$hearing || $hearing['blotter_id'] != $caseId) {
+        return redirect()->to("blotter/view/$caseId")->with('error', 'Hearing not found.');
+    }
+
+    $parties = $this->partyModel->getByBlotter($caseId);
+    $grouped = [];
+    foreach ($parties as $p) {
+        $grouped[$p['role']][] = $p;
+    }
+
+    $barangay = (new \App\Models\BarangaySettingsModel())->first();
+
+    return view('blotter/print_summon', [
+        'case'     => $case,
+        'hearing'  => $hearing,
+        'parties'  => $grouped,
+        'barangay' => $barangay,
+    ]);
+}
 /**
  * AJAX: Get upcoming hearing notifications.
  * 
@@ -499,5 +555,51 @@ public function getUpcomingNotifications()
         'count'         => count($notifications),
         'csrf_hash'     => csrf_hash()
     ]);
+}
+
+/**
+ * Export Blotter Cases to CSV
+ */
+public function exportCsv()
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to('/login');
+    }
+
+    $db = \Config\Database::connect();
+    
+    // Fetch all cases with basic details
+    $cases = $db->table('blotter_records')
+        ->select('case_number, incident_type, incident_date, incident_location, purok, status, action_taken, created_at')
+        ->orderBy('id', 'DESC')
+        ->get()
+        ->getResultArray();
+
+    $filename = 'Blotter_Cases_' . date('Ymd_His') . '.csv';
+
+    header("Content-Description: File Transfer");
+    header("Content-Disposition: attachment; filename=$filename");
+    header("Content-Type: text/csv; charset=UTF-8");
+
+    $file = fopen('php://output', 'w');
+
+    // Headers
+    fputcsv($file, ['Case Number', 'Incident Type', 'Date of Incident', 'Location', 'Purok', 'Status', 'Action Taken', 'Date Filed']);
+
+    foreach ($cases as $c) {
+        fputcsv($file, [
+            $c['case_number'],
+            $c['incident_type'],
+            $c['incident_date'],
+            $c['incident_location'],
+            $c['purok'],
+            $c['status'],
+            $c['action_taken'],
+            $c['created_at']
+        ]);
+    }
+
+    fclose($file);
+    exit;
 }
 }
