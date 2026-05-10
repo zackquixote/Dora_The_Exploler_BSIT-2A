@@ -2,14 +2,15 @@
 <header class="bmis-topbar" id="mainTopbar">
     <div class="tb-left" style="display:flex;align-items:center;gap:24px">
         <div>
-            <h1><?= $title ?? 'Dashboard' ?></h1>
-            <p><?= date('l, F d, Y') ?></p>
+            <h1 style="font-weight:800;color:var(--ink);margin:0"><?= $title ?? 'Dashboard' ?></h1>
+            <p style="font-weight:700;color:var(--ink-soft);margin-top:2px;font-size:13px"><?= date('l, F d, Y') ?></p>
         </div>
         
         <!-- Global Search -->
         <div style="position:relative; width: 300px; display:none" id="desktop-search-container">
             <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-size:13px"></i>
-            <input type="text" id="globalSearchInput" class="ds-input" placeholder="Search residents, cases (Ctrl+K)" style="padding-left:38px; border-radius:20px; background:var(--bg); border:none; height:38px">
+            <input type="text" id="globalSearchInput" class="ds-input" placeholder="Search residents, cases..." style="padding-left:38px; padding-right:60px; border-radius:20px; background:var(--bg); border:none; height:38px">
+            <span class="ds-kbd" style="position:absolute; right:10px; top:50%; transform:translateY(-50%)">Ctrl+K</span>
             <div id="globalSearchResults" style="display:none; position:absolute; top:45px; left:0; width:100%; background:var(--white); border-radius:12px; box-shadow:var(--shadow-lg); z-index:1000; overflow:hidden">
                 <div style="padding:12px; max-height:400px; overflow-y:auto" id="globalSearchBody"></div>
             </div>

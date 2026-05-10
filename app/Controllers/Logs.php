@@ -39,7 +39,30 @@ class Logs extends BaseController
             $builder->where('USER_NAME', $user);
         }
         if (!empty($action)) {
-            $builder->like('ACTION', $action);
+            $actionLower = strtolower($action);
+            if ($actionLower === 'create') {
+                $builder->groupStart()
+                        ->like('ACTION', 'create')
+                        ->orLike('ACTION', 'add')
+                        ->orLike('ACTION', 'generate')
+                        ->groupEnd();
+            } elseif ($actionLower === 'update') {
+                $builder->groupStart()
+                        ->like('ACTION', 'update')
+                        ->orLike('ACTION', 'edit')
+                        ->groupEnd();
+            } elseif ($actionLower === 'delete') {
+                $builder->groupStart()
+                        ->like('ACTION', 'delete')
+                        ->orLike('ACTION', 'remove')
+                        ->groupEnd();
+            } elseif ($actionLower === 'login') {
+                $builder->groupStart()
+                        ->like('ACTION', 'log')
+                        ->groupEnd();
+            } else {
+                $builder->like('ACTION', $action);
+            }
         }
 
         $data['logs'] = $builder->get()->getResultArray();

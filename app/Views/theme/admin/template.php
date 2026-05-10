@@ -67,7 +67,7 @@
 <!-- External -->
 <script defer src="<?= base_url('assets/adminlte/plugins/toastr/toastr.min.js') ?>"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script defer src="<?= base_url('js/blotter/notifications.js') ?>"></script>
+<script defer src="<?= base_url('js/blotter/notifications.js') ?>?v=<?= time() ?>"></script>
 
 <?= $this->renderSection('scripts') ?>
 
@@ -128,7 +128,6 @@ $(document).on('submit', 'form[data-confirm]', function(e) {
             $form.submit();
         }
     });
-    });
 });
 
 // Global Search Logic
@@ -141,11 +140,21 @@ const $searchInput = $('#globalSearchInput');
 const $searchResults = $('#globalSearchResults');
 const $searchBody = $('#globalSearchBody');
 
-// Ctrl+K to focus search
+// Ctrl+K to focus search, Esc to close
 document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         $searchInput.focus();
+    }
+    if (e.key === 'Escape') {
+        $searchResults.hide();
+        $searchInput.blur();
+    }
+    // Alt+N = New Resident, Alt+H = Households, Alt+D = Dashboard
+    if (e.altKey && !e.ctrlKey) {
+        var shortcuts = { 'n': 'resident/create', 'h': 'households', 'd': 'admin/dashboard', 'b': 'blotter', 'c': 'certificate' };
+        var target = shortcuts[e.key.toLowerCase()];
+        if (target) { e.preventDefault(); window.location.href = window.baseUrl + target; }
     }
 });
 
@@ -160,12 +169,13 @@ $searchInput.on('input', function() {
     }
     
     searchTimeout = setTimeout(() => {
-        $searchBody.html('<div style="text-align:center;padding:12px;color:var(--ink-soft)"><i class="fas fa-spinner fa-spin"></i> Searching...</div>');
+        $searchBody.html('<div style="text-align:center;padding:20px;color:var(--ink-soft)"><div class="ds-skeleton" style="width:100%;height:36px;margin-bottom:8px"></div><div class="ds-skeleton" style="width:100%;height:36px;margin-bottom:8px"></div><div class="ds-skeleton" style="width:80%;height:36px"></div></div>');
         $searchResults.show();
         
-        $.get(window.baseUrl + 'api/search', { q: query }, function(data) {
-            if (data.length === 0) {
-                $searchBody.html('<div style="text-align:center;padding:12px;color:var(--ink-soft)">No results found for "'+query+'"</div>');
+        $.get(window.baseUrl + 'api/search', { q: query })
+         .done(function(data) {
+            if (!data || data.length === 0) {
+                $searchBody.html('<div class="ds-empty-state" style="padding:24px 16px;text-align:center"><div class="ds-empty-icon" style="font-size:32px;color:var(--ink-soft);margin-bottom:12px;opacity:0.5"><i class="fas fa-search-minus"></i></div><div class="ds-empty-title" style="font-size:14px;font-weight:700;color:var(--ink)">No matching records found</div><div class="ds-empty-desc" style="font-size:11.5px;color:var(--ink-muted)">We couldn\'t find anything for "'+query+'"</div></div>');
                 return;
             }
             
@@ -184,7 +194,10 @@ $searchInput.on('input', function() {
                 `;
             });
             $searchBody.html(html);
-        });
+         })
+         .fail(function() {
+             $searchBody.html('<div class="ds-empty-state" style="padding:24px 16px;text-align:center"><div class="ds-empty-icon" style="font-size:32px;color:var(--c-rose);margin-bottom:12px;opacity:0.8"><i class="fas fa-exclamation-triangle"></i></div><div class="ds-empty-title" style="font-size:14px;font-weight:700;color:var(--ink)">Search Error</div><div class="ds-empty-desc" style="font-size:11.5px;color:var(--ink-muted)">An error occurred while fetching results.</div></div>');
+         });
     }, 300);
 });
 

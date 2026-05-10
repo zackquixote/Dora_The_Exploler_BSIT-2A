@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\HouseholdModel;
 use App\Models\ResidentModel;
+use App\Models\LogModel;
 
 /**
  * Household Controller
@@ -37,12 +38,14 @@ class HouseholdController extends BaseController
 {
     protected $householdModel;
     protected $residentModel;
+    protected $logModel;
     protected $db;
 
     public function __construct()
     {
         $this->householdModel = new HouseholdModel();
         $this->residentModel  = new ResidentModel();
+        $this->logModel       = new LogModel();
         $this->db             = \Config\Database::connect();
     }
 
@@ -53,6 +56,22 @@ class HouseholdController extends BaseController
             return redirect()->to('/login');
         }
         return null;
+    }
+
+    private function generateHouseholdNo()
+    {
+        $year = date('Y');
+        $last = $this->householdModel->like('household_no', "HH-{$year}-%", 'after')
+                                     ->orderBy('id', 'DESC')
+                                     ->first();
+
+        if ($last && !empty($last['household_no'])) {
+            $parts = explode('-', $last['household_no']);
+            $next  = intval(end($parts)) + 1;
+        } else {
+            $next  = 1;
+        }
+        return "HH-{$year}-" . str_pad($next, 3, '0', STR_PAD_LEFT);
     }
 
     // ── Index ─────────────────────────────────────────────────────────
@@ -115,17 +134,7 @@ class HouseholdController extends BaseController
     {
         if ($r = $this->requireLogin()) return $r;
 
-        $year  = date('Y');
-        $count = $this->householdModel->like('household_no', "HH-{$year}-%")->countAllResults();
-
-        $nextNumber           = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
-        $generatedHouseholdNo = "HH-{$year}-{$nextNumber}";
-
-        while ($this->householdModel->where('household_no', $generatedHouseholdNo)->first()) {
-            $count++;
-            $nextNumber           = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
-            $generatedHouseholdNo = "HH-{$year}-{$nextNumber}";
-        }
+        $generatedHouseholdNo = $this->generateHouseholdNo();
 
         return view('households/create', [
             'title'                => 'Add Household',
@@ -141,16 +150,7 @@ class HouseholdController extends BaseController
         $householdNo = $this->request->getPost('household_no');
 
         if (empty($householdNo)) {
-            $year        = date('Y');
-            $count       = $this->householdModel->like('household_no', "HH-{$year}-%")->countAllResults();
-            $nextNumber  = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
-            $householdNo = "HH-{$year}-{$nextNumber}";
-
-            while ($this->householdModel->where('household_no', $householdNo)->first()) {
-                $count++;
-                $nextNumber  = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
-                $householdNo = "HH-{$year}-{$nextNumber}";
-            }
+            $householdNo = $this->generateHouseholdNo();
         }
 
         $rules = [
@@ -198,6 +198,8 @@ class HouseholdController extends BaseController
 
             $message = "Household {$householdNo} added successfully";
             if ($memberCount > 0) $message .= " with {$memberCount} member(s)";
+
+            $this->logModel->addLog("Created Household {$householdNo}" . ($memberCount > 0 ? " with {$memberCount} member(s)" : ''), 'household');
 
             return redirect()->to('/households')->with('success', $message);
         }
@@ -297,6 +299,8 @@ class HouseholdController extends BaseController
                 if ($this->residentModel->update($memberId, $updateData)) $memberCount++;
             }
 
+            $this->logModel->addLog("Updated Household {$data['household_no']} with {$memberCount} active member(s)", 'household');
+
             return redirect()->to('/households')->with('success', "Household updated successfully with {$memberCount} active member(s)");
         }
 
@@ -381,6 +385,9 @@ public function delete($id)
     if ($this->householdModel->delete($id)) {
         $message = 'Household deleted successfully';
         if ($force && $hasResidents > 0) $message .= ". {$hasResidents} resident(s) transferred.";
+
+        $this->logModel->addLog("Deleted Household {$household['household_no']}" . ($force && $hasResidents > 0 ? " (force: {$hasResidents} residents unlinked)" : ''), 'household');
+
         return $this->response->setJSON(['status' => 'success', 'message' => $message, 'csrf_hash' => csrf_hash()]);
     }
 
@@ -492,16 +499,7 @@ public function delete($id)
     // ── AJAX: Next household number ───────────────────────────────────
     public function getNextHouseholdNo()
     {
-        $year        = date('Y');
-        $count       = $this->householdModel->like('household_no', "HH-{$year}-%")->countAllResults();
-        $nextNumber  = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
-        $householdNo = "HH-{$year}-{$nextNumber}";
-
-        while ($this->householdModel->where('household_no', $householdNo)->first()) {
-            $count++;
-            $nextNumber  = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
-            $householdNo = "HH-{$year}-{$nextNumber}";
-        }
+        $householdNo = $this->generateHouseholdNo();
 
         return $this->response->setJSON(['status' => 'success', 'household_no' => $householdNo, 'csrf_hash' => csrf_hash()]);
     }

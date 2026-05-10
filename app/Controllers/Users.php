@@ -68,22 +68,24 @@ class Users extends Controller
 
         foreach ($result as $row) {
             $actions = '
-                <a href="' . base_url('admin/users/view/' . $row['id']) . '" class="btn btn-sm btn-info" title="View">
-                    <i class="far fa-eye"></i>
-                </a>
-                <button class="btn btn-sm btn-warning edit-btn" data-id="' . $row['id'] . '" title="Edit">
-                    <i class="far fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger deleteUserBtn" data-id="' . $row['id'] . '" title="Delete">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+                <div style="white-space:nowrap;display:flex;gap:6px">
+                    <a href="' . base_url('admin/users/view/' . $row['id']) . '" class="ds-action-btn ab-blue" title="View">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <button type="button" class="ds-action-btn ab-amber edit-btn" data-id="' . $row['id'] . '" title="Edit">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button type="button" class="ds-action-btn ab-rose deleteUserBtn" data-id="' . $row['id'] . '" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             ';
 
             // We construct the array so DataTables can read it by name
             $data[] = [
                 'no'         => $num++,
                 'id'         => $row['id'],
-                'name'       => $row['name'],
+                'name'       => '<strong class="font-serif" style="font-size:14px;letter-spacing:-0.01em;">' . esc($row['name']) . '</strong>',
                 'email'      => $row['email'],
                 'role'       => $row['role'],
                 'status'     => $row['status'],

@@ -79,13 +79,13 @@
         var userId = $(this).data('id');
         $.get(window.baseUrl + '/edit/' + userId, function(response) {
             if (response.data) {
-                $('#editUserModal #name').val(response.data.name);
-                $('#editUserModal #userId').val(response.data.id);
-                $('#editUserModal #email').val(response.data.email);
-                $('#editUserModal #password').val('');
-                $('#editUserModal #role').val(response.data.role);
-                $('#editUserModal #status').val(response.data.status);
-                $('#editUserModal').modal('show');
+                $('#editUserForm #name').val(response.data.name);
+                $('#editUserForm #userId').val(response.data.id);
+                $('#editUserForm #email').val(response.data.email);
+                $('#editUserForm #password').val('');
+                $('#editUserForm #role').val(response.data.role);
+                $('#editUserForm #status').val(response.data.status);
+                $('#editUserOverlay').addClass('show');
             } else {
                 alert('Error fetching user data');
             }
@@ -102,7 +102,7 @@
             dataType: 'json',
             success: function (response) {
                 if (response.success) {
-                    $('#editUserModal').modal('hide');
+                    $('#editUserOverlay').removeClass('show');
                     showToast('success', 'User updated successfully!');
                     table.ajax.reload(null, false);
                 } else {

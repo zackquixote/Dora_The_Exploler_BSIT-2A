@@ -16,17 +16,15 @@ foreach ($residents as $r) {
 <div class="bmis-content">
 
     <!-- HEADER -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:12px">
-            <a href="<?= base_url('households') ?>" class="ds-action-btn ab-blue" title="Back"><i class="fas fa-arrow-left"></i></a>
-            <div>
-                <div class="ds-page-title" style="margin:0">Household #<?= esc($household['household_no']) ?></div>
-                <div style="font-size:11px;color:var(--ink-muted)"><i class="fas fa-map-marker-alt" style="margin-right:4px"></i> <?= esc($household['address'] ?? 'Address not set') ?></div>
-            </div>
+    <div class="bmis-page-header">
+        <div class="bmis-page-title">
+            <h1 style="font-weight: 800;"><i class="fas fa-home text-primary"></i> Household #<?= esc($household['household_no']) ?></h1>
+            <p><i class="fas fa-map-marker-alt" style="margin-right:4px"></i> <?= esc($household['address'] ?? 'Address not set') ?></p>
         </div>
-        <div style="display:flex;gap:6px">
-            <a href="<?= base_url('households/edit/'.$household['id']) ?>" class="ds-btn ds-btn-ghost"><i class="fas fa-edit"></i> Edit</a>
-            <a href="<?= base_url('resident/create?household_id='.$household['id']) ?>" class="ds-btn ds-btn-teal"><i class="fas fa-user-plus"></i> Add Member</a>
+        <div class="bmis-page-actions">
+            <a href="<?= base_url('households') ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-arrow-left me-2"></i> Back to Directory</a>
+            <a href="<?= base_url('households/edit/'.$household['id']) ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-edit me-2"></i> Edit Household</a>
+            <a href="<?= base_url('resident/create?household_id='.$household['id']) ?>" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm"><i class="fas fa-user-plus me-2"></i> Add Member</a>
         </div>
     </div>
 
@@ -48,7 +46,7 @@ foreach ($residents as $r) {
                         <img src="<?= base_url($profileSrc) ?>" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid var(--c-teal-bg)">
                         <span style="position:absolute;bottom:0;right:0;width:20px;height:20px;border-radius:50%;background:var(--c-amber);color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;border:2px solid var(--white)"><i class="fas fa-star"></i></span>
                     </div>
-                    <div style="font-size:13px;font-weight:700;color:var(--ink)"><?= esc($headName) ?></div>
+                    <div class="font-serif" style="font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-0.01em"><?= esc($headName) ?></div>
                     <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px">Head of Household</div>
                     <?php if ($headResident): ?>
                     <div style="text-align:left;margin-top:12px">
@@ -103,7 +101,7 @@ foreach ($residents as $r) {
                             <tr id="member-row-<?= $r['id'] ?>">
                                 <td>
                                     <div style="display:flex;align-items:center;gap:8px">
-                                        <strong><?= esc($fullName) ?></strong>
+                                        <strong class="font-serif" style="font-size:14px;letter-spacing:-0.01em;"><?= esc($fullName) ?></strong>
                                         <?php if ($isHead): ?><span class="ds-badge" style="background:var(--c-amber-bg);color:var(--c-amber);font-size:9px"><i class="fas fa-star"></i> Head</span><?php endif; ?>
                                     </div>
                                 </td>

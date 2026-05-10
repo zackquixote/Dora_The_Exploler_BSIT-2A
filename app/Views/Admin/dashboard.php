@@ -223,6 +223,51 @@
         </div>
     </div>
 
+    <!-- ROW 5.5 · AGE DISTRIBUTION -->
+    <div class="ds-grid-2" style="margin-top:16px">
+        <div class="ds-card">
+            <div class="ds-card-head">
+                <div class="ds-card-title"><i class="fas fa-birthday-cake"></i> Age Distribution</div>
+                <span class="ds-badge ds-badge-blue"><?= $totalResidents ?? 0 ?> residents</span>
+            </div>
+            <div class="ds-card-body">
+                <div class="ds-chart-wrap" style="height:190px"><canvas id="ageChart"></canvas></div>
+            </div>
+        </div>
+        <div class="ds-card">
+            <div class="ds-card-head">
+                <div class="ds-card-title"><i class="fas fa-chart-pie"></i> Demographics Summary</div>
+            </div>
+            <div class="ds-card-body">
+                <?php
+                $ageBrackets = [
+                    ['label' => 'Minors (0-17)', 'val' => $ageDistribution['minors'] ?? 0, 'color' => '#6366f1', 'icon' => 'fa-child'],
+                    ['label' => 'Young Adults (18-30)', 'val' => $ageDistribution['young_adults'] ?? 0, 'color' => '#185FA5', 'icon' => 'fa-user-graduate'],
+                    ['label' => 'Adults (31-45)', 'val' => $ageDistribution['adults'] ?? 0, 'color' => '#1D9E75', 'icon' => 'fa-briefcase'],
+                    ['label' => 'Middle Aged (46-59)', 'val' => $ageDistribution['middle_aged'] ?? 0, 'color' => '#854F0B', 'icon' => 'fa-user'],
+                    ['label' => 'Seniors (60+)', 'val' => $ageDistribution['seniors'] ?? 0, 'color' => '#A32D2D', 'icon' => 'fa-user-clock'],
+                ];
+                $totalPop = max(1, $totalResidents ?? 1);
+                foreach ($ageBrackets as $ab):
+                    $pct = round(($ab['val'] / $totalPop) * 100);
+                ?>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                    <div style="width:28px;height:28px;border-radius:50%;background:<?= $ab['color'] ?>15;color:<?= $ab['color'] ?>;display:flex;align-items:center;justify-content:center;font-size:11px"><i class="fas <?= $ab['icon'] ?>"></i></div>
+                    <div style="flex:1">
+                        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+                            <span style="font-weight:600;color:var(--ink)"><?= $ab['label'] ?></span>
+                            <span style="font-weight:700;color:<?= $ab['color'] ?>"><?= $ab['val'] ?> <span style="font-weight:400;color:var(--ink-muted)">(<?= $pct ?>%)</span></span>
+                        </div>
+                        <div style="height:5px;background:var(--bg);border-radius:4px;overflow:hidden">
+                            <div style="height:100%;width:<?= $pct ?>%;background:<?= $ab['color'] ?>;border-radius:4px;transition:width .6s ease"></div>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+
     <!-- ROW 6 · TABLES -->
     <div class="ds-section-label">Records</div>
     <div class="ds-grid-2">
@@ -347,6 +392,9 @@
 </div>
 
 <!-- Chart Data -->
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
 <script>
 const DASHBOARD_DATA = {
     baseUrl:        "<?= base_url() ?>",
@@ -356,7 +404,9 @@ const DASHBOARD_DATA = {
     purokLabels: <?= json_encode(array_column($purokCounts ?? [], 'sitio')) ?>,
     purokValues: <?= json_encode(array_column($purokCounts ?? [], 'count')) ?>,
     civilLabels: <?= json_encode(array_column($civilStatusData ?? [], 'civil_status')) ?>,
-    civilValues: <?= json_encode(array_column($civilStatusData ?? [], 'count')) ?>
+    civilValues: <?= json_encode(array_column($civilStatusData ?? [], 'count')) ?>,
+    ageLabels: ['0-17', '18-30', '31-45', '46-59', '60+'],
+    ageValues: [<?= (int)($ageDistribution['minors'] ?? 0) ?>, <?= (int)($ageDistribution['young_adults'] ?? 0) ?>, <?= (int)($ageDistribution['adults'] ?? 0) ?>, <?= (int)($ageDistribution['middle_aged'] ?? 0) ?>, <?= (int)($ageDistribution['seniors'] ?? 0) ?>]
 };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
@@ -394,5 +444,4 @@ setInterval(function() {
     if (timeEl) timeEl.innerText = timeString;
 }, 1000);
 </script>
-
 <?= $this->endSection() ?>

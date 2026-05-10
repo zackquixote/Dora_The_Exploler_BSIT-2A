@@ -66,12 +66,19 @@ class CertificateModel extends Model
         $year = $year ?? date('Y');
         $prefix = $this->typePrefixes[$type] ?? 'CERT';
 
-        // Count how many of this type already exist for the year
-        $count = $this->where('certificate_type', $type)
-                      ->where('YEAR(created_at)', $year)
-                      ->countAllResults();
+        // Find the latest certificate of this type for the year
+        $lastCert = $this->where('certificate_type', $type)
+                         ->where('YEAR(created_at)', $year)
+                         ->orderBy('id', 'DESC')
+                         ->first();
 
-        $next = $count + 1;
+        if ($lastCert && !empty($lastCert['certificate_number'])) {
+            $parts = explode('-', $lastCert['certificate_number']);
+            $next = intval(end($parts)) + 1;
+        } else {
+            $next = 1;
+        }
+
         return $prefix . '-' . $year . '-' . str_pad($next, 4, '0', STR_PAD_LEFT);
     }
 

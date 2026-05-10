@@ -7,6 +7,17 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 
 <div class="bmis-content">
 
+    <!-- Premium Page Header -->
+    <div class="bmis-page-header">
+        <div class="bmis-page-title">
+            <h1 style="font-weight: 800;"><i class="fas fa-user-plus text-primary"></i> Add New Resident</h1>
+            <p>Register a new resident into the barangay database.</p>
+        </div>
+        <div class="bmis-page-actions">
+            <a href="<?= base_url('resident') ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-arrow-left me-2"></i> Back to Directory</a>
+        </div>
+    </div>
+
     <!-- Errors -->
     <?php if (session()->getFlashdata('errors')): ?>
         <div style="background:var(--c-rose-bg);color:var(--c-rose);padding:12px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600">
@@ -70,9 +81,22 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                         <label class="ds-input-label">Citizenship</label>
                         <input type="text" name="citizenship" class="ds-input" value="<?= old('citizenship') ?? 'Filipino' ?>">
                     </div>
-                    <div>
+                    <div style="grid-column: 1 / -1">
                         <label class="ds-input-label">Profile Picture</label>
-                        <input type="file" name="profile_picture" class="ds-input" id="profile_picture" accept="image/*" style="padding:6px 12px">
+                        <div class="ds-photo-upload" id="photoDropZone">
+                            <div id="photoPreviewWrap">
+                                <div class="ds-photo-preview empty" id="photoPreview">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                            </div>
+                            <div class="ds-photo-info">
+                                <div class="title">Upload a photo</div>
+                                <div class="subtitle">Drag & drop or click to browse. JPG, PNG up to 2MB.</div>
+                                <div class="file-name" id="photoFileName" style="display:none"></div>
+                            </div>
+                            <input type="file" name="profile_picture" id="profile_picture" accept="image/*" style="display:none">
+                            <button type="button" class="ds-btn ds-btn-ghost" id="photoBrowseBtn" style="height:32px;font-size:11px"><i class="fas fa-upload"></i> Browse</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -158,11 +182,14 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
     </form>
 </div>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
 <script>
     var BASE_URL         = "<?= base_url() ?>";
     var CSRF_TOKEN_NAME  = "<?= csrf_token() ?>";
     var CSRF_TOKEN_VALUE = "<?= csrf_hash() ?>";
 </script>
+<script src="<?= base_url('js/shared/photo-upload.js') ?>"></script>
 <script src="<?= base_url('js/residents/residents-create.js') ?>"></script>
-
 <?= $this->endSection() ?>

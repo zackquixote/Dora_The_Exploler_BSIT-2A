@@ -2,7 +2,7 @@
    BMIS DESIGN SYSTEM — Master Stylesheet
    Font: Inter + DM Mono | Palette: Modern Indigo/Emerald
    ═══════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600&display=swap');
 
 *,
 *::before,
@@ -15,8 +15,9 @@
 :root {
   --font: 'Inter', sans-serif;
   --mono: 'DM Mono', monospace;
-  --bg: #eef2f6;
-  /* Softer grayish-blue background */
+  --serif: 'Playfair Display', serif;
+  --bg: #e2e8f0;
+  /* Slightly darker slate background to contrast white cards */
   --white: #ffffff;
   /* Solid white for cards to contrast gently against the softer bg */
   --ink: #0f172a;
@@ -60,6 +61,10 @@ body {
   font-size: 13.5px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+.font-serif {
+  font-family: var(--serif) !important;
 }
 
 /* ─── SIDEBAR ──────────────────────────────── */
@@ -1261,6 +1266,7 @@ body {
   font-weight: 800;
   background: linear-gradient(to right, #ffffff, #cbd5e1);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -1477,3 +1483,110 @@ body.dark-theme .ds-skeleton {
     background-position: -200% 0;
   }
 }
+
+/* ─── SKELETON VARIANTS ────────────────────── */
+.ds-skeleton-circle { border-radius: 50%; }
+.ds-skeleton-text { width: 80%; height: 12px; margin-bottom: 8px; }
+.ds-skeleton-text.short { width: 40%; }
+.ds-skeleton-text.medium { width: 60%; }
+.ds-skeleton-card { width: 100%; height: 120px; border-radius: var(--r); }
+.ds-skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; }
+.ds-skeleton-row {
+  display: flex; gap: 12px; align-items: center;
+  padding: 12px 0; border-bottom: .5px solid var(--border);
+}
+
+/* ─── PHOTO UPLOAD PREVIEW ─────────────────── */
+.ds-photo-upload {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px; border: 2px dashed var(--border);
+  border-radius: var(--r); transition: all .2s;
+  background: var(--bg);
+}
+.ds-photo-upload:hover { border-color: var(--c-blue); background: var(--c-blue-bg); }
+.ds-photo-upload.dragover { border-color: var(--c-teal); background: var(--c-teal-bg); transform: scale(1.01); }
+
+.ds-photo-preview {
+  width: 80px; height: 80px; border-radius: 50%;
+  object-fit: cover; border: 3px solid var(--c-teal-bg);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all .3s;
+}
+.ds-photo-preview:hover { transform: scale(1.05); }
+.ds-photo-preview.empty {
+  background: var(--bg); display: flex; align-items: center;
+  justify-content: center; font-size: 28px; color: var(--ink-soft);
+  border: 3px dashed var(--border);
+}
+
+.ds-photo-info { flex: 1; }
+.ds-photo-info .title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.ds-photo-info .subtitle { font-size: 11px; color: var(--ink-soft); }
+.ds-photo-info .file-name { font-size: 10px; color: var(--c-teal); font-weight: 600; margin-top: 4px; }
+
+/* ─── PULSE ANIMATION ──────────────────────── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(29, 158, 117, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(29, 158, 117, 0); }
+}
+.ds-pulse { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* ─── SMOOTH PAGE TRANSITIONS ──────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.bmis-content { animation: fadeInUp .3s ease-out; }
+
+/* ─── KEYBOARD SHORTCUT HINTS ──────────────── */
+.ds-kbd {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding: 0 5px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px; font-size: 10px; font-weight: 700;
+  font-family: var(--mono); color: var(--ink-soft);
+  box-shadow: 0 1px 0 var(--border);
+}
+
+/* ─── ENHANCED TOOLTIPS ────────────────────── */
+[data-tooltip] {
+  position: relative;
+}
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%) scale(0.9); opacity: 0;
+  background: var(--ink); color: #fff;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 10.5px; font-weight: 600; white-space: nowrap;
+  pointer-events: none; transition: all .15s;
+  z-index: 1000;
+}
+[data-tooltip]:hover::after { opacity: 1; transform: translateX(-50%) scale(1); }
+
+/* ─── EMPTY STATE ILLUSTRATIONS ────────────── */
+.ds-empty-state {
+  text-align: center; padding: 40px 20px; color: var(--ink-soft);
+}
+.ds-empty-state .ds-empty-icon {
+  width: 64px; height: 64px; margin: 0 auto 16px;
+  border-radius: 50%; background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: var(--ink-soft); opacity: 0.5;
+}
+.ds-empty-state .ds-empty-title {
+  font-size: 14px; font-weight: 700; color: var(--ink);
+  margin-bottom: 4px;
+}
+.ds-empty-state .ds-empty-desc {
+  font-size: 12px; color: var(--ink-muted); max-width: 280px;
+  margin: 0 auto;
+}
+
+/* ─── COUNTER ANIMATION ───────────────────── */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ds-stat-num { animation: countUp .4s ease-out; }
+.ds-mini-num { animation: countUp .4s ease-out; }

@@ -123,7 +123,6 @@ var HouseholdIndex = (function() {
         }
         
         jQuery(document).ready(function($) {
-            console.log('Household index initialized');
             initSearch();
             initDelete();
         });

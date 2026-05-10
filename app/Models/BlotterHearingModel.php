@@ -72,6 +72,20 @@ public function getUpcomingHearings($days = 3)
 }
 
 /**
+ * Get hearings that are past their date but still marked as 'Scheduled'.
+ */
+public function getOverdueHearings()
+{
+    $today = date('Y-m-d');
+    return $this->select('blotter_hearings.*, blotter_records.case_number, blotter_records.id as blotter_id')
+                ->join('blotter_records', 'blotter_records.id = blotter_hearings.blotter_id')
+                ->where('hearing_date <', $today)
+                ->where('blotter_hearings.status', 'Scheduled')
+                ->orderBy('hearing_date', 'ASC')
+                ->findAll();
+}
+
+/**
  * Mark a hearing as notified.
  *
  * @param int $id

@@ -7,6 +7,17 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 
 <div class="bmis-content">
 
+    <!-- Premium Page Header -->
+    <div class="bmis-page-header">
+        <div class="bmis-page-title">
+            <h1 style="font-weight: 800;"><i class="fas fa-home text-primary"></i> Add New Household</h1>
+            <p>Register a new household and assign members.</p>
+        </div>
+        <div class="bmis-page-actions">
+            <a href="<?= base_url('households') ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-arrow-left me-2"></i> Back to Directory</a>
+        </div>
+    </div>
+
     <?php if (session()->getFlashdata('errors')): ?>
         <div style="background:var(--c-rose-bg);color:var(--c-rose);padding:12px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600">
             <i class="fas fa-exclamation-circle" style="margin-right:6px"></i> Please fix:
@@ -34,7 +45,7 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                     <div>
                         <label class="ds-input-label">Purok / Sitio <span style="color:var(--c-rose)">*</span></label>
                         <select name="sitio" id="sitioSelect" class="ds-select" required>
-                            <option value="">— Select Purok —</option>
+                            <option value="">Select Purok</option>
                             <?php foreach (['Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um'] as $s): ?>
                                 <option value="<?= $s ?>" <?= old('sitio') == $s ? 'selected' : '' ?>><?= $s ?></option>
                             <?php endforeach; ?>
@@ -43,7 +54,7 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                     <div>
                         <label class="ds-input-label">House Type</label>
                         <select name="house_type" class="ds-select">
-                            <option value="">— Select Type —</option>
+                            <option value="">Select Type</option>
                             <?php foreach (['Concrete','Semi-Concrete','Wood','Light Materials'] as $ht): ?>
                                 <option value="<?= $ht ?>" <?= old('house_type') == $ht ? 'selected' : '' ?>><?= $ht ?></option>
                             <?php endforeach; ?>

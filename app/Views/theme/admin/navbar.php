@@ -2,15 +2,19 @@
 <header class="bmis-topbar" id="mainTopbar">
     <div class="tb-left" style="display:flex;align-items:center;gap:24px">
         <div>
-            <h1><?= $title ?? 'Dashboard' ?></h1>
-            <p><?= date('l, F d, Y') ?></p>
+            <h1 style="font-weight:800;color:var(--ink);margin:0"><?= $title ?? 'Dashboard' ?></h1>
+            <p style="font-weight:700;color:var(--ink-soft);margin-top:2px;font-size:13px"><?= date('l, F d, Y') ?></p>
         </div>
         
-        <!-- Global Search Trigger -->
-        <button id="spotlightTriggerBtn" style="display:none; align-items:center; justify-content:space-between; width: 260px; height: 36px; padding: 0 16px; border-radius: 20px; border: 1px solid var(--border-input); background: var(--bg); color: var(--ink-soft); font-size: 12px; cursor: pointer; transition: border-color 0.2s;">
-            <span><i class="fas fa-search" style="margin-right:8px;"></i> Search residents, cases...</span>
-            <span style="font-size:10px; background:var(--border); padding:2px 6px; border-radius:4px; font-weight:600;">Ctrl+K</span>
-        </button>
+        <!-- Global Search -->
+        <div style="position:relative; width: 280px;" id="desktop-search-container">
+            <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-size:13px"></i>
+            <input type="text" id="globalSearchInput" class="ds-input" placeholder="Search residents, cases..." style="padding-left:38px; padding-right:60px; border-radius:20px; background:var(--bg); border:none; height:36px">
+            <span class="ds-kbd" style="position:absolute; right:10px; top:50%; transform:translateY(-50%)">Ctrl+K</span>
+            <div id="globalSearchResults" style="display:none; position:absolute; top:42px; left:0; width:100%; background:var(--white); border-radius:12px; box-shadow:var(--shadow-lg); z-index:1000; overflow:hidden; border:1px solid var(--border)">
+                <div style="padding:12px; max-height:400px; overflow-y:auto" id="globalSearchBody"></div>
+            </div>
+        </div>
     </div>
     <div class="tb-right">
         <div class="dropdown" style="display:inline-block">

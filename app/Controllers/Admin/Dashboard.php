@@ -99,6 +99,17 @@ class Dashboard extends BaseController
         // Recent activity logs (unchanged but keep)
         $recentLogs = $logModel->orderBy('DATELOG DESC, TIMELOG DESC')->limit(10)->findAll();
 
+        // Age distribution for demographics chart
+        $ageDistribution = $db->query("
+            SELECT 
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) BETWEEN 0 AND 17 THEN 1 ELSE 0 END) as 'minors',
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) BETWEEN 18 AND 30 THEN 1 ELSE 0 END) as 'young_adults',
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) BETWEEN 31 AND 45 THEN 1 ELSE 0 END) as 'adults',
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) BETWEEN 46 AND 59 THEN 1 ELSE 0 END) as 'middle_aged',
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) >= 60 THEN 1 ELSE 0 END) as 'seniors'
+            FROM residents WHERE deleted_at IS NULL AND birthdate IS NOT NULL
+        ")->getRowArray();
+
         return view('Admin/dashboard', [
             'title'           => 'Admin Dashboard',
             // existing
@@ -127,6 +138,7 @@ class Dashboard extends BaseController
             'upcomingHearings' => $upcomingHearings,
             'casesByPurok'     => $casesByPurok,
             'recentCases'      => $recentCases,
+            'ageDistribution'  => $ageDistribution,
         ]);
     }
 

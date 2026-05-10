@@ -6,14 +6,14 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 <?= $this->section('content') ?>
 
 <div class="bmis-content">
-    <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:12px">
-            <a href="<?= base_url('households') ?>" class="ds-action-btn ab-blue" title="Back"><i class="fas fa-arrow-left"></i></a>
-            <div>
-                <div class="ds-page-title" style="margin:0">Assign Existing Residents</div>
-                <div style="font-size:11px;color:var(--ink-muted)">Target: Household #<?= esc($household_id) ?></div>
-            </div>
+    <!-- Premium Page Header -->
+    <div class="bmis-page-header">
+        <div class="bmis-page-title">
+            <h1 style="font-weight: 800;"><i class="fas fa-user-plus text-primary"></i> Assign Existing Residents</h1>
+            <p>Target: <strong style="color:var(--ink)">Household #<?= esc($household_id) ?></strong></p>
+        </div>
+        <div class="bmis-page-actions">
+            <a href="<?= base_url('households') ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-arrow-left me-2"></i> Back to Directory</a>
         </div>
     </div>
 

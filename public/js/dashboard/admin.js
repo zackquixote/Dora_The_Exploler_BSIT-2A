@@ -109,6 +109,52 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // ── Age Distribution Bar ──
+    const ageEl = document.getElementById('ageChart');
+    if (ageEl && DASHBOARD_DATA.ageLabels) {
+        const ageColors = ['#6366f1', '#185FA5', '#1D9E75', '#854F0B', '#A32D2D'];
+        new Chart(ageEl, {
+            type: 'bar',
+            data: {
+                labels: DASHBOARD_DATA.ageLabels,
+                datasets: [{
+                    label: 'Residents',
+                    data: DASHBOARD_DATA.ageValues,
+                    backgroundColor: ageColors,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    maxBarThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                        padding: 12,
+                        cornerRadius: 10,
+                        titleFont: { size: 13, weight: 'bold' },
+                        bodyFont: { size: 12 },
+                        callbacks: {
+                            label: function(ctx) {
+                                var total = ctx.dataset.data.reduce(function(a,b){ return a+b; }, 0);
+                                var pct = total > 0 ? Math.round((ctx.parsed.y / total) * 100) : 0;
+                                return ctx.parsed.y + ' residents (' + pct + '%)';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.04)', drawBorder: false }, ticks: { stepSize: 1 } },
+                    x: { grid: { display: false } }
+                },
+                animation: { y: { duration: 1200, easing: 'easeOutQuart' } }
+            }
+        });
+    }
+
     // ── AJAX Case Filtering ──
     const caseFilter = document.getElementById('caseOverviewFilter');
     if (caseFilter) {

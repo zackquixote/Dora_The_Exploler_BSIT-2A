@@ -576,19 +576,38 @@ public function getUpcomingNotifications()
     }
 
     $days = $this->request->getGet('days') ?? 3;
-    $hearings = $this->hearingModel->getUpcomingHearings($days);
+    $upcomingHearings = $this->hearingModel->getUpcomingHearings($days);
+    $overdueHearings  = $this->hearingModel->getOverdueHearings();
 
     $notifications = [];
-    foreach ($hearings as $h) {
+
+    // Add Overdue hearings first (high priority)
+    foreach ($overdueHearings as $h) {
+        $notifications[] = [
+            'id'          => $h['id'] . '_overdue',
+            'title'       => 'Overdue Hearing',
+            'case_number' => $h['case_number'],
+            'message'     => 'Hearing was due on ' . date('M d, Y', strtotime($h['hearing_date'])) . ' but is still marked as Scheduled.',
+            'date'        => $h['hearing_date'],
+            'time'        => $h['hearing_time'] ? date('h:i A', strtotime($h['hearing_time'])) : '',
+            'venue'       => $h['venue'],
+            'url'         => site_url('blotter/view/' . $h['blotter_id']),
+            'type'        => 'danger'
+        ];
+    }
+
+    // Add Upcoming hearings
+    foreach ($upcomingHearings as $h) {
         $notifications[] = [
             'id'          => $h['id'],
-            'title'       => 'Blotter Hearing',
+            'title'       => 'Upcoming Hearing',
             'case_number' => $h['case_number'],
             'message'     => 'Hearing scheduled for ' . date('M d, Y', strtotime($h['hearing_date'])),
             'date'        => $h['hearing_date'],
             'time'        => $h['hearing_time'] ? date('h:i A', strtotime($h['hearing_time'])) : '',
             'venue'       => $h['venue'],
-            'url'         => site_url('blotter/view/' . $h['blotter_id'])
+            'url'         => site_url('blotter/view/' . $h['blotter_id']),
+            'type'        => 'warning'
         ];
     }
 

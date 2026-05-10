@@ -34,6 +34,18 @@ $statusBadge = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','deceased'
         </div>
     <?php endif; ?>
 
+    <!-- Premium Page Header -->
+    <div class="bmis-page-header">
+        <div class="bmis-page-title">
+            <h1 style="font-weight: 800;"><i class="fas fa-user text-primary"></i> Resident Profile</h1>
+            <p>Detailed records for: <strong style="color:var(--ink)"><?= esc($resident['first_name']) ?> <?= esc($resident['last_name']) ?></strong></p>
+        </div>
+        <div class="bmis-page-actions">
+            <a href="<?= base_url('resident') ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-arrow-left me-2"></i> Back to Directory</a>
+            <a href="<?= base_url('resident/edit/'.$resident['id']) ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-edit me-2"></i> Edit Profile</a>
+        </div>
+    </div>
+
     <!-- ── THREE-COLUMN GRID ── -->
     <div class="rv-grid">
 
@@ -48,7 +60,7 @@ $statusBadge = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','deceased'
                             <span style="position:absolute;bottom:2px;right:2px;width:14px;height:14px;border-radius:50%;background:var(--c-teal);border:2.5px solid var(--white)"></span>
                         <?php endif; ?>
                     </div>
-                    <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px"><?= esc($resident['first_name']) ?> <?= esc($resident['last_name']) ?></div>
+                    <div class="font-serif" style="font-size:18px;font-weight:700;color:var(--ink);margin-bottom:2px;letter-spacing:-0.01em;line-height:1.2;"><?= esc($resident['first_name']) ?> <?= esc($resident['last_name']) ?></div>
                     <div style="font-size:11px;color:var(--ink-muted);margin-bottom:10px"><?= ucfirst(esc($resident['civil_status'] ?? 'N/A')) ?> · <?= ucfirst(esc($resident['sex'])) ?></div>
 
                     <!-- Mini Stats -->

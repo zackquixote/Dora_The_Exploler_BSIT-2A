@@ -146,6 +146,9 @@
     </div>
 </div>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
 <script>
 const DASHBOARD_DATA = {
     baseUrl: "<?= base_url() ?>",
@@ -173,5 +176,4 @@ setInterval(function() {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="<?= base_url('js/dashboard/admin.js') ?>"></script>
-
 <?= $this->endSection() ?>

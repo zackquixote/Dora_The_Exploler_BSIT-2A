@@ -7,11 +7,12 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 
 <div class="bmis-content">
 
-    <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <h1 class="ds-page-title" style="margin:0;">
-            <i class="fas fa-cogs" style="color:var(--c-blue);margin-right:8px;"></i> Barangay Settings
-        </h1>
+    <!-- Premium Page Header -->
+    <div class="bmis-page-header">
+        <div class="bmis-page-title">
+            <h1 style="font-weight: 800;"><i class="fas fa-cogs text-primary"></i> Barangay Settings</h1>
+            <p>Configure general barangay information and official positions.</p>
+        </div>
     </div>
 
     <!-- Flash Alerts -->
@@ -119,7 +120,7 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                                 <i class="fas fa-user-tie"></i> <?= $label ?>
                             </label>
                             <select name="<?= $fieldName ?>" class="ds-select official-select">
-                                <option value="">— Select Resident —</option>
+                                <option value="">Select Resident</option>
                                 <?php foreach ($residents as $r):
                                     $rFullName = $r['first_name'] . ' ' . $r['last_name'];
                                 ?>
@@ -150,7 +151,7 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                                 <i class="fas fa-user"></i> <?= $posName ?>
                             </label>
                             <select name="kagawad_<?= $i ?>_id" class="ds-select official-select">
-                                <option value="">— Select Resident —</option>
+                                <option value="">Select Resident</option>
                                 <?php foreach ($residents as $r):
                                     $rFullName = $r['first_name'] . ' ' . $r['last_name'];
                                 ?>
@@ -182,6 +183,9 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 
 </div><!-- /bmis-content -->
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('resident_search');
@@ -227,5 +231,4 @@ document.addEventListener('DOMContentLoaded', function () {
     purokSelect.addEventListener('change', filterOptions);
 });
 </script>
-
 <?= $this->endSection() ?>

@@ -5,11 +5,28 @@
 (function($) {
     'use strict';
 
+    // Derive the application root URL from this script's own src attribute.
+    // e.g. "http://localhost:8080/js/blotter/notifications.js" → "http://localhost:8080/"
+    function getAppRoot() {
+        var scripts = document.getElementsByTagName('script');
+        for (var i = 0; i < scripts.length; i++) {
+            var src = scripts[i].src || '';
+            var marker = 'js/blotter/notifications.js';
+            var idx = src.indexOf(marker);
+            if (idx !== -1) {
+                return src.substring(0, idx);
+            }
+        }
+        // Fallback: use window.baseUrl or origin
+        return window.baseUrl || (window.location.origin + '/');
+    }
+
+    var APP_ROOT = getAppRoot();
+
     let NotificationCenter = {
         config: {
             refreshInterval: 60000,
-            notificationDays: 3,
-            apiUrl: (window.baseUrl || '/') + 'blotter/getUpcomingNotifications'
+            notificationDays: 3
         },
 
         init: function() {
@@ -19,7 +36,7 @@
 
         loadNotifications: function() {
             $.ajax({
-                url: this.config.apiUrl,
+                url: APP_ROOT + 'blotter/getUpcomingNotifications',
                 type: 'GET',
                 data: { days: this.config.notificationDays },
                 dataType: 'json',
@@ -55,19 +72,21 @@
             }
             let html = '';
             $.each(notifications, (i, n) => {
-                html += `<a class="dropdown-item" href="${n.url}">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0"><i class="fas fa-gavel text-warning"></i></div>
+                let iconColor = n.type === 'danger' ? 'text-danger' : 'text-warning';
+                let alertBg   = n.type === 'danger' ? 'bg-danger bg-opacity-10' : '';
+                html += `<a class="dropdown-item ${alertBg}" href="${n.url}" style="border-bottom:1px solid #f1f5f9; white-space: normal;">
+                            <div class="d-flex align-items-start py-1">
+                                <div class="flex-shrink-0 mt-1"><i class="fas fa-gavel ${iconColor}"></i></div>
                                 <div class="flex-grow-1 ms-3">
-                                    <strong>${n.title} – ${n.case_number}</strong><br>
+                                    <strong class="${n.type === 'danger' ? 'text-danger' : ''}">${n.title} – ${n.case_number}</strong><br>
                                     <small>${n.message} ${n.time ? 'at ' + n.time : ''}</small>
-                                    <div class="small text-muted">📍 ${n.venue || 'Venue TBA'}</div>
+                                    <div class="small text-muted mt-1">📍 ${n.venue || 'Venue TBA'}</div>
                                 </div>
                             </div>
                          </a>`;
             });
             html += '<div class="dropdown-divider"></div>';
-            html += '<a class="dropdown-item text-center small" href="' + window.baseUrl + 'blotter?filter=upcoming">View all upcoming hearings →</a>';
+            html += '<a class="dropdown-item text-center small" href="' + APP_ROOT + 'blotter?filter=upcoming">View all upcoming hearings →</a>';
             $dropdown.html(html);
         },
 

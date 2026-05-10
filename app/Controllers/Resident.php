@@ -221,6 +221,10 @@ class Resident extends BaseController
 
         try {
             $this->residentModel->update($id, $data);
+
+            $fullName = ($data['first_name'] ?? $resident['first_name']) . ' ' . ($data['last_name'] ?? $resident['last_name']);
+            $this->logModel->addLog('Updated Resident ' . $fullName, 'resident');
+
             return redirect()->to(base_url('resident'))->with('success', 'Resident updated successfully.');
         } catch (\Exception $e) {
             if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
@@ -247,6 +251,9 @@ class Resident extends BaseController
             }
 
             if ($this->residentModel->delete($id)) {
+                $fullName = $resident['first_name'] . ' ' . $resident['last_name'];
+                $this->logModel->addLog('Deleted Resident ' . $fullName, 'resident');
+
                 return $this->response->setJSON([
                     'status'    => 'success',
                     'message'   => 'Resident deleted successfully.',
@@ -320,6 +327,14 @@ class Resident extends BaseController
         $keyword       = $this->request->getGet('q');
         $filterPurok   = $this->request->getGet('filter_purok');
         $filterHouseId = $this->request->getGet('filter_household_id');
+
+        // Pre-fill purok filter with household's location on initial load
+        if ($filterPurok === null && $householdId) {
+            $household = $this->householdModel->find($householdId);
+            if ($household) {
+                $filterPurok = $household['sitio'];
+            }
+        }
 
         $builder = $this->residentModel
             ->groupStart()

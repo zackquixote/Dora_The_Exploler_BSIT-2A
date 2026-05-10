@@ -7,15 +7,34 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 
 <div class="bmis-content">
 
+    <!-- Page Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <div style="display:flex;align-items:center;gap:16px">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--c-blue-bg);color:var(--c-blue);display:flex;align-items:center;justify-content:center;font-size:20px">
+                <i class="fas fa-users"></i>
+            </div>
+            <div>
+                <div class="ds-page-title" style="margin:0;font-size:24px;font-weight:800;color:var(--ink)">Resident Directory</div>
+                <div style="font-size:13px;color:var(--ink-muted);margin-top:2px">Manage all registered residents in the barangay</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:10px">
+            <a href="<?= base_url('resident/exportCsv' . (($selectedPurok ?? 'all') !== 'all' ? '?purok='.urlencode($selectedPurok) : '')) ?>" class="ds-btn ds-btn-ghost" style="height:40px;padding:0 20px;border-radius:20px;background:var(--white)"><i class="fas fa-file-csv"></i> Export CSV</a>
+            <a href="<?= base_url('resident/create') ?>" class="ds-btn ds-btn-primary" style="height:40px;padding:0 20px;border-radius:20px;box-shadow:0 4px 12px rgba(var(--c-blue-rgb), 0.3)">
+                <i class="fas fa-plus"></i> Add Resident
+            </a>
+        </div>
+    </div>
+
     <!-- Flash messages -->
     <?php if (session()->getFlashdata('success')): ?>
-        <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:10px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px">
-            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
+        <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:14px 20px;border-radius:var(--r-md);margin-bottom:24px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;border:1px solid rgba(var(--c-teal-rgb), 0.2)">
+            <i class="fas fa-check-circle" style="font-size:16px"></i> <?= session()->getFlashdata('success') ?>
         </div>
     <?php endif; ?>
     <?php if (session()->getFlashdata('error')): ?>
-        <div style="background:var(--c-rose-bg);color:var(--c-rose);padding:10px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px">
-            <i class="fas fa-exclamation-circle"></i> <?= session()->getFlashdata('error') ?>
+        <div style="background:var(--c-rose-bg);color:var(--c-rose);padding:14px 20px;border-radius:var(--r-md);margin-bottom:24px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;border:1px solid rgba(var(--c-rose-rgb), 0.2)">
+            <i class="fas fa-exclamation-circle" style="font-size:16px"></i> <?= session()->getFlashdata('error') ?>
         </div>
     <?php endif; ?>
 
@@ -81,13 +100,9 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
     </div>
 
     <!-- RESIDENTS TABLE -->
-    <div class="ds-card" style="margin-bottom:14px">
-        <div class="ds-card-head">
-            <div class="ds-card-title"><i class="fas fa-address-book"></i> Resident Directory</div>
-            <div style="display:flex;gap:8px">
-                <a href="<?= base_url('resident/exportCsv' . (($selectedPurok ?? 'all') !== 'all' ? '?purok='.urlencode($selectedPurok) : '')) ?>" class="ds-btn ds-btn-ghost"><i class="fas fa-file-csv"></i> Export CSV</a>
-                <a href="<?= base_url('resident/create') ?>" class="ds-btn ds-btn-primary"><i class="fas fa-plus"></i> Add Resident</a>
-            </div>
+    <div class="ds-card" style="margin-bottom:24px;border:none;box-shadow:0 10px 30px rgba(0,0,0,0.03);border-radius:var(--r-lg);overflow:hidden">
+        <div class="ds-card-head" style="background:var(--white);padding:20px 24px;border-bottom:1px solid var(--border)">
+            <div class="ds-card-title"><i class="fas fa-list"></i> Full Resident List</div>
         </div>
         <div class="ds-card-body p0">
             <div style="overflow-x:auto">
@@ -108,38 +123,34 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (empty($residents)): ?>
-                            <tr><td colspan="11" style="text-align:center;padding:32px;color:var(--ink-soft)">No residents found.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($residents as $r):
-                                $profileImg = !empty($r['profile_picture']) ? base_url('uploads/' . $r['profile_picture']) : base_url('assets/img/default.png');
-                                $flags = [];
-                                if (!empty($r['is_senior_citizen'])) $flags[] = '<span class="ds-badge ds-badge-green">Senior</span>';
-                                if (!empty($r['is_pwd'])) $flags[] = '<span class="ds-badge ds-badge-amber">PWD</span>';
-                                if (!empty($r['is_voter'])) $flags[] = '<span class="ds-badge ds-badge-blue">Voter</span>';
-                            ?>
-                            <tr>
-                                <td class="mono"><?= $r['id'] ?></td>
-                                <td><img src="<?= $profileImg ?>" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid var(--border)"></td>
-                                <td><strong><?= esc($r['first_name']) ?> <?= esc($r['last_name']) ?></strong></td>
-                                <td><?= ucfirst($r['sex']) ?></td>
-                                <td><?= $r['age'] ?? '—' ?></td>
-                                <td><?= esc($r['civil_status'] ?? '—') ?></td>
-                                <td style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--ink-muted)"><?= esc($r['sitio'] ?? 'Unassigned') ?></td>
-                                <td class="mono"><?= esc($r['household_no'] ?? '—') ?></td>
-                                <td><?= esc($r['occupation'] ?? '—') ?></td>
-                                <td><?= implode(' ', $flags) ?: '—' ?></td>
-                                <td style="white-space:nowrap">
-                                    <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-eye"></i></a>
-                                    <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-edit"></i></a>
-                                    <form action="<?= base_url('resident/delete/'.$r['id']) ?>" method="POST" style="display:inline-block" data-confirm="Delete <?= esc($r['first_name'].' '.$r['last_name']) ?>?">
-                                        <?= csrf_field() ?>
-                                        <button type="submit" class="ds-action-btn ab-rose" title="Delete"><i class="fas fa-trash"></i></button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                        <?php foreach ($residents as $r):
+                            $profileImg = !empty($r['profile_picture']) ? base_url('uploads/' . $r['profile_picture']) : base_url('assets/img/default.png');
+                            $flags = [];
+                            if (!empty($r['is_senior_citizen'])) $flags[] = '<span class="ds-badge ds-badge-green">Senior</span>';
+                            if (!empty($r['is_pwd'])) $flags[] = '<span class="ds-badge ds-badge-amber">PWD</span>';
+                            if (!empty($r['is_voter'])) $flags[] = '<span class="ds-badge ds-badge-blue">Voter</span>';
+                        ?>
+                        <tr>
+                            <td class="mono"><?= $r['id'] ?></td>
+                            <td><img src="<?= $profileImg ?>" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid var(--border)"></td>
+                            <td><strong class="font-serif" style="font-size:14px;letter-spacing:-0.01em;"><?= esc($r['first_name']) ?> <?= esc($r['last_name']) ?></strong></td>
+                            <td><?= ucfirst($r['sex']) ?></td>
+                            <td><?= $r['age'] ?? '—' ?></td>
+                            <td><?= esc($r['civil_status'] ?? '—') ?></td>
+                            <td style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--ink-muted)"><?= esc($r['sitio'] ?? 'Unassigned') ?></td>
+                            <td class="mono"><?= esc($r['household_no'] ?? '—') ?></td>
+                            <td><?= esc($r['occupation'] ?? '—') ?></td>
+                            <td><?= implode(' ', $flags) ?: '—' ?></td>
+                            <td style="white-space:nowrap">
+                                <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-eye"></i></a>
+                                <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-edit"></i></a>
+                                <form action="<?= base_url('resident/delete/'.$r['id']) ?>" method="POST" style="display:inline-block" data-confirm="Delete <?= esc($r['first_name'].' '.$r['last_name']) ?>?">
+                                    <?= csrf_field() ?>
+                                    <button type="submit" class="ds-action-btn ab-rose" title="Delete"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>

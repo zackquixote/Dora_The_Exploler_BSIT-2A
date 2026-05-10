@@ -38,17 +38,20 @@ class SearchController extends Controller
             // 2. Search Households
             $householdModel = new HouseholdModel();
             $households = $householdModel
+                ->select('households.*, CONCAT(residents.first_name, " ", residents.last_name) as head_name')
+                ->join('residents', 'residents.id = households.head_resident_id', 'left')
                 ->groupStart()
-                    ->like('household_no', $query)
-                    ->orLike('head_name', $query)
+                    ->like('households.household_no', $query)
+                    ->orLike('CONCAT(residents.first_name, " ", residents.last_name)', $query)
                 ->groupEnd()
                 ->findAll(5);
 
             foreach ($households as $h) {
+                $head = $h['head_name'] ? $h['head_name'] : 'Unassigned';
                 $results[] = [
                     'type'  => 'Household',
                     'title' => $h['household_no'],
-                    'desc'  => 'Head: ' . $h['head_name'] . ' • ' . $h['sitio'],
+                    'desc'  => 'Head: ' . $head . ' • ' . ($h['sitio'] ?? 'N/A'),
                     'icon'  => 'fa-home',
                     'color' => 'teal',
                     'url'   => base_url('households/view/' . $h['id'])
