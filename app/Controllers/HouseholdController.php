@@ -191,7 +191,6 @@ class HouseholdController extends BaseController
                     'household_id'          => $householdId,
                     'relationship_to_head'  => $memberInfo['relationship'] ?? null,
                     'is_household_head'     => ($headId == $memberId) ? 1 : 0,
-                    'member_status'         => 'Active',
                     'joined_household_date' => date('Y-m-d'),
                 ];
                 if ($this->residentModel->update($memberId, $updateData)) $memberCount++;
@@ -281,7 +280,6 @@ class HouseholdController extends BaseController
                 $this->residentModel->whereIn('id', $removedMemberIds)->set([
                     'household_id'       => null,
                     'is_household_head'  => 0,
-                    'member_status'      => 'Transferred',
                     'left_household_date' => date('Y-m-d'),
                 ])->update();
             }
@@ -292,7 +290,6 @@ class HouseholdController extends BaseController
                     'household_id'         => $id,
                     'relationship_to_head' => $memberInfo['relationship'] ?? null,
                     'is_household_head'    => ($headId == $memberId) ? 1 : 0,
-                    'member_status'        => 'Active',
                 ];
                 if (!in_array($memberId, $currentMemberIds)) {
                     $updateData['joined_household_date'] = date('Y-m-d');
@@ -377,7 +374,6 @@ public function delete($id)
             ->update([
                 'household_id'        => null,
                 'is_household_head'   => 0,
-                'member_status'       => 'Transferred',
                 'left_household_date' => date('Y-m-d'),
             ]);
     }

@@ -45,14 +45,15 @@ class LogModel extends Model
         date_default_timezone_set('Asia/Manila'); // Set to Philippine time
 
         $session = session();
+        $request = service('request');
         $this->insert([
             'USERID'          => $session->get('user_id'),
             'USER_NAME'       => $session->get('name'),
             'ACTION'          => $action,
             'DATELOG'         => date('Y-m-d'),
             'TIMELOG'         => date('H:i:s'),
-            'user_ip_address' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
-            'device_used'     => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+            'user_ip_address' => $request->getIPAddress(),
+            'device_used'     => $request->getUserAgent()->getAgentString(),
             'identifier'      => $type
         ]);
     }
@@ -80,14 +81,12 @@ class LogModel extends Model
 
     public function getLogsPerMonth()
     {
-        return $this->db->query("
-            SELECT 
-                MONTH(STR_TO_DATE(DATELOG, '%Y-%m-%d')) AS month_num,
-                COUNT(*) AS total_logs
-            FROM tbl_logs
-            WHERE DATELOG IS NOT NULL
-            GROUP BY month_num
-            ORDER BY month_num
-        ")->getResultArray();
+        return $this->db->table('tbl_logs')
+            ->select("MONTH(STR_TO_DATE(DATELOG, '%Y-%m-%d')) AS month_num, COUNT(*) AS total_logs")
+            ->where('DATELOG IS NOT NULL', null, false)
+            ->groupBy('month_num')
+            ->orderBy('month_num')
+            ->get()
+            ->getResultArray();
     }
 }

@@ -68,10 +68,13 @@ class Users extends Controller
 
         foreach ($result as $row) {
             $actions = '
-                <button class="btn btn-sm btn-warning edit-btn" data-id="' . $row['id'] . '">
+                <a href="' . base_url('admin/users/view/' . $row['id']) . '" class="btn btn-sm btn-info" title="View">
+                    <i class="far fa-eye"></i>
+                </a>
+                <button class="btn btn-sm btn-warning edit-btn" data-id="' . $row['id'] . '" title="Edit">
                     <i class="far fa-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-danger deleteUserBtn" data-id="' . $row['id'] . '">
+                <button class="btn btn-sm btn-danger deleteUserBtn" data-id="' . $row['id'] . '" title="Delete">
                     <i class="fas fa-trash-alt"></i>
                 </button>
             ';
@@ -98,6 +101,18 @@ class Users extends Controller
         ];
 
         return $this->response->setJSON($response);
+    }
+
+    public function view($id = null)
+    {
+        $db = \Config\Database::connect();
+        $user = $db->table('users')->where('id', $id)->get()->getRowArray();
+
+        if (!$user) {
+            return redirect()->to('/admin/users')->with('error', 'User not found.');
+        }
+
+        return view('users/view', ['user' => $user]);
     }
 
    

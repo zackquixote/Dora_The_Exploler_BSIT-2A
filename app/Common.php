@@ -20,8 +20,15 @@
 
 if (!function_exists('time_elapsed_string')) {
     function time_elapsed_string($datetime, $full = false) {
-        $now = new DateTime;
-        $ago = new DateTime($datetime);
+        $now = new \DateTime();
+        try {
+            // Clean up double-date strings like "2026-05-10 00:00:00 0000-00-00 00:00:00"
+            $datetime = preg_replace('/0000-00-00\s*(00:00:00)?/', '', $datetime);
+            $datetime = trim($datetime);
+            $ago = new \DateTime($datetime);
+        } catch (\Exception $e) {
+            return 'recently';
+        }
         $diff = $now->diff($ago);
 
         $diff->w = floor($diff->d / 7);

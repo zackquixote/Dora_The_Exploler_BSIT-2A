@@ -136,7 +136,18 @@ class Blotter extends BaseController
         // At least one complainant and one respondent
         $roles = array_column($partyData, 'role');
         if (!in_array('complainant', $roles) || !in_array('respondent', $roles)) {
-            return redirect()->back()->with('error', 'You must add at least one complainant and one respondent.');
+            return redirect()->back()->withInput()->with('error', 'You must add at least one complainant and one respondent.');
+        }
+
+        // Validate individual party data
+        foreach ($partyData as $p) {
+            $type = $p['type'] ?? 'outsider';
+            if ($type === 'resident' && empty($p['resident_id'])) {
+                return redirect()->back()->withInput()->with('error', 'Resident party must have a resident selected.');
+            }
+            if ($type === 'outsider' && empty(trim($p['outsider_name'] ?? ''))) {
+                return redirect()->back()->withInput()->with('error', 'Outsider party must have a name.');
+            }
         }
 
         $db = \Config\Database::connect();
@@ -263,54 +274,77 @@ class Blotter extends BaseController
         return redirect()->to('blotter')->with('error', 'Case not found.');
     }
 
+    // Validate input (matching store() rules)
+    $rules = [
+        'incident_type'     => 'required|max_length[50]',
+        'incident_date'     => 'required|valid_date',
+        'incident_location' => 'permit_empty|max_length[255]',
+        'details'           => 'required',
+        'status'            => 'required|in_list[Pending,Investigating,Ongoing,For Hearing,Settled,Dismissed,Referred,Unsettled]',
+    ];
+
+    if (!$this->validate($rules)) {
+        return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+    }
+
     // Capture status before update for timeline
     $oldStatus = $case['status'];
     $newStatus = $this->request->getPost('status');
 
-    // Update main blotter fields
-    $this->blotterModel->update($id, [
-        'incident_type'     => $this->request->getPost('incident_type'),
-        'incident_date'     => $this->request->getPost('incident_date'),
-        'incident_location' => $this->request->getPost('incident_location'),
-        'purok'             => $this->request->getPost('purok'),
-        'details'           => $this->request->getPost('details'),
-        'status'            => $newStatus,
-        'action_taken'      => $this->request->getPost('action_taken'),
-        'updated_by'        => session()->get('user_id') ?? session()->get('id'),
-    ]);
+    $db = \Config\Database::connect();
+    $db->transBegin();
 
-    // Log timeline entry if status changed
-    if ($oldStatus !== $newStatus) {
-        $this->timelineModel->insert([
-            'blotter_id' => $id,
-            'old_status' => $oldStatus,
-            'new_status' => $newStatus,
-            'remarks'    => $this->request->getPost('action_taken') ?? '',
-            'created_by' => session()->get('user_id') ?? session()->get('id'),
+    try {
+        // Update main blotter fields
+        $this->blotterModel->update($id, [
+            'incident_type'     => $this->request->getPost('incident_type'),
+            'incident_date'     => $this->request->getPost('incident_date'),
+            'incident_location' => $this->request->getPost('incident_location'),
+            'purok'             => $this->request->getPost('purok'),
+            'details'           => $this->request->getPost('details'),
+            'status'            => $newStatus,
+            'action_taken'      => $this->request->getPost('action_taken'),
+            'updated_by'        => session()->get('user_id') ?? session()->get('id'),
         ]);
-    }
 
-    // Remove existing parties and re-insert
-    $this->partyModel->where('blotter_id', $id)->delete();
-
-    $partyData = $this->request->getPost('parties') ?? [];
-    foreach ($partyData as $p) {
-        $insert = [
-            'blotter_id' => $id,
-            'role'       => $p['role'],
-        ];
-        if (($p['type'] ?? '') === 'resident' && !empty($p['resident_id'])) {
-            $insert['resident_id'] = $p['resident_id'];
-        } else {
-            $insert['outsider_name']    = $p['outsider_name'] ?? '';
-            $insert['outsider_address'] = $p['outsider_address'] ?? '';
+        // Log timeline entry if status changed
+        if ($oldStatus !== $newStatus) {
+            $this->timelineModel->insert([
+                'blotter_id' => $id,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'remarks'    => $this->request->getPost('action_taken') ?? '',
+                'created_by' => session()->get('user_id') ?? session()->get('id'),
+            ]);
         }
-        $this->partyModel->insert($insert);
+
+        // Remove existing parties and re-insert
+        $this->partyModel->where('blotter_id', $id)->delete();
+
+        $partyData = $this->request->getPost('parties') ?? [];
+        foreach ($partyData as $p) {
+            $insert = [
+                'blotter_id' => $id,
+                'role'       => $p['role'],
+            ];
+            if (($p['type'] ?? '') === 'resident' && !empty($p['resident_id'])) {
+                $insert['resident_id'] = $p['resident_id'];
+            } else {
+                $insert['outsider_name']    = $p['outsider_name'] ?? '';
+                $insert['outsider_address'] = $p['outsider_address'] ?? '';
+            }
+            $this->partyModel->insert($insert);
+        }
+
+        $db->transCommit();
+        $this->logModel->addLog("Updated blotter case {$case['case_number']}");
+
+        return redirect()->to('blotter')->with('success', 'Case updated successfully.');
+    } catch (\Exception $e) {
+        $db->transRollback();
+        log_message('error', 'Blotter update failed: ' . $e->getMessage());
+        return redirect()->back()->withInput()->with('error', 'An error occurred while updating the case.');
     }
-
-    $this->logModel->addLog("Updated blotter case {$case['case_number']}");
-
-    return redirect()->to('blotter')->with('success', 'Case updated successfully.');
 }
     // ──────────────────────────────────────────────────────────
     //  DELETE CASE (with cascading parties)
@@ -361,6 +395,18 @@ public function addHearing($blotterId)
     $case = $this->blotterModel->find($blotterId);
     if (!$case) {
         return $this->response->setJSON(['status' => 'error', 'message' => 'Case not found.']);
+    }
+
+    // Validate hearing input
+    $rules = [
+        'hearing_date'      => 'required|valid_date',
+        'hearing_time'      => 'permit_empty',
+        'venue'             => 'permit_empty|max_length[255]',
+        'presiding_officer' => 'permit_empty|max_length[150]',
+    ];
+
+    if (!$this->validate($rules)) {
+        return $this->response->setJSON(['status' => 'error', 'errors' => $this->validator->getErrors()]);
     }
 
     $data = [

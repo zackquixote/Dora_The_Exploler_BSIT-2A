@@ -32,6 +32,7 @@ class ResidentModel extends Model
         'occupation',
         'citizenship',
         'profile_picture',
+        'relationship_to_head',
         'is_voter',
         'is_senior_citizen',
         'is_pwd',
@@ -39,7 +40,6 @@ class ResidentModel extends Model
         'registered_by',
         'joined_household_date',
         'left_household_date',
-        'member_status'
     ];
 
     protected $useTimestamps = true;
@@ -49,9 +49,11 @@ class ResidentModel extends Model
     protected $useSoftDeletes = true;
 
     protected $validationRules = [
-        'first_name' => 'required|min_length[2]|max_length[80]',
-        'last_name'  => 'required|min_length[2]|max_length[80]',
-        'birthdate'  => 'required|valid_date',
+        'first_name'   => 'required|min_length[2]|max_length[80]',
+        'last_name'    => 'required|min_length[2]|max_length[80]',
+        'birthdate'    => 'required|valid_date',
+        'sex'          => 'required|in_list[male,female]',
+        'civil_status' => 'permit_empty|in_list[single,married,widowed,separated]',
     ];
 
     /**

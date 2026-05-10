@@ -9,7 +9,7 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 
     <?php if (session()->getFlashdata('success')): ?>
         <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:10px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px">
-            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
+            <i class="fas fa-check-circle"></i> <?= esc(session()->getFlashdata('success')) ?>
         </div>
     <?php endif; ?>
 

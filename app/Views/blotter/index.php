@@ -9,7 +9,7 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 
     <?php if (session()->getFlashdata('success')): ?>
         <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:10px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px">
-            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
+            <i class="fas fa-check-circle"></i> <?= esc(session()->getFlashdata('success')) ?>
         </div>
     <?php endif; ?>
 
@@ -74,7 +74,10 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                             <td style="white-space:nowrap">
                                 <a href="<?= base_url('blotter/view/'.$b['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-folder-open"></i></a>
                                 <a href="<?= base_url('blotter/edit/'.$b['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-edit"></i></a>
-                                <button class="ds-action-btn ab-rose delete-btn" data-id="<?= $b['id'] ?>" data-case="<?= esc($b['case_number']) ?>" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                                <form action="<?= base_url('blotter/delete/'.$b['id']) ?>" method="POST" style="display:inline-block" data-confirm="Delete Case <?= esc($b['case_number']) ?>?">
+                                    <?= csrf_field() ?>
+                                    <button type="submit" class="ds-action-btn ab-rose" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                                </form>
                             </td>
                         </tr>
                         <?php endforeach; endif; ?>
@@ -85,23 +88,7 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
     </div>
 </div>
 
-<!-- Delete Modal -->
-<div class="ds-modal-overlay" id="deleteModalOverlay">
-    <div class="ds-modal">
-        <div class="ds-modal-icon" style="background:var(--c-rose-bg);color:var(--c-rose)"><i class="fas fa-trash-alt"></i></div>
-        <h3>Confirm Delete</h3>
-        <div class="subtitle">This will also remove all associated parties and hearings</div>
-        <p>Are you sure you want to delete <strong id="delete-case-ref"></strong>?</p>
-        <div class="ds-modal-actions">
-            <button class="ds-btn ds-btn-ghost" onclick="document.getElementById('deleteModalOverlay').classList.remove('show')">Cancel</button>
-            <form id="delete-form" method="POST" action="">
-                <?= csrf_field() ?>
-                <input type="hidden" name="_method" value="DELETE">
-                <button type="submit" class="ds-btn ds-btn-rose">Delete Case</button>
-            </form>
-        </div>
-    </div>
-</div>
+
 
 <?= $this->endSection() ?>
 

@@ -82,8 +82,16 @@ class Auth extends BaseController
             // ─────────────────────────────────────────────────────────────
 
             if ($remember) {
-                $this->response->setCookie('user_email', $email, 60 * 60 * 24 * 30);
-                $this->response->setCookie('user_id', $user['id'], 60 * 60 * 24 * 30);
+                // Store only the email in a secure, httpOnly cookie (no user_id exposed)
+                $this->response->setCookie(
+                    'remember_email',
+                    $email,
+                    60 * 60 * 24 * 30, // 30 days
+                    '',                // domain
+                    '/',               // path
+                    false,             // secure (set true in production with HTTPS)
+                    true               // httpOnly — not accessible via JavaScript
+                );
             }
 
             // Force lowercase redirection
@@ -102,8 +110,7 @@ class Auth extends BaseController
 
         session()->destroy();
         
-        $this->response->deleteCookie('user_email');
-        $this->response->deleteCookie('user_id');
+        $this->response->deleteCookie('remember_email');
         
         return redirect()->to('/login');
     }

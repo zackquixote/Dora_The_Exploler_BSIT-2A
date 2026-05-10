@@ -132,7 +132,10 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                                 <td style="white-space:nowrap">
                                     <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-eye"></i></a>
                                     <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-edit"></i></a>
-                                    <button class="ds-action-btn ab-rose delete-resident" data-id="<?= $r['id'] ?>" data-name="<?= esc($r['first_name'].' '.$r['last_name']) ?>" title="Delete"><i class="fas fa-trash"></i></button>
+                                    <form action="<?= base_url('resident/delete/'.$r['id']) ?>" method="POST" style="display:inline-block" data-confirm="Delete <?= esc($r['first_name'].' '.$r['last_name']) ?>?">
+                                        <?= csrf_field() ?>
+                                        <button type="submit" class="ds-action-btn ab-rose" title="Delete"><i class="fas fa-trash"></i></button>
+                                    </form>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -159,28 +162,7 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
     </div>
 </div>
 
-<!-- Delete Modal -->
-<div class="ds-modal-overlay" id="deleteModalOverlay">
-    <div class="ds-modal">
-        <div class="ds-modal-icon" style="background:var(--c-rose-bg);color:var(--c-rose)"><i class="fas fa-trash-alt"></i></div>
-        <h3>Confirm Delete</h3>
-        <div class="subtitle">This action cannot be undone</div>
-        <p>Are you sure you want to delete <strong id="deleteResidentName"></strong>?</p>
-        <div class="ds-modal-actions">
-            <button class="ds-btn ds-btn-ghost" onclick="closeDeleteModal()">Cancel</button>
-            <button class="ds-btn ds-btn-rose" id="confirmDeleteBtn">Delete</button>
-        </div>
-    </div>
-</div>
 
-<script>
-function closeDeleteModal() {
-    document.getElementById('deleteModalOverlay').classList.remove('show');
-}
-document.getElementById('deleteModalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeDeleteModal();
-});
-</script>
 
 <?= $this->endSection() ?>
 

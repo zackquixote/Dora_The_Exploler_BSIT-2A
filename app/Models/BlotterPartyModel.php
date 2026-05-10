@@ -31,6 +31,11 @@ class BlotterPartyModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = '';
 
+    protected $validationRules = [
+        'blotter_id' => 'required|integer',
+        'role'       => 'required|in_list[complainant,respondent,witness]',
+    ];
+
     /**
      * Get parties for a specific blotter case, including resident full name.
      */

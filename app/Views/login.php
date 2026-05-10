@@ -29,15 +29,53 @@ $province     = $settings['province']      ?? 'Province';
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: var(--bg);
-        background-image: radial-gradient(circle at 50% 0%, var(--c-blue-bg) 0%, transparent 70%);
-        font-family: 'DM Sans', sans-serif;
-        color: var(--ink);
+        background-color: var(--c-navy);
+        background-image: linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.85)), url('<?= base_url("assets/img/wowow.jpg") ?>');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        font-family: 'Inter', sans-serif;
+        color: #f8fafc;
     }
     .login-wrapper {
         width: 100%;
-        max-width: 400px;
+        max-width: 420px;
         padding: 20px;
+        animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    @keyframes fadeUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .ds-card.glass-card {
+        background: rgba(15, 23, 42, 0.65) !important;
+        backdrop-filter: blur(24px) !important;
+        -webkit-backdrop-filter: blur(24px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    }
+    .glass-card .ds-input-label {
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+    .glass-card .ds-input {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        color: #fff !important;
+    }
+    .glass-card .ds-input:focus {
+        background: rgba(255, 255, 255, 0.12) !important;
+        border-color: var(--c-teal) !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+    }
+    .glass-card .ds-input::placeholder {
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+    .glass-card i.fas {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+    .glass-card label[for="remember"] {
+        color: rgba(255, 255, 255, 0.75) !important;
     }
     .logo-container {
         text-align: center;
@@ -53,14 +91,14 @@ $province     = $settings['province']      ?? 'Province';
         object-fit: cover;
     }
     .portal-title {
-        font-size: 20px;
-        font-weight: 700;
-        color: var(--c-navy);
+        font-size: 22px;
+        font-weight: 800;
+        color: #ffffff;
         margin: 0;
     }
     .portal-subtitle {
-        font-size: 13px;
-        color: var(--ink-muted);
+        font-size: 13.5px;
+        color: rgba(255, 255, 255, 0.75);
         margin-top: 4px;
     }
     .flash-error {
@@ -78,8 +116,8 @@ $province     = $settings['province']      ?? 'Province';
     .login-footer {
         text-align: center;
         margin-top: 24px;
-        font-size: 11px;
-        color: var(--ink-soft);
+        font-size: 11.5px;
+        color: rgba(255, 255, 255, 0.6);
     }
     .login-footer a {
         color: var(--c-blue);
@@ -91,7 +129,10 @@ $province     = $settings['province']      ?? 'Province';
 
   <div class="login-wrapper">
     <div class="logo-container">
-      <img src="<?= base_url('assets/img/tabu.jpg') ?>" alt="Barangay Logo">
+      <div style="display: flex; justify-content: center; gap: 16px; margin-bottom: 16px;">
+        <img src="<?= base_url('assets/img/ilog.png') ?>" alt="Logo 1" style="margin-bottom: 0; border: 3px solid rgba(255, 255, 255, 0.8);">
+        <img src="<?= base_url('assets/img/tabu.jpg') ?>" alt="Logo 2" style="margin-bottom: 0; border: 3px solid rgba(255, 255, 255, 0.8);">
+      </div>
       <h1 class="portal-title"><?= esc($barangay) ?>, <?= esc($municipality) ?></h1>
       <div class="portal-subtitle">Smart Governance Portal</div>
     </div>
@@ -99,11 +140,11 @@ $province     = $settings['province']      ?? 'Province';
     <?php if (session()->getFlashdata('error')): ?>
       <div class="flash-error">
         <i class="fas fa-exclamation-triangle"></i>
-        <?= session()->getFlashdata('error') ?>
+        <?= esc(session()->getFlashdata('error')) ?>
       </div>
     <?php endif; ?>
 
-    <div class="ds-card">
+    <div class="ds-card glass-card">
       <form id="loginForm" action="<?= base_url('/auth') ?>" method="post" autocomplete="off">
         <?= csrf_field() ?>
         

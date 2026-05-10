@@ -33,6 +33,12 @@ class BlotterHearingModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
+    protected $validationRules = [
+        'blotter_id'   => 'required|integer',
+        'hearing_date' => 'required|valid_date',
+        'status'       => 'permit_empty|in_list[Scheduled,In Progress,Completed,Cancelled]',
+    ];
+
     /**
      * Get all hearings for a specific blotter case, ordered by date descending.
      */

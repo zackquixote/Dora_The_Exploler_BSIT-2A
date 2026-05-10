@@ -85,7 +85,7 @@ $routes->group('', [
     $routes->get('certificate/print/(:num)', 'Certificate::print_view/$1');
     $routes->get('certificate/edit/(:num)', 'Certificate::edit/$1');
     $routes->match(['post', 'put'], 'certificate/update/(:num)', 'Certificate::update/$1');
-    $routes->delete('certificate/delete/(:num)', 'Certificate::delete/$1');
+    $routes->post('certificate/delete/(:num)', 'Certificate::delete/$1');
 
 
     // =========================
@@ -111,14 +111,22 @@ $routes->get('blotter/edit/(:num)', 'Blotter::edit/$1');
 $routes->get('blotter/print-settlement/(:num)', 'Blotter::printSettlement/$1');
 $routes->get('blotter/print-summon/(:num)/(:num)', 'Blotter::printSummon/$1/$2');
 $routes->match(['post', 'put'], 'blotter/update/(:num)', 'Blotter::update/$1');
-$routes->delete('blotter/delete/(:num)', 'Blotter::delete/$1');
+$routes->post('blotter/delete/(:num)', 'Blotter::delete/$1');
 // Additional AJAX endpoint
 $routes->get('blotter/searchResidents', 'Blotter::searchResidents');
 $routes->get('blotter/getUpcomingNotifications', 'Blotter::getUpcomingNotifications');
 $routes->post('blotter/hearing/add/(:num)', 'Blotter::addHearing/$1');
 $routes->post('blotter/hearing/update/(:num)', 'Blotter::updateHearing/$1');
-$routes->delete('blotter/hearing/delete/(:num)', 'Blotter::deleteHearing/$1');
+$routes->post('blotter/hearing/delete/(:num)', 'Blotter::deleteHearing/$1');
 $routes->get('blotter/print/(:num)', 'Blotter::printCase/$1');
+
+// Global Search
+$routes->get('api/search', 'SearchController::index');
+
+// =========================
+// SYSTEM LOGS
+// =========================
+$routes->get('logs', 'Logs::log');
 });
 
 
@@ -131,6 +139,7 @@ $routes->group('admin', [
 ], function ($routes) {
 
     $routes->get('dashboard', 'Dashboard::index');
+    $routes->get('dashboard/filterCases', 'Dashboard::filterCases');
 
     // =========================
     // SETTINGS
@@ -138,7 +147,6 @@ $routes->group('admin', [
     $routes->get('settings', 'Settings::index');
     $routes->post('settings', 'Settings::update');
     $routes->post('settings/update', 'Settings::update');
-
 
     // =========================
     // CERTIFICATE TYPES
@@ -148,7 +156,7 @@ $routes->group('admin', [
     $routes->post('certificateTypes/store', 'CertificateTypes::store');
     $routes->get('certificateTypes/edit/(:num)', 'CertificateTypes::edit/$1');
     $routes->post('certificateTypes/update/(:num)', 'CertificateTypes::update/$1');
-    $routes->delete('certificateTypes/delete/(:num)', 'CertificateTypes::delete/$1');
+    $routes->post('certificateTypes/delete/(:num)', 'CertificateTypes::delete/$1');
 
 
     // =========================
@@ -160,8 +168,9 @@ $routes->group('admin', [
         $routes->post('save', 'Users::save');
         $routes->get('edit/(:segment)', 'Users::edit/$1');
         $routes->post('update', 'Users::update');
-        $routes->delete('delete/(:num)', 'Users::delete/$1');
+        $routes->post('delete/(:num)', 'Users::delete/$1');
         $routes->post('fetchRecords', 'Users::fetchRecords');
+        $routes->get('view/(:num)', 'Users::view/$1');
         $routes->get('users/create', 'Users::create');
     });
 });
@@ -188,7 +197,4 @@ $routes->group('staff', [
 });
 
 
-// ------------------------------------------------
-// SYSTEM LOGS
-// ------------------------------------------------
-$routes->get('logs', 'Logs::log');
+// End of Routes

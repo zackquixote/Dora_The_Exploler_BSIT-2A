@@ -129,4 +129,40 @@ class Dashboard extends BaseController
             'recentCases'      => $recentCases,
         ]);
     }
+
+    public function filterCases()
+    {
+        $range = $this->request->getGet('range') ?? 'month';
+        $db = \Config\Database::connect();
+        
+        $openCasesQuery = $db->table('blotter_records')->whereIn('status', ['Pending','Investigating','Ongoing','For Hearing']);
+        $settledQuery = $db->table('blotter_records')->where('status', 'Settled');
+        $blotterQuery = $db->table('blotter_records');
+        $hearingsQuery = $db->table('blotter_hearings');
+        
+        $today = date('Y-m-d');
+        
+        if ($range === 'month') {
+            $month = date('m');
+            $year = date('Y');
+            $openCasesQuery->where('MONTH(created_at)', $month)->where('YEAR(created_at)', $year);
+            $settledQuery->where('MONTH(updated_at)', $month)->where('YEAR(updated_at)', $year);
+            $blotterQuery->where('MONTH(created_at)', $month)->where('YEAR(created_at)', $year);
+            $hearingsQuery->where('MONTH(hearing_date)', $month)->where('YEAR(hearing_date)', $year);
+        } elseif ($range === 'year') {
+            $year = date('Y');
+            $openCasesQuery->where('YEAR(created_at)', $year);
+            $settledQuery->where('YEAR(updated_at)', $year);
+            $blotterQuery->where('YEAR(created_at)', $year);
+            $hearingsQuery->where('YEAR(hearing_date)', $year);
+        }
+        
+        // Return JSON
+        return $this->response->setJSON([
+            'openCases' => $openCasesQuery->countAllResults(),
+            'settledThisMonth' => $settledQuery->countAllResults(),
+            'hearingsToday' => $hearingsQuery->where('hearing_date', $today)->countAllResults(),
+            'blotterCount' => $blotterQuery->countAllResults()
+        ]);
+    }
 }

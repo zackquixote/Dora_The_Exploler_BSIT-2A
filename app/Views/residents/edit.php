@@ -96,10 +96,6 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                 <div class="ds-card-title"><i class="fas fa-home"></i> Address &amp; Household</div>
             </div>
             <div class="ds-card-body">
-                <div style="margin-bottom:14px">
-                    <label class="ds-input-label">Street / House Number</label>
-                    <input type="text" name="street_address" class="ds-input" value="<?= old('street_address', $resident['street_address'] ?? '') ?>">
-                </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
                     <div>
                         <label class="ds-input-label">Sitio / Zone <span style="color:var(--c-rose)">*</span></label>

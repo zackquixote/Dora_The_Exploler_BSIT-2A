@@ -9,7 +9,7 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 
     <?php if (session()->getFlashdata('success')): ?>
         <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:10px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px">
-            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
+            <i class="fas fa-check-circle"></i> <?= esc(session()->getFlashdata('success')) ?>
         </div>
     <?php endif; ?>
 
@@ -62,7 +62,10 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                             <td style="white-space:nowrap">
                                 <a href="<?= base_url('households/view/'.$h['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-eye"></i></a>
                                 <a href="<?= base_url('households/edit/'.$h['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-pen"></i></a>
-                                <button class="ds-action-btn ab-rose delete-household" data-id="<?= $h['id'] ?>" data-no="<?= esc($h['household_no']) ?>" title="Delete"><i class="fas fa-trash"></i></button>
+                                <form action="<?= base_url('households/delete/'.$h['id']) ?>" method="POST" style="display:inline-block" data-confirm="Delete Household <?= esc($h['household_no']) ?>?">
+                                    <?= csrf_field() ?>
+                                    <button type="submit" class="ds-action-btn ab-rose" title="Delete"><i class="fas fa-trash"></i></button>
+                                </form>
                             </td>
                         </tr>
                         <?php endforeach; endif; ?>

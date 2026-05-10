@@ -109,7 +109,6 @@ class Resident extends BaseController
             $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
             $data       = $this->prepareResidentData($this->request->getPost(), $profilePic);
             $data['status'] = 'active';
-            $data['member_status'] = 'Active';
             $data['registered_by'] = session()->get('user_id') ?? 1;
 
             try {
@@ -132,7 +131,6 @@ class Resident extends BaseController
         $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
         $data       = $this->prepareResidentData($this->request->getPost(), $profilePic);
         $data['status'] = 'active';
-        $data['member_status'] = 'Active';
         $data['registered_by'] = session()->get('user_id') ?? 1;
 
         try {
@@ -422,7 +420,7 @@ class Resident extends BaseController
             $uploadPath = FCPATH . 'uploads/' . $folderName;
 
             if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
+                mkdir($uploadPath, 0755, true);
             }
 
             $newName = $file->getRandomName();
@@ -452,7 +450,6 @@ class Resident extends BaseController
             'relationship_to_head' => !empty($postData['relationship_to_head']) ? $postData['relationship_to_head'] : null,
             'occupation'           => !empty($postData['occupation'])           ? $postData['occupation']           : null,
             'citizenship'          => !empty($postData['citizenship'])          ? $postData['citizenship']          : null,
-            'street_address'       => !empty($postData['street_address'])       ? $postData['street_address']       : null,
             'sitio'                => $postData['sitio'],
             'is_voter'             => isset($postData['is_voter'])        ? 1 : 0,
             'is_pwd'               => isset($postData['is_pwd'])          ? 1 : 0,
@@ -501,7 +498,6 @@ public function updateStatus($id)
 
     $this->residentModel->update($id, [
         'status' => $newStatus,
-        'member_status' => ucfirst($newStatus)
     ]);
 
     $this->logModel->addLog(
@@ -534,8 +530,7 @@ public function updateMemberStatus($id)
     }
 
     $this->residentModel->update($id, [
-        'member_status' => $newStatus,
-        'status' => strtolower($newStatus)
+        'status' => strtolower($newStatus),
     ]);
 
     $this->logModel->addLog(

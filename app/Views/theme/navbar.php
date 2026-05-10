@@ -1,8 +1,19 @@
 <?php //staff topbar ?>
 <header class="bmis-topbar" id="mainTopbar">
-    <div class="tb-left">
-        <h1><?= $title ?? 'Dashboard' ?></h1>
-        <p><?= date('l, F d, Y') ?></p>
+    <div class="tb-left" style="display:flex;align-items:center;gap:24px">
+        <div>
+            <h1><?= $title ?? 'Dashboard' ?></h1>
+            <p><?= date('l, F d, Y') ?></p>
+        </div>
+        
+        <!-- Global Search -->
+        <div style="position:relative; width: 300px; display:none" id="desktop-search-container">
+            <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-size:13px"></i>
+            <input type="text" id="globalSearchInput" class="ds-input" placeholder="Search residents, cases (Ctrl+K)" style="padding-left:38px; border-radius:20px; background:var(--bg); border:none; height:38px">
+            <div id="globalSearchResults" style="display:none; position:absolute; top:45px; left:0; width:100%; background:var(--white); border-radius:12px; box-shadow:var(--shadow-lg); z-index:1000; overflow:hidden">
+                <div style="padding:12px; max-height:400px; overflow-y:auto" id="globalSearchBody"></div>
+            </div>
+        </div>
     </div>
     <div class="tb-right">
         <div class="dropdown" style="display:inline-block">

@@ -3,6 +3,22 @@
 
 <div class="bmis-content">
 
+    <!-- PREMIUM WELCOME BANNER -->
+    <div class="ds-welcome-banner">
+        <div>
+            <h2><span id="dynamicGreeting">Welcome</span>, <strong>Staff</strong>!</h2>
+            <p style="font-size: 14.5px; opacity: 0.9; margin-top: 4px;">Monitor key metrics, resolve cases, and assist the community efficiently.</p>
+        </div>
+        <div class="ds-datetime" style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+            <div style="font-size: 12px; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font); font-weight: 600;">
+                <i class="fas fa-calendar-day" style="margin-right: 4px;"></i> <span id="liveDate"><?= date('l, F j, Y') ?></span>
+            </div>
+            <div style="font-size: 28px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.5px;">
+                <i class="far fa-clock" style="font-size: 22px; opacity: 0.7; margin-right: 6px;"></i><span id="liveTime"><?= date('h:i:s A') ?></span>
+            </div>
+        </div>
+    </div>
+
     <!-- ROW 1 · PRIMARY STAT CARDS -->
     <div class="ds-grid-4">
         <div class="ds-stat">
@@ -138,6 +154,22 @@ const DASHBOARD_DATA = {
     purokLabels: <?= json_encode(array_column($purokCounts ?? [], 'sitio')) ?>,
     purokValues: <?= json_encode(array_column($purokCounts ?? [], 'count')) ?>
 };
+
+// Dynamic Greeting
+var hr = new Date().getHours();
+var greeting = "Good evening 🌙";
+if (hr < 12) greeting = "Good morning 🌅";
+else if (hr < 18) greeting = "Good afternoon ☀️";
+var greetingEl = document.getElementById('dynamicGreeting');
+if (greetingEl) greetingEl.innerText = greeting;
+
+// Live Clock Logic for Welcome Banner
+setInterval(function() {
+    var now = new Date();
+    var timeString = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute:'2-digit', second:'2-digit' });
+    var timeEl = document.getElementById('liveTime');
+    if (timeEl) timeEl.innerText = timeString;
+}, 1000);
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="<?= base_url('js/dashboard/admin.js') ?>"></script>

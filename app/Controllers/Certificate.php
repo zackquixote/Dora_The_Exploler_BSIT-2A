@@ -69,8 +69,8 @@ class Certificate extends BaseController
         $type       = $this->request->getPost('certificate_type');
         $purpose    = $this->request->getPost('purpose');
 
-        if (! $residentId || ! $type) {
-            return redirect()->back()->with('error', 'Missing required information.');
+        if (! $residentId || ! $type || ! $purpose) {
+            return redirect()->back()->with('error', 'Missing required information (resident, type, and purpose).');
         }
 
         if (! in_array($type, CertificateModel::getTypes())) {

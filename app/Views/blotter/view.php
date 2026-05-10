@@ -167,6 +167,12 @@ $sc = match($status) {
                 <div class="ds-card-head"><div class="ds-card-title" style="font-size:11px"><i class="fas fa-bolt"></i> Quick Update</div></div>
                 <form action="<?= base_url('blotter/update/' . $case['id']) ?>" method="POST">
                     <?= csrf_field() ?>
+                    <!-- Hidden fields to satisfy update() validation -->
+                    <input type="hidden" name="incident_type" value="<?= esc($case['incident_type']) ?>">
+                    <input type="hidden" name="incident_date" value="<?= esc($case['incident_date']) ?>">
+                    <input type="hidden" name="incident_location" value="<?= esc($case['incident_location'] ?? '') ?>">
+                    <input type="hidden" name="details" value="<?= esc($case['details']) ?>">
+                    <input type="hidden" name="purok" value="<?= esc($case['purok'] ?? '') ?>">
                     <div class="ds-card-body">
                         <div style="margin-bottom:10px">
                             <label class="ds-input-label">Status</label>
@@ -203,6 +209,7 @@ $sc = match($status) {
     <div class="modal-dialog" role="document">
         <div class="modal-content shadow border-0" style="border-radius:var(--r)">
             <form id="hearing-form" action="<?= base_url('blotter/hearing/add/' . $case['id']) ?>" method="POST">
+                <?= csrf_field() ?>
                 <div style="padding:16px 20px;border-bottom:.5px solid var(--border)">
                     <h5 style="font-size:14px;font-weight:700;color:var(--ink);margin:0"><i class="fas fa-gavel" style="margin-right:6px;color:var(--c-teal)"></i> Add Hearing</h5>
                 </div>

@@ -3,6 +3,22 @@
 
 <div class="bmis-content">
 
+    <!-- PREMIUM WELCOME BANNER -->
+    <div class="ds-welcome-banner">
+        <div>
+            <h2><span id="dynamicGreeting">Welcome</span>, <strong>Admin</strong>!</h2>
+            <p style="font-size: 14.5px; opacity: 0.9; margin-top: 4px;">Monitor key metrics, resolve cases, and manage your community efficiently.</p>
+        </div>
+        <div class="ds-datetime" style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+            <div style="font-size: 12px; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font); font-weight: 600;">
+                <i class="fas fa-calendar-day" style="margin-right: 4px;"></i> <span id="liveDate"><?= date('l, F j, Y') ?></span>
+            </div>
+            <div style="font-size: 28px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.5px;">
+                <i class="far fa-clock" style="font-size: 22px; opacity: 0.7; margin-right: 6px;"></i><span id="liveTime"><?= date('h:i:s A') ?></span>
+            </div>
+        </div>
+    </div>
+
     <!-- ROW 1 · PRIMARY STAT CARDS -->
     <div class="ds-grid-4">
         <div class="ds-stat">
@@ -58,30 +74,45 @@
         </div>
     </div>
 
-    <!-- ROW 2 · CASE OVERVIEW -->
-    <div class="ds-section-label">Case Overview</div>
-    <div class="ds-grid-4">
+    <!-- ── DETAILED STATISTICS (COMBINED) ── -->
+    <div style="display: flex; align-items: center; margin: 20px 0 10px;">
+        <div class="ds-section-label" style="margin: 0; flex: 1;">Detailed Statistics</div>
+        <select id="detailedStatsSelector" class="ds-select" style="width: auto; height: 26px; font-size: 11px; padding: 0 24px 0 10px; text-transform: none; letter-spacing: normal; background-color: var(--white); border-color: var(--border); margin-left: 12px; cursor: pointer;">
+            <option value="caseOverview">Case Overview</option>
+            <option value="population">Population Breakdown</option>
+            <option value="gender">User &amp; Gender Stats</option>
+        </select>
+        
+        <!-- Case Overview Date Filter (Only visible when Case Overview is selected) -->
+        <select id="caseOverviewFilter" class="ds-select" style="width: auto; height: 26px; font-size: 11px; padding: 0 24px 0 10px; text-transform: none; letter-spacing: normal; background-color: var(--white); border-color: var(--border); margin-left: 8px; cursor: pointer;">
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+            <option value="all">All Time</option>
+        </select>
+    </div>
+
+    <!-- 1. Case Overview Grid -->
+    <div class="ds-grid-4 stats-grid" id="grid-caseOverview">
         <div class="ds-mini">
             <div class="ds-mini-icon ic-amber"><i class="fas fa-folder-open"></i></div>
-            <div><div class="ds-mini-num"><?= $openCases ?? 0 ?></div><div class="ds-mini-label">Open Cases</div></div>
+            <div><div class="ds-mini-num case-overview-num" id="openCasesCount" style="transition: opacity 0.2s;"><?= $openCases ?? 0 ?></div><div class="ds-mini-label">Open Cases</div></div>
         </div>
         <div class="ds-mini">
             <div class="ds-mini-icon ic-blue"><i class="fas fa-gavel"></i></div>
-            <div><div class="ds-mini-num"><?= $hearingsToday ?? 0 ?></div><div class="ds-mini-label">Hearings Today</div></div>
+            <div><div class="ds-mini-num case-overview-num" id="hearingsCount" style="transition: opacity 0.2s;"><?= $hearingsToday ?? 0 ?></div><div class="ds-mini-label">Hearings Today</div></div>
         </div>
         <div class="ds-mini">
             <div class="ds-mini-icon ic-teal"><i class="fas fa-check-circle"></i></div>
-            <div><div class="ds-mini-num"><?= $settledThisMonth ?? 0 ?></div><div class="ds-mini-label">Settled (Month)</div></div>
+            <div><div class="ds-mini-num case-overview-num" id="settledCount" style="transition: opacity 0.2s;"><?= $settledThisMonth ?? 0 ?></div><div class="ds-mini-label">Settled (Month)</div></div>
         </div>
         <div class="ds-mini">
             <div class="ds-mini-icon ic-rose"><i class="fas fa-file-alt"></i></div>
-            <div><div class="ds-mini-num"><?= $blotterCount ?? 0 ?></div><div class="ds-mini-label">Total Cases</div></div>
+            <div><div class="ds-mini-num case-overview-num" id="blotterTotalCount" style="transition: opacity 0.2s;"><?= $blotterCount ?? 0 ?></div><div class="ds-mini-label">Total Cases</div></div>
         </div>
     </div>
 
-    <!-- ROW 3 · POPULATION BREAKDOWN -->
-    <div class="ds-section-label">Population Breakdown</div>
-    <div class="ds-grid-4">
+    <!-- 2. Population Breakdown Grid -->
+    <div class="ds-grid-4 stats-grid" id="grid-population" style="display:none;">
         <?php
         $pop = max(1, $totalResidents ?? 1);
         $popCards = [
@@ -107,9 +138,8 @@
         <?php endforeach; ?>
     </div>
 
-    <!-- ROW 4 · USER & GENDER -->
-    <div class="ds-section-label">User &amp; Gender Stats</div>
-    <div class="ds-grid-4">
+    <!-- 3. User & Gender Grid -->
+    <div class="ds-grid-4 stats-grid" id="grid-gender" style="display:none;">
         <div class="ds-mini">
             <div class="ds-mini-icon ic-rose"><i class="fas fa-user-shield"></i></div>
             <div><div class="ds-mini-num"><?= $totalAdmins ?? 0 ?></div><div class="ds-mini-label">Admins</div></div>
@@ -212,7 +242,13 @@
                             <td><?= esc($h['venue'] ?? 'Main Hall') ?></td>
                         </tr>
                         <?php endforeach; else: ?>
-                        <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--ink-soft)">No hearings scheduled</td></tr>
+                        <tr>
+                            <td colspan="3" style="text-align:center;padding:32px 16px;color:var(--ink-soft);">
+                                <i class="fas fa-calendar-check" style="font-size:32px;opacity:0.25;margin-bottom:12px;display:block;"></i>
+                                <div style="font-weight:600;">You're all caught up!</div>
+                                <div style="font-size:11px;opacity:0.7;">No hearings scheduled.</div>
+                            </td>
+                        </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -244,7 +280,13 @@
                             <td><span class="ds-badge <?= $bc ?>"><?= esc($st) ?></span></td>
                         </tr>
                         <?php endforeach; else: ?>
-                        <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--ink-soft)">No cases found</td></tr>
+                        <tr>
+                            <td colspan="3" style="text-align:center;padding:32px 16px;color:var(--ink-soft);">
+                                <i class="fas fa-folder-open" style="font-size:32px;opacity:0.25;margin-bottom:12px;display:block;"></i>
+                                <div style="font-weight:600;">No cases filed</div>
+                                <div style="font-size:11px;opacity:0.7;">Recent cases will appear here.</div>
+                            </td>
+                        </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -319,5 +361,38 @@ const DASHBOARD_DATA = {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="<?= base_url('js/dashboard/admin.js') ?>"></script>
+
+<script>
+// Detailed Stats Tab Logic
+const statsSelector = document.getElementById('detailedStatsSelector');
+if (statsSelector) {
+    statsSelector.addEventListener('change', function() {
+        // Hide all grids
+        document.querySelectorAll('.stats-grid').forEach(el => el.style.display = 'none');
+        
+        // Show selected grid
+        const selectedGrid = document.getElementById('grid-' + this.value);
+        if (selectedGrid) selectedGrid.style.display = 'grid'; // or block depending on responsive CSS, but ds-grid-4 forces grid when not hidden
+        
+        // Toggle the date filter visibility
+        document.getElementById('caseOverviewFilter').style.display = (this.value === 'caseOverview') ? 'block' : 'none';
+    });
+}
+
+// Dynamic Greeting
+var hr = new Date().getHours();
+var greeting = "Good evening 🌙";
+if (hr < 12) greeting = "Good morning 🌅";
+else if (hr < 18) greeting = "Good afternoon ☀️";
+document.getElementById('dynamicGreeting').innerText = greeting;
+
+// Live Clock Logic for Welcome Banner
+setInterval(function() {
+    var now = new Date();
+    var timeString = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute:'2-digit', second:'2-digit' });
+    var timeEl = document.getElementById('liveTime');
+    if (timeEl) timeEl.innerText = timeString;
+}, 1000);
+</script>
 
 <?= $this->endSection() ?>

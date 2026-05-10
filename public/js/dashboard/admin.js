@@ -5,11 +5,11 @@
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof DASHBOARD_DATA === 'undefined') return;
 
-    const palette = ['#185FA5','#1D9E75','#534AB7','#A32D2D','#854F0B','#3B6D11'];
-    const paletteBg = ['#E6F1FB','#E1F5EE','#EEEDFE','#FCEBEB','#FAEEDA','#EAF3DE'];
+    const palette = ['#4F46E5','#10B981','#8B5CF6','#F43F5E','#F59E0B','#22C55E'];
+    const paletteBg = ['#EEF2FF','#D1FAE5','#EDE9FE','#FFE4E6','#FEF3C7','#DCFCE7'];
 
-    Chart.defaults.font.family = "'DM Sans', sans-serif";
-    Chart.defaults.font.size = 11;
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.font.size = 11.5;
     Chart.defaults.color = '#64748b';
 
     // ── Gender Donut ──
@@ -21,8 +21,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 labels: ['Male', 'Female'],
                 datasets: [{
                     data: [DASHBOARD_DATA.gender.male, DASHBOARD_DATA.gender.female],
-                    backgroundColor: ['#185FA5', '#A32D2D'],
-                    borderWidth: 0,
+                    backgroundColor: ['#4F46E5', '#F43F5E'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 6,
                     cutout: '72%'
                 }]
             },
@@ -37,6 +39,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // ── Purok Bar ──
     const purokEl = document.getElementById('purokChart');
     if (purokEl && DASHBOARD_DATA.purokLabels) {
+        // Create subtle gradient
+        let ctx = purokEl.getContext('2d');
+        let gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        gradient.addColorStop(0, '#4F46E5'); // Indigo
+        gradient.addColorStop(1, 'rgba(79, 70, 229, 0.1)');
+
         new Chart(purokEl, {
             type: 'bar',
             data: {
@@ -44,18 +52,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     label: 'Residents',
                     data: DASHBOARD_DATA.purokValues,
-                    backgroundColor: palette.slice(0, DASHBOARD_DATA.purokLabels.length),
+                    backgroundColor: gradient,
                     borderRadius: 6,
-                    maxBarThickness: 36
+                    borderSkipped: false,
+                    maxBarThickness: 32,
+                    hoverBackgroundColor: '#8B5CF6' // Violet on hover
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                        backdropFilter: 'blur(4px)',
+                        padding: 12,
+                        cornerRadius: 10,
+                        titleFont: { size: 13, family: "'Inter', sans-serif", weight: 'bold' },
+                        bodyFont: { size: 12, family: "'Inter', sans-serif" }
+                    }
+                },
                 scales: {
                     y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.04)', drawBorder: false }, ticks: { stepSize: 1 } },
                     x: { grid: { display: false } }
+                },
+                animation: {
+                    y: { duration: 1500, easing: 'easeOutQuart' }
                 }
             }
         });
@@ -71,15 +94,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     data: DASHBOARD_DATA.civilValues,
                     backgroundColor: palette.slice(0, DASHBOARD_DATA.civilLabels.length),
-                    borderWidth: 0,
-                    cutout: '65%'
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    cutout: '65%',
+                    hoverOffset: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
+                plugins: { legend: { display: false } },
+                animation: { animateScale: true, animateRotate: true }
             }
+        });
+    }
+
+    // ── AJAX Case Filtering ──
+    const caseFilter = document.getElementById('caseOverviewFilter');
+    if (caseFilter) {
+        caseFilter.addEventListener('change', function() {
+            const val = this.value;
+            // Add fade out class
+            const statNums = document.querySelectorAll('.case-overview-num');
+            statNums.forEach(el => el.style.opacity = '0.3');
+
+            fetch(DASHBOARD_DATA.baseUrl + 'admin/dashboard/filterCases?range=' + val)
+                .then(res => res.json())
+                .then(data => {
+                    setTimeout(() => {
+                        document.getElementById('openCasesCount').innerText = data.openCases;
+                        document.getElementById('hearingsCount').innerText = data.hearingsToday;
+                        document.getElementById('settledCount').innerText = data.settledThisMonth;
+                        document.getElementById('blotterTotalCount').innerText = data.blotterCount;
+                        statNums.forEach(el => el.style.opacity = '1');
+                    }, 200);
+                }).catch(err => {
+                    console.error(err);
+                    statNums.forEach(el => el.style.opacity = '1');
+                });
         });
     }
 });

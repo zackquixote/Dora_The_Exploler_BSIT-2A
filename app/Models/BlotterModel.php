@@ -31,6 +31,13 @@ class BlotterModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
+    protected $validationRules = [
+        'incident_type' => 'required|max_length[50]',
+        'incident_date' => 'required|valid_date',
+        'details'       => 'required',
+        'status'        => 'permit_empty|in_list[Pending,Investigating,Ongoing,For Hearing,Settled,Dismissed,Referred,Unsettled]',
+    ];
+
     // Optional: helper to get all cases with creator name
     public function getBlotters()
     {
