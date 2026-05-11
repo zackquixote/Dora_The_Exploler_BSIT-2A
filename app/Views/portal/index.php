@@ -8,14 +8,13 @@ $municipality = $settings['municipality']  ?? 'Municipality';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($barangay) ?> - Public Portal</title>
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+    <!-- Fonts loaded via bmis-design-system.css -->
     <!-- Icons -->
     <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/fontawesome-free/css/all.min.css') ?>">
     <!-- Design System -->
     <link rel="stylesheet" href="<?= base_url('assets/css/bmis-design-system.css') ?>">
     <style>
-        body { font-family: 'DM Sans', sans-serif; background: var(--bg); margin: 0; color: var(--ink); }
+        body { font-family: var(--font); background: var(--bg); margin: 0; color: var(--ink); }
         .portal-nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: var(--white); border-bottom: .5px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
         .portal-nav .logo { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 16px; color: var(--c-navy); text-decoration: none; }
         .portal-nav .logo img { height: 40px; width: 40px; border-radius: 50%; object-fit: cover; }

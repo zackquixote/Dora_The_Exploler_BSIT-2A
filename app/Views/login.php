@@ -14,7 +14,6 @@ $province     = $settings['province']      ?? 'Province';
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   
   <!-- Font Awesome -->
   <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/fontawesome-free/css/all.min.css') ?>">
@@ -34,7 +33,7 @@ $province     = $settings['province']      ?? 'Province';
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
-        font-family: 'Inter', sans-serif;
+        font-family: var(--font);
         color: #f8fafc;
     }
     .login-wrapper {
