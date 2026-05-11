@@ -32,6 +32,11 @@ class Users extends Controller
         return view('users/index');
     }
 
+    /**
+     * Execute fetchRecords functionality.
+     *
+     * @return mixed
+     */
     public function fetchRecords()
     {
         if (!$this->request->isAJAX()) {
@@ -81,7 +86,6 @@ class Users extends Controller
                 </div>
             ';
 
-            // We construct the array so DataTables can read it by name
             $data[] = [
                 'no'         => $num++,
                 'id'         => $row['id'],
@@ -105,6 +109,11 @@ class Users extends Controller
         return $this->response->setJSON($response);
     }
 
+    /**
+     * Execute view functionality.
+     *
+     * @return mixed
+     */
     public function view($id = null)
     {
         $db = \Config\Database::connect();
@@ -118,6 +127,11 @@ class Users extends Controller
     }
 
    
+    /**
+     * Execute edit functionality.
+     *
+     * @return mixed
+     */
     public function edit($id = null)
     {
         if (!$this->request->isAJAX()) return $this->response->setStatusCode(404);
@@ -132,6 +146,11 @@ class Users extends Controller
         }
     }
 
+    /**
+     * Execute update functionality.
+     *
+     * @return mixed
+     */
     public function update()
     {
         $id = $this->request->getPost('userId');
@@ -157,6 +176,11 @@ class Users extends Controller
         }
     }
 
+    /**
+     * Execute delete functionality.
+     *
+     * @return mixed
+     */
     public function delete($id = null)
     {
         $db = \Config\Database::connect();
@@ -177,6 +201,11 @@ class Users extends Controller
         return view('users/create');
     }
 
+      /**
+       * Execute save functionality.
+       *
+       * @return mixed
+       */
       public function save()
     {
         // 1. Get the email from the input

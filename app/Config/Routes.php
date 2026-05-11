@@ -20,26 +20,37 @@ $routes->addPlaceholder('num', '[0-9]+');
 $routes->addPlaceholder('segment', '[^/]+');
 
 
-// ------------------------------------------------
-// AUTH (PUBLIC)
-// ------------------------------------------------
+/**
+ * --------------------------------------------------------------------
+ * Public Authentication Routes
+ * --------------------------------------------------------------------
+ * Routes accessible without user authentication.
+ * Handles the main portal access, login processing, and logout.
+ */
 $routes->get('/', 'Portal::index');
 $routes->match(['get', 'post'], 'login', 'Auth::index');
 $routes->post('auth', 'Auth::auth');
 $routes->get('logout', 'Auth::logout');
 
 
-// ------------------------------------------------
-// LOGGED IN AREA (MAIN SYSTEM)
-// ------------------------------------------------
+/**
+ * --------------------------------------------------------------------
+ * Authenticated Area (Main System Routes)
+ * --------------------------------------------------------------------
+ * All routes within this group require an active user session.
+ * Protected by the 'loggedIn' route filter.
+ */
 $routes->group('', [
     'namespace' => 'App\Controllers',
     'filter'    => 'loggedIn',
 ], function ($routes) {
 
-    // =========================
-    // RESIDENTS
-    // =========================
+    /**
+     * --------------------------------------------------------------------
+     * Resident Management Routes
+     * --------------------------------------------------------------------
+     * CRUD operations and specialized endpoints for Barangay residents.
+     */
     $routes->get('resident', 'Resident::index');
     $routes->get('residents', 'Resident::index');
     $routes->get('resident/exportCsv', 'Resident::exportCsv');
@@ -56,9 +67,12 @@ $routes->group('', [
     $routes->match(['post', 'put'], 'resident/updateStatus/(:num)', 'Resident::updateStatus/$1');
     $routes->match(['post', 'put'], 'resident/updateMemberStatus/(:num)', 'Resident::updateMemberStatus/$1');
 
-    // =========================
-    // HOUSEHOLDS
-    // =========================
+    /**
+     * --------------------------------------------------------------------
+     * Household Management Routes
+     * --------------------------------------------------------------------
+     * Grouped routes for handling household records and resident groupings.
+     */
     $routes->group('households', function ($routes) {
         $routes->get('/', 'HouseholdController::index');
         $routes->match(['get', 'post'], 'create', 'HouseholdController::create');
@@ -76,9 +90,12 @@ $routes->group('', [
     });
 
 
-    // =========================
-    // CERTIFICATES
-    // =========================
+    /**
+     * --------------------------------------------------------------------
+     * Certificate Management Routes
+     * --------------------------------------------------------------------
+     * Handling the creation, generation, printing, and management of various certificates.
+     */
     $routes->get('certificate', 'Certificate::index');
     $routes->get('certificate/create', 'Certificate::create');
     $routes->post('certificate/store', 'Certificate::store');
@@ -88,9 +105,12 @@ $routes->group('', [
     $routes->post('certificate/delete/(:num)', 'Certificate::delete/$1');
 
 
-    // =========================
-    // OFFICIALS (FULL CRUD FIXED)
-    // =========================
+    /**
+     * --------------------------------------------------------------------
+     * Barangay Officials Management Routes
+     * --------------------------------------------------------------------
+     * Full CRUD operations for managing current and past barangay officials.
+     */
     $routes->get('officials', 'Officials::index');
     $routes->get('officials/create', 'Officials::create');
     $routes->post('officials/store', 'Officials::store');
@@ -101,8 +121,13 @@ $routes->group('', [
 
 
    
-  // Blotter Routes
-$routes->get('blotter', 'Blotter::index');
+    /**
+     * --------------------------------------------------------------------
+     * Blotter / Incident Management Routes
+     * --------------------------------------------------------------------
+     * Endpoints for recording, updating, and managing blotter cases, hearings, and summons.
+     */
+    $routes->get('blotter', 'Blotter::index');
 $routes->get('blotter/exportCsv', 'Blotter::exportCsv');
 $routes->get('blotter/create', 'Blotter::create');
 $routes->post('blotter/store', 'Blotter::store');
@@ -120,19 +145,31 @@ $routes->post('blotter/hearing/update/(:num)', 'Blotter::updateHearing/$1');
 $routes->post('blotter/hearing/delete/(:num)', 'Blotter::deleteHearing/$1');
 $routes->get('blotter/print/(:num)', 'Blotter::printCase/$1');
 
-// Global Search
-$routes->get('api/search', 'SearchController::index');
+    /**
+     * --------------------------------------------------------------------
+     * Global API Endpoints
+     * --------------------------------------------------------------------
+     * Generic endpoints used across the system (e.g., Global Search).
+     */
+    $routes->get('api/search', 'SearchController::index');
 
-// =========================
-// SYSTEM LOGS
-// =========================
+    /**
+     * --------------------------------------------------------------------
+     * System Logs
+     * --------------------------------------------------------------------
+     * View audit trails and user activity logs across the application.
+     */
 $routes->get('logs', 'Logs::log');
 });
 
 
-// ------------------------------------------------
-// ADMIN AREA
-// ------------------------------------------------
+/**
+ * --------------------------------------------------------------------
+ * Administrative Routes
+ * --------------------------------------------------------------------
+ * Grouped routes restricted to Administrator role.
+ * Protected by 'adminOnly' filter.
+ */
 $routes->group('admin', [
     'namespace' => 'App\Controllers\Admin',
     'filter'    => 'adminOnly',
@@ -141,16 +178,22 @@ $routes->group('admin', [
     $routes->get('dashboard', 'Dashboard::index');
     $routes->get('dashboard/filterCases', 'Dashboard::filterCases');
 
-    // =========================
-    // SETTINGS
-    // =========================
+    /**
+     * --------------------------------------------------------------------
+     * System Settings
+     * --------------------------------------------------------------------
+     * Endpoints for configuring global system behaviors and information.
+     */
     $routes->get('settings', 'Settings::index');
     $routes->post('settings', 'Settings::update');
     $routes->post('settings/update', 'Settings::update');
 
-    // =========================
-    // CERTIFICATE TYPES
-    // =========================
+    /**
+     * --------------------------------------------------------------------
+     * Certificate Types Configuration
+     * --------------------------------------------------------------------
+     * Manage the dynamic types of certificates that can be issued.
+     */
     $routes->get('certificateTypes', 'CertificateTypes::index');
     $routes->get('certificateTypes/create', 'CertificateTypes::create');
     $routes->post('certificateTypes/store', 'CertificateTypes::store');
@@ -159,9 +202,12 @@ $routes->group('admin', [
     $routes->post('certificateTypes/delete/(:num)', 'CertificateTypes::delete/$1');
 
 
-    // =========================
-    // USERS
-    // =========================
+    /**
+     * --------------------------------------------------------------------
+     * User Identity and Access Management
+     * --------------------------------------------------------------------
+     * Administrative routes for managing system user accounts and roles.
+     */
     $routes->group('users', ['namespace' => 'App\Controllers'], function ($routes) {
         $routes->get('/', 'Users::index');
         $routes->get('create', 'Users::create');
@@ -176,9 +222,13 @@ $routes->group('admin', [
 });
 
 
-// ------------------------------------------------
-// STAFF AREA
-// ------------------------------------------------
+/**
+ * --------------------------------------------------------------------
+ * Staff / Standard User Routes
+ * --------------------------------------------------------------------
+ * Grouped routes specific to Staff role.
+ * Protected by 'staffOnly' filter.
+ */
 $routes->group('staff', [
     'namespace' => 'App\Controllers\Staff',
     'filter'    => 'staffOnly',
@@ -197,4 +247,3 @@ $routes->group('staff', [
 });
 
 
-// End of Routes

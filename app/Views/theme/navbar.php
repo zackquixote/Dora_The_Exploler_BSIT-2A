@@ -1,4 +1,12 @@
-<?php //staff topbar ?>
+<?php
+/**
+ * Unified Navbar — role-aware topbar for both Admin and Staff.
+ *
+ * Admin extras: dark mode toggle, settings button, always-visible search.
+ * Staff: search hidden by default (shown via JS on desktop).
+ */
+$role = strtolower(session()->get('role') ?? 'staff');
+?>
 <header class="bmis-topbar" id="mainTopbar">
     <div class="tb-left" style="display:flex;align-items:center;gap:24px">
         <div>
@@ -7,11 +15,11 @@
         </div>
         
         <!-- Global Search -->
-        <div style="position:relative; width: 300px; display:none" id="desktop-search-container">
+        <div style="position:relative; width: 280px;<?= $role !== 'admin' ? ' display:none' : '' ?>" id="desktop-search-container">
             <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font-size:13px"></i>
-            <input type="text" id="globalSearchInput" class="ds-input" placeholder="Search residents, cases..." style="padding-left:38px; padding-right:60px; border-radius:20px; background:var(--bg); border:none; height:38px">
+            <input type="text" id="globalSearchInput" class="ds-input" placeholder="Search residents, cases..." style="padding-left:38px; padding-right:60px; border-radius:20px; background:var(--bg); border:none; height:36px">
             <span class="ds-kbd" style="position:absolute; right:10px; top:50%; transform:translateY(-50%)">Ctrl+K</span>
-            <div id="globalSearchResults" style="display:none; position:absolute; top:45px; left:0; width:100%; background:var(--white); border-radius:12px; box-shadow:var(--shadow-lg); z-index:1000; overflow:hidden">
+            <div id="globalSearchResults" style="display:none; position:absolute; top:42px; left:0; width:100%; background:var(--white); border-radius:12px; box-shadow:var(--shadow-lg); z-index:1000; overflow:hidden; border:1px solid var(--border)">
                 <div style="padding:12px; max-height:400px; overflow-y:auto" id="globalSearchBody"></div>
             </div>
         </div>
@@ -25,6 +33,16 @@
             <div class="dropdown-menu dropdown-menu-right shadow-sm border-0 mt-2" id="notifications-dropdown-menu" style="border-radius:12px;width:300px;max-height:400px;overflow-y:auto;z-index:9999;">
             </div>
         </div>
+
+        <?php if ($role === 'admin'): ?>
+        <button class="tb-icon-btn" id="darkModeToggle" title="Toggle Dark Mode">
+            <i class="fas fa-moon"></i>
+        </button>
+        <button class="tb-icon-btn" title="Settings" onclick="window.location='<?= base_url('admin/settings') ?>'">
+            <i class="fas fa-cog"></i>
+        </button>
+        <?php endif; ?>
+
         <div class="tb-user-pill">
             <div class="tb-avatar"><i class="fas fa-user"></i></div>
             <span><?= esc(session()->get('email')) ?></span>

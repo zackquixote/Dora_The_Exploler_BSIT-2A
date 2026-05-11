@@ -40,6 +40,11 @@ class LogModel extends Model
     ];
 
 
+    /**
+     * Execute addLog functionality.
+     *
+     * @return mixed
+     */
     public function addLog(string $action, string $type = '')
     {
         date_default_timezone_set('Asia/Manila'); // Set to Philippine time
@@ -64,6 +69,11 @@ class LogModel extends Model
         return $this->orderBy('DATELOG DESC, TIMELOG DESC')->findAll();
     }
 
+    /**
+     * Execute getLogsByDate functionality.
+     *
+     * @return mixed
+     */
     public function getLogsByDate($date)
     {
         return $this->where('DATELOG', $date)
@@ -71,6 +81,11 @@ class LogModel extends Model
                     ->findAll();
     }
 
+    /**
+     * Execute getLogsByDateAndResid functionality.
+     *
+     * @return mixed
+     */
     public function getLogsByDateAndResid($date, $userId)
     {
         return $this->where('DATELOG', $date)
@@ -79,6 +94,11 @@ class LogModel extends Model
                     ->findAll();
     }
 
+    /**
+     * Execute getLogsPerMonth functionality.
+     *
+     * @return mixed
+     */
     public function getLogsPerMonth()
     {
         return $this->db->table('tbl_logs')

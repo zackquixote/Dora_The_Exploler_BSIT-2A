@@ -49,7 +49,11 @@ class HouseholdController extends BaseController
         $this->db             = \Config\Database::connect();
     }
 
-    // ── Auth helper ───────────────────────────────────────────────────
+    /**
+     * Execute requireLogin functionality.
+     *
+     * @return mixed
+     */
     private function requireLogin()
     {
         if (!session()->get('logged_in')) {
@@ -58,6 +62,11 @@ class HouseholdController extends BaseController
         return null;
     }
 
+    /**
+     * Execute generateHouseholdNo functionality.
+     *
+     * @return mixed
+     */
     private function generateHouseholdNo()
     {
         $year = date('Y');
@@ -74,7 +83,11 @@ class HouseholdController extends BaseController
         return "HH-{$year}-" . str_pad($next, 3, '0', STR_PAD_LEFT);
     }
 
-    // ── Index ─────────────────────────────────────────────────────────
+    /**
+     * Execute index functionality.
+     *
+     * @return mixed
+     */
     public function index()
     {
         if ($r = $this->requireLogin()) return $r;
@@ -129,7 +142,11 @@ class HouseholdController extends BaseController
         ]);
     }
 
-    // ── Create ────────────────────────────────────────────────────────
+    /**
+     * Execute create functionality.
+     *
+     * @return mixed
+     */
     public function create()
     {
         if ($r = $this->requireLogin()) return $r;
@@ -142,7 +159,11 @@ class HouseholdController extends BaseController
         ]);
     }
 
-    // ── Store ─────────────────────────────────────────────────────────
+    /**
+     * Execute store functionality.
+     *
+     * @return mixed
+     */
     public function store()
     {
         if ($r = $this->requireLogin()) return $r;
@@ -207,7 +228,11 @@ class HouseholdController extends BaseController
         return redirect()->back()->withInput()->with('error', 'Failed to add household. Please try again.');
     }
 
-    // ── Edit ──────────────────────────────────────────────────────────
+    /**
+     * Execute edit functionality.
+     *
+     * @return mixed
+     */
     public function edit($id)
     {
         if ($r = $this->requireLogin()) return $r;
@@ -236,7 +261,11 @@ class HouseholdController extends BaseController
         ]);
     }
 
-    // ── Update ────────────────────────────────────────────────────────
+    /**
+     * Execute update functionality.
+     *
+     * @return mixed
+     */
     public function update($id)
     {
         if ($r = $this->requireLogin()) return $r;
@@ -307,7 +336,11 @@ class HouseholdController extends BaseController
         return redirect()->back()->with('error', 'Failed to update household');
     }
 
-    // ── View ──────────────────────────────────────────────────────────
+    /**
+     * Execute view functionality.
+     *
+     * @return mixed
+     */
     public function view($id)
     {
         if ($r = $this->requireLogin()) return $r;
@@ -339,12 +372,10 @@ class HouseholdController extends BaseController
         ]);
     }
 
-    // ── Delete (AJAX) ─────────────────────────────────────────────────
-  /**
- * Delete household (AJAX)
- * 
- * @param int $id Household ID
- * @return \CodeIgniter\HTTP\ResponseInterface
+    /**
+     * Execute delete functionality.
+     *
+     * @return mixed
  */
 public function delete($id)
 {
@@ -393,7 +424,12 @@ public function delete($id)
 
     return $this->response->setJSON(['status' => 'error', 'message' => 'Delete failed', 'csrf_hash' => csrf_hash()]);
 }
-    // ── AJAX: Get members of a household ──────────────────────────────
+
+    /**
+     * Execute getMembers functionality.
+     *
+     * @return mixed
+     */
     public function getMembers($householdId)
     {
         try {
@@ -404,7 +440,11 @@ public function delete($id)
         }
     }
 
-    // ── AJAX: Set as Household Head ───────────────────────────────────
+    /**
+     * Execute setHead functionality.
+     *
+     * @return mixed
+     */
     public function setHead($residentId)
     {
         if ($r = $this->requireLogin()) return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
@@ -443,7 +483,11 @@ public function delete($id)
         return $this->response->setJSON(['status' => 'success', 'message' => 'Household head updated successfully', 'csrf_hash' => csrf_hash()]);
     }
 
-    // ── AJAX: Residents by sitio ──────────────────────────────────────
+    /**
+     * Execute getResidentsBySitio functionality.
+     *
+     * @return mixed
+     */
     public function getResidentsBySitio()
     {
         $sitio = $this->request->getPost('sitio');
@@ -469,7 +513,11 @@ public function delete($id)
         }
     }
 
-    // ── AJAX: Households by sitio ─────────────────────────────────────
+    /**
+     * Execute getHouseholdsBySitio functionality.
+     *
+     * @return mixed
+     */
     public function getHouseholdsBySitio()
     {
         $sitio = $this->request->getGet('sitio') ?? $this->request->getPost('sitio');
@@ -485,7 +533,11 @@ public function delete($id)
         }
     }
 
-    // ── AJAX: Get by sitio (alternate endpoint) ───────────────────────
+    /**
+     * Execute getBySitio functionality.
+     *
+     * @return mixed
+     */
     public function getBySitio()
     {
         $sitio = $this->request->getPost('sitio');
@@ -496,7 +548,11 @@ public function delete($id)
         return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request']);
     }
 
-    // ── AJAX: Next household number ───────────────────────────────────
+    /**
+     * Execute getNextHouseholdNo functionality.
+     *
+     * @return mixed
+     */
     public function getNextHouseholdNo()
     {
         $householdNo = $this->generateHouseholdNo();
@@ -504,7 +560,11 @@ public function delete($id)
         return $this->response->setJSON(['status' => 'success', 'household_no' => $householdNo, 'csrf_hash' => csrf_hash()]);
     }
 
-    // ── AJAX: Check if household number exists ────────────────────────
+    /**
+     * Execute checkHouseholdNo functionality.
+     *
+     * @return mixed
+     */
     public function checkHouseholdNo()
     {
         $householdNo = $this->request->getGet('household_no');
@@ -521,7 +581,11 @@ public function delete($id)
         ]);
     }
 
-    // ── AJAX: Get household details ───────────────────────────────────
+    /**
+     * Execute getDetails functionality.
+     *
+     * @return mixed
+     */
     public function getDetails($id)
     {
         $household = $this->householdModel->find($id);

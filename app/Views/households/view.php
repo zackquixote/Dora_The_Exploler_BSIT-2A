@@ -1,6 +1,4 @@
 <?php
-$role = strtolower(session()->get('role') ?? 'staff');
-$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 $profileSrc = ($headResident && !empty($headResident['profile_picture'])) ? 'uploads/' . $headResident['profile_picture'] : 'assets/img/default.png';
 $headName = $headResident ? ($headResident['first_name'] . ' ' . $headResident['last_name']) : 'Unassigned';
 $voterCount = $seniorCount = $pwdCount = 0;
@@ -10,7 +8,7 @@ foreach ($residents as $r) {
     if (!empty($r['is_pwd']) && $r['is_pwd'] == 1) $pwdCount++;
 }
 ?>
-<?= $this->extend($template) ?>
+<?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
 
 <div class="bmis-content">

@@ -31,6 +31,11 @@ class Auth extends BaseController
         $this->logModel = new LogModel();
     }
 
+  /**
+   * Execute index functionality.
+   *
+   * @return mixed
+   */
   public function index()
 {
     // Already logged in – redirect to role dashboard
@@ -102,6 +107,11 @@ class Auth extends BaseController
         return redirect()->back()->with('error', 'Invalid email or password');
     }
 
+    /**
+     * Execute logout functionality.
+     *
+     * @return mixed
+     */
     public function logout()
     {
         // ── LOG THE LOGOUT HERE (Before destroying session) ──

@@ -7,6 +7,12 @@ use App\Models\CertificateTypeModel;
 use App\Models\CertificateModel;
 use App\Models\LogModel;
 
+/**
+ * --------------------------------------------------------------------
+ * CertificateTypes
+ * --------------------------------------------------------------------
+ * Handles controller operations and data logic for the application.
+ */
 class CertificateTypes extends BaseController
 {
     protected $typeModel;

@@ -1,6 +1,4 @@
 <?php
-$role = session()->get('role');
-$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 $status = $case['status'];
 $sc = match($status) {
     'Pending'=>'ds-badge-amber','Settled'=>'ds-badge-teal','Dismissed'=>'ds-badge-gray',
@@ -8,7 +6,7 @@ $sc = match($status) {
     default=>'ds-badge-blue'
 };
 ?>
-<?= $this->extend($template) ?>
+<?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
 
 <div class="bmis-content">

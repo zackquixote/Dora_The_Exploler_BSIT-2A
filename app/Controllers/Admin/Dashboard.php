@@ -10,8 +10,19 @@ use App\Models\BlotterModel;
 use App\Models\CertificateModel;
 use App\Models\BlotterHearingModel;
 
+/**
+ * --------------------------------------------------------------------
+ * Dashboard
+ * --------------------------------------------------------------------
+ * Handles controller operations and data logic for the application.
+ */
 class Dashboard extends BaseController
 {
+    /**
+     * Execute index functionality.
+     *
+     * @return mixed
+     */
     public function index()
     {
         if (!session()->get('logged_in') || session()->get('role') !== 'admin') {
@@ -142,6 +153,11 @@ class Dashboard extends BaseController
         ]);
     }
 
+    /**
+     * Execute filterCases functionality.
+     *
+     * @return mixed
+     */
     public function filterCases()
     {
         $range = $this->request->getGet('range') ?? 'month';

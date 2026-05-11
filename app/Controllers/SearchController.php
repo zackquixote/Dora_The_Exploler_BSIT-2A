@@ -7,8 +7,19 @@ use App\Models\ResidentModel;
 use App\Models\HouseholdModel;
 use App\Models\BlotterModel;
 
+/**
+ * --------------------------------------------------------------------
+ * SearchController
+ * --------------------------------------------------------------------
+ * Handles controller operations and data logic for the application.
+ */
 class SearchController extends Controller
 {
+    /**
+     * Execute index functionality.
+     *
+     * @return mixed
+     */
     public function index()
     {
         $query = $this->request->getGet('q') ?? '';

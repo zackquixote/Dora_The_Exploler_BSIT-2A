@@ -1,8 +1,4 @@
-<?php
-$role = strtolower(session()->get('role') ?? 'staff');
-$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
-?>
-<?= $this->extend($template) ?>
+<?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
 
 <div class="bmis-content">
@@ -17,10 +13,6 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
             <a href="<?= base_url('resident') ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-arrow-left me-2"></i> Back to Directory</a>
         </div>
     </div>
-
-
-
-
 
     <!-- Errors -->
     <?php if (session()->getFlashdata('errors')): ?>
@@ -71,8 +63,8 @@ $template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
                         <label class="ds-input-label">Civil Status</label>
                         <select name="civil_status" class="ds-select">
                             <option value="">Select Status</option>
-                            <?php foreach (['Single','Married','Widowed','Separated'] as $cs): ?>
-                                <option value="<?= $cs ?>" <?= old('civil_status', $resident['civil_status'] ?? '') === $cs ? 'selected' : '' ?>><?= $cs ?></option>
+                            <?php foreach (['single' => 'Single','married' => 'Married','widowed' => 'Widowed','separated' => 'Separated'] as $val => $label): ?>
+                                <option value="<?= $val ?>" <?= old('civil_status', $resident['civil_status'] ?? '') === $val ? 'selected' : '' ?>><?= $label ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>

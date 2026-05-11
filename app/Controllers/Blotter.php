@@ -34,9 +34,13 @@ class Blotter extends BaseController
 
     }
 
-    // ──────────────────────────────────────────────────────────
-    //  LIST ALL CASES
-    // ──────────────────────────────────────────────────────────
+    /**
+     * List All Cases
+     * 
+     * Execute index functionality for blotter records.
+     *
+     * @return mixed
+     */
     public function index()
     {
         // Because we now store complainants/respondents in blotter_parties,
@@ -90,9 +94,13 @@ class Blotter extends BaseController
         return view('blotter/index', ['blotters' => $blotterRows]);
     }
 
-    // ──────────────────────────────────────────────────────────
-    //  CREATE FORM
-    // ──────────────────────────────────────────────────────────
+    /**
+     * Create Form
+     * 
+     * Execute create functionality for blotter records.
+     *
+     * @return mixed
+     */
     public function create()
     {
         // Provide all active residents for the dropdown search
@@ -104,9 +112,13 @@ class Blotter extends BaseController
         return view('blotter/create', ['residents' => $residents]);
     }
 
-    // ──────────────────────────────────────────────────────────
-    //  STORE NEW CASE + PARTIES
-    // ──────────────────────────────────────────────────────────
+    /**
+     * Store New Case + Parties
+     * 
+     * Execute store functionality for blotter records.
+     *
+     * @return mixed
+     */
     public function store()
     {
         // 1. Validate core incident fields
@@ -214,9 +226,13 @@ class Blotter extends BaseController
         }
     }
 
-    // ──────────────────────────────────────────────────────────
-    //  VIEW CASE DETAIL
-    // ──────────────────────────────────────────────────────────
+    /**
+     * View Case Detail
+     * 
+     * Execute view functionality for blotter records.
+     *
+     * @return mixed
+     */
     public function view($id)
 {
     $case = $this->blotterModel->find($id);
@@ -243,9 +259,13 @@ class Blotter extends BaseController
     ]);
 }
 
-    // ──────────────────────────────────────────────────────────
-    //  EDIT CASE (basic fields)
-    // ──────────────────────────────────────────────────────────
+    /**
+     * Edit Case (Basic Fields)
+     * 
+     * Execute edit functionality for blotter records.
+     *
+     * @return mixed
+     */
     public function edit($id)
     {
         $case = $this->blotterModel->find($id);
@@ -263,10 +283,13 @@ class Blotter extends BaseController
         ]);
     }
 
-    // ──────────────────────────────────────────────────────────
-    //  UPDATE CASE + PARTIES
-    // ──────────────────────────────────────────────────────────
-
+    /**
+     * Update Case + Parties
+     * 
+     * Execute update functionality for blotter records.
+     *
+     * @return mixed
+     */
     public function update($id)
 {
     $case = $this->blotterModel->find($id);
@@ -346,9 +369,13 @@ class Blotter extends BaseController
         return redirect()->back()->withInput()->with('error', 'An error occurred while updating the case.');
     }
 }
-    // ──────────────────────────────────────────────────────────
-    //  DELETE CASE (with cascading parties)
-    // ──────────────────────────────────────────────────────────
+    /**
+     * Delete Case (With Cascading Parties)
+     * 
+     * Execute delete functionality for blotter records.
+     *
+     * @return mixed
+     */
     public function delete($id)
     {
         $case = $this->blotterModel->find($id);
@@ -362,9 +389,13 @@ class Blotter extends BaseController
         return redirect()->to('blotter')->with('success', 'Case deleted.');
     }
 
-    // ──────────────────────────────────────────────────────────
-    //  AJAX: Search residents by name (for autocomplete/dropdown)
-    // ──────────────────────────────────────────────────────────
+    /**
+     * Ajax: Search Residents By Name (For Autocomplete/Dropdown)
+     * 
+     * Execute searchResidents functionality for blotter records.
+     *
+     * @return mixed
+     */
    public function searchResidents()
 {
     $term = $this->request->getGet('q');

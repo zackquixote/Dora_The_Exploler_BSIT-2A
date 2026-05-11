@@ -21,6 +21,11 @@ use App\Controllers\BaseController;
 class Logs extends BaseController
 {
 
+    /**
+     * Execute log functionality.
+     *
+     * @return mixed
+     */
     public function log()
     {
         $logModel = new \App\Models\LogModel();

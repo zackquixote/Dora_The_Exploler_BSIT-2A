@@ -1,8 +1,4 @@
-<?php
-$role = strtolower(session()->get('role') ?? 'staff');
-$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
-?>
-<?= $this->extend($template) ?>
+<?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
 
 <div class="bmis-content">

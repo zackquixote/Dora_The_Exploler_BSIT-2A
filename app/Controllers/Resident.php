@@ -39,7 +39,7 @@ class Resident extends BaseController
         $builder = $this->db->table('residents')
             ->select('residents.*, households.household_no, TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) as age')
             ->join('households', 'households.id = residents.household_id', 'left')
-            ->where('residents.deleted_at', null);
+            ->where('residents.deleted_at IS NULL');
 
         if ($selectedPurok !== 'all') {
             if ($selectedPurok === 'Unassigned') {
@@ -56,7 +56,7 @@ class Resident extends BaseController
 
         $allResidents = $this->db->table('residents')
             ->select('sitio')
-            ->where('deleted_at', null)
+            ->where('deleted_at IS NULL')
             ->get()
             ->getResultArray();
 
@@ -99,8 +99,11 @@ class Resident extends BaseController
             'birthdate'       => 'required|valid_date',
             'sex'             => 'required|in_list[male,female]',
             'sitio'           => 'required|max_length[100]',
-            'profile_picture' => 'is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
+            'profile_picture' => 'permit_empty|is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
         ];
+
+        // DEBUG: Log incoming data
+        log_message('debug', 'Resident Store Called - POST Data: ' . json_encode($this->request->getPost()));
 
         if ($this->request->isAJAX()) {
             if (!$this->validate($rules)) {
@@ -112,15 +115,24 @@ class Resident extends BaseController
             $data['registered_by'] = session()->get('user_id') ?? 1;
 
             try {
-                $this->residentModel->insert($data);
+                $result = $this->residentModel->insert($data);
+
+                // Check if model validation failed (insert returns false)
+                if ($result === false) {
+                    $modelErrors = $this->residentModel->errors();
+                    log_message('error', 'Resident AJAX insert failed - Model errors: ' . json_encode($modelErrors));
+                    return $this->response->setJSON(['status' => 'error', 'errors' => $modelErrors]);
+                }
+
                 $fullName = $data['first_name'] . ' ' . $data['last_name'];
                 $this->logModel->addLog('Added Resident ' . $fullName);
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             } catch (\Exception $e) {
+                log_message('error', 'Resident AJAX insert exception: ' . $e->getMessage());
                 if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
                     return $this->response->setJSON(['status' => 'error', 'message' => 'A resident with the same name and birthdate already exists.']);
                 }
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Database error.']);
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
             }
         }
 
@@ -134,15 +146,24 @@ class Resident extends BaseController
         $data['registered_by'] = session()->get('user_id') ?? 1;
 
         try {
-            $this->residentModel->insert($data);
+            $result = $this->residentModel->insert($data);
+
+            // Check if model validation failed (insert returns false)
+            if ($result === false) {
+                $modelErrors = $this->residentModel->errors();
+                log_message('error', 'Resident insert failed - Model errors: ' . json_encode($modelErrors));
+                return redirect()->back()->withInput()->with('errors', $modelErrors);
+            }
+
             $fullName = $data['first_name'] . ' ' . $data['last_name'];
             $this->logModel->addLog('Added Resident ' . $fullName);
             return redirect()->to(base_url('resident'))->with('success', 'Resident added successfully.');
         } catch (\Exception $e) {
+            log_message('error', 'Resident insert exception: ' . $e->getMessage());
             if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
                 return redirect()->back()->with('error', 'A resident with the same name and birthdate already exists.')->withInput();
             }
-            return redirect()->back()->with('error', 'Database error. Please try again.')->withInput();
+            return redirect()->back()->with('error', 'Database error: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -176,7 +197,7 @@ class Resident extends BaseController
             'birthdate'       => 'required|valid_date',
             'sex'             => 'required|in_list[male,female]',
             'sitio'           => 'required|max_length[100]',
-            'profile_picture' => 'is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
+            'profile_picture' => 'permit_empty|is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
         ];
 
         if ($this->request->isAJAX()) {
@@ -197,13 +218,16 @@ class Resident extends BaseController
             $data = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
             try {
-                $this->residentModel->update($id, $data);
+                $result = $this->residentModel->update($id, $data);
+                if ($result === false) {
+                    return $this->response->setJSON(['status' => 'error', 'errors' => $this->residentModel->errors()]);
+                }
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             } catch (\Exception $e) {
                 if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
                     return $this->response->setJSON(['status' => 'error', 'message' => 'Another resident with the same name and birthdate already exists.']);
                 }
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Update failed.']);
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Update failed: ' . $e->getMessage()]);
             }
         }
 
@@ -220,17 +244,16 @@ class Resident extends BaseController
         $data = $this->prepareResidentData($this->request->getPost(), $profilePic);
 
         try {
-            $this->residentModel->update($id, $data);
-
-            $fullName = ($data['first_name'] ?? $resident['first_name']) . ' ' . ($data['last_name'] ?? $resident['last_name']);
-            $this->logModel->addLog('Updated Resident ' . $fullName, 'resident');
-
+            $result = $this->residentModel->update($id, $data);
+            if ($result === false) {
+                return redirect()->back()->withInput()->with('errors', $this->residentModel->errors());
+            }
             return redirect()->to(base_url('resident'))->with('success', 'Resident updated successfully.');
         } catch (\Exception $e) {
             if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
                 return redirect()->back()->with('error', 'Another resident with the same name and birthdate already exists.')->withInput();
             }
-            return redirect()->back()->with('error', 'Update failed.')->withInput();
+            return redirect()->back()->with('error', 'Update failed: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -251,9 +274,6 @@ class Resident extends BaseController
             }
 
             if ($this->residentModel->delete($id)) {
-                $fullName = $resident['first_name'] . ' ' . $resident['last_name'];
-                $this->logModel->addLog('Deleted Resident ' . $fullName, 'resident');
-
                 return $this->response->setJSON([
                     'status'    => 'success',
                     'message'   => 'Resident deleted successfully.',
@@ -278,7 +298,7 @@ class Resident extends BaseController
             ->select('r.*, h.household_no, h.street_address as household_address, TIMESTAMPDIFF(YEAR, r.birthdate, CURDATE()) as age')
             ->join('households h', 'h.id = r.household_id', 'left')
             ->where('r.id', $id)
-            ->where('r.deleted_at', null)
+            ->where('r.deleted_at IS NULL')
             ->get()
             ->getRowArray();
 
@@ -327,14 +347,6 @@ class Resident extends BaseController
         $keyword       = $this->request->getGet('q');
         $filterPurok   = $this->request->getGet('filter_purok');
         $filterHouseId = $this->request->getGet('filter_household_id');
-
-        // Pre-fill purok filter with household's location on initial load
-        if ($filterPurok === null && $householdId) {
-            $household = $this->householdModel->find($householdId);
-            if ($household) {
-                $filterPurok = $household['sitio'];
-            }
-        }
 
         $builder = $this->residentModel
             ->groupStart()
@@ -401,7 +413,7 @@ class Resident extends BaseController
         $builder = $this->db->table('residents')
             ->select('residents.*, households.household_no')
             ->join('households', 'households.id = residents.household_id', 'left')
-            ->where('residents.deleted_at', null);
+            ->where('residents.deleted_at IS NULL');
 
         if ($searchValue) {
             $builder->groupStart()
@@ -411,7 +423,7 @@ class Resident extends BaseController
                 ->groupEnd();
         }
 
-        $total    = $this->db->table('residents')->where('deleted_at', null)->countAllResults();
+        $total    = $this->db->table('residents')->where('deleted_at IS NULL')->countAllResults();
         $filtered = $builder->countAllResults(false);
         $data     = $builder->orderBy('residents.id', 'DESC')->limit($length, $start)->get()->getResultArray();
 
@@ -435,7 +447,7 @@ class Resident extends BaseController
             $uploadPath = FCPATH . 'uploads/' . $folderName;
 
             if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0755, true);
+                mkdir($uploadPath, 0777, true);
             }
 
             $newName = $file->getRandomName();
@@ -460,11 +472,12 @@ class Resident extends BaseController
             'last_name'            => $postData['last_name'],
             'birthdate'            => $postData['birthdate'],
             'sex'                  => $postData['sex'],
-            'civil_status'         => !empty($postData['civil_status'])         ? $postData['civil_status']         : null,
+            'civil_status'         => !empty($postData['civil_status'])         ? strtolower($postData['civil_status']) : null,
             'contact_number'       => !empty($postData['contact_number'])       ? $postData['contact_number']       : null,
             'relationship_to_head' => !empty($postData['relationship_to_head']) ? $postData['relationship_to_head'] : null,
             'occupation'           => !empty($postData['occupation'])           ? $postData['occupation']           : null,
             'citizenship'          => !empty($postData['citizenship'])          ? $postData['citizenship']          : null,
+            'street_address'       => !empty($postData['street_address'])       ? $postData['street_address']       : null,
             'sitio'                => $postData['sitio'],
             'is_voter'             => isset($postData['is_voter'])        ? 1 : 0,
             'is_pwd'               => isset($postData['is_pwd'])          ? 1 : 0,
@@ -512,7 +525,7 @@ public function updateStatus($id)
     }
 
     $this->residentModel->update($id, [
-        'status' => $newStatus,
+        'status' => $newStatus
     ]);
 
     $this->logModel->addLog(
@@ -545,7 +558,7 @@ public function updateMemberStatus($id)
     }
 
     $this->residentModel->update($id, [
-        'status' => strtolower($newStatus),
+        'status' => strtolower($newStatus)
     ]);
 
     $this->logModel->addLog(
@@ -570,7 +583,7 @@ public function updateMemberStatus($id)
         $builder = $this->db->table('residents')
             ->select('residents.first_name, residents.last_name, residents.middle_name, residents.birthdate, residents.sex, residents.civil_status, residents.contact_number, residents.occupation, residents.sitio, residents.is_voter, residents.is_pwd, residents.is_senior_citizen, households.household_no')
             ->join('households', 'households.id = residents.household_id', 'left')
-            ->where('residents.deleted_at', null);
+            ->where('residents.deleted_at IS NULL');
 
         if ($selectedPurok !== 'all') {
             if ($selectedPurok === 'Unassigned') {

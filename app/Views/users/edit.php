@@ -1,4 +1,4 @@
-<?= $this->extend('theme/admin/template') ?>
+<?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
 
 <div class="bmis-content">

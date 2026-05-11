@@ -44,6 +44,11 @@ class HouseholdModel extends Model
         'house_type'   => 'permit_empty|in_list[Concrete,Semi-Concrete,Wood,Light Materials]'
     ];
 
+    /**
+     * Execute getAllWithHead functionality.
+     *
+     * @return mixed
+     */
     public function getAllWithHead()
     {
         return $this->select('households.*, CONCAT(residents.first_name, " ", residents.last_name) as head_name')
@@ -52,6 +57,11 @@ class HouseholdModel extends Model
                     ->findAll();
     }
 
+    /**
+     * Execute getResidentCount functionality.
+     *
+     * @return mixed
+     */
     public function getResidentCount($householdId)
     {
         $db = \Config\Database::connect();
@@ -60,6 +70,11 @@ class HouseholdModel extends Model
                   ->countAllResults();
     }
 
+    /**
+     * Execute isUniqueHouseholdNo functionality.
+     *
+     * @return mixed
+     */
     public function isUniqueHouseholdNo($no, $ignoreId = null)
     {
         $builder = $this->where('household_no', $no);

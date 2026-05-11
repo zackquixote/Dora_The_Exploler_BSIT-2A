@@ -1,11 +1,9 @@
 <?php
-$role = strtolower(session()->get('role') ?? 'staff');
-$template = ($role == 'admin') ? 'theme/admin/template' : 'theme/template';
 $profileImg = base_url(!empty($resident['profile_picture']) ? 'uploads/' . $resident['profile_picture'] : 'assets/img/default.png');
 $currentStatus = $resident['status'] ?? 'active';
 $statusBadge = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','deceased'=>'ds-badge-rose','transferred'=>'ds-badge-amber'];
 ?>
-<?= $this->extend($template) ?>
+<?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
 
 <style>

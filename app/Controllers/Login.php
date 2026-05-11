@@ -20,6 +20,11 @@ namespace App\Controllers;
 class Login extends BaseController
 {
 
+    /**
+     * Execute index functionality.
+     *
+     * @return mixed
+     */
     public function index()
     {
         return view('login'); // your login view filename
@@ -32,6 +37,11 @@ class Login extends BaseController
     }
 
 
+    /**
+     * Execute dashboard functionality.
+     *
+     * @return mixed
+     */
     public function dashboard()
     {
         return view('adminlte_view'); 

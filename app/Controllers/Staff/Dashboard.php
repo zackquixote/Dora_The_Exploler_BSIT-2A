@@ -9,9 +9,20 @@ use App\Models\LogModel;
 use App\Models\BlotterModel;
 use App\Models\BlotterHearingModel;
 
+/**
+ * --------------------------------------------------------------------
+ * Dashboard
+ * --------------------------------------------------------------------
+ * Handles controller operations and data logic for the application.
+ */
 class Dashboard extends BaseController
 {
 
+    /**
+     * Execute index functionality.
+     *
+     * @return mixed
+     */
     public function index()
     {
         if (!session()->get('logged_in')) {

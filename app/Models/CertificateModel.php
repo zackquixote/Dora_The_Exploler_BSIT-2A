@@ -146,6 +146,11 @@ class CertificateModel extends Model
         return $result ?: null;
     }
 
+    /**
+     * Execute getBarangaySettings functionality.
+     *
+     * @return mixed
+     */
     public function getBarangaySettings(): ?array
     {
         return $this->db->table('barangay_settings')
