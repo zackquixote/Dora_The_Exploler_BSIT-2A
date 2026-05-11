@@ -140,10 +140,13 @@
                             <td style="white-space:nowrap">
                                 <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-eye"></i></a>
                                 <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-edit"></i></a>
-                                <form action="<?= base_url('resident/delete/'.$r['id']) ?>" method="POST" style="display:inline-block" data-confirm="Delete <?= esc($r['first_name'].' '.$r['last_name']) ?>?">
-                                    <?= csrf_field() ?>
-                                    <button type="submit" class="ds-action-btn ab-rose" title="Delete"><i class="fas fa-trash"></i></button>
-                                </form>
+                                <button
+                                    type="button"
+                                    class="ds-action-btn ab-rose delete-resident"
+                                    title="Delete"
+                                    data-id="<?= esc($r['id']) ?>"
+                                    data-name="<?= esc($r['first_name'].' '.$r['last_name'], 'attr') ?>"
+                                ><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>
                         <?php endforeach; ?>

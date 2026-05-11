@@ -28,7 +28,8 @@ class Dashboard extends BaseController
         if (!session()->get('logged_in')) {
             return redirect()->to('/login');
         }
-        if (session()->get('role') !== 'staff') {
+        $role = strtolower((string) (session()->get('role') ?? ''));
+        if ($role !== 'staff') {
             return redirect()->to('/admin/dashboard');
         }
 

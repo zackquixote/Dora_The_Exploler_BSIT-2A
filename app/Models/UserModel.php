@@ -52,27 +52,30 @@ class UserModel extends Model
      */
     public function getRecords($start, $length, $searchValue)
     {
-        $builder = $this->builder();
-        
-        // Apply search filter if provided
-        if (!empty($searchValue)) {
-            $builder->groupStart()
-                    ->like('name', $searchValue)
-                    ->orLike('email', $searchValue)
-                    ->orLike('role', $searchValue)
-                    ->orLike('phone', $searchValue)
-                    ->groupEnd();
+        $start = (int) ($start ?? 0);
+        $length = (int) ($length ?? 10);
+        $searchValue = trim((string) ($searchValue ?? ''));
+
+        // Build a single base query that respects soft deletes (Model methods do).
+        $base = $this->select('id, name, email, role, status, phone, created_at');
+
+        if ($searchValue !== '') {
+            $base->groupStart()
+                ->like('name', $searchValue)
+                ->orLike('email', $searchValue)
+                ->orLike('role', $searchValue)
+                ->orLike('phone', $searchValue)
+                ->groupEnd();
         }
-        
-        // Get total filtered count
-        $filteredCount = $builder->countAllResults(false);
-        
-        // Get paginated results - FIXED: Use $this->findAll() not $builder->findAll()
-        $data = $this->findAll($length, $start);
-        
-        return [
-            'data' => $data,
-            'filtered' => $filteredCount
-        ];
+
+        // Count (filtered) without mutating the data query
+        $filteredCount = (clone $base)->countAllResults();
+
+        // Data page
+        $data = $base
+            ->orderBy('id', 'DESC')
+            ->findAll($length, $start);
+
+        return ['data' => $data, 'filtered' => $filteredCount];
     }
 }

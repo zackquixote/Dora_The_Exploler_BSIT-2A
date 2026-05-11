@@ -3,65 +3,63 @@
 namespace App\Controllers;
 
 use CodeIgniter\Controller;
+use App\Models\UserModel;
 
-/**
- * Users Controller
- * 
- * Manages system user accounts: listing, creating, editing, deleting.
- * Uses DataTables for AJAX listing and inline edits.
- * 
- * METHODS:
- * - index(): Displays the main user management view.
- * - fetchRecords(): DataTables server-side processing for user list.
- * - edit($id): Returns user data for editing (AJAX).
- * - update(): Updates user details (name, email, role, status, optional password).
- * - delete($id): Deletes a user account.
- * - create(): Displays the "add user" form.
- * - save(): Validates unique email and inserts new user.
- * 
- * DEPENDENCIES:
- * - Database connection for raw queries.
- * - No explicit model used; uses Query Builder directly.
- * 
- * @package App\Controllers
- */
 class Users extends Controller
 {
+    protected $userModel;
+
+    public function __construct()
+    {
+        $this->userModel = new UserModel();
+    }
+
     public function index()
     {
         return view('users/index');
     }
 
-    /**
-     * Execute fetchRecords functionality.
-     *
-     * @return mixed
-     */
     public function fetchRecords()
     {
         if (!$this->request->isAJAX()) {
             return $this->response->setStatusCode(404)->setJSON(['message' => 'Invalid request']);
         }
 
-        $db = \Config\Database::connect();
-        $builder = $db->table('users');
-
-        $draw   = $this->request->getPost('draw');
-        $start  = $this->request->getPost('start');
-        $length = $this->request->getPost('length');
-        $search = $this->request->getPost('search')['value'];
-
+        // Use explicit builders: DataTables counts must not mutate the data query builder.
+        $builder = $this->userModel->builder();
         $builder->select('id, name, email, role, status, phone, created_at');
+
+        // Manually add soft‑delete condition because builder() does not auto‑filter
+        $builder->where('deleted_at', null);
+
+        $draw   = (int) ($this->request->getPost('draw') ?? 0);
+        $start  = (int) ($this->request->getPost('start') ?? 0);
+        $length = (int) ($this->request->getPost('length') ?? 10);
+
+        $searchArr = $this->request->getPost('search');
+        $search = (is_array($searchArr) && isset($searchArr['value'])) ? trim((string) $searchArr['value']) : '';
 
         if (!empty($search)) {
             $builder->groupStart();
             $builder->like('name', $search);
             $builder->orLike('email', $search);
-            $groupEnd();
+            $builder->groupEnd();   // ← FIXED
         }
 
-        $totalRecords = $builder->countAllResults(false);
-        $totalFiltered = (!empty($search)) ? $builder->countAllResults(false) : $totalRecords;
+        // Total records (unfiltered)
+        $totalRecords = $this->userModel->builder()
+            ->where('deleted_at', null)
+            ->countAllResults();
+
+        // Total filtered records (apply same filters as $builder, but on an independent builder)
+        $countBuilder = $this->userModel->builder()->where('deleted_at', null);
+        if (!empty($search)) {
+            $countBuilder->groupStart()
+                ->like('name', $search)
+                ->orLike('email', $search)
+                ->groupEnd();
+        }
+        $totalFiltered = $countBuilder->countAllResults();
 
         $builder->orderBy('id', 'DESC');
         $builder->limit($length, $start);
@@ -100,7 +98,7 @@ class Users extends Controller
         }
 
         $response = [
-            "draw"            => intval($draw),
+            "draw"            => $draw,
             "recordsTotal"    => $totalRecords,
             "recordsFiltered" => $totalFiltered,
             "data"            => $data
@@ -109,36 +107,20 @@ class Users extends Controller
         return $this->response->setJSON($response);
     }
 
-    /**
-     * Execute view functionality.
-     *
-     * @return mixed
-     */
     public function view($id = null)
     {
-        $db = \Config\Database::connect();
-        $user = $db->table('users')->where('id', $id)->get()->getRowArray();
-
+        $user = $this->userModel->find($id);   // respects soft deletes
         if (!$user) {
             return redirect()->to('/admin/users')->with('error', 'User not found.');
         }
-
         return view('users/view', ['user' => $user]);
     }
 
-   
-    /**
-     * Execute edit functionality.
-     *
-     * @return mixed
-     */
     public function edit($id = null)
     {
         if (!$this->request->isAJAX()) return $this->response->setStatusCode(404);
-        
-        $db = \Config\Database::connect();
-        $user = $db->table('users')->where('id', $id)->get()->getRowArray();
 
+        $user = $this->userModel->find($id);
         if ($user) {
             return $this->response->setJSON(['status' => 'success', 'data' => $user]);
         } else {
@@ -146,19 +128,21 @@ class Users extends Controller
         }
     }
 
-    /**
-     * Execute update functionality.
-     *
-     * @return mixed
-     */
     public function update()
     {
         $id = $this->request->getPost('userId');
+        $user = $this->userModel->find($id);
+        if (!$user) {
+            return $this->response->setJSON(['success' => false, 'message' => 'User not found']);
+        }
+
         $data = [
             'name'   => $this->request->getPost('name'),
             'email'  => $this->request->getPost('email'),
-            'role'   => $this->request->getPost('role'),
-            'status' => $this->request->getPost('status'),
+            // Normalize to match DB conventions used across the app
+            'role'   => strtolower(trim((string) $this->request->getPost('role'))),
+            'status' => strtolower(trim((string) $this->request->getPost('status'))),
+            'phone'  => trim((string) $this->request->getPost('phone')),
         ];
 
         $password = $this->request->getPost('password');
@@ -166,78 +150,52 @@ class Users extends Controller
             $data['password'] = password_hash($password, PASSWORD_DEFAULT);
         }
 
-        $db = \Config\Database::connect();
-        $builder = $db->table('users');
-
-        if ($builder->where('id', $id)->update($data)) {
+        if ($this->userModel->update($id, $data)) {
             return $this->response->setJSON(['success' => true, 'message' => 'User updated successfully']);
-        } else {
-            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update user']);
         }
+        return $this->response->setJSON(['success' => false, 'message' => 'Failed to update user']);
     }
 
-    /**
-     * Execute delete functionality.
-     *
-     * @return mixed
-     */
     public function delete($id = null)
     {
-        $db = \Config\Database::connect();
-        $builder = $db->table('users');
-
-        if ($builder->where('id', $id)->delete()) {
-            return $this->response->setJSON(['success' => true, 'message' => 'User deleted successfully']);
-        } else {
-            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete user']);
+        $user = $this->userModel->find($id);
+        if (!$user) {
+            return $this->response->setJSON(['success' => false, 'message' => 'User not found']);
         }
+
+        // Soft delete via the model – sets deleted_at, preserves record
+        if ($this->userModel->delete($id)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'User deleted successfully']);
+        }
+        return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete user']);
     }
 
-        // ... your existing code ...
-
-    // ADD THIS NEW METHOD
     public function create()
     {
         return view('users/create');
     }
 
-      /**
-       * Execute save functionality.
-       *
-       * @return mixed
-       */
-      public function save()
+    public function save()
     {
-        // 1. Get the email from the input
         $email = $this->request->getPost('email');
 
-        // 2. Check if email already exists in database
-        $db = \Config\Database::connect();
-        $exists = $db->table('users')->where('email', $email)->countAllResults();
-
-        if ($exists > 0) {
-            // Email exists, redirect back with error
+        $exists = $this->userModel->where('email', $email)->first();
+        if ($exists) {
             return redirect()->back()->with('error', 'Email already exists. Please use a different email.');
         }
 
-        // 3. Prepare data (Only runs if email is unique)
         $data = [
             'name'     => $this->request->getPost('name'),
             'email'    => $email,
             'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-            'role'     => $this->request->getPost('role'),
-            'status'   => $this->request->getPost('status'),
-            'phone'    => $this->request->getPost('phone'),
+            'role'     => strtolower(trim((string) $this->request->getPost('role'))),
+            'status'   => strtolower(trim((string) $this->request->getPost('status'))),
+            'phone'    => trim((string) $this->request->getPost('phone')),
         ];
 
-        // 4. Insert data
-        $builder = $db->table('users');
-
-        if ($builder->insert($data)) {
+        if ($this->userModel->insert($data)) {
             return redirect()->to('/admin/users')->with('success', 'User added successfully');
-        } else {
-            return redirect()->back()->with('error', 'Failed to add user');
         }
+        return redirect()->back()->with('error', 'Failed to add user');
     }
-    
 }

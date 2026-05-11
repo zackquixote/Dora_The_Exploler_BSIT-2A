@@ -23,6 +23,13 @@ foreach ($residents as $r) {
             <a href="<?= base_url('households') ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-arrow-left me-2"></i> Back to Directory</a>
             <a href="<?= base_url('households/edit/'.$household['id']) ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-edit me-2"></i> Edit Household</a>
             <a href="<?= base_url('resident/create?household_id='.$household['id']) ?>" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm"><i class="fas fa-user-plus me-2"></i> Add Member</a>
+            <button
+                type="button"
+                class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm delete-household-view"
+                data-id="<?= esc($household['id']) ?>"
+                data-no="<?= esc($household['household_no'], 'attr') ?>"
+                title="Delete Household"
+            ><i class="fas fa-trash me-2"></i> Delete</button>
         </div>
     </div>
 
@@ -93,8 +100,9 @@ foreach ($residents as $r) {
                                 if (empty($age) && !empty($r['birthdate'])) $age = (new DateTime($r['birthdate']))->diff(new DateTime())->y;
                                 $isHead = ($headResident && $headResident['id'] == $r['id']);
                                 $fullName = $r['first_name'] . ' ' . $r['last_name'];
-                                $memberStatus = $r['member_status'] ?? 'Active';
-                                $sc = ['Active'=>'ds-badge-teal','Inactive'=>'ds-badge-gray','Transferred'=>'ds-badge-amber','Deceased'=>'ds-badge-rose'];
+                                $memberStatusKey = strtolower($r['status'] ?? 'active');
+                                $memberStatus = ucfirst($memberStatusKey);
+                                $sc = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','transferred'=>'ds-badge-amber','deceased'=>'ds-badge-rose'];
                             ?>
                             <tr id="member-row-<?= $r['id'] ?>">
                                 <td>
@@ -107,13 +115,13 @@ foreach ($residents as $r) {
                                 <td><strong><?= esc(ucfirst($r['relationship_to_head'] ?? '—')) ?></strong></td>
                                 <td>
                                     <span id="membership-display-<?= $r['id'] ?>">
-                                        <span class="ds-badge <?= $sc[$memberStatus] ?? 'ds-badge-gray' ?>" id="membership-badge-<?= $r['id'] ?>"><?= esc($memberStatus) ?></span>
+                                        <span class="ds-badge <?= $sc[$memberStatusKey] ?? 'ds-badge-gray' ?>" id="membership-badge-<?= $r['id'] ?>"><?= esc($memberStatus) ?></span>
                                         <i class="fas fa-pencil-alt edit-membership-icon" data-resident-id="<?= $r['id'] ?>" style="cursor:pointer;font-size:9px;color:var(--ink-soft);margin-left:4px" title="Edit"></i>
                                     </span>
                                     <span id="membership-editor-<?= $r['id'] ?>" style="display:none;align-items:center;gap:4px">
                                         <select id="membership-select-<?= $r['id'] ?>" class="ds-select" style="height:26px;font-size:10px;padding:0 8px;width:auto">
-                                            <?php foreach (['Active','Inactive','Transferred','Deceased'] as $ms): ?>
-                                                <option value="<?= $ms ?>" <?= $memberStatus == $ms ? 'selected' : '' ?>><?= $ms ?></option>
+                                            <?php foreach (['active'=>'Active','inactive'=>'Inactive','transferred'=>'Transferred','deceased'=>'Deceased'] as $msVal => $msLabel): ?>
+                                                <option value="<?= $msVal ?>" <?= $memberStatusKey == $msVal ? 'selected' : '' ?>><?= $msLabel ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                         <i class="fas fa-check save-membership-icon" data-resident-id="<?= $r['id'] ?>" style="cursor:pointer;font-size:11px;color:var(--c-teal)" title="Save"></i>

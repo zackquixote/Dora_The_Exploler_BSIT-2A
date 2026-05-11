@@ -12,7 +12,8 @@ class AddUpdatedAtToResidents extends Migration
             'updated_at' => [
                 'type' => 'TIMESTAMP',
                 'null' => true,
-                'after' => 'registered_at'
+                // `registered_at` was renamed to `created_at` in the current schema
+                'after' => 'created_at'
             ]
         ]);
     }

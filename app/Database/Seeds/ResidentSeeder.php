@@ -24,7 +24,8 @@ class ResidentSeeder extends Seeder
                 'is_pwd' => 0,
                 'status' => 'active',
                 'registered_by' => 1,
-                'registered_at' => date('Y-m-d H:i:s')
+                // Match current schema: use created_at (registered_at was renamed)
+                'created_at' => date('Y-m-d H:i:s')
             ],
             [
                 'household_id' => 2,
@@ -41,7 +42,7 @@ class ResidentSeeder extends Seeder
                 'is_pwd' => 0,
                 'status' => 'active',
                 'registered_by' => 1,
-                'registered_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s')
             ],
             [
                 'household_id' => 3,
@@ -58,7 +59,7 @@ class ResidentSeeder extends Seeder
                 'is_pwd' => 0,
                 'status' => 'active',
                 'registered_by' => 1,
-                'registered_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s')
             ],
             [
                 'household_id' => 4,
@@ -75,7 +76,7 @@ class ResidentSeeder extends Seeder
                 'is_pwd' => 0,
                 'status' => 'active',
                 'registered_by' => 1,
-                'registered_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s')
             ],
             [
                 'household_id' => 5,
@@ -92,7 +93,7 @@ class ResidentSeeder extends Seeder
                 'is_pwd' => 0,
                 'status' => 'active',
                 'registered_by' => 1,
-                'registered_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s')
             ]
         ];
 

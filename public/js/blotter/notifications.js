@@ -91,7 +91,9 @@
         },
 
         updateCsrf: function(newHash) {
-            $('input[name="<?= csrf_token() ?>"]').val(newHash);
+            // This file is served as static JS (not processed by PHP), so we can't embed `csrf_token()`.
+            // Best-effort: update any hidden CSRF fields present on the page.
+            $('input[type="hidden"][name*="csrf"]').val(newHash);
         }
     };
 

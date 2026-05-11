@@ -46,11 +46,20 @@
 
     // ---------- Certificate Modal ----------
     window.generateCertificate = function() {
-        $('#generateCertificateModal').modal('show');
+        // Support the current template's custom overlay modal
+        const overlay = document.getElementById('certModalOverlay');
+        if (overlay) {
+            overlay.classList.add('show');
+            return;
+        }
+
+        // Backward compatible (if a Bootstrap modal exists)
+        const $bsModal = $('#generateCertificateModal');
+        if ($bsModal.length) $bsModal.modal('show');
     };
 
     // Log certificate generation on form submit
-    $(document).on('submit', '#generateCertificateModal form', function() {
+    $(document).on('submit', '#certModalOverlay form, #generateCertificateModal form', function() {
         const certType = $('[name="certificate_type"]', this).val() || 'Certificate';
         logActivity('Generated Certificate', certType, 'cert');
     });
@@ -179,9 +188,10 @@
 
             $.post(`${config.baseUrl}resident/updateStatus/${config.residentId}`, payload, function(response) {
                 if (response.status === 'success') {
-                    const badgeClass = config.statusBadges[newStatus] || 'rv-badge-secondary';
-                    $badge.text(newStatus.charAt(0).toUpperCase() + newStatus.slice(1))
-                          .attr('class', 'rv-badge ' + badgeClass);
+                    const badgeClass = config.statusBadges[newStatus] || 'ds-badge-gray';
+                    $badge
+                        .text(newStatus.charAt(0).toUpperCase() + newStatus.slice(1))
+                        .attr('class', 'ds-badge ' + badgeClass);
                     originalStatus = newStatus;
                     $editor.hide();
                     $display.show();

@@ -152,7 +152,13 @@ $statusBadge = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','deceased'
                             <?php endforeach; ?>
                             <div class="rv-detail-row" style="grid-column:1/-1">
                                 <div class="rv-detail-lbl">Last Updated</div>
-                                <div class="rv-detail-val"><?= date('M d, Y · h:i A', strtotime($resident['updated_at'])) ?></div>
+                                <div class="rv-detail-val">
+                                    <?php if (!empty($resident['updated_at'])): ?>
+                                        <?= date('M d, Y · h:i A', strtotime($resident['updated_at'])) ?>
+                                    <?php else: ?>
+                                        —
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     </div>

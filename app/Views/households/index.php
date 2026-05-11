@@ -75,14 +75,20 @@
                             <td><strong><?= esc($h['head_name']) ?></strong></td>
                             <td style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--ink-muted)"><?= esc($h['sitio']) ?></td>
                             <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<?= esc($h['address'] ?: $h['street_address']) ?>"><?= esc($h['address'] ?: $h['street_address']) ?></td>
-                            <td><span class="ds-badge <?= $bc ?>"><?= $count ?></span> <span style="font-size:10px;color:var(--ink-soft)"><?= $bt ?></span></td>
+                            <td>
+                                <span class="ds-badge <?= $bc ?> resident-count"><?= $count ?></span>
+                                <span style="font-size:10px;color:var(--ink-soft)"><?= $bt ?></span>
+                            </td>
                             <td style="white-space:nowrap">
                                 <a href="<?= base_url('households/view/'.$h['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-eye"></i></a>
                                 <a href="<?= base_url('households/edit/'.$h['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-pen"></i></a>
-                                <form action="<?= base_url('households/delete/'.$h['id']) ?>" method="POST" style="display:inline-block" data-confirm="Delete Household <?= esc($h['household_no']) ?>?">
-                                    <?= csrf_field() ?>
-                                    <button type="submit" class="ds-action-btn ab-rose" title="Delete"><i class="fas fa-trash"></i></button>
-                                </form>
+                                <button
+                                    type="button"
+                                    class="ds-action-btn ab-rose delete-household"
+                                    title="Delete"
+                                    data-id="<?= esc($h['id']) ?>"
+                                    data-no="<?= esc($h['household_no'], 'attr') ?>"
+                                ><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>
                         <?php endforeach; endif; ?>

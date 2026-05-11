@@ -125,14 +125,15 @@ var HouseholdView = (function() {
                 dataType: 'json',
                 success: function(res) {
                     if (res.status === 'success') {
-                        const badgeColors = {
-                            'Active': 'success',
-                            'Inactive': 'secondary',
-                            'Transferred': 'warning',
-                            'Deceased': 'dark'
+                        const badgeClasses = {
+                            active: 'ds-badge-teal',
+                            inactive: 'ds-badge-gray',
+                            transferred: 'ds-badge-amber',
+                            deceased: 'ds-badge-rose'
                         };
-                        const newClass = badgeColors[newStatus] || 'secondary';
-                        badge.text(newStatus).attr('class', 'badge badge-' + newClass);
+                        const cls = badgeClasses[String(newStatus).toLowerCase()] || 'ds-badge-gray';
+                        const label = String(newStatus).charAt(0).toUpperCase() + String(newStatus).slice(1);
+                        badge.text(label).attr('class', 'ds-badge ' + cls);
                         $(`#membership-editor-${residentId}`).hide();
                         $(`#membership-display-${residentId}`).show();
                         if (res.csrf_hash) updateCSRFToken(res.csrf_hash);

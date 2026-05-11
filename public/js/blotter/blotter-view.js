@@ -43,7 +43,8 @@ $(function() {
                 alert(resp.message);
             }
             if (resp.csrf_hash) {
-                $('input[name="<?= csrf_token() ?>"]').val(resp.csrf_hash);
+                window.blotterConfig.csrfHash = resp.csrf_hash;
+                $('input[name="' + window.blotterConfig.csrfToken + '"]').val(resp.csrf_hash);
             }
         }, 'json');
     });
@@ -57,14 +58,15 @@ $(function() {
             data[window.blotterConfig.csrfToken] = window.blotterConfig.csrfHash;
             $.ajax({
                 url: window.blotterConfig.hearingDeleteUrl + '/' + id,
-                type: 'DELETE',
+                // Use POST for widest CI4 compatibility with CSRF
+                type: 'POST',
                 data: data,
                 success: function(resp) {
                     if (resp.status === 'success') location.reload();
                     else alert(resp.message);
                     if (resp.csrf_hash) {
                         window.blotterConfig.csrfHash = resp.csrf_hash;
-                        $('input[name="<?= csrf_token() ?>"]').val(resp.csrf_hash);
+                        $('input[name="' + window.blotterConfig.csrfToken + '"]').val(resp.csrf_hash);
                     }
                 }
             });

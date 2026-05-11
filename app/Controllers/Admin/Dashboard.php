@@ -25,7 +25,8 @@ class Dashboard extends BaseController
      */
     public function index()
     {
-        if (!session()->get('logged_in') || session()->get('role') !== 'admin') {
+        $role = strtolower((string) (session()->get('role') ?? ''));
+        if (!session()->get('logged_in') || $role !== 'admin') {
             return redirect()->to('/login');
         }
 

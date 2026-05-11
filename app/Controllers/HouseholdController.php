@@ -383,7 +383,10 @@ public function delete($id)
 
     $household = $this->householdModel->find($id);
     if (!$household) {
-        return $this->response->setJSON(['status' => 'error', 'message' => 'Household not found', 'csrf_hash' => csrf_hash()]);
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Household not found', 'csrf_hash' => csrf_hash()]);
+        }
+        return redirect()->back()->with('error', 'Household not found');
     }
 
     $hasResidents = $this->db->table('residents')
@@ -395,11 +398,15 @@ public function delete($id)
     $force = filter_var($this->request->getPost('force'), FILTER_VALIDATE_BOOLEAN);
 
     if ($hasResidents > 0 && !$force) {
-        return $this->response->setJSON([
-            'status'    => 'error',
-            'message'   => "Cannot delete household with {$hasResidents} resident(s). Please transfer or delete residents first.",
-            'csrf_hash' => csrf_hash(),
-        ]);
+        $msg = "Cannot delete household with {$hasResidents} resident(s). Please transfer or delete residents first.";
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'status'    => 'error',
+                'message'   => $msg,
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+        return redirect()->back()->with('error', $msg);
     }
 
     if ($force && $hasResidents > 0) {
@@ -419,10 +426,16 @@ public function delete($id)
 
         $this->logModel->addLog("Deleted Household {$household['household_no']}" . ($force && $hasResidents > 0 ? " (force: {$hasResidents} residents unlinked)" : ''), 'household');
 
-        return $this->response->setJSON(['status' => 'success', 'message' => $message, 'csrf_hash' => csrf_hash()]);
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON(['status' => 'success', 'message' => $message, 'csrf_hash' => csrf_hash()]);
+        }
+        return redirect()->to(base_url('households'))->with('success', $message);
     }
 
-    return $this->response->setJSON(['status' => 'error', 'message' => 'Delete failed', 'csrf_hash' => csrf_hash()]);
+    if ($this->request->isAJAX()) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Delete failed', 'csrf_hash' => csrf_hash()]);
+    }
+    return redirect()->back()->with('error', 'Delete failed');
 }
 
     /**
@@ -541,11 +554,20 @@ public function delete($id)
     public function getBySitio()
     {
         $sitio = $this->request->getPost('sitio');
-        if ($sitio) {
-            $households = $this->householdModel->where('sitio', $sitio)->orderBy('household_no', 'ASC')->findAll();
-            return $this->response->setJSON(['status' => 'success', 'households' => $households, 'csrf_hash' => csrf_hash()]);
+        if (empty($sitio)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Sitio is required', 'csrf_hash' => csrf_hash()]);
         }
-        return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request']);
+
+        $households = $this->householdModel
+            ->where('sitio', $sitio)
+            ->orderBy('household_no', 'ASC')
+            ->findAll();
+
+        return $this->response->setJSON([
+            'status'     => 'success',
+            'households' => $households,
+            'csrf_hash'  => csrf_hash(),
+        ]);
     }
 
     /**
