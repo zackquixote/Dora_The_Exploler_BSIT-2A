@@ -20,6 +20,7 @@ class Dashboard extends BaseController
             return redirect()->to('/login');
         }
 
-        return view('dashboard'); // create this view later
+        $role = strtolower(session()->get('role') ?? 'staff');
+        return redirect()->to($role . '/dashboard');
     }
 }

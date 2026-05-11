@@ -109,10 +109,14 @@ class HouseholdController extends BaseController
                 ->countAllResults();
 
             $headName = 'Not assigned';
+            $headPhoto = 'assets/img/default.png';
             if (!empty($h['head_resident_id'])) {
                 $head = $this->residentModel->find($h['head_resident_id']);
                 if ($head) {
                     $headName = $head['first_name'] . ' ' . $head['last_name'];
+                    if (!empty($head['profile_picture'])) {
+                        $headPhoto = 'uploads/' . $head['profile_picture'];
+                    }
                 }
             }
 
@@ -123,6 +127,7 @@ class HouseholdController extends BaseController
                 'address'        => $h['address'] ?? '',
                 'street_address' => $h['street_address'] ?? '',
                 'head_name'      => $headName,
+                'head_photo'     => $headPhoto,
                 'resident_count' => $residentCount,
                 'house_type'     => $h['house_type'] ?? 'N/A',
             ];
@@ -449,7 +454,7 @@ public function delete($id)
             $members = $this->residentModel->where('household_id', $householdId)->where('deleted_at', null)->findAll();
             return $this->response->setJSON(['status' => 'success', 'members' => $members, 'count' => count($members), 'csrf_hash' => csrf_hash()]);
         } catch (\Exception $e) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage(), 'csrf_hash' => csrf_hash()]);
         }
     }
 
@@ -460,11 +465,11 @@ public function delete($id)
      */
     public function setHead($residentId)
     {
-        if ($r = $this->requireLogin()) return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+        if ($r = $this->requireLogin()) return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized', 'csrf_hash' => csrf_hash()]);
 
         $resident = $this->residentModel->find($residentId);
         if (!$resident || !$resident['household_id']) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Resident or Household not found']);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Resident or Household not found', 'csrf_hash' => csrf_hash()]);
         }
 
         $householdId = $resident['household_id'];
@@ -522,7 +527,7 @@ public function delete($id)
 
             return $this->response->setJSON(['status' => 'success', 'residents' => $residents, 'count' => count($residents), 'csrf_hash' => csrf_hash()]);
         } catch (\Exception $e) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage(), 'csrf_hash' => csrf_hash()]);
         }
     }
 
@@ -535,14 +540,14 @@ public function delete($id)
     {
         $sitio = $this->request->getGet('sitio') ?? $this->request->getPost('sitio');
         if (empty($sitio)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Sitio is required']);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Sitio is required', 'csrf_hash' => csrf_hash()]);
         }
 
         try {
             $households = $this->householdModel->where('sitio', $sitio)->orderBy('household_no', 'ASC')->findAll();
             return $this->response->setJSON(['status' => 'success', 'data' => $households, 'count' => count($households), 'csrf_hash' => csrf_hash()]);
         } catch (\Exception $e) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage(), 'csrf_hash' => csrf_hash()]);
         }
     }
 

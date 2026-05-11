@@ -40,6 +40,7 @@ class HouseholdModel extends Model
 
     protected $validationRules = [
         'household_no' => 'required|min_length[3]|max_length[50]',
+        'address'      => 'required|max_length[255]',
         'sitio'        => 'required|in_list[Purok Malipayon,Purok Masagana,Purok Cory,Purok Kawayan,Purok Pagla-um]',
         'house_type'   => 'permit_empty|in_list[Concrete,Semi-Concrete,Wood,Light Materials]'
     ];
@@ -67,6 +68,7 @@ class HouseholdModel extends Model
         $db = \Config\Database::connect();
         return $db->table('residents')
                   ->where('household_id', $householdId)
+                  ->where('deleted_at', null) // Only count non-deleted residents
                   ->countAllResults();
     }
 

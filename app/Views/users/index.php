@@ -19,14 +19,14 @@
         </a>
     </div>
 
-    <?php if (session()->get('success')): ?>
+    <?php if (session()->getFlashdata('success')): ?>
         <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:14px 20px;border-radius:var(--r-md);margin-bottom:24px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;border:1px solid rgba(var(--c-teal-rgb), 0.2)">
-            <i class="fas fa-check-circle" style="font-size:16px"></i> <?= session()->get('success') ?>
+            <i class="fas fa-check-circle" style="font-size:16px"></i> <?= session()->getFlashdata('success') ?>
         </div>
     <?php endif; ?>
-    <?php if (session()->get('error')): ?>
+    <?php if (session()->getFlashdata('error')): ?>
         <div style="background:var(--c-rose-bg);color:var(--c-rose);padding:14px 20px;border-radius:var(--r-md);margin-bottom:24px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;border:1px solid rgba(var(--c-rose-rgb), 0.2)">
-            <i class="fas fa-exclamation-circle" style="font-size:16px"></i> <?= session()->get('error') ?>
+            <i class="fas fa-exclamation-circle" style="font-size:16px"></i> <?= session()->getFlashdata('error') ?>
         </div>
     <?php endif; ?>
 
@@ -78,6 +78,11 @@
                     <label class="ds-input-label">Email Address <span style="color:var(--c-rose)">*</span></label>
                     <input type="email" name="email" id="email" class="ds-input" placeholder="user@bmis.com" required>
                 </div>
+            </div>
+
+            <div style="margin-bottom:16px">
+                <label class="ds-input-label">Phone Number</label>
+                <input type="text" name="phone" id="phone" class="ds-input" placeholder="e.g. 09123456789">
             </div>
             
             <div style="margin-bottom:16px">

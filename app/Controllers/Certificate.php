@@ -31,7 +31,8 @@ class Certificate extends BaseController
     {
         $certificatesRaw = $this->certModel
             ->select('certificates.*, residents.first_name, residents.last_name')
-            ->join('residents', 'residents.id = certificates.resident_id')
+            // Keep certificates visible even if resident record is missing/deleted.
+            ->join('residents', 'residents.id = certificates.resident_id', 'left')
             ->orderBy('certificates.id', 'DESC')
             ->findAll();
 
@@ -54,7 +55,7 @@ class Certificate extends BaseController
     {
         $residentModel = new ResidentModel();
         $data = [
-            'residents' => $residentModel->orderBy('last_name', 'ASC')->findAll(),
+            'residents' => $residentModel->where('status', 'active')->orderBy('last_name', 'ASC')->findAll(),
             'types'     => CertificateModel::getTypes()
         ];
         return view('certificate/create', $data);
@@ -65,9 +66,9 @@ class Certificate extends BaseController
      */
     public function store()
     {
-        $residentId = $this->request->getPost('resident_id');
-        $type       = $this->request->getPost('certificate_type');
-        $purpose    = $this->request->getPost('purpose');
+        $residentId = (int) ($this->request->getPost('resident_id') ?? 0);
+        $type       = trim((string) $this->request->getPost('certificate_type'));
+        $purpose    = trim((string) $this->request->getPost('purpose'));
 
         if (! $residentId || ! $type || ! $purpose) {
             return redirect()->back()->with('error', 'Missing required information (resident, type, and purpose).');
@@ -77,28 +78,42 @@ class Certificate extends BaseController
             return redirect()->back()->with('error', 'Invalid certificate type.');
         }
 
-        // Generate certificate number
-        $certNumber = $this->certModel->generateCertificateNumber($type);
+        $residentModel = new ResidentModel();
+        $resident = $residentModel->find($residentId);
+        if (! $resident) {
+            return redirect()->back()->with('error', 'Selected resident was not found.');
+        }
 
-        $createdBy = session()->get('id') ?? session()->get('user_id') ?? 1;
+        $createdBy = session()->get('user_id') ?? 1;
+        $certId = false;
+        $certNumber = '';
 
-        $certId = $this->certModel->insert([
-            'certificate_number' => $certNumber,    // NEW
-            'resident_id'        => $residentId,
-            'certificate_type'   => $type,
-            'purpose'            => $purpose,
-            'created_by'         => $createdBy,
-        ]);
+        // Retry number generation on rare unique-collision race conditions.
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            $certNumber = $this->certModel->generateCertificateNumber($type);
+            try {
+                $certId = $this->certModel->insert([
+                    'certificate_number' => $certNumber,
+                    'resident_id'        => $residentId,
+                    'certificate_type'   => $type,
+                    'purpose'            => $purpose,
+                    'created_by'         => $createdBy,
+                ]);
+
+                if ($certId) {
+                    break;
+                }
+            } catch (\Throwable $e) {
+                // Retry once/twice if duplicate certificate number occurred.
+                if (stripos($e->getMessage(), 'Duplicate entry') === false) {
+                    throw $e;
+                }
+            }
+        }
 
         if ($certId) {
-            $residentModel = new ResidentModel();
-            $resident      = $residentModel->find($residentId);
-
-            if ($resident) {
-                $name = $resident['first_name'] . ' ' . $resident['last_name'];
-                $this->logModel->addLog("Generated {$type} ({$certNumber}) for {$name}");
-            }
-
+            $name = $resident['first_name'] . ' ' . $resident['last_name'];
+            $this->logModel->addLog("Generated {$type} ({$certNumber}) for {$name}");
             return redirect()->to('certificate/print/' . $certId);
         }
 
@@ -191,7 +206,7 @@ class Certificate extends BaseController
             return redirect()->to('certificate')->with('error', 'Certificate not found.');
         }
 
-        $purpose = $this->request->getPost('purpose');
+        $purpose = trim((string) $this->request->getPost('purpose'));
 
         if (! $purpose) {
             return redirect()->back()->with('error', 'Purpose is required.');

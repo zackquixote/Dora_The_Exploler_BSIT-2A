@@ -72,7 +72,13 @@
                         ?>
                         <tr>
                             <td><a href="<?= base_url('households/view/'.$h['id']) ?>" style="color:var(--c-teal);font-weight:700;text-decoration:none;font-family:var(--mono);font-size:11.5px"><?= esc($h['household_no']) ?></a></td>
-                            <td><strong><?= esc($h['head_name']) ?></strong></td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <img src="<?= base_url($h['head_photo']) ?>" 
+                                         style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid var(--border)">
+                                    <strong><?= esc($h['head_name']) ?></strong>
+                                </div>
+                            </td>
                             <td style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--ink-muted)"><?= esc($h['sitio']) ?></td>
                             <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<?= esc($h['address'] ?: $h['street_address']) ?>"><?= esc($h['address'] ?: $h['street_address']) ?></td>
                             <td>

@@ -71,6 +71,10 @@
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
                     <div>
+                        <label class="ds-input-label">Contact Number</label>
+                        <input type="text" name="contact_number" class="ds-input" value="<?= old('contact_number', $resident['contact_number'] ?? '') ?>" placeholder="e.g. 09123456789">
+                    </div>
+                    <div>
                         <label class="ds-input-label">Occupation</label>
                         <input type="text" name="occupation" class="ds-input" value="<?= old('occupation', $resident['occupation'] ?? '') ?>">
                     </div>

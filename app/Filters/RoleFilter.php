@@ -13,9 +13,10 @@ class RoleFilter implements FilterInterface
             return redirect()->to('/login');
         }
 
-        $role = session()->get('role');
+        $role = strtolower((string) (session()->get('role') ?? ''));
+        $allowed = array_map(static fn($r) => strtolower((string) $r), $arguments ?? []);
 
-        if ($arguments && in_array($role, $arguments)) {
+        if ($arguments && in_array($role, $allowed, true)) {
             return; 
         }
 

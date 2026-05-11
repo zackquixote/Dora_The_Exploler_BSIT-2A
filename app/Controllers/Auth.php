@@ -41,7 +41,7 @@ class Auth extends BaseController
     // Already logged in – redirect to role dashboard
     if (session()->get('logged_in')) {
         $redirectRole = strtolower(session()->get('role'));
-        return redirect()->to($redirectRole . '/dashboard');
+        return redirect()->to(base_url($redirectRole . '/dashboard'));
     }
 
     // Fetch barangay settings (only one row, id = 1)
@@ -73,11 +73,12 @@ class Auth extends BaseController
         $user = $model->where('email', $email)->first();
 
         if ($user && password_verify($password, $user['password'])) {
+            $normalizedRole = strtolower((string) ($user['role'] ?? 'staff'));
             
             session()->set([
                 'logged_in' => true,
                 'user_id'   => $user['id'],
-                'role'      => $user['role'],
+                'role'      => $normalizedRole,
                 'email'     => $user['email'],
                 'name'      => $user['name']
             ]);
@@ -100,8 +101,8 @@ class Auth extends BaseController
             }
 
             // Force lowercase redirection
-            $redirectRole = strtolower($user['role']);
-            return redirect()->to($redirectRole . '/dashboard');
+            $redirectRole = $normalizedRole;
+            return redirect()->to(base_url($redirectRole . '/dashboard'));
         }
 
         return redirect()->back()->with('error', 'Invalid email or password');

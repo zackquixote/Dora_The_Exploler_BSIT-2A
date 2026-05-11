@@ -7,7 +7,7 @@
             <div class="ds-card-title"><i class="fas fa-user-edit"></i> Edit User</div>
             <a href="<?= base_url('admin/users') ?>" class="ds-btn ds-btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>
         </div>
-        <form action="<?= base_url('admin/users/update/' . $user['id']) ?>" method="POST">
+        <form action="<?= base_url('admin/users/update') ?>" method="POST">
             <?= csrf_field() ?>
             <input type="hidden" name="userId" value="<?= $user['id'] ?>">
             <div class="ds-card-body">

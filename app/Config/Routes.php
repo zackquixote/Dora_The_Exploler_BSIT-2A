@@ -62,8 +62,9 @@ $routes->group('', [
     $routes->post('resident/delete/(:num)', 'Resident::delete/$1');
 
     $routes->get('resident/getHouseholdsBySitio', 'Resident::getHouseholdsBySitio');
+    $routes->get('resident/activity/(:num)', 'Resident::activity/$1');
     $routes->get('resident/assign-search', 'Resident::assignSearch');
-    $routes->get('resident/assign/(:num)', 'Resident::assign/$1');
+    $routes->post('resident/assignBulk', 'Resident::assignBulk');
     $routes->match(['post', 'put'], 'resident/updateStatus/(:num)', 'Resident::updateStatus/$1');
     $routes->match(['post', 'put'], 'resident/updateMemberStatus/(:num)', 'Resident::updateMemberStatus/$1');
 
@@ -116,8 +117,7 @@ $routes->group('', [
     $routes->post('officials/store', 'Officials::store');
     $routes->get('officials/edit/(:num)', 'Officials::edit/$1');
     $routes->match(['post', 'put'], 'officials/update/(:num)', 'Officials::update/$1');
-    $routes->get('officials/delete/(:num)', 'Officials::delete/$1');
-     $routes->get('officials', 'Officials::index');
+    $routes->post('officials/delete/(:num)', 'Officials::delete/$1');
 
 
    
@@ -217,7 +217,6 @@ $routes->group('admin', [
         $routes->post('delete/(:num)', 'Users::delete/$1');
         $routes->post('fetchRecords', 'Users::fetchRecords');
         $routes->get('view/(:num)', 'Users::view/$1');
-        $routes->get('users/create', 'Users::create');
     });
 });
 

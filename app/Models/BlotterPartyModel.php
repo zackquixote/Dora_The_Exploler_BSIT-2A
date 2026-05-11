@@ -27,9 +27,7 @@ class BlotterPartyModel extends Model
     ];
 
     // Only created_at exists in the table (no updated_at).
-    protected $useTimestamps = true;
-    protected $createdField  = 'created_at';
-    protected $updatedField  = '';
+    protected $useTimestamps = false;
 
     protected $validationRules = [
         'blotter_id' => 'required|integer',
@@ -43,7 +41,8 @@ class BlotterPartyModel extends Model
     {
         return $this->select([
                 'blotter_parties.*',
-                'CONCAT(residents.first_name, " ", residents.last_name) as resident_name'
+                'CONCAT(residents.first_name, " ", residents.last_name) as resident_name',
+                'residents.profile_picture'
             ])
             ->join('residents', 'residents.id = blotter_parties.resident_id', 'left')
             ->where('blotter_id', $blotterId)

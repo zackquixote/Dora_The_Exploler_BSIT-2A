@@ -31,6 +31,21 @@ class OfficialModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
+    protected $validationRules = [
+        'position'  => 'required|min_length[3]|max_length[100]',
+        'full_name' => 'required|min_length[3]|max_length[150]',
+        'is_active' => 'required|in_list[0,1]',
+    ];
+
+    protected $validationMessages = [
+        'position' => [
+            'required' => 'Official position (e.g. Barangay Captain) is required.'
+        ],
+        'full_name' => [
+            'required' => 'The full name of the official is required.'
+        ]
+    ];
+
     /**
      * Get all officials with resident full name if linked.
      */

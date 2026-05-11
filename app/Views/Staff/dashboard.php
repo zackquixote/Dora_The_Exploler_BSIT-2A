@@ -129,12 +129,41 @@
         </div>
     </div>
 
-    <!-- ROW 6 · QUICK ACTIONS -->
-    <div class="ds-section-label">Actions</div>
-    <div class="ds-card">
-        <div class="ds-card-head"><div class="ds-card-title"><i class="fas fa-bolt"></i> Quick Actions</div></div>
-        <div class="ds-card-body">
-            <div class="ds-quick-grid">
+    <!-- ROW 6 · ACTIVITY + QUICK ACTIONS -->
+    <div class="ds-section-label">Activity</div>
+    <div class="ds-grid-activity">
+        <div class="ds-card">
+            <div class="ds-card-head">
+                <div class="ds-card-title"><i class="fas fa-history"></i> Recent Activity</div>
+            </div>
+            <div class="ds-card-body">
+                <div class="ds-activity-feed">
+                    <?php if (empty($recentLogs)): ?>
+                        <div style="text-align:center;padding:24px;color:var(--ink-soft)"><i class="fas fa-history" style="font-size:20px;opacity:.3;margin-bottom:8px;display:block"></i>No recent activity</div>
+                    <?php else: foreach ($recentLogs as $log):
+                        $a = strtolower($log['ACTION'] ?? '');
+                        $ic='ds-ai-view'; $ii='fa-eye';
+                        if (strpos($a,'delete')!==false||strpos($a,'remove')!==false){$ic='ds-ai-delete';$ii='fa-trash-alt';}
+                        elseif (strpos($a,'edit')!==false||strpos($a,'update')!==false){$ic='ds-ai-edit';$ii='fa-edit';}
+                        elseif (strpos($a,'create')!==false||strpos($a,'add')!==false){$ic='ds-ai-create';$ii='fa-plus-circle';}
+                        elseif (strpos($a,'print')!==false){$ic='ds-ai-print';$ii='fa-print';}
+                        elseif (strpos($a,'certif')!==false){$ic='ds-ai-cert';$ii='fa-file-alt';}
+                    ?>
+                    <div class="ds-activity-item">
+                        <div class="ds-activity-icon <?= $ic ?>"><i class="fas <?= $ii ?>"></i></div>
+                        <div>
+                            <div class="ds-activity-action"><?= esc($log['ACTION']) ?></div>
+                            <div class="ds-activity-meta">by <strong><?= esc($log['USER_NAME'] ?? 'System') ?></strong> · <?= time_elapsed_string($log['DATELOG'].' '.$log['TIMELOG']) ?></div>
+                        </div>
+                    </div>
+                    <?php endforeach; endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="ds-card">
+            <div class="ds-card-head"><div class="ds-card-title"><i class="fas fa-bolt"></i> Quick Actions</div></div>
+            <div class="ds-quick-grid" style="padding: 16px;">
                 <a href="<?= base_url('resident/create') ?>" class="ds-quick-btn qb-blue"><i class="fas fa-user-plus"></i> Add Resident</a>
                 <a href="<?= base_url('resident') ?>" class="ds-quick-btn qb-teal"><i class="fas fa-users"></i> View Residents</a>
                 <a href="<?= base_url('households') ?>" class="ds-quick-btn qb-slate"><i class="fas fa-home"></i> Households</a>

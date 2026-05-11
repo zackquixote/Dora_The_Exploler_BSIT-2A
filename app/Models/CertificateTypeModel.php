@@ -36,6 +36,7 @@ class CertificateTypeModel extends Model
 
     protected $allowedFields = [
         'name',
+        'prefix',
         'content',
         'created_by',
     ];

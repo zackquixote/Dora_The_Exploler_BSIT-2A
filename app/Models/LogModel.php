@@ -47,37 +47,32 @@ class LogModel extends Model
      */
     public function addLog(string $action, string $type = '')
     {
-        date_default_timezone_set('Asia/Manila'); // Set to Philippine time
+        date_default_timezone_set('Asia/Manila');
 
         $session = session();
         $request = service('request');
+        
         $this->insert([
-            'USERID'          => $session->get('user_id'),
+            'USERID'          => (string) $session->get('user_id'),
             'USER_NAME'       => $session->get('name'),
             'ACTION'          => $action,
-            'DATELOG'         => date('Y-m-d'),
-            'TIMELOG'         => date('H:i:s'),
+            'DATELOG'         => date('Y-m-d'),      // Date only for date-based filtering
+            'TIMELOG'         => date('Y-m-d H:i:s'), // Full datetime for time display
             'user_ip_address' => $request->getIPAddress(),
             'device_used'     => $request->getUserAgent()->getAgentString(),
             'identifier'      => $type
         ]);
     }
 
-    // ✅ Just return the log data — no view logic here
     public function getLogs()
     {
-        return $this->orderBy('DATELOG DESC, TIMELOG DESC')->findAll();
+        return $this->orderBy('DATELOG', 'DESC')->orderBy('TIMELOG', 'DESC')->findAll();
     }
 
-    /**
-     * Execute getLogsByDate functionality.
-     *
-     * @return mixed
-     */
     public function getLogsByDate($date)
     {
         return $this->where('DATELOG', $date)
-                    ->orderBy('TIMELOG DESC')
+                    ->orderBy('TIMELOG', 'DESC')
                     ->findAll();
     }
 

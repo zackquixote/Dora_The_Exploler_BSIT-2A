@@ -38,8 +38,7 @@ class UserModel extends Model
     protected $primaryKey = 'id';
     protected $allowedFields = [
         'uuid', 'email', 'password', 'role', 
-        'status', 'name', 'phone', 'created_at', 
-        'updated_at', 'deleted_at'
+        'status', 'name', 'phone'
     ];
     protected $useTimestamps = true;
     protected $useSoftDeletes = true;

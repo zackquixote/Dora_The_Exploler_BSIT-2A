@@ -63,7 +63,12 @@ $sc = match($status) {
                     <?php foreach ($parties[$prole] as $p): ?>
                     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:6px">
                         <div style="display:flex;align-items:center;gap:10px">
-                            <div style="width:28px;height:28px;border-radius:6px;background:var(--<?= $rc[$prole][0] ?>-bg);color:var(--<?= $rc[$prole][0] ?>);display:flex;align-items:center;justify-content:center;font-size:11px"><i class="fas <?= $rc[$prole][1] ?>"></i></div>
+                            <?php if (!empty($p['resident_id'])): ?>
+                                <img src="<?= base_url(!empty($p['profile_picture']) ? 'uploads/' . $p['profile_picture'] : 'assets/img/default.png') ?>" 
+                                     style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--<?= $rc[$prole][0] ?>-bg)">
+                            <?php else: ?>
+                                <div style="width:32px;height:32px;border-radius:50%;background:var(--<?= $rc[$prole][0] ?>-bg);color:var(--<?= $rc[$prole][0] ?>);display:flex;align-items:center;justify-content:center;font-size:11px"><i class="fas <?= $rc[$prole][1] ?>"></i></div>
+                            <?php endif; ?>
                             <div>
                                 <?php if (!empty($p['resident_id'])): ?>
                                     <strong style="font-size:12px;color:var(--ink)"><?= esc($p['resident_name']) ?></strong>
@@ -87,7 +92,7 @@ $sc = match($status) {
             <div class="ds-card" style="margin-bottom:14px">
                 <div class="ds-card-head">
                     <div class="ds-card-title"><i class="fas fa-gavel"></i> Hearings</div>
-                    <button type="button" class="ds-btn ds-btn-teal" style="height:30px;font-size:11px" data-toggle="modal" data-target="#addHearingModal"><i class="fas fa-plus"></i> Add</button>
+                    <button type="button" class="ds-btn ds-btn-teal" style="height:30px;font-size:11px" data-bs-toggle="modal" data-bs-target="#addHearingModal"><i class="fas fa-plus"></i> Add</button>
                 </div>
                 <div class="ds-card-body">
                     <?php if (empty($hearings)): ?>
@@ -166,6 +171,7 @@ $sc = match($status) {
                 <form action="<?= base_url('blotter/update/' . $case['id']) ?>" method="POST">
                     <?= csrf_field() ?>
                     <!-- Hidden fields to satisfy update() validation -->
+                    <input type="hidden" name="_quick_update" value="1">
                     <input type="hidden" name="incident_type" value="<?= esc($case['incident_type']) ?>">
                     <input type="hidden" name="incident_date" value="<?= esc($case['incident_date']) ?>">
                     <input type="hidden" name="incident_location" value="<?= esc($case['incident_location'] ?? '') ?>">
@@ -225,7 +231,7 @@ $sc = match($status) {
                     <input type="hidden" name="hearing_id" id="hearing-id">
                 </div>
                 <div style="padding:12px 20px;border-top:.5px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
-                    <button type="button" class="ds-btn ds-btn-ghost" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="ds-btn ds-btn-ghost" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="ds-btn ds-btn-teal" id="modal-save-btn">Save</button>
                 </div>
             </form>
@@ -241,7 +247,7 @@ $sc = match($status) {
             <h5 style="font-size:14px;font-weight:700;color:var(--ink)">Confirm Delete</h5>
             <p style="font-size:12px;color:var(--ink-muted)">Delete <strong id="delete-case-ref"></strong>?</p>
             <div style="display:flex;justify-content:center;gap:8px;margin-top:16px">
-                <button class="ds-btn ds-btn-ghost" data-dismiss="modal">Cancel</button>
+                <button class="ds-btn ds-btn-ghost" data-bs-dismiss="modal">Cancel</button>
                 <form id="delete-form" method="POST" action=""><?= csrf_field() ?><button type="submit" class="ds-btn ds-btn-rose">Delete</button></form>
             </div>
         </div>

@@ -110,14 +110,20 @@ class Settings extends BaseController
     public function update()
     {
         // 1. Update basic barangay information (record with id = 1).
-        //    Only the 4 columns that still exist in barangay_settings are sent.
+        //    If no row exists yet, insert one.
         $basicData = [
             'barangay_name'  => $this->request->getPost('barangay_name'),
             'municipality'   => $this->request->getPost('municipality'),
             'province'       => $this->request->getPost('province'),
             'contact_number' => $this->request->getPost('contact_number'),
         ];
-        $this->settingsModel->update(1, $basicData);
+
+        $existing = $this->settingsModel->find(1);
+        if ($existing) {
+            $this->settingsModel->update(1, $basicData);
+        } else {
+            $this->settingsModel->insert($basicData);
+        }
 
         // 2. Map positions to resident IDs from the form.
         //    Form fields use descriptive names (punong_barangay_id etc.)

@@ -50,6 +50,13 @@
         }
     }
 
+    function refreshCsrf(response) {
+        if (response && response.csrf_hash) {
+            window.csrfHash = response.csrf_hash;
+            $('input[name="' + window.csrfName + '"]').val(response.csrf_hash);
+        }
+    }
+
     // 4. ADD USER
     $('#addUserForm').on('submit', function (e) {
         e.preventDefault();
@@ -78,6 +85,7 @@
     $(document).on('click', '.edit-btn', function() {
         var userId = $(this).data('id');
         $.get(window.baseUrl + '/edit/' + userId, function(response) {
+            refreshCsrf(response);
             if (response.data) {
                 $('#editUserForm #name').val(response.data.name);
                 $('#editUserForm #userId').val(response.data.id);
@@ -85,6 +93,7 @@
                 $('#editUserForm #password').val('');
                 $('#editUserForm #role').val(response.data.role);
                 $('#editUserForm #status').val(response.data.status);
+                $('#editUserForm #phone').val(response.data.phone || '');
                 $('#editUserOverlay').addClass('show');
             } else {
                 alert('Error fetching user data');
@@ -101,6 +110,7 @@
             data: $(this).serialize() + '&' + window.csrfName + '=' + window.csrfHash,
             dataType: 'json',
             success: function (response) {
+                refreshCsrf(response);
                 if (response.success) {
                     $('#editUserOverlay').removeClass('show');
                     showToast('success', 'User updated successfully!');
@@ -125,6 +135,7 @@
                 method: 'POST',
                 data: { [window.csrfName]: window.csrfHash },
                 success: function (response) {
+                    refreshCsrf(response);
                     if (response.success) {
                         showToast('success', 'User deleted successfully.');
                         table.ajax.reload(null, false);

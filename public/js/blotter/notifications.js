@@ -67,14 +67,14 @@
             let $dropdown = $('#notifications-dropdown-menu');
             if (!$dropdown.length) return;
             if (!notifications.length) {
-                $dropdown.html('<div class="dropdown-item text-muted text-center">No upcoming hearings</div>');
+                $dropdown.html('<li><span class="dropdown-item text-muted text-center">No upcoming hearings</span></li>');
                 return;
             }
             let html = '';
-            $.each(notifications, (i, n) => {
+            $.each(notifications, function(i, n) {
                 let iconColor = n.type === 'danger' ? 'text-danger' : 'text-warning';
                 let alertBg   = n.type === 'danger' ? 'bg-danger bg-opacity-10' : '';
-                html += `<a class="dropdown-item ${alertBg}" href="${n.url}" style="border-bottom:1px solid #f1f5f9; white-space: normal;">
+                html += `<li><a class="dropdown-item ${alertBg}" href="${n.url}" style="border-bottom:1px solid #f1f5f9; white-space: normal;">
                             <div class="d-flex align-items-start py-1">
                                 <div class="flex-shrink-0 mt-1"><i class="fas fa-gavel ${iconColor}"></i></div>
                                 <div class="flex-grow-1 ms-3">
@@ -83,10 +83,10 @@
                                     <div class="small text-muted mt-1">📍 ${n.venue || 'Venue TBA'}</div>
                                 </div>
                             </div>
-                         </a>`;
+                         </a></li>`;
             });
-            html += '<div class="dropdown-divider"></div>';
-            html += '<a class="dropdown-item text-center small" href="' + APP_ROOT + 'blotter?filter=upcoming">View all upcoming hearings →</a>';
+            html += '<li><hr class="dropdown-divider"></li>';
+            html += '<li><a class="dropdown-item text-center small" href="' + APP_ROOT + 'blotter">View all upcoming hearings →</a></li>';
             $dropdown.html(html);
         },
 

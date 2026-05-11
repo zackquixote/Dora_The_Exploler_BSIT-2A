@@ -45,7 +45,10 @@
                         <tr>
                             <td class="mono"><strong><?= esc($c['certificate_number'] ?? 'N/A') ?></strong></td>
                             <td><span class="ds-badge <?= $tc ?>"><?= esc($c['certificate_type']) ?></span></td>
-                            <td><strong class="font-serif" style="font-size:14px;letter-spacing:-0.01em;"><?= esc($c['first_name'] . ' ' . $c['last_name']) ?></strong></td>
+                            <td>
+                                <?php $residentName = trim((string) ($c['first_name'] ?? '') . ' ' . (string) ($c['last_name'] ?? '')); ?>
+                                <strong class="font-serif" style="font-size:14px;letter-spacing:-0.01em;"><?= esc($residentName !== '' ? $residentName : 'Former/Unknown Resident') ?></strong>
+                            </td>
                             <td><?= esc($c['purpose']) ?></td>
                             <td><?= date('M d, Y', strtotime($c['created_at'])) ?></td>
                             <td style="white-space:nowrap">

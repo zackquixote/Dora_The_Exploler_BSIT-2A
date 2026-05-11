@@ -22,7 +22,7 @@ class StaffFilter implements FilterInterface
         }
 
         // Logged in but wrong role → their own dashboard
-        if (strtolower(session()->get('role')) !== 'staff') {
+        if (strtolower((string) (session()->get('role') ?? '')) !== 'staff') {
             return redirect()->to('/admin/dashboard')->with('error', 'Access denied. Staff only.');
         }
     }

@@ -79,10 +79,10 @@
                         <div>
                             <label class="ds-input-label">Type</label>
                             <div style="display:flex;gap:4px">
-                                <label style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px;border-radius:var(--r-sm);font-size:10.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:<?= empty($p['resident_id']) ? 'var(--white)' : 'var(--c-blue-bg)' ?>">
+                                <label class="type-toggle-label" data-value="resident" style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px;border-radius:var(--r-sm);font-size:10.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:<?= empty($p['resident_id']) ? 'var(--white)' : 'var(--c-blue-bg)' ?>">
                                     <input type="radio" name="parties[<?= $index ?>][type]" value="resident" <?= empty($p['resident_id']) ? '' : 'checked' ?> style="display:none"> Resident
                                 </label>
-                                <label style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px;border-radius:var(--r-sm);font-size:10.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:<?= empty($p['resident_id']) ? 'var(--c-amber-bg)' : 'var(--white)' ?>">
+                                <label class="type-toggle-label" data-value="outsider" style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px;border-radius:var(--r-sm);font-size:10.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:<?= empty($p['resident_id']) ? 'var(--c-amber-bg)' : 'var(--white)' ?>">
                                     <input type="radio" name="parties[<?= $index ?>][type]" value="outsider" <?= empty($p['resident_id']) ? 'checked' : '' ?> style="display:none"> Outsider
                                 </label>
                             </div>
@@ -127,5 +127,6 @@
         partyIndex: <?= count($parties) ?>
     };
 </script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script src="<?= base_url('js/blotter/blotter-edit.js') ?>"></script>
 <?= $this->endSection() ?>

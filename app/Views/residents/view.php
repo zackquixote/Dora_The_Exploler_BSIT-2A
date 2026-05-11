@@ -325,6 +325,7 @@ $statusBadge = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','deceased'
                     <option>Certificate of Indigency</option>
                     <option>Certificate of Residency</option>
                     <option>Business Permit</option>
+                    <option>Solo Parent</option>
                 </select>
             </div>
             <div style="margin-bottom:16px">

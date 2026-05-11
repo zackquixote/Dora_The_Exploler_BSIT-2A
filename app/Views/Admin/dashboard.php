@@ -283,7 +283,7 @@
                         <?php if (!empty($upcomingHearings)): foreach ($upcomingHearings as $h): ?>
                         <tr>
                             <td><strong><?= date('M d', strtotime($h['hearing_date'])) ?></strong></td>
-                            <td class="mono"><?php $case = (new \App\Models\BlotterModel())->find($h['blotter_id']); echo esc($case['case_number'] ?? '--'); ?></td>
+                            <td class="mono"><?= esc($h['case_number'] ?? '--') ?></td>
                             <td><?= esc($h['venue'] ?? 'Main Hall') ?></td>
                         </tr>
                         <?php endforeach; else: ?>
@@ -364,7 +364,7 @@
                         <div class="ds-activity-icon <?= $ic ?>"><i class="fas <?= $ii ?>"></i></div>
                         <div>
                             <div class="ds-activity-action"><?= esc($log['ACTION']) ?></div>
-                            <div class="ds-activity-meta">by <strong><?= esc($log['USER_NAME'] ?? 'System') ?></strong> · <?= time_elapsed_string($log['DATELOG'].' '.$log['TIMELOG']) ?></div>
+                            <div class="ds-activity-meta">by <strong><?= esc($log['USER_NAME'] ?? 'System') ?></strong> · <?= esc(date('M d, Y h:i A', strtotime($log['TIMELOG'] ?? $log['DATELOG']))) ?></div>
                         </div>
                     </div>
                     <?php endforeach; endif; ?>

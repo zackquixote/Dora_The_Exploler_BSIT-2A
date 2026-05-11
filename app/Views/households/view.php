@@ -85,7 +85,7 @@ foreach ($residents as $r) {
             <div class="ds-card">
                 <div class="ds-card-head">
                     <div class="ds-card-title"><i class="fas fa-users"></i> Household Members (<?= $residentCount ?>)</div>
-                    <button type="button" class="ds-btn ds-btn-teal" style="height:30px;font-size:11px" data-toggle="modal" data-target="#addMemberModal"><i class="fas fa-plus"></i> Add</button>
+                    <button type="button" class="ds-btn ds-btn-teal" style="height:30px;font-size:11px" data-bs-toggle="modal" data-bs-target="#addMemberModal"><i class="fas fa-plus"></i> Add</button>
                 </div>
                 <div class="ds-card-body p0">
                     <?php if (empty($residents)): ?>
@@ -93,7 +93,7 @@ foreach ($residents as $r) {
                     <?php else: ?>
                     <div style="overflow-x:auto">
                         <table class="ds-table">
-                            <thead><tr><th>Resident</th><th>Age</th><th>Relationship</th><th>Status</th><th>Flags</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Photo</th><th>Resident</th><th>Age</th><th>Relationship</th><th>Status</th><th>Flags</th><th>Actions</th></tr></thead>
                             <tbody>
                             <?php foreach ($residents as $r):
                                 $age = $r['age'] ?? '';
@@ -105,6 +105,10 @@ foreach ($residents as $r) {
                                 $sc = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','transferred'=>'ds-badge-amber','deceased'=>'ds-badge-rose'];
                             ?>
                             <tr id="member-row-<?= $r['id'] ?>">
+                                <td style="width:40px">
+                                    <img src="<?= base_url(!empty($r['profile_picture']) ? 'uploads/' . $r['profile_picture'] : 'assets/img/default.png') ?>" 
+                                         style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--border)">
+                                </td>
                                 <td>
                                     <div style="display:flex;align-items:center;gap:8px">
                                         <strong class="font-serif" style="font-size:14px;letter-spacing:-0.01em;"><?= esc($fullName) ?></strong>

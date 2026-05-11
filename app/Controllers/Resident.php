@@ -343,7 +343,99 @@ class Resident extends BaseController
         return $this->response->setJSON(['status' => 'success', 'data' => $households]);
     }
 
-    // ... (assignSearch, assignBulk, list, etc. remain unchanged)
+    // ── Activity Feed (AJAX) ──────────────────────────────────────────
+    public function activity($id)
+    {
+        if ($r = $this->requireLogin()) return $r;
+
+        // Get the resident's name to search logs
+        $resident = $this->residentModel->find($id);
+        if (!$resident) {
+            return $this->response->setJSON(['status' => 'success', 'logs' => []]);
+        }
+
+        $fullName = $resident['first_name'] . ' ' . $resident['last_name'];
+
+        $logs = $this->db->table('tbl_logs')
+            ->select('ACTION, USER_NAME, DATELOG, TIMELOG')
+            ->like('ACTION', $fullName)
+            ->orderBy('DATELOG', 'DESC')
+            ->orderBy('TIMELOG', 'DESC')
+            ->limit(20)
+            ->get()->getResultArray();
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'logs'   => $logs,
+        ]);
+    }
+
+    // ── Assign Search (search residents to assign to a household) ─────
+    public function assignSearch()
+    {
+        if ($r = $this->requireLogin()) return $r;
+
+        $householdId  = $this->request->getGet('household_id');
+        $keyword      = $this->request->getGet('q') ?? '';
+        $filterPurok  = $this->request->getGet('filter_purok') ?? '';
+        $filterHouseId = $this->request->getGet('filter_household_id') ?? '';
+
+        $builder = $this->db->table('residents')
+            ->select('residents.id, residents.first_name, residents.last_name, residents.sitio, residents.household_id, residents.profile_picture')
+            ->where('residents.deleted_at IS NULL');
+
+        if (!empty($keyword)) {
+            $builder->groupStart()
+                ->like('residents.first_name', $keyword)
+                ->orLike('residents.last_name', $keyword)
+                ->groupEnd();
+        }
+        if (!empty($filterPurok)) {
+            $builder->where('residents.sitio', $filterPurok);
+        }
+        if (!empty($filterHouseId)) {
+            $builder->where('residents.household_id', $filterHouseId);
+        }
+
+        $residents = $builder->orderBy('residents.last_name', 'ASC')->get()->getResultArray();
+
+        return view('households/resident_assign_search', [
+            'residents'      => $residents,
+            'household_id'   => $householdId,
+            'keyword'        => $keyword,
+            'filterPurok'    => $filterPurok,
+            'filterHouseId'  => $filterHouseId,
+        ]);
+    }
+
+    // ── Assign Bulk (assign selected residents to a household) ────────
+    public function assignBulk()
+    {
+        if ($r = $this->requireLogin()) return $r;
+
+        $targetHouseholdId = $this->request->getPost('target_household_id');
+        $selectedResidents = $this->request->getPost('selected_residents') ?? [];
+        $relationships     = $this->request->getPost('relationships') ?? [];
+
+        if (empty($targetHouseholdId) || empty($selectedResidents)) {
+            return redirect()->back()->with('error', 'No residents selected.');
+        }
+
+        $count = 0;
+        foreach ($selectedResidents as $residentId) {
+            $this->residentModel->update($residentId, [
+                'household_id'          => $targetHouseholdId,
+                'relationship_to_head'  => $relationships[$residentId] ?? null,
+                'joined_household_date' => date('Y-m-d'),
+            ]);
+            $count++;
+        }
+
+        $this->logModel->addLog("Assigned {$count} resident(s) to household #{$targetHouseholdId}");
+
+        return redirect()->to(base_url('households/view/' . $targetHouseholdId))
+            ->with('success', "{$count} resident(s) assigned successfully.");
+    }
 
     // ── Private Helpers ───────────────────────────────────────────────
     private function uploadProfilePicture($file, $sitio, $currentPicture = null)
@@ -421,7 +513,8 @@ class Resident extends BaseController
         if (!in_array(strtolower($newStatus), $allowed)) {   // case‑insensitive check
             return $this->response->setJSON([
                 'status'  => 'error',
-                'message' => 'Invalid status value.'
+                'message' => 'Invalid status value.',
+                'csrf_hash' => csrf_hash(),
             ]);
         }
 
@@ -429,7 +522,8 @@ class Resident extends BaseController
         if (!$resident) {
             return $this->response->setJSON([
                 'status'  => 'error',
-                'message' => 'Resident not found.'
+                'message' => 'Resident not found.',
+                'csrf_hash' => csrf_hash(),
             ]);
         }
 
@@ -444,14 +538,15 @@ class Resident extends BaseController
         return $this->response->setJSON([
             'status'  => 'success',
             'message' => 'Status updated.',
-            'new_status' => $newStatus
+            'new_status' => $newStatus,
+            'csrf_hash' => csrf_hash(),
         ]);
     }
 
     public function updateMemberStatus($id)
     {
         if (!$this->request->isAJAX()) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request.']);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request.', 'csrf_hash' => csrf_hash()]);
         }
 
         $newStatus = $this->request->getPost('member_status');
@@ -459,12 +554,12 @@ class Resident extends BaseController
         $allowed = ['active', 'inactive', 'transferred', 'deceased'];
 
         if (!in_array(strtolower($newStatus), $allowed)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid status value.']);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid status value.', 'csrf_hash' => csrf_hash()]);
         }
 
         $resident = $this->residentModel->find($id);
         if (!$resident) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Resident not found.']);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Resident not found.', 'csrf_hash' => csrf_hash()]);
         }
 
         $this->residentModel->update($id, [
@@ -478,7 +573,8 @@ class Resident extends BaseController
         return $this->response->setJSON([
             'status'     => 'success',
             'message'    => 'Membership status updated.',
-            'new_status' => $newStatus
+            'new_status' => $newStatus,
+            'csrf_hash'  => csrf_hash(),
         ]);
     }
 

@@ -18,11 +18,13 @@ use App\Models\LogModel;
 class Blotter extends BaseController
 {
     protected $blotterModel;
-    protected $partyModel;
+    protected $partyModel; 
     protected $residentModel;
     protected $logModel;
     protected $hearingModel;
-    protected $timelineModel; 
+    protected $timelineModel;
+    protected $db;
+
     public function __construct()
     {
         $this->blotterModel  = new BlotterModel();
@@ -31,7 +33,7 @@ class Blotter extends BaseController
         $this->logModel      = new LogModel();
         $this->hearingModel  = new \App\Models\BlotterHearingModel();
         $this->timelineModel = new \App\Models\BlotterTimelineModel();
-
+        $this->db            = \Config\Database::connect();
     }
 
     /**
@@ -235,7 +237,12 @@ class Blotter extends BaseController
      */
     public function view($id)
 {
-    $case = $this->blotterModel->find($id);
+    $case = $this->db->table('blotter_records')
+        ->select('blotter_records.*, users.name as created_by_name')
+        ->join('users', 'users.id = blotter_records.created_by', 'left')
+        ->where('blotter_records.id', $id)
+        ->get()->getRowArray();
+
     if (!$case) {
         return redirect()->to('blotter')->with('error', 'Case not found.');
     }
@@ -341,22 +348,25 @@ class Blotter extends BaseController
             ]);
         }
 
-        // Remove existing parties and re-insert
-        $this->partyModel->where('blotter_id', $id)->delete();
+        // Remove existing parties and re-insert — skip if this is a Quick Update from the view sidebar
+        $isQuickUpdate = (bool) $this->request->getPost('_quick_update');
+        if (!$isQuickUpdate) {
+            $this->partyModel->where('blotter_id', $id)->delete();
 
-        $partyData = $this->request->getPost('parties') ?? [];
-        foreach ($partyData as $p) {
-            $insert = [
-                'blotter_id' => $id,
-                'role'       => $p['role'],
-            ];
-            if (($p['type'] ?? '') === 'resident' && !empty($p['resident_id'])) {
-                $insert['resident_id'] = $p['resident_id'];
-            } else {
-                $insert['outsider_name']    = $p['outsider_name'] ?? '';
-                $insert['outsider_address'] = $p['outsider_address'] ?? '';
+            $partyData = $this->request->getPost('parties') ?? [];
+            foreach ($partyData as $p) {
+                $insert = [
+                    'blotter_id' => $id,
+                    'role'       => $p['role'],
+                ];
+                if (($p['type'] ?? '') === 'resident' && !empty($p['resident_id'])) {
+                    $insert['resident_id'] = $p['resident_id'];
+                } else {
+                    $insert['outsider_name']    = $p['outsider_name'] ?? '';
+                    $insert['outsider_address'] = $p['outsider_address'] ?? '';
+                }
+                $this->partyModel->insert($insert);
             }
-            $this->partyModel->insert($insert);
         }
 
         $db->transCommit();
@@ -425,7 +435,7 @@ public function addHearing($blotterId)
 {
     $case = $this->blotterModel->find($blotterId);
     if (!$case) {
-        return $this->response->setJSON(['status' => 'error', 'message' => 'Case not found.']);
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Case not found.', 'csrf_hash' => csrf_hash()]);
     }
 
     // Validate hearing input
@@ -437,7 +447,7 @@ public function addHearing($blotterId)
     ];
 
     if (!$this->validate($rules)) {
-        return $this->response->setJSON(['status' => 'error', 'errors' => $this->validator->getErrors()]);
+        return $this->response->setJSON(['status' => 'error', 'errors' => $this->validator->getErrors(), 'csrf_hash' => csrf_hash()]);
     }
 
     $data = [
@@ -453,10 +463,10 @@ public function addHearing($blotterId)
 
     if ($this->hearingModel->insert($data)) {
         $this->logModel->addLog("Added hearing for case {$case['case_number']}");
-        return $this->response->setJSON(['status' => 'success', 'message' => 'Hearing added.']);
+        return $this->response->setJSON(['status' => 'success', 'message' => 'Hearing added.', 'csrf_hash' => csrf_hash()]);
     }
 
-    return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to save hearing.']);
+    return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to save hearing.', 'csrf_hash' => csrf_hash()]);
 }
 
 /**
@@ -466,7 +476,7 @@ public function updateHearing($hearingId)
 {
     $hearing = $this->hearingModel->find($hearingId);
     if (!$hearing) {
-        return $this->response->setJSON(['status' => 'error', 'message' => 'Hearing not found.']);
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Hearing not found.', 'csrf_hash' => csrf_hash()]);
     }
 
     $data = [
@@ -482,10 +492,10 @@ public function updateHearing($hearingId)
     if ($this->hearingModel->update($hearingId, $data)) {
         $case = $this->blotterModel->find($hearing['blotter_id']);
         $this->logModel->addLog("Updated hearing for case {$case['case_number']}");
-        return $this->response->setJSON(['status' => 'success', 'message' => 'Hearing updated.']);
+        return $this->response->setJSON(['status' => 'success', 'message' => 'Hearing updated.', 'csrf_hash' => csrf_hash()]);
     }
 
-    return $this->response->setJSON(['status' => 'error', 'message' => 'Update failed.']);
+    return $this->response->setJSON(['status' => 'error', 'message' => 'Update failed.', 'csrf_hash' => csrf_hash()]);
 }
 
 /**
@@ -495,13 +505,13 @@ public function deleteHearing($hearingId)
 {
     $hearing = $this->hearingModel->find($hearingId);
     if (!$hearing) {
-        return $this->response->setJSON(['status' => 'error', 'message' => 'Hearing not found.']);
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Hearing not found.', 'csrf_hash' => csrf_hash()]);
     }
 
     $this->hearingModel->delete($hearingId);
     $case = $this->blotterModel->find($hearing['blotter_id']);
     $this->logModel->addLog("Deleted hearing for case {$case['case_number']}");
-    return $this->response->setJSON(['status' => 'success', 'message' => 'Hearing deleted.']);
+    return $this->response->setJSON(['status' => 'success', 'message' => 'Hearing deleted.', 'csrf_hash' => csrf_hash()]);
 }
 
 /**
@@ -509,7 +519,12 @@ public function deleteHearing($hearingId)
  */
 public function printCase($id)
 {
-    $case = $this->blotterModel->find($id);
+    $case = $this->db->table('blotter_records')
+        ->select('blotter_records.*, users.name as created_by_name')
+        ->join('users', 'users.id = blotter_records.created_by', 'left')
+        ->where('blotter_records.id', $id)
+        ->get()->getRowArray();
+
     if (!$case) {
         return redirect()->to('blotter')->with('error', 'Case not found.');
     }

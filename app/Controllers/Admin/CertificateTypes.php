@@ -58,6 +58,7 @@ class CertificateTypes extends BaseController
         // Pass enum types so the name field can be a dropdown
         return view('admin/certificate_types/create', [
             'enumTypes' => CertificateModel::getTypes(),
+            'preselect' => $this->request->getGet('name') ?? old('name') ?? '',
         ]);
     }
 
@@ -82,7 +83,7 @@ class CertificateTypes extends BaseController
         $this->typeModel->insert([
             'name'       => $name,
             'content'    => $this->request->getPost('content'),
-            'created_by' => session()->get('id'),
+            'created_by' => session()->get('user_id'),
         ]);
 
         $this->logModel->addLog('Created certificate template: ' . $name);
@@ -108,10 +109,14 @@ class CertificateTypes extends BaseController
 
     /**
      * Update existing certificate type template
+     * $id comes from the URL segment (route passes it as parameter)
      */
-    public function update()
+    public function update($id = null)
     {
-        $id = $this->request->getPost('id');
+        // Accept id from URL segment first, fall back to POST hidden field
+        if (empty($id)) {
+            $id = $this->request->getPost('id');
+        }
 
         if (! $this->typeModel->find($id)) {
             return redirect()->to('admin/certificateTypes')

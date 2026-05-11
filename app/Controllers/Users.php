@@ -2,10 +2,10 @@
 
 namespace App\Controllers;
 
-use CodeIgniter\Controller;
 use App\Models\UserModel;
+use App\Models\LogModel;
 
-class Users extends Controller
+class Users extends BaseController
 {
     protected $userModel;
 
@@ -122,9 +122,11 @@ class Users extends Controller
 
         $user = $this->userModel->find($id);
         if ($user) {
-            return $this->response->setJSON(['status' => 'success', 'data' => $user]);
+            $user['role'] = strtolower((string) ($user['role'] ?? 'staff'));
+            $user['status'] = strtolower((string) ($user['status'] ?? 'active'));
+            return $this->response->setJSON(['status' => 'success', 'data' => $user, 'csrf_hash' => csrf_hash()]);
         } else {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'User not found']);
+            return $this->response->setJSON(['status' => 'error', 'message' => 'User not found', 'csrf_hash' => csrf_hash()]);
         }
     }
 
@@ -133,12 +135,18 @@ class Users extends Controller
         $id = $this->request->getPost('userId');
         $user = $this->userModel->find($id);
         if (!$user) {
-            return $this->response->setJSON(['success' => false, 'message' => 'User not found']);
+            return $this->response->setJSON(['success' => false, 'message' => 'User not found', 'csrf_hash' => csrf_hash()]);
+        }
+
+        $email = trim((string) $this->request->getPost('email'));
+        $emailOwner = $this->userModel->where('email', $email)->first();
+        if ($emailOwner && (int) $emailOwner['id'] !== (int) $id) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Email already exists.', 'csrf_hash' => csrf_hash()]);
         }
 
         $data = [
             'name'   => $this->request->getPost('name'),
-            'email'  => $this->request->getPost('email'),
+            'email'  => $email,
             // Normalize to match DB conventions used across the app
             'role'   => strtolower(trim((string) $this->request->getPost('role'))),
             'status' => strtolower(trim((string) $this->request->getPost('status'))),
@@ -151,23 +159,23 @@ class Users extends Controller
         }
 
         if ($this->userModel->update($id, $data)) {
-            return $this->response->setJSON(['success' => true, 'message' => 'User updated successfully']);
+            return $this->response->setJSON(['success' => true, 'message' => 'User updated successfully', 'csrf_hash' => csrf_hash()]);
         }
-        return $this->response->setJSON(['success' => false, 'message' => 'Failed to update user']);
+        return $this->response->setJSON(['success' => false, 'message' => 'Failed to update user', 'csrf_hash' => csrf_hash()]);
     }
 
     public function delete($id = null)
     {
         $user = $this->userModel->find($id);
         if (!$user) {
-            return $this->response->setJSON(['success' => false, 'message' => 'User not found']);
+            return $this->response->setJSON(['success' => false, 'message' => 'User not found', 'csrf_hash' => csrf_hash()]);
         }
 
         // Soft delete via the model – sets deleted_at, preserves record
         if ($this->userModel->delete($id)) {
-            return $this->response->setJSON(['success' => true, 'message' => 'User deleted successfully']);
+            return $this->response->setJSON(['success' => true, 'message' => 'User deleted successfully', 'csrf_hash' => csrf_hash()]);
         }
-        return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete user']);
+        return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete user', 'csrf_hash' => csrf_hash()]);
     }
 
     public function create()

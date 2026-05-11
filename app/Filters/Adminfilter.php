@@ -22,7 +22,7 @@ class AdminFilter implements FilterInterface
         }
 
         // Logged in but wrong role → their own dashboard
-        if (strtolower(session()->get('role')) !== 'admin') {
+        if (strtolower((string) (session()->get('role') ?? '')) !== 'admin') {
             return redirect()->to('/staff/dashboard')->with('error', 'Access denied. Admins only.');
         }
     }

@@ -1,31 +1,41 @@
-$(function() {
-    // Delete modal
-    $('.delete-btn').click(function() {
-        let id = $(this).data('id');
-        let caseRef = $(this).data('case');
-        $('#delete-case-ref').text(caseRef);
-        $('#delete-form').attr('action', window.blotterConfig.deleteUrl + '/' + id);
-        $('#deleteModal').modal('show');
+/**
+ * blotter-index.js
+ * Handles the blotter index page:
+ * - Delete confirmation (inline form submit)
+ * - Live search + status/purok filters
+ */
+$(function () {
+
+    // ── Delete confirmation ───────────────────────────────────────────
+    // The delete buttons are inside <form data-confirm="..."> elements.
+    // Intercept submit and show a native confirm dialog.
+    $(document).on('submit', 'form[data-confirm]', function (e) {
+        var msg = $(this).data('confirm') || 'Are you sure you want to delete this record?';
+        if (!confirm(msg)) {
+            e.preventDefault();
+        }
     });
 
-    // Live filters
+    // ── Live filters ──────────────────────────────────────────────────
     function filterTable() {
-        let search = $('#searchCase').val().toLowerCase();
-        let status = $('#filterStatus').val();
-        let purok = $('#filterPurok').val();
-        $('#blotterTable tbody tr').each(function() {
-            let text = $(this).text().toLowerCase();
-            let rowStatus = $(this).data('status');
-            let rowPurok = $(this).data('purok');
-            let show = text.includes(search) && 
-                       (!status || rowStatus === status) && 
-                       (!purok || rowPurok === purok);
+        var search = $('#searchCase').val().toLowerCase();
+        var status = $('#filterStatus').val();
+        var purok  = $('#filterPurok').val();
+
+        $('#blotterTable tbody tr').each(function () {
+            var text      = $(this).text().toLowerCase();
+            var rowStatus = $(this).data('status');
+            var rowPurok  = $(this).data('purok');
+            var show = text.includes(search) &&
+                       (!status || rowStatus === status) &&
+                       (!purok  || rowPurok  === purok);
             $(this).toggle(show);
         });
     }
 
     $('#searchCase, #filterStatus, #filterPurok').on('keyup change', filterTable);
-    $('#clearFilters').click(function() {
+
+    $('#clearFilters').on('click', function () {
         $('#searchCase').val('');
         $('#filterStatus').val('');
         $('#filterPurok').val('');

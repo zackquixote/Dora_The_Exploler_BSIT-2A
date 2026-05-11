@@ -28,20 +28,7 @@
 
     // ---------- Print Profile ----------
     window.printProfile = function() {
-        Swal.fire({
-            title: 'Print Profile',
-            text: `Preparing print for ${config.residentName}...`,
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonColor: '#2B4FBF',
-            confirmButtonText: 'Print Now',
-            cancelButtonText: 'Cancel'
-        }).then(result => {
-            if (result.isConfirmed) {
-                window.print();
-                logActivity('Printed Profile', '', 'print');
-            }
-        });
+        window.print();
     };
 
     // ---------- Certificate Modal ----------
@@ -58,44 +45,12 @@
         if ($bsModal.length) $bsModal.modal('show');
     };
 
-    // Log certificate generation on form submit
+    // Log certificate generation on form submit — no-op, server logs it
     $(document).on('submit', '#certModalOverlay form, #generateCertificateModal form', function() {
-        const certType = $('[name="certificate_type"]', this).val() || 'Certificate';
-        logActivity('Generated Certificate', certType, 'cert');
+        // Server-side logging handles this via LogModel
     });
 
-    // ---------- Activity Feed (localStorage) ----------
-    const ACTIVITY_KEY = 'rv_activity_log';
-    const MAX_ACTIVITIES = 50;
-
-    function getActivities() {
-        try {
-            return JSON.parse(localStorage.getItem(ACTIVITY_KEY)) || [];
-        } catch { return []; }
-    }
-
-    function saveActivities(activities) {
-        localStorage.setItem(ACTIVITY_KEY, JSON.stringify(activities));
-    }
-
-    function logActivity(action, detail, type) {
-        const activities = getActivities();
-        activities.unshift({
-            id: Date.now(),
-            action: action,
-            detail: detail || '',
-            type: type || 'view',
-            user: config.currentUser,
-            role: config.currentRole,
-            residentId: config.residentId,
-            residentName: config.residentName,
-            timestamp: new Date().toISOString()
-        });
-        if (activities.length > MAX_ACTIVITIES) activities.splice(MAX_ACTIVITIES);
-        saveActivities(activities);
-        renderActivityFeed();
-    }
-
+    // ---------- Activity Feed (server-side logs) ----------
     function timeAgo(isoString) {
         const diff = Math.floor((Date.now() - new Date(isoString)) / 1000);
         if (diff < 60) return 'Just now';
@@ -105,45 +60,6 @@
         return new Date(isoString).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
     }
 
-    const ICON_MAP = {
-        cert: { icon: 'fas fa-file-alt', cls: 'cert' },
-        print: { icon: 'fas fa-print', cls: 'print' },
-        edit: { icon: 'fas fa-edit', cls: 'edit' },
-        view: { icon: 'fas fa-eye', cls: 'view' }
-    };
-
-    function renderActivityFeed() {
-        const $feed = $('#rv-activity-feed');
-        const $count = $('#rv-activity-count');
-        if (!$feed.length) return;
-
-        const all = getActivities();
-        const activities = all.filter(a => String(a.residentId) === String(config.residentId));
-
-        if ($count.length) {
-            $count.text(activities.length);
-            $count.css('display', activities.length ? 'inline-flex' : 'none');
-        }
-
-        if (!activities.length) {
-            $feed.html(`<div class="rv-activity-empty"><i class="fas fa-history"></i><p>No activity yet for this profile.</p></div>`);
-            return;
-        }
-
-        $feed.html(activities.slice(0, 15).map(a => {
-            const iconData = ICON_MAP[a.type] || ICON_MAP.view;
-            return `
-            <div class="rv-activity-item">
-                <div class="rv-activity-icon ${iconData.cls}"><i class="${iconData.icon}"></i></div>
-                <div class="rv-activity-content">
-                    <div class="rv-activity-action">${escapeHtml(a.action)}${a.detail ? ` — <span style="color:var(--rv-text-muted);font-weight:400">${escapeHtml(a.detail)}</span>` : ''}</div>
-                    <div class="rv-activity-user">by <strong>${escapeHtml(a.user)}</strong> <span style="text-transform:capitalize;font-size:0.68rem;background:var(--rv-gray-bg);padding:1px 5px;border-radius:4px;margin-left:2px;">${escapeHtml(a.role)}</span></div>
-                    <div class="rv-activity-time"><i class="fas fa-clock" style="font-size:0.65rem;margin-right:3px;opacity:0.6"></i>${timeAgo(a.timestamp)}</div>
-                </div>
-            </div>`;
-        }).join(''));
-    }
-
     function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>]/g, function(m) {
@@ -151,6 +67,58 @@
             if (m === '<') return '&lt;';
             if (m === '>') return '&gt;';
             return m;
+        });
+    }
+
+    function renderActivityFeed(logs) {
+        const $feed = $('#rv-activity-feed');
+        const $count = $('#rv-activity-count');
+        if (!$feed.length) return;
+
+        if (!logs || !logs.length) {
+            $feed.html('<div style="text-align:center;padding:24px;color:var(--ink-soft);font-size:11px"><i class="fas fa-history" style="opacity:.3;display:block;margin-bottom:6px;font-size:18px"></i>No activity recorded.</div>');
+            if ($count.length) $count.hide();
+            return;
+        }
+
+        if ($count.length) {
+            $count.text(logs.length).show();
+        }
+
+        $feed.html(logs.map(function(log) {
+            const action = log.ACTION || '';
+            const user   = log.USER_NAME || 'System';
+            const ts     = log.TIMELOG || log.DATELOG || '';
+            let icon = 'fa-eye', cls = 'ds-ai-view';
+            const a = action.toLowerCase();
+            if (a.includes('delete') || a.includes('remove')) { icon = 'fa-trash-alt'; cls = 'ds-ai-delete'; }
+            else if (a.includes('edit') || a.includes('update')) { icon = 'fa-edit'; cls = 'ds-ai-edit'; }
+            else if (a.includes('create') || a.includes('add')) { icon = 'fa-plus-circle'; cls = 'ds-ai-create'; }
+            else if (a.includes('print')) { icon = 'fa-print'; cls = 'ds-ai-print'; }
+            else if (a.includes('certif')) { icon = 'fa-file-alt'; cls = 'ds-ai-cert'; }
+
+            return `<div class="ds-activity-item">
+                <div class="ds-activity-icon ${cls}"><i class="fas ${icon}"></i></div>
+                <div>
+                    <div class="ds-activity-action">${escapeHtml(action)}</div>
+                    <div class="ds-activity-meta">by <strong>${escapeHtml(user)}</strong> · ${ts ? timeAgo(ts) : ''}</div>
+                </div>
+            </div>`;
+        }).join(''));
+    }
+
+    function loadActivityFeed() {
+        const $feed = $('#rv-activity-feed');
+        if (!$feed.length || !config.residentId) return;
+
+        $.get(config.baseUrl + 'resident/activity/' + config.residentId, function(res) {
+            if (res.status === 'success') {
+                renderActivityFeed(res.logs);
+            } else {
+                $feed.html('<div style="text-align:center;padding:24px;color:var(--ink-soft);font-size:11px">Could not load activity.</div>');
+            }
+        }, 'json').fail(function() {
+            $feed.html('<div style="text-align:center;padding:24px;color:var(--ink-soft);font-size:11px">Could not load activity.</div>');
         });
     }
 
@@ -192,6 +160,10 @@
                     $badge
                         .text(newStatus.charAt(0).toUpperCase() + newStatus.slice(1))
                         .attr('class', 'ds-badge ' + badgeClass);
+                    if (response.csrf_hash && config.csrfName) {
+                        config.csrfValue = response.csrf_hash;
+                        $('input[name="' + config.csrfName + '"]').val(response.csrf_hash);
+                    }
                     originalStatus = newStatus;
                     $editor.hide();
                     $display.show();
@@ -205,14 +177,8 @@
 
     // ---------- Initialize ----------
     $(document).ready(function() {
-        // Log profile view once per session
-        const sessionKey = `rv_viewed_${config.residentId}`;
-        if (!sessionStorage.getItem(sessionKey)) {
-            logActivity('Viewed Profile', '', 'view');
-            sessionStorage.setItem(sessionKey, '1');
-        }
-        renderActivityFeed();
-        setInterval(renderActivityFeed, 30000);
+        loadActivityFeed();
+        setInterval(loadActivityFeed, 60000);
         initStatusEditor();
     });
 

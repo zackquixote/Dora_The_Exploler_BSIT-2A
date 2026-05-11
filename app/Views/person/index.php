@@ -26,7 +26,7 @@
             <div class="card-header">
               <h3 class="card-title">List of Persons</h3>
               <div class="float-right">
-                <button type="button" class="btn btn-md btn-primary" data-toggle="modal" data-target="#AddNewModal">
+                <button type="button" class="btn btn-md btn-primary" data-bs-toggle="modal" data-bs-target="#AddNewModal">
                   <i class="fa fa-plus-circle fa fw"></i> Add New
                 </button>
               </div>
@@ -59,7 +59,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title"><i class="fa fa-plus-circle fa fw"></i>  Add New</h5>
-              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
             </div>
 
             <div class="modal-body">
@@ -75,7 +75,7 @@
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class='fas fa-times-circle'></i> Cancel</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class='fas fa-times-circle'></i> Cancel</button>
             <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
           </div>
         </div>
@@ -88,7 +88,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="editUserModalLabel"><i class="far fa-edit fa fw"></i> Edit Record</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -109,7 +109,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class='fas fa-times-circle'></i> Cancel</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class='fas fa-times-circle'></i> Cancel</button>
             <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
           </div>
         </div>
