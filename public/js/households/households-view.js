@@ -178,4 +178,9 @@ $(document).ready(function() {
             residentCount: vars.residentCount
         });
     }
+
+    // Open Add Member modal — Bootstrap 4 jQuery API
+    $(document).on('click', '#open-add-member-btn', function () {
+        $('#addMemberModal').modal('show');
+    });
 });

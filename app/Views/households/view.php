@@ -85,7 +85,7 @@ foreach ($residents as $r) {
             <div class="ds-card">
                 <div class="ds-card-head">
                     <div class="ds-card-title"><i class="fas fa-users"></i> Household Members (<?= $residentCount ?>)</div>
-                    <button type="button" class="ds-btn ds-btn-teal" style="height:30px;font-size:11px" data-bs-toggle="modal" data-bs-target="#addMemberModal"><i class="fas fa-plus"></i> Add</button>
+                    <button type="button" class="ds-btn ds-btn-teal" style="height:30px;font-size:11px" id="open-add-member-btn"><i class="fas fa-plus"></i> Add</button>
                 </div>
                 <div class="ds-card-body p0">
                     <?php if (empty($residents)): ?>

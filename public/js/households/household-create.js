@@ -286,10 +286,12 @@ $(document).ready(function() {
     });
     
     function showFormError(message) {
-        const alertHtml = '<div class="alert alert-danger custom-alert alert-dismissible fade show" style="margin-bottom: 20px;">' +
-            '<i class="fas fa-exclamation-circle mr-2"></i>' + message +
-            '<button type="button" class="close" data-dismiss="alert">&times;</button></div>';
-        $('.content .container-fluid').prepend(alertHtml);
+        // Remove any existing error alert
+        $('#household-form-error').remove();
+        const alertHtml = '<div id="household-form-error" style="background:var(--c-rose-bg);color:var(--c-rose);padding:12px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600">' +
+            '<i class="fas fa-exclamation-circle" style="margin-right:6px"></i>' + message + '</div>';
+        // Prepend inside the form, before the first card
+        $('#householdForm .ds-card').first().before(alertHtml);
         $('html, body').animate({ scrollTop: 0 }, 300);
     }
     
