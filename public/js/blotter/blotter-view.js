@@ -27,6 +27,7 @@ $(function () {
         // Reset form to Add mode
         $('#hearing-id').val('');
         $('#hearing-form')[0].reset();
+        $('#presiding-officer-select').val('');
         $('#modal-save-btn').text('Save');
         $('#hearing-form').attr('action', window.blotterConfig.hearingAddUrl);
         showModal('addHearingModal');
@@ -58,7 +59,8 @@ $(function () {
         $('input[name="hearing_date"]').val(btn.data('date'));
         $('input[name="hearing_time"]').val(btn.data('time'));
         $('input[name="venue"]').val(btn.data('venue'));
-        $('input[name="presiding_officer"]').val(btn.data('officer'));
+        // Presiding officer is now a <select> — match by value (full_name)
+        $('#presiding-officer-select').val(btn.data('officer'));
         $('textarea[name="notes"]').val(btn.data('notes'));
         $('input[name="outcome"]').val(btn.data('outcome') || '');
         $('select[name="status"]').val(btn.data('status'));

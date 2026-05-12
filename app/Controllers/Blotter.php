@@ -257,12 +257,19 @@ class Blotter extends BaseController
     $hearings = $this->hearingModel->getByBlotter($id);
     $timeline = $this->timelineModel->getByBlotter($id);
 
+    // Load active officials for the presiding officer dropdown
+    $officials = $this->db->table('officials')
+        ->where('is_active', 1)
+        ->orderBy('FIELD(position, "Punong Barangay","Secretary","Treasurer","SK Chairperson","Kagawad 1","Kagawad 2","Kagawad 3","Kagawad 4","Kagawad 5","Kagawad 6","Kagawad 7")')
+        ->get()
+        ->getResultArray();
 
     return view('blotter/view', [
         'case'      => $case,
         'parties'   => $grouped,
         'hearings'  => $hearings,
-        'timeline'  => $timeline,       
+        'timeline'  => $timeline,
+        'officials' => $officials,
     ]);
 }
 

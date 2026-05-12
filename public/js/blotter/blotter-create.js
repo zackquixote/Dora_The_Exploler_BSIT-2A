@@ -40,6 +40,7 @@
             searchField: ['text'],
             placeholder: 'Type a name to search…',
             maxOptions:  60,
+            dropdownParent: 'body',
             load: function (query, callback) {
                 const url = searchUrl + (searchUrl.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(query);
                 fetch(url)

@@ -223,7 +223,16 @@ $sc = match($status) {
                         <div><label class="ds-input-label">Time</label><input type="time" name="hearing_time" class="ds-input"></div>
                     </div>
                     <div style="margin-bottom:10px"><label class="ds-input-label">Venue</label><input type="text" name="venue" class="ds-input" placeholder="e.g., Barangay Hall"></div>
-                    <div style="margin-bottom:10px"><label class="ds-input-label">Presiding Officer</label><input type="text" name="presiding_officer" class="ds-input" placeholder="Name of official"></div>
+                    <div style="margin-bottom:10px"><label class="ds-input-label">Presiding Officer</label>
+                        <select name="presiding_officer" id="presiding-officer-select" class="ds-select">
+                            <option value="">— Select Official —</option>
+                            <?php foreach ($officials as $off): ?>
+                                <option value="<?= esc($off['full_name']) ?>" data-position="<?= esc($off['position']) ?>">
+                                    <?= esc($off['full_name']) ?> — <?= esc($off['position']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                     <div style="margin-bottom:10px"><label class="ds-input-label">Status</label>
                         <select name="status" class="ds-select"><option>Scheduled</option><option>In Progress</option><option>Completed</option><option>Cancelled</option></select>
                     </div>
