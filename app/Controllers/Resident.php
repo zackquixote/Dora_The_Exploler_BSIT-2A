@@ -375,14 +375,24 @@ class Resident extends BaseController
     {
         if ($r = $this->requireLogin()) return $r;
 
-        $householdId  = $this->request->getGet('household_id');
-        $keyword      = $this->request->getGet('q') ?? '';
-        $filterPurok  = $this->request->getGet('filter_purok') ?? '';
+        $householdId   = $this->request->getGet('household_id');
+        $keyword       = $this->request->getGet('q') ?? '';
         $filterHouseId = $this->request->getGet('filter_household_id') ?? '';
 
+        // Look up the household's sitio and current head so we can pre-filter and lock head relationship
+        $household      = $this->householdModel->find($householdId);
+        $householdSitio = $household['sitio'] ?? '';
+        $headResidentId = $household['head_resident_id'] ?? null;
+
+        // Use the URL param if explicitly set, otherwise default to the household's sitio
+        $filterPurok = $this->request->getGet('filter_purok') ?? $householdSitio;
+
+        $filterStatus  = $this->request->getGet('filter_status') ?? '';
+
         $builder = $this->db->table('residents')
-            ->select('residents.id, residents.first_name, residents.last_name, residents.sitio, residents.household_id, residents.profile_picture')
-            ->where('residents.deleted_at IS NULL');
+            ->select('residents.id, residents.first_name, residents.last_name, residents.sitio, residents.household_id, residents.profile_picture, residents.relationship_to_head')
+            ->where('residents.deleted_at IS NULL')
+            ->where('residents.status', 'active');
 
         if (!empty($keyword)) {
             $builder->groupStart()
@@ -396,15 +406,21 @@ class Resident extends BaseController
         if (!empty($filterHouseId)) {
             $builder->where('residents.household_id', $filterHouseId);
         }
+        if ($filterStatus === 'no_household') {
+            $builder->where('residents.household_id', null);
+        }
 
         $residents = $builder->orderBy('residents.last_name', 'ASC')->get()->getResultArray();
 
         return view('households/resident_assign_search', [
             'residents'      => $residents,
             'household_id'   => $householdId,
+            'householdSitio' => $householdSitio,
+            'headResidentId' => $headResidentId,
             'keyword'        => $keyword,
             'filterPurok'    => $filterPurok,
             'filterHouseId'  => $filterHouseId,
+            'filterStatus'   => $filterStatus,
         ]);
     }
 
@@ -421,11 +437,20 @@ class Resident extends BaseController
             return redirect()->back()->with('error', 'No residents selected.');
         }
 
+        // Determine the current head of the target household so we can preserve/auto-assign their relationship
+        $household      = $this->householdModel->find($targetHouseholdId);
+        $headResidentId = $household['head_resident_id'] ?? null;
+
         $count = 0;
         foreach ($selectedResidents as $residentId) {
+            // If this resident is the household head, always assign "Head" regardless of dropdown
+            $relationship = ($headResidentId && (int)$residentId === (int)$headResidentId)
+                ? 'Head'
+                : ($relationships[$residentId] ?? null);
+
             $this->residentModel->update($residentId, [
                 'household_id'          => $targetHouseholdId,
-                'relationship_to_head'  => $relationships[$residentId] ?? null,
+                'relationship_to_head'  => $relationship,
                 'joined_household_date' => date('Y-m-d'),
             ]);
             $count++;
@@ -439,7 +464,7 @@ class Resident extends BaseController
 
     // ── Private Helpers ───────────────────────────────────────────────
     private function uploadProfilePicture($file, $sitio, $currentPicture = null)
-    {
+    {   
         if ($file && $file->isValid() && !$file->hasMoved()) {
             if ($currentPicture && file_exists(FCPATH . 'uploads/' . $currentPicture)) {
                 unlink(FCPATH . 'uploads/' . $currentPicture);
