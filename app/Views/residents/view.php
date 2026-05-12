@@ -124,7 +124,6 @@ $statusBadge = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','deceased'
                     <button class="rv-tab-btn" onclick="switchTab('status',this)"><i class="fas fa-flag" style="margin-right:4px"></i> Status</button>
                     <button class="rv-tab-btn" onclick="switchTab('documents',this)"><i class="fas fa-file-alt" style="margin-right:4px"></i> Documents</button>
                     <button class="rv-tab-btn" onclick="switchTab('cases',this)"><i class="fas fa-balance-scale" style="margin-right:4px"></i> Cases</button>
-                    <button class="rv-tab-btn" onclick="switchTab('transfers',this)"><i class="fas fa-exchange-alt" style="margin-right:4px"></i> Transfers <?php if(!empty($transferHistory)): ?><span class="ds-badge ds-badge-blue" style="font-size:9px;margin-left:3px"><?= count($transferHistory) ?></span><?php endif; ?></button>
                 </div>
                 <div class="ds-card-body">
 

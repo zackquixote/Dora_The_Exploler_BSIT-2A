@@ -20,6 +20,7 @@
             searchField: ['text'],
             placeholder: 'Type to search resident…',
             maxOptions: 50,
+            dropdownParent: 'body',
             load: function (query, callback) {
                 const url = searchUrl + (searchUrl.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(query);
                 fetch(url)

@@ -167,7 +167,6 @@
                     originalStatus = newStatus;
                     $editor.hide();
                     $display.show();
-                    logActivity('Changed Status', `to ${newStatus}`, 'edit');
                 } else {
                     alert(response.message || 'Update failed');
                 }

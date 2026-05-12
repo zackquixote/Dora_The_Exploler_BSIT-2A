@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Models\HouseholdModel;
 use App\Models\ResidentModel;
 use App\Models\LogModel;
-use App\Models\ResidentTransferHistoryModel;
 
 /**
  * Household Controller
@@ -40,16 +39,14 @@ class HouseholdController extends BaseController
     protected $householdModel;
     protected $residentModel;
     protected $logModel;
-    protected $transferHistoryModel;
     protected $db;
 
     public function __construct()
     {
-        $this->householdModel       = new HouseholdModel();
-        $this->residentModel        = new ResidentModel();
-        $this->logModel             = new LogModel();
-        $this->transferHistoryModel = new ResidentTransferHistoryModel();
-        $this->db                   = \Config\Database::connect();
+        $this->householdModel = new HouseholdModel();
+        $this->residentModel  = new ResidentModel();
+        $this->logModel       = new LogModel();
+        $this->db             = \Config\Database::connect();
     }
 
     /**
@@ -536,15 +533,6 @@ public function delete($id)
             'relationship_to_head' => null,
             'left_household_date'  => date('Y-m-d'),
         ]);
-
-        // Record transfer history
-        $this->transferHistoryModel->record(
-            (int)$residentId,
-            (int)$householdId,
-            null,
-            'Removed from household',
-            session()->get('user_id') ?? null
-        );
 
         $this->logModel->addLog(
             "Removed {$resident['first_name']} {$resident['last_name']} from household #{$householdId}"

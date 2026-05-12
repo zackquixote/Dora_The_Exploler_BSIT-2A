@@ -5,23 +5,20 @@ namespace App\Controllers;
 use App\Models\ResidentModel;
 use App\Models\HouseholdModel;
 use App\Models\LogModel;
-use App\Models\ResidentTransferHistoryModel;
 
 class Resident extends BaseController
 {
     protected $residentModel;
     protected $householdModel;
     protected $logModel;
-    protected $transferHistoryModel;
     protected $db;
 
     public function __construct()
     {
-        $this->residentModel        = new ResidentModel();
-        $this->householdModel       = new HouseholdModel();
-        $this->logModel             = new LogModel();
-        $this->transferHistoryModel = new ResidentTransferHistoryModel();
-        $this->db                   = \Config\Database::connect();
+        $this->residentModel  = new ResidentModel();
+        $this->householdModel = new HouseholdModel();
+        $this->logModel       = new LogModel();
+        $this->db             = \Config\Database::connect();
     }
 
     private function requireLogin()
@@ -128,17 +125,6 @@ class Resident extends BaseController
                 $fullName = $data['first_name'] . ' ' . $data['last_name'];
                 $this->logModel->addLog('Added Resident ' . $fullName);
 
-                // Record initial household assignment if one was set
-                if (!empty($data['household_id'])) {
-                    $this->transferHistoryModel->record(
-                        $result,
-                        null,
-                        (int)$data['household_id'],
-                        'Initial household assignment on registration',
-                        session()->get('user_id') ?? 1
-                    );
-                }
-
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             } catch (\Exception $e) {
                 log_message('error', 'Resident AJAX insert exception: ' . $e->getMessage());
@@ -168,17 +154,6 @@ class Resident extends BaseController
 
             $fullName = $data['first_name'] . ' ' . $data['last_name'];
             $this->logModel->addLog('Added Resident ' . $fullName);
-
-            // Record initial household assignment if one was set
-            if (!empty($data['household_id'])) {
-                $this->transferHistoryModel->record(
-                    $result,
-                    null,
-                    (int)$data['household_id'],
-                    'Initial household assignment on registration',
-                    session()->get('user_id') ?? 1
-                );
-            }
 
             return redirect()->to(base_url('resident'))->with('success', 'Resident added successfully.');
         } catch (\Exception $e) {
@@ -246,18 +221,6 @@ class Resident extends BaseController
                 if ($result === false) {
                     return $this->response->setJSON(['status' => 'error', 'errors' => $this->residentModel->errors()]);
                 }
-                // Record household transfer if household changed
-                $oldHouseholdId = (int)($resident['household_id'] ?? 0);
-                $newHouseholdId = (int)($data['household_id'] ?? 0);
-                if ($oldHouseholdId !== $newHouseholdId) {
-                    $this->transferHistoryModel->record(
-                        $id,
-                        $oldHouseholdId ?: null,
-                        $newHouseholdId ?: null,
-                        'Updated via resident edit form',
-                        session()->get('user_id') ?? 1
-                    );
-                }
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             } catch (\Exception $e) {
                 if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
@@ -283,18 +246,6 @@ class Resident extends BaseController
             $result = $this->residentModel->update($id, $data);
             if ($result === false) {
                 return redirect()->back()->withInput()->with('errors', $this->residentModel->errors());
-            }
-            // Record household transfer if household changed
-            $oldHouseholdId = (int)($resident['household_id'] ?? 0);
-            $newHouseholdId = (int)($data['household_id'] ?? 0);
-            if ($oldHouseholdId !== $newHouseholdId) {
-                $this->transferHistoryModel->record(
-                    $id,
-                    $oldHouseholdId ?: null,
-                    $newHouseholdId ?: null,
-                    'Updated via resident edit form',
-                    session()->get('user_id') ?? 1
-                );
             }
             return redirect()->to(base_url('resident'))->with('success', 'Resident updated successfully.');
         } catch (\Exception $e) {
@@ -380,12 +331,10 @@ class Resident extends BaseController
         $transferHistory = $this->transferHistoryModel->getByResident((int)$id);
 
         return view('residents/view', [
-            'resident'        => $resident,
-            'certificates'    => $certificates,
-            'blotterHistory'  => $blotterHistory,
-            'transferHistory' => $transferHistory,
-        ]);
-    }
+            'resident'       => $resident,
+            'certificates'   => $certificates,
+            'blotterHistory' => $blotterHistory,
+        ]);    }
 
     // ── Households by Sitio (AJAX) ────────────────────────────────────
     public function getHouseholdsBySitio()
@@ -499,32 +448,15 @@ class Resident extends BaseController
 
         $count = 0;
         foreach ($selectedResidents as $residentId) {
-            // If this resident is the household head, always assign "Head" regardless of dropdown
             $relationship = ($headResidentId && (int)$residentId === (int)$headResidentId)
                 ? 'Head'
                 : ($relationships[$residentId] ?? null);
-
-            // Fetch old household for transfer history
-            $existing = $this->residentModel->find($residentId);
-            $oldHouseholdId = (int)($existing['household_id'] ?? 0);
 
             $this->residentModel->update($residentId, [
                 'household_id'          => $targetHouseholdId,
                 'relationship_to_head'  => $relationship,
                 'joined_household_date' => date('Y-m-d'),
             ]);
-
-            // Record transfer if household actually changed
-            if ($oldHouseholdId !== (int)$targetHouseholdId) {
-                $this->transferHistoryModel->record(
-                    (int)$residentId,
-                    $oldHouseholdId ?: null,
-                    (int)$targetHouseholdId,
-                    'Assigned via bulk household assignment',
-                    session()->get('user_id') ?? 1
-                );
-            }
-
             $count++;
         }
 

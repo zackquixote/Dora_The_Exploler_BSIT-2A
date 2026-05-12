@@ -142,22 +142,11 @@
     }
 
     // ---------- Age Calculator (auto-check Senior Citizen) ----------
+    // Note: The view's inline script handles the full auto-senior logic
+    // (disable + note display). This function is intentionally left minimal
+    // to avoid conflicting with the inline handler.
     function initAgeCalculator() {
-        $('input[name="birthdate"]').on('change', function() {
-            const birthdate = $(this).val();
-            if (birthdate && calculateAge(birthdate) >= 60) {
-                $('input[name="is_senior_citizen"]').prop('checked', true);
-            }
-        });
-    }
-
-    function calculateAge(birthdate) {
-        const today = new Date();
-        const birth = new Date(birthdate);
-        let age = today.getFullYear() - birth.getFullYear();
-        const m = today.getMonth() - birth.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-        return age;
+        // Handled by inline script in the view
     }
 
     // ---------- Custom Checkbox Styling ----------

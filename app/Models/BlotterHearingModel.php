@@ -59,16 +59,18 @@ class BlotterHearingModel extends Model
  */
 public function getUpcomingHearings($days = 3)
 {
-    $today = date('Y-m-d');
+    $today     = date('Y-m-d');
     $threshold = date('Y-m-d', strtotime("+{$days} days"));
 
-    return $this->select('blotter_hearings.*, blotter_records.case_number, blotter_records.id as blotter_id')
+    return $this->db->table('blotter_hearings')
+                ->select('blotter_hearings.*, blotter_records.case_number, blotter_hearings.blotter_id')
                 ->join('blotter_records', 'blotter_records.id = blotter_hearings.blotter_id')
-                ->where('hearing_date >=', $today)
-                ->where('hearing_date <=', $threshold)
-                ->where('notification_sent', 0)
-                ->orderBy('hearing_date', 'ASC')
-                ->findAll();
+                ->where('blotter_hearings.hearing_date >=', $today)
+                ->where('blotter_hearings.hearing_date <=', $threshold)
+                ->where('blotter_hearings.status', 'Scheduled')
+                ->orderBy('blotter_hearings.hearing_date', 'ASC')
+                ->get()
+                ->getResultArray();
 }
 
 /**
@@ -77,12 +79,14 @@ public function getUpcomingHearings($days = 3)
 public function getOverdueHearings()
 {
     $today = date('Y-m-d');
-    return $this->select('blotter_hearings.*, blotter_records.case_number, blotter_records.id as blotter_id')
+    return $this->db->table('blotter_hearings')
+                ->select('blotter_hearings.*, blotter_records.case_number, blotter_hearings.blotter_id')
                 ->join('blotter_records', 'blotter_records.id = blotter_hearings.blotter_id')
-                ->where('hearing_date <', $today)
+                ->where('blotter_hearings.hearing_date <', $today)
                 ->where('blotter_hearings.status', 'Scheduled')
-                ->orderBy('hearing_date', 'ASC')
-                ->findAll();
+                ->orderBy('blotter_hearings.hearing_date', 'ASC')
+                ->get()
+                ->getResultArray();
 }
 
 /**
