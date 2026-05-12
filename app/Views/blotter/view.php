@@ -92,7 +92,7 @@ $sc = match($status) {
             <div class="ds-card" style="margin-bottom:14px">
                 <div class="ds-card-head">
                     <div class="ds-card-title"><i class="fas fa-gavel"></i> Hearings</div>
-                    <button type="button" class="ds-btn ds-btn-teal" style="height:30px;font-size:11px" data-bs-toggle="modal" data-bs-target="#addHearingModal"><i class="fas fa-plus"></i> Add</button>
+                    <button type="button" class="ds-btn ds-btn-teal" style="height:30px;font-size:11px" id="open-hearing-modal-btn"><i class="fas fa-plus"></i> Add</button>
                 </div>
                 <div class="ds-card-body">
                     <?php if (empty($hearings)): ?>
@@ -231,7 +231,7 @@ $sc = match($status) {
                     <input type="hidden" name="hearing_id" id="hearing-id">
                 </div>
                 <div style="padding:12px 20px;border-top:.5px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
-                    <button type="button" class="ds-btn ds-btn-ghost" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="ds-btn ds-btn-ghost" id="cancel-hearing-btn">Cancel</button>
                     <button type="submit" class="ds-btn ds-btn-teal" id="modal-save-btn">Save</button>
                 </div>
             </form>
@@ -247,7 +247,7 @@ $sc = match($status) {
             <h5 style="font-size:14px;font-weight:700;color:var(--ink)">Confirm Delete</h5>
             <p style="font-size:12px;color:var(--ink-muted)">Delete <strong id="delete-case-ref"></strong>?</p>
             <div style="display:flex;justify-content:center;gap:8px;margin-top:16px">
-                <button class="ds-btn ds-btn-ghost" data-bs-dismiss="modal">Cancel</button>
+                <button class="ds-btn ds-btn-ghost" id="cancel-delete-btn">Cancel</button>
                 <form id="delete-form" method="POST" action=""><?= csrf_field() ?><button type="submit" class="ds-btn ds-btn-rose">Delete</button></form>
             </div>
         </div>

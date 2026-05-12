@@ -1,17 +1,19 @@
 /**
  * blotter-view.js
  * Handles the blotter case view page:
- * - Delete case modal
- * - Add/Edit/Delete hearing via AJAX (Bootstrap 5 modal)
+ * - Delete case modal (Bootstrap 4 jQuery API)
+ * - Add/Edit/Delete hearing via AJAX
  * - CSRF token refresh after each AJAX call
  */
 $(function () {
 
     // ── Helpers ──────────────────────────────────────────────────────
-    function getModal(id) {
-        var el = document.getElementById(id);
-        if (!el) return null;
-        return bootstrap.Modal.getOrCreateInstance(el);
+    function showModal(id) {
+        $('#' + id).modal('show');
+    }
+
+    function hideModal(id) {
+        $('#' + id).modal('hide');
     }
 
     function refreshCsrf(newHash) {
@@ -20,30 +22,33 @@ $(function () {
         $('input[name="' + window.blotterConfig.csrfToken + '"]').val(newHash);
     }
 
+    // ── Open hearing modal (Add button) ───────────────────────────────
+    $(document).on('click', '#open-hearing-modal-btn', function () {
+        // Reset form to Add mode
+        $('#hearing-id').val('');
+        $('#hearing-form')[0].reset();
+        $('#modal-save-btn').text('Save');
+        $('#hearing-form').attr('action', window.blotterConfig.hearingAddUrl);
+        showModal('addHearingModal');
+    });
+
+    // ── Cancel buttons ────────────────────────────────────────────────
+    $(document).on('click', '#cancel-hearing-btn', function () {
+        hideModal('addHearingModal');
+    });
+
+    $(document).on('click', '#cancel-delete-btn', function () {
+        hideModal('deleteModal');
+    });
+
     // ── Delete case modal ─────────────────────────────────────────────
     $(document).on('click', '.delete-btn', function () {
-        var id       = $(this).data('id');
-        var caseRef  = $(this).data('case');
+        var id      = $(this).data('id');
+        var caseRef = $(this).data('case');
         $('#delete-case-ref').text(caseRef);
         $('#delete-form').attr('action', window.blotterConfig.deleteUrl + '/' + id);
-        getModal('deleteModal').show();
+        showModal('deleteModal');
     });
-
-    $(document).on('click', '[data-bs-dismiss="modal"]', function () {
-        var modalEl = $(this).closest('.modal')[0];
-        if (modalEl) bootstrap.Modal.getInstance(modalEl).hide();
-    });
-
-    // ── Hearing modal: reset on open ──────────────────────────────────
-    var hearingModalEl = document.getElementById('addHearingModal');
-    if (hearingModalEl) {
-        hearingModalEl.addEventListener('show.bs.modal', function () {
-            $('#hearing-id').val('');
-            $('#hearing-form')[0].reset();
-            $('#modal-save-btn').text('Save');
-            $('#hearing-form').attr('action', window.blotterConfig.hearingAddUrl);
-        });
-    }
 
     // ── Edit hearing: populate modal ──────────────────────────────────
     $(document).on('click', '.edit-hearing', function (e) {
@@ -59,27 +64,48 @@ $(function () {
         $('select[name="status"]').val(btn.data('status'));
         $('#hearing-form').attr('action', window.blotterConfig.hearingUpdateUrl + '/' + btn.data('id'));
         $('#modal-save-btn').text('Update');
-        getModal('addHearingModal').show();
+        showModal('addHearingModal');
     });
 
     // ── AJAX submit hearing form ──────────────────────────────────────
     $('#hearing-form').on('submit', function (e) {
         e.preventDefault();
         var form = $(this);
+        var $btn = $('#modal-save-btn');
 
-        // Always use the latest CSRF hash before serialising
+        // Disable button to prevent double-submit
+        $btn.prop('disabled', true).text('Saving…');
+
+        // Refresh CSRF before serialising
         $('input[name="' + window.blotterConfig.csrfToken + '"]').val(window.blotterConfig.csrfHash);
 
         $.post(form.attr('action'), form.serialize(), function (resp) {
             refreshCsrf(resp.csrf_hash);
             if (resp.status === 'success') {
+                hideModal('addHearingModal');
                 location.reload();
             } else {
-                alert(resp.message || 'An error occurred.');
+                $btn.prop('disabled', false).text($btn.data('original-text') || 'Save');
+                // Show error inside modal
+                var $err = $('#hearing-error-msg');
+                if (!$err.length) {
+                    $err = $('<div id="hearing-error-msg" style="background:var(--c-rose-bg);color:var(--c-rose);padding:8px 12px;border-radius:6px;font-size:12px;font-weight:600;margin-bottom:10px"></div>');
+                    form.find('.ds-card-body, div[style*="padding:16px"]').first().prepend($err);
+                }
+                $err.text(resp.message || 'An error occurred. Please try again.').show();
             }
-        }, 'json').fail(function () {
-            alert('Request failed. Please refresh and try again.');
+        }, 'json').fail(function (xhr) {
+            $btn.prop('disabled', false).text('Save');
+            alert('Request failed (HTTP ' + xhr.status + '). Please refresh and try again.');
         });
+    });
+
+    // Store original button text on page load
+    $('#modal-save-btn').data('original-text', $('#modal-save-btn').text());
+
+    // Clear error message when modal opens fresh
+    $('#addHearingModal').on('show.bs.modal', function () {
+        $('#hearing-error-msg').hide();
     });
 
     // ── Delete hearing ────────────────────────────────────────────────
@@ -92,9 +118,9 @@ $(function () {
         data[window.blotterConfig.csrfToken] = window.blotterConfig.csrfHash;
 
         $.ajax({
-            url:  window.blotterConfig.hearingDeleteUrl + '/' + id,
-            type: 'POST',
-            data: data,
+            url:      window.blotterConfig.hearingDeleteUrl + '/' + id,
+            type:     'POST',
+            data:     data,
             dataType: 'json',
             success: function (resp) {
                 refreshCsrf(resp.csrf_hash);
