@@ -65,6 +65,14 @@
                         <label class="ds-input-label">Photo (Optional)</label>
                         <input type="file" name="photo" class="ds-input" accept="image/*">
                     </div>
+                    <div>
+                        <label class="ds-input-label">Term Start</label>
+                        <input type="date" name="term_start" class="ds-input" value="<?= old('term_start') ?>">
+                    </div>
+                    <div>
+                        <label class="ds-input-label">Term End</label>
+                        <input type="date" name="term_end" class="ds-input" value="<?= old('term_end') ?>">
+                    </div>
                 </div>
             </div>
             <div style="padding:12px 18px;border-top:.5px solid var(--border);display:flex;justify-content:flex-end;gap:8px">

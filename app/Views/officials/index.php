@@ -258,6 +258,18 @@
             <div class="off-card-info">
                 <div class="off-card-name"><?= esc($o['full_name']) ?></div>
                 <span class="ds-badge <?= $badgeCls ?>" style="font-size:9px"><?= esc($o['position']) ?></span>
+                <?php if (!empty($o['term_expired'])): ?>
+                    <span class="ds-badge ds-badge-rose" style="font-size:9px;margin-left:3px"><i class="fas fa-exclamation-circle"></i> Term Expired</span>
+                <?php elseif (!empty($o['term_expiring_soon'])): ?>
+                    <span class="ds-badge ds-badge-amber" style="font-size:9px;margin-left:3px"><i class="fas fa-clock"></i> Expiring Soon</span>
+                <?php endif; ?>
+                <?php if (!empty($o['term_start']) || !empty($o['term_end'])): ?>
+                    <div style="font-size:9.5px;color:var(--ink-soft);margin-top:4px">
+                        <i class="fas fa-calendar-alt" style="margin-right:3px"></i>
+                        <?= !empty($o['term_start']) ? date('M Y', strtotime($o['term_start'])) : '?' ?>
+                        – <?= !empty($o['term_end']) ? date('M Y', strtotime($o['term_end'])) : 'Present' ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         <?php endforeach; ?>
@@ -267,7 +279,7 @@
     <!-- ── Kagawads ── -->
     <?php if (!empty($kagawads)): ?>
     <div class="off-section-head">
-        <h3>Sangguniang Barangay Members</h3>
+        <h3>Sangguniang Baranggay Members</h3>
     </div>
     <div class="off-grid-kagawad">
         <?php foreach ($kagawads as $o): ?>
@@ -278,6 +290,18 @@
             <div class="off-card-info">
                 <div class="off-card-name"><?= esc($o['full_name']) ?></div>
                 <span class="ds-badge ds-badge-violet" style="font-size:9px"><?= esc($o['position']) ?></span>
+                <?php if (!empty($o['term_expired'])): ?>
+                    <span class="ds-badge ds-badge-rose" style="font-size:9px;margin-left:3px"><i class="fas fa-exclamation-circle"></i> Term Expired</span>
+                <?php elseif (!empty($o['term_expiring_soon'])): ?>
+                    <span class="ds-badge ds-badge-amber" style="font-size:9px;margin-left:3px"><i class="fas fa-clock"></i> Expiring Soon</span>
+                <?php endif; ?>
+                <?php if (!empty($o['term_start']) || !empty($o['term_end'])): ?>
+                    <div style="font-size:9.5px;color:var(--ink-soft);margin-top:4px">
+                        <i class="fas fa-calendar-alt" style="margin-right:3px"></i>
+                        <?= !empty($o['term_start']) ? date('M Y', strtotime($o['term_start'])) : '?' ?>
+                        – <?= !empty($o['term_end']) ? date('M Y', strtotime($o['term_end'])) : 'Present' ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         <?php endforeach; ?>

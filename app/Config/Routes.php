@@ -67,6 +67,7 @@ $routes->group('', [
     $routes->post('resident/assignBulk', 'Resident::assignBulk');
     $routes->match(['post', 'put'], 'resident/updateStatus/(:num)', 'Resident::updateStatus/$1');
     $routes->match(['post', 'put'], 'resident/updateMemberStatus/(:num)', 'Resident::updateMemberStatus/$1');
+    $routes->get('resident/checkDuplicate', 'Resident::checkDuplicate');
 
     /**
      * --------------------------------------------------------------------

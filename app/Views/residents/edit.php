@@ -35,15 +35,15 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
                     <div>
                         <label class="ds-input-label">First Name <span style="color:var(--c-rose)">*</span></label>
-                        <input type="text" name="first_name" class="ds-input" value="<?= old('first_name', $resident['first_name']) ?>" required>
+                        <input type="text" name="first_name" class="ds-input name-only" value="<?= old('first_name', $resident['first_name']) ?>" required>
                     </div>
                     <div>
                         <label class="ds-input-label">Middle Name</label>
-                        <input type="text" name="middle_name" class="ds-input" value="<?= old('middle_name', $resident['middle_name'] ?? '') ?>">
+                        <input type="text" name="middle_name" class="ds-input name-only" value="<?= old('middle_name', $resident['middle_name'] ?? '') ?>">
                     </div>
                     <div>
                         <label class="ds-input-label">Last Name <span style="color:var(--c-rose)">*</span></label>
-                        <input type="text" name="last_name" class="ds-input" value="<?= old('last_name', $resident['last_name']) ?>" required>
+                        <input type="text" name="last_name" class="ds-input name-only" value="<?= old('last_name', $resident['last_name']) ?>" required>
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
@@ -72,7 +72,7 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
                     <div>
                         <label class="ds-input-label">Contact Number</label>
-                        <input type="text" name="contact_number" class="ds-input" value="<?= old('contact_number', $resident['contact_number'] ?? '') ?>" placeholder="e.g. 09123456789">
+                        <input type="text" name="contact_number" class="ds-input phone-only" value="<?= old('contact_number', $resident['contact_number'] ?? '') ?>" placeholder="e.g. 09123456789" maxlength="20">
                     </div>
                     <div>
                         <label class="ds-input-label">Occupation</label>
@@ -199,4 +199,24 @@
 </script>
 <script src="<?= base_url('js/shared/photo-upload.js') ?>"></script>
 <script src="<?= base_url('js/residents/residents-edit.js') ?>"></script>
+<script>
+// ── Input restrictions ────────────────────────────────────────────────
+(function () {
+    $(document).on('keypress', '.name-only', function (e) {
+        var ch = String.fromCharCode(e.which);
+        if (!/[a-zA-ZÀ-ÿ\s'\-\.]/.test(ch)) { e.preventDefault(); }
+    });
+    $(document).on('input', '.name-only', function () {
+        this.value = this.value.replace(/[0-9]/g, '');
+    });
+
+    $(document).on('keypress', '.phone-only', function (e) {
+        var ch = String.fromCharCode(e.which);
+        if (!/[\d\+\-\s\(\)]/.test(ch)) { e.preventDefault(); }
+    });
+    $(document).on('input', '.phone-only', function () {
+        this.value = this.value.replace(/[^0-9\+\-\s\(\)]/g, '');
+    });
+})();
+</script>
 <?= $this->endSection() ?>

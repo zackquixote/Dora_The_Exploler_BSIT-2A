@@ -124,6 +124,7 @@ $statusBadge = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','deceased'
                     <button class="rv-tab-btn" onclick="switchTab('status',this)"><i class="fas fa-flag" style="margin-right:4px"></i> Status</button>
                     <button class="rv-tab-btn" onclick="switchTab('documents',this)"><i class="fas fa-file-alt" style="margin-right:4px"></i> Documents</button>
                     <button class="rv-tab-btn" onclick="switchTab('cases',this)"><i class="fas fa-balance-scale" style="margin-right:4px"></i> Cases</button>
+                    <button class="rv-tab-btn" onclick="switchTab('transfers',this)"><i class="fas fa-exchange-alt" style="margin-right:4px"></i> Transfers <?php if(!empty($transferHistory)): ?><span class="ds-badge ds-badge-blue" style="font-size:9px;margin-left:3px"><?= count($transferHistory) ?></span><?php endif; ?></button>
                 </div>
                 <div class="ds-card-body">
 
@@ -280,6 +281,60 @@ $statusBadge = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','deceased'
                             <div style="text-align:center;padding:30px;color:var(--ink-soft);font-size:12px">
                                 <i class="fas fa-check-circle" style="font-size:24px;color:var(--c-teal);opacity:0.5;display:block;margin-bottom:8px"></i>
                                 Clean record. No blotter cases found.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- TRANSFER HISTORY TAB -->
+                    <div id="transfers" class="rv-tab-content">
+                        <div class="ds-section-label" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+                            <span>Household Transfer History</span>
+                            <span class="ds-badge ds-badge-blue"><?= count($transferHistory ?? []) ?> records</span>
+                        </div>
+                        <?php if (!empty($transferHistory)): ?>
+                            <div style="position:relative;padding-left:20px">
+                                <!-- Timeline line -->
+                                <div style="position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--border)"></div>
+                                <?php foreach ($transferHistory as $t): ?>
+                                <div style="position:relative;margin-bottom:16px">
+                                    <!-- Dot -->
+                                    <div style="position:absolute;left:-20px;top:10px;width:10px;height:10px;border-radius:50%;background:var(--c-blue);border:2px solid var(--white);box-shadow:0 0 0 2px var(--c-blue-bg)"></div>
+                                    <div style="padding:12px 14px;background:var(--bg);border-radius:var(--r-sm);border:.5px solid var(--border)">
+                                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                                            <div style="display:flex;align-items:center;gap:8px">
+                                                <?php if ($t['from_household_no']): ?>
+                                                    <span class="ds-badge ds-badge-rose" style="font-size:10px"><?= esc($t['from_household_no']) ?></span>
+                                                    <i class="fas fa-arrow-right" style="font-size:9px;color:var(--ink-soft)"></i>
+                                                <?php else: ?>
+                                                    <span class="ds-badge ds-badge-gray" style="font-size:10px">No Household</span>
+                                                    <i class="fas fa-arrow-right" style="font-size:9px;color:var(--ink-soft)"></i>
+                                                <?php endif; ?>
+                                                <?php if ($t['to_household_no']): ?>
+                                                    <span class="ds-badge ds-badge-teal" style="font-size:10px"><?= esc($t['to_household_no']) ?></span>
+                                                <?php else: ?>
+                                                    <span class="ds-badge ds-badge-gray" style="font-size:10px">Unassigned</span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <span style="font-size:10px;color:var(--ink-soft)"><?= date('M d, Y · h:i A', strtotime($t['transferred_at'])) ?></span>
+                                        </div>
+                                        <?php if (!empty($t['reason'])): ?>
+                                            <div style="font-size:11px;color:var(--ink-muted);font-style:italic">
+                                                <i class="fas fa-comment-alt" style="margin-right:4px;opacity:.5"></i><?= esc($t['reason']) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($t['transferred_by_name'])): ?>
+                                            <div style="font-size:10px;color:var(--ink-soft);margin-top:4px">
+                                                <i class="fas fa-user" style="margin-right:3px"></i>by <?= esc($t['transferred_by_name']) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div style="text-align:center;padding:30px;color:var(--ink-soft);font-size:12px">
+                                <i class="fas fa-exchange-alt" style="font-size:24px;opacity:.3;display:block;margin-bottom:8px"></i>
+                                No household transfers recorded.
                             </div>
                         <?php endif; ?>
                     </div>

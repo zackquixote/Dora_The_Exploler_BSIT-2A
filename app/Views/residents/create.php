@@ -34,15 +34,15 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
                     <div>
                         <label class="ds-input-label">First Name <span style="color:var(--c-rose)">*</span></label>
-                        <input type="text" name="first_name" class="ds-input" value="<?= old('first_name') ?>" placeholder="e.g. Juan" required>
+                        <input type="text" name="first_name" class="ds-input name-only" value="<?= old('first_name') ?>" placeholder="e.g. Juan" required>
                     </div>
                     <div>
                         <label class="ds-input-label">Middle Name</label>
-                        <input type="text" name="middle_name" class="ds-input" value="<?= old('middle_name') ?>" placeholder="e.g. Dela Cruz">
+                        <input type="text" name="middle_name" class="ds-input name-only" value="<?= old('middle_name') ?>" placeholder="e.g. Dela Cruz">
                     </div>
                     <div>
                         <label class="ds-input-label">Last Name <span style="color:var(--c-rose)">*</span></label>
-                        <input type="text" name="last_name" class="ds-input" value="<?= old('last_name') ?>" placeholder="e.g. Santos" required>
+                        <input type="text" name="last_name" class="ds-input name-only" value="<?= old('last_name') ?>" placeholder="e.g. Santos" required>
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
@@ -71,7 +71,7 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
                     <div>
                         <label class="ds-input-label">Contact Number</label>
-                        <input type="text" name="contact_number" class="ds-input" value="<?= old('contact_number') ?>" placeholder="e.g. 09123456789">
+                        <input type="text" name="contact_number" class="ds-input phone-only" value="<?= old('contact_number') ?>" placeholder="e.g. 09123456789" maxlength="20">
                     </div>
                     <div>
                         <label class="ds-input-label">Occupation</label>
@@ -192,4 +192,70 @@
 </script>
 <script src="<?= base_url('js/shared/photo-upload.js') ?>"></script>
 <script src="<?= base_url('js/residents/residents-create.js') ?>"></script>
+<script>
+// ── Input restrictions ────────────────────────────────────────────────
+(function () {
+    // Names: letters, spaces, hyphens, apostrophes, dots only
+    $(document).on('keypress', '.name-only', function (e) {
+        var ch = String.fromCharCode(e.which);
+        if (!/[a-zA-ZÀ-ÿ\s'\-\.]/.test(ch)) { e.preventDefault(); }
+    });
+    $(document).on('input', '.name-only', function () {
+        this.value = this.value.replace(/[0-9]/g, '');
+    });
+
+    // Phone: digits, +, -, spaces, parentheses only
+    $(document).on('keypress', '.phone-only', function (e) {
+        var ch = String.fromCharCode(e.which);
+        if (!/[\d\+\-\s\(\)]/.test(ch)) { e.preventDefault(); }
+    });
+    $(document).on('input', '.phone-only', function () {
+        this.value = this.value.replace(/[^0-9\+\-\s\(\)]/g, '');
+    });
+})();
+(function () {
+    var checkUrl  = BASE_URL + 'resident/checkDuplicate';
+    var $warning  = null;
+    var debounce  = null;
+
+    function getWarning() {
+        if (!$warning) {
+            $warning = $('<div id="duplicate-warning" style="display:none;background:var(--c-amber-bg);color:var(--c-amber);padding:12px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;font-weight:600;border:1px solid var(--c-amber)">' +
+                '<i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>' +
+                '<span id="dup-msg"></span>' +
+                '</div>');
+            $('#residentForm').before($warning);
+        }
+        return $warning;
+    }
+
+    function check() {
+        var fn = $('input[name="first_name"]').val().trim();
+        var ln = $('input[name="last_name"]').val().trim();
+        var bd = $('input[name="birthdate"]').val().trim();
+        if (!fn || !ln || !bd) { getWarning().hide(); return; }
+
+        $.getJSON(checkUrl, { first_name: fn, last_name: ln, birthdate: bd }, function (res) {
+            if (res.duplicate) {
+                $('#dup-msg').html(
+                    'A resident with this name and birthdate already exists: ' +
+                    '<strong>' + $('<span>').text(res.name).html() + '</strong>' +
+                    ' (' + $('<span>').text(res.sitio).html() + ', ' + $('<span>').text(res.status).html() + ')' +
+                    ' &nbsp;<a href="' + res.view_url + '" target="_blank" style="color:var(--c-amber);text-decoration:underline">View record</a>'
+                );
+                getWarning().show();
+            } else {
+                getWarning().hide();
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $('input[name="first_name"], input[name="last_name"], input[name="birthdate"]').on('input change', function () {
+            clearTimeout(debounce);
+            debounce = setTimeout(check, 500);
+        });
+    });
+})();
+</script>
 <?= $this->endSection() ?>

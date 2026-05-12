@@ -19,12 +19,14 @@ class OfficialModel extends Model
     protected $primaryKey = 'id';
 
     protected $allowedFields = [
-        'resident_id',      // optional FK
-        'position',         // e.g., Barangay Captain, Secretary, Treasurer
-        'full_name',        // display name
+        'resident_id',
+        'position',
+        'full_name',
         'contact_number',
-        'photo',            // profile image path
-        'is_active'         // 1 = currently serving
+        'photo',
+        'is_active',
+        'term_start',
+        'term_end',
     ];
 
     protected $useTimestamps = true;

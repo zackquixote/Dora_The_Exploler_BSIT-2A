@@ -53,6 +53,15 @@ class Officials extends BaseController
                     $off['photo'] = $resident['profile_picture'] ?? $off['photo'];
                 }
             }
+            // Term status flag
+            $off['term_expired'] = false;
+            $off['term_expiring_soon'] = false;
+            if (!empty($off['term_end'])) {
+                $daysLeft = (int) ceil((strtotime($off['term_end']) - time()) / 86400);
+                if ($daysLeft < 0)  $off['term_expired']       = true;
+                elseif ($daysLeft <= 30) $off['term_expiring_soon'] = true;
+                $off['term_days_left'] = $daysLeft;
+            }
         }
 
         return view('officials/index', [
@@ -124,6 +133,8 @@ class Officials extends BaseController
             'contact_number' => $this->request->getPost('contact_number') ?: null,
             'photo'          => $photo,
             'is_active'      => 1,
+            'term_start'     => $this->request->getPost('term_start') ?: null,
+            'term_end'       => $this->request->getPost('term_end') ?: null,
         ]);
 
         $this->logModel->addLog("Added official: {$fullName} as " . $this->request->getPost('position'));
@@ -208,6 +219,8 @@ class Officials extends BaseController
             'contact_number' => $this->request->getPost('contact_number') ?: null,
             'photo'          => $photo,
             'is_active'      => (int) $this->request->getPost('is_active'),
+            'term_start'     => $this->request->getPost('term_start') ?: null,
+            'term_end'       => $this->request->getPost('term_end') ?: null,
         ]);
 
         $this->logModel->addLog("Updated official: {$fullName}");

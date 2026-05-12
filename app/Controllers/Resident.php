@@ -5,20 +5,23 @@ namespace App\Controllers;
 use App\Models\ResidentModel;
 use App\Models\HouseholdModel;
 use App\Models\LogModel;
+use App\Models\ResidentTransferHistoryModel;
 
 class Resident extends BaseController
 {
     protected $residentModel;
     protected $householdModel;
     protected $logModel;
+    protected $transferHistoryModel;
     protected $db;
 
     public function __construct()
     {
-        $this->residentModel  = new ResidentModel();
-        $this->householdModel = new HouseholdModel();
-        $this->logModel       = new LogModel();
-        $this->db             = \Config\Database::connect();
+        $this->residentModel        = new ResidentModel();
+        $this->householdModel       = new HouseholdModel();
+        $this->logModel             = new LogModel();
+        $this->transferHistoryModel = new ResidentTransferHistoryModel();
+        $this->db                   = \Config\Database::connect();
     }
 
     private function requireLogin()
@@ -94,11 +97,12 @@ class Resident extends BaseController
         if ($r = $this->requireLogin()) return $r;
 
         $rules = [
-            'first_name'      => 'required|min_length[2]|max_length[100]',
-            'last_name'       => 'required|min_length[2]|max_length[100]',
+            'first_name'      => 'required|min_length[2]|max_length[100]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
+            'last_name'       => 'required|min_length[2]|max_length[100]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
             'birthdate'       => 'required|valid_date',
             'sex'             => 'required|in_list[male,female]',
             'sitio'           => 'required|max_length[100]',
+            'contact_number'  => 'permit_empty|regex_match[/^[\d\+\-\s\(\)]+$/]|max_length[20]',
             'profile_picture' => 'permit_empty|is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
         ];
 
@@ -123,6 +127,18 @@ class Resident extends BaseController
 
                 $fullName = $data['first_name'] . ' ' . $data['last_name'];
                 $this->logModel->addLog('Added Resident ' . $fullName);
+
+                // Record initial household assignment if one was set
+                if (!empty($data['household_id'])) {
+                    $this->transferHistoryModel->record(
+                        $result,
+                        null,
+                        (int)$data['household_id'],
+                        'Initial household assignment on registration',
+                        session()->get('user_id') ?? 1
+                    );
+                }
+
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             } catch (\Exception $e) {
                 log_message('error', 'Resident AJAX insert exception: ' . $e->getMessage());
@@ -152,6 +168,18 @@ class Resident extends BaseController
 
             $fullName = $data['first_name'] . ' ' . $data['last_name'];
             $this->logModel->addLog('Added Resident ' . $fullName);
+
+            // Record initial household assignment if one was set
+            if (!empty($data['household_id'])) {
+                $this->transferHistoryModel->record(
+                    $result,
+                    null,
+                    (int)$data['household_id'],
+                    'Initial household assignment on registration',
+                    session()->get('user_id') ?? 1
+                );
+            }
+
             return redirect()->to(base_url('resident'))->with('success', 'Resident added successfully.');
         } catch (\Exception $e) {
             log_message('error', 'Resident insert exception: ' . $e->getMessage());
@@ -187,11 +215,12 @@ class Resident extends BaseController
         if ($r = $this->requireLogin()) return $r;
 
         $rules = [
-            'first_name'      => 'required|min_length[2]',
-            'last_name'       => 'required|min_length[2]',
+            'first_name'      => 'required|min_length[2]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
+            'last_name'       => 'required|min_length[2]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
             'birthdate'       => 'required|valid_date',
             'sex'             => 'required|in_list[male,female]',
             'sitio'           => 'required|max_length[100]',
+            'contact_number'  => 'permit_empty|regex_match[/^[\d\+\-\s\(\)]+$/]|max_length[20]',
             'profile_picture' => 'permit_empty|is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
         ];
 
@@ -216,6 +245,18 @@ class Resident extends BaseController
                 $result = $this->residentModel->update($id, $data);
                 if ($result === false) {
                     return $this->response->setJSON(['status' => 'error', 'errors' => $this->residentModel->errors()]);
+                }
+                // Record household transfer if household changed
+                $oldHouseholdId = (int)($resident['household_id'] ?? 0);
+                $newHouseholdId = (int)($data['household_id'] ?? 0);
+                if ($oldHouseholdId !== $newHouseholdId) {
+                    $this->transferHistoryModel->record(
+                        $id,
+                        $oldHouseholdId ?: null,
+                        $newHouseholdId ?: null,
+                        'Updated via resident edit form',
+                        session()->get('user_id') ?? 1
+                    );
                 }
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             } catch (\Exception $e) {
@@ -242,6 +283,18 @@ class Resident extends BaseController
             $result = $this->residentModel->update($id, $data);
             if ($result === false) {
                 return redirect()->back()->withInput()->with('errors', $this->residentModel->errors());
+            }
+            // Record household transfer if household changed
+            $oldHouseholdId = (int)($resident['household_id'] ?? 0);
+            $newHouseholdId = (int)($data['household_id'] ?? 0);
+            if ($oldHouseholdId !== $newHouseholdId) {
+                $this->transferHistoryModel->record(
+                    $id,
+                    $oldHouseholdId ?: null,
+                    $newHouseholdId ?: null,
+                    'Updated via resident edit form',
+                    session()->get('user_id') ?? 1
+                );
             }
             return redirect()->to(base_url('resident'))->with('success', 'Resident updated successfully.');
         } catch (\Exception $e) {
@@ -324,10 +377,13 @@ class Resident extends BaseController
             ->orderBy('br.incident_date', 'DESC')
             ->get()->getResultArray();
 
+        $transferHistory = $this->transferHistoryModel->getByResident((int)$id);
+
         return view('residents/view', [
-            'resident' => $resident,
-            'certificates' => $certificates,
-            'blotterHistory' => $blotterHistory
+            'resident'        => $resident,
+            'certificates'    => $certificates,
+            'blotterHistory'  => $blotterHistory,
+            'transferHistory' => $transferHistory,
         ]);
     }
 
@@ -436,7 +492,7 @@ class Resident extends BaseController
         if (empty($targetHouseholdId) || empty($selectedResidents)) {
             return redirect()->back()->with('error', 'No residents selected.');
         }
-
+        
         // Determine the current head of the target household so we can preserve/auto-assign their relationship
         $household      = $this->householdModel->find($targetHouseholdId);
         $headResidentId = $household['head_resident_id'] ?? null;
@@ -448,11 +504,27 @@ class Resident extends BaseController
                 ? 'Head'
                 : ($relationships[$residentId] ?? null);
 
+            // Fetch old household for transfer history
+            $existing = $this->residentModel->find($residentId);
+            $oldHouseholdId = (int)($existing['household_id'] ?? 0);
+
             $this->residentModel->update($residentId, [
                 'household_id'          => $targetHouseholdId,
                 'relationship_to_head'  => $relationship,
                 'joined_household_date' => date('Y-m-d'),
             ]);
+
+            // Record transfer if household actually changed
+            if ($oldHouseholdId !== (int)$targetHouseholdId) {
+                $this->transferHistoryModel->record(
+                    (int)$residentId,
+                    $oldHouseholdId ?: null,
+                    (int)$targetHouseholdId,
+                    'Assigned via bulk household assignment',
+                    session()->get('user_id') ?? 1
+                );
+            }
+
             $count++;
         }
 
@@ -523,6 +595,46 @@ class Resident extends BaseController
             'Purok Pagla-um'  => 'purok_paglaum',
         ];
         return $folderMap[$sitio] ?? 'others';
+    }
+
+    // ── Check Duplicate (AJAX) ────────────────────────────────────────
+    public function checkDuplicate()
+    {
+        $firstName = trim($this->request->getGet('first_name') ?? '');
+        $lastName  = trim($this->request->getGet('last_name')  ?? '');
+        $birthdate = trim($this->request->getGet('birthdate')  ?? '');
+        $excludeId = (int)($this->request->getGet('exclude_id') ?? 0);
+
+        if (empty($firstName) || empty($lastName) || empty($birthdate)) {
+            return $this->response->setJSON(['duplicate' => false]);
+        }
+
+        $builder = $this->db->table('residents')
+            ->select('id, first_name, last_name, birthdate, sitio, status')
+            ->where('LOWER(first_name)', strtolower($firstName))
+            ->where('LOWER(last_name)',  strtolower($lastName))
+            ->where('birthdate', $birthdate)
+            ->where('deleted_at IS NULL');
+
+        if ($excludeId > 0) {
+            $builder->where('id !=', $excludeId);
+        }
+
+        $match = $builder->get()->getRowArray();
+
+        if ($match) {
+            return $this->response->setJSON([
+                'duplicate' => true,
+                'id'        => $match['id'],
+                'name'      => $match['first_name'] . ' ' . $match['last_name'],
+                'birthdate' => $match['birthdate'],
+                'sitio'     => $match['sitio'] ?? '—',
+                'status'    => $match['status'],
+                'view_url'  => base_url('resident/view/' . $match['id']),
+            ]);
+        }
+
+        return $this->response->setJSON(['duplicate' => false]);
     }
 
     // ── Quick AJAX status update (general) ─────────────────────────

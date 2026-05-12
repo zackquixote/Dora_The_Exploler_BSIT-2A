@@ -30,9 +30,12 @@ class Logs extends BaseController
     {
         $logModel = new \App\Models\LogModel();
         
-        $date = $this->request->getGet('date');
-        $user = $this->request->getGet('user');
-        $action = $this->request->getGet('action');
+        $date    = $this->request->getGet('date');
+        $user    = $this->request->getGet('user');
+        $action  = $this->request->getGet('action');
+        $keyword = trim($this->request->getGet('keyword') ?? '');
+        $page    = max(1, (int)($this->request->getGet('page') ?? 1));
+        $perPage = 50;
 
         $builder = $logModel->builder();
         $builder->orderBy('DATELOG DESC, TIMELOG DESC');
@@ -42,6 +45,9 @@ class Logs extends BaseController
         }
         if (!empty($user)) {
             $builder->where('USER_NAME', $user);
+        }
+        if (!empty($keyword)) {
+            $builder->like('ACTION', $keyword);
         }
         if (!empty($action)) {
             $actionLower = strtolower($action);
@@ -70,10 +76,20 @@ class Logs extends BaseController
             }
         }
 
-        $data['logs'] = $builder->get()->getResultArray();
-        $data['selectedDate'] = $date;
-        $data['selectedUser'] = $user;
+        // Total count for pagination
+        $totalCount = $builder->countAllResults(false);
+        $totalPages = max(1, (int)ceil($totalCount / $perPage));
+        $offset     = ($page - 1) * $perPage;
+
+        $data['logs']           = $builder->limit($perPage, $offset)->get()->getResultArray();
+        $data['selectedDate']   = $date;
+        $data['selectedUser']   = $user;
         $data['selectedAction'] = $action;
+        $data['keyword']        = $keyword;
+        $data['currentPage']    = $page;
+        $data['totalPages']     = $totalPages;
+        $data['totalCount']     = $totalCount;
+        $data['perPage']        = $perPage;
 
         // Get unique users for the dropdown
         $data['users'] = $logModel->builder()->select('USER_NAME')->distinct()->orderBy('USER_NAME', 'ASC')->get()->getResultArray();

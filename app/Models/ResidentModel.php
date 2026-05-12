@@ -49,11 +49,20 @@ class ResidentModel extends Model
     protected $useSoftDeletes = true;
 
     protected $validationRules = [
-        'first_name'   => 'required|min_length[2]|max_length[80]',
-        'last_name'    => 'required|min_length[2]|max_length[80]',
+        'first_name'   => 'required|min_length[2]|max_length[80]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
+        'last_name'    => 'required|min_length[2]|max_length[80]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
         'birthdate'    => 'required|valid_date',
         'sex'          => 'required|in_list[male,female]',
         'civil_status' => 'permit_empty|in_list[single,married,widowed,separated]',
+    ];
+
+    protected $validationMessages = [
+        'first_name' => [
+            'regex_match' => 'First name must contain letters only — no numbers or special characters.',
+        ],
+        'last_name' => [
+            'regex_match' => 'Last name must contain letters only — no numbers or special characters.',
+        ],
     ];
 
     /**
