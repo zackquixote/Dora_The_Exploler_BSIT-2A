@@ -417,10 +417,11 @@ class Blotter extends BaseController
 {
     $term = $this->request->getGet('q');
 
-    // If a search term is provided, filter; otherwise return all active residents
+    // Exclude soft-deleted residents and only return active ones
     $builder = $this->residentModel
         ->select('id, CONCAT(first_name, " ", last_name) as text')
         ->where('status', 'active')
+        ->where('deleted_at IS NULL')
         ->orderBy('last_name', 'ASC')
         ->orderBy('first_name', 'ASC');
 
@@ -431,7 +432,7 @@ class Blotter extends BaseController
                 ->groupEnd();
     }
 
-    $residents = $builder->limit(500)->findAll();  // limit for performance
+    $residents = $builder->limit(500)->findAll();
 
     return $this->response->setJSON($residents);
 }

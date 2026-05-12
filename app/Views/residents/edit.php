@@ -217,6 +217,38 @@
     $(document).on('input', '.phone-only', function () {
         this.value = this.value.replace(/[^0-9\+\-\s\(\)]/g, '');
     });
+
+    // ── Auto Senior Citizen ───────────────────────────────────────────
+    var $birthdateInput = $('input[name="birthdate"]');
+    var $seniorCheckbox = $('input[name="is_senior_citizen"]');
+    var $seniorLabel    = $seniorCheckbox.closest('label');
+    var $seniorNote     = $('<div id="senior-auto-note" style="font-size:10px;color:var(--c-green);font-weight:700;margin-top:4px;display:none"><i class="fas fa-magic" style="margin-right:3px"></i>Auto-marked (age 60+)</div>');
+    $seniorLabel.append($seniorNote);
+
+    function updateSeniorStatus() {
+        var bd = $birthdateInput.val();
+        if (!bd) return;
+
+        var birth = new Date(bd);
+        var today = new Date();
+        var age   = today.getFullYear() - birth.getFullYear();
+        var m     = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+
+        if (age >= 60) {
+            $seniorCheckbox.prop('checked', true).prop('disabled', true);
+            $seniorNote.show();
+        } else {
+            $seniorCheckbox.prop('disabled', false);
+            if ($seniorNote.is(':visible')) {
+                $seniorCheckbox.prop('checked', false);
+                $seniorNote.hide();
+            }
+        }
+    }
+
+    $birthdateInput.on('change input', updateSeniorStatus);
+    if ($birthdateInput.val()) updateSeniorStatus();
 })();
 </script>
 <?= $this->endSection() ?>

@@ -99,10 +99,10 @@ class Resident extends BaseController
         $rules = [
             'first_name'      => 'required|min_length[2]|max_length[100]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
             'last_name'       => 'required|min_length[2]|max_length[100]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
-            'birthdate'       => 'required|valid_date',
+            'birthdate'       => 'required|valid_date|before_now_date',
             'sex'             => 'required|in_list[male,female]',
             'sitio'           => 'required|max_length[100]',
-            'contact_number'  => 'permit_empty|regex_match[/^[\d\+\-\s\(\)]+$/]|max_length[20]',
+            'contact_number'  => 'permit_empty|regex_match[/^[\d\+\-\s\(\)]+$/]|min_length[7]|max_length[20]',
             'profile_picture' => 'permit_empty|is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
         ];
 
@@ -217,10 +217,10 @@ class Resident extends BaseController
         $rules = [
             'first_name'      => 'required|min_length[2]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
             'last_name'       => 'required|min_length[2]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
-            'birthdate'       => 'required|valid_date',
+            'birthdate'       => 'required|valid_date|before_now_date',
             'sex'             => 'required|in_list[male,female]',
             'sitio'           => 'required|max_length[100]',
-            'contact_number'  => 'permit_empty|regex_match[/^[\d\+\-\s\(\)]+$/]|max_length[20]',
+            'contact_number'  => 'permit_empty|regex_match[/^[\d\+\-\s\(\)]+$/]|min_length[7]|max_length[20]',
             'profile_picture' => 'permit_empty|is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
         ];
 
