@@ -502,6 +502,50 @@ public function delete($id)
     }
 
     /**
+     * AJAX – Remove (unlink) a single resident from their household without deleting them.
+     */
+    public function removeMember($residentId)
+    {
+        if ($r = $this->requireLogin()) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized', 'csrf_hash' => csrf_hash()]);
+        }
+
+        $resident = $this->residentModel->find($residentId);
+        if (!$resident || !$resident['household_id']) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Resident or household not found.', 'csrf_hash' => csrf_hash()]);
+        }
+
+        $householdId = $resident['household_id'];
+
+        // Block removing the household head — assign a new head first
+        $household = $this->householdModel->find($householdId);
+        if ($household && (int)$household['head_resident_id'] === (int)$residentId) {
+            return $this->response->setJSON([
+                'status'    => 'error',
+                'message'   => 'Cannot remove the Household Head. Assign a new head first.',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        $this->residentModel->update($residentId, [
+            'household_id'         => null,
+            'is_household_head'    => 0,
+            'relationship_to_head' => null,
+            'left_household_date'  => date('Y-m-d'),
+        ]);
+
+        $this->logModel->addLog(
+            "Removed {$resident['first_name']} {$resident['last_name']} from household #{$householdId}"
+        );
+
+        return $this->response->setJSON([
+            'status'    => 'success',
+            'message'   => $resident['first_name'] . ' ' . $resident['last_name'] . ' removed from household.',
+            'csrf_hash' => csrf_hash(),
+        ]);
+    }
+
+    /**
      * Execute getResidentsBySitio functionality.
      *
      * @return mixed
