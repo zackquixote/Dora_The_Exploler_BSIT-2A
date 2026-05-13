@@ -38,6 +38,25 @@ class Auth extends BaseController
    */
   public function index()
 {
+    // #region agent log
+    @file_put_contents(
+        ROOTPATH . 'debug-0646ff.log',
+        json_encode([
+            'sessionId'    => '0646ff',
+            'runId'        => 'pre-fix',
+            'hypothesisId' => 'H22',
+            'location'     => 'app/Controllers/Auth.php:42',
+            'message'      => 'auth index session gate',
+            'data'         => [
+                'logged_in' => (bool) session()->get('logged_in'),
+                'user_id'   => session()->get('user_id') ?: null,
+                'role'      => session()->get('role') ?: null,
+            ],
+            'timestamp'    => (int) round(microtime(true) * 1000),
+        ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
+        FILE_APPEND
+    );
+    // #endregion
     // Already logged in – redirect to role dashboard
     if (session()->get('logged_in')) {
         $redirectRole = strtolower(session()->get('role'));
@@ -71,6 +90,28 @@ class Auth extends BaseController
         $remember = $this->request->getPost('remember');
 
         $user = $model->where('email', $email)->first();
+
+        // #region agent log
+        @file_put_contents(
+            ROOTPATH . 'debug-0646ff.log',
+            json_encode([
+                'sessionId'    => '0646ff',
+                'runId'        => 'pre-fix',
+                'hypothesisId' => 'H23',
+                'location'     => 'app/Controllers/Auth.php:84',
+                'message'      => 'auth credential evaluation',
+                'data'         => [
+                    'email'           => (string) $email,
+                    'user_found'      => (bool) $user,
+                    'has_password_row'=> is_array($user) && array_key_exists('password', $user),
+                    'verify_result'   => (bool) ($user && password_verify((string) $password, (string) ($user['password'] ?? ''))),
+                    'already_logged_in'=> (bool) session()->get('logged_in'),
+                ],
+                'timestamp'    => (int) round(microtime(true) * 1000),
+            ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
+            FILE_APPEND
+        );
+        // #endregion
 
         if ($user && password_verify($password, $user['password'])) {
             $normalizedRole = strtolower((string) ($user['role'] ?? 'staff'));
@@ -106,9 +147,46 @@ class Auth extends BaseController
 
             // Force lowercase redirection
             $redirectRole = $normalizedRole;
+            // #region agent log
+            @file_put_contents(
+                ROOTPATH . 'debug-0646ff.log',
+                json_encode([
+                    'sessionId'    => '0646ff',
+                    'runId'        => 'pre-fix',
+                    'hypothesisId' => 'H24',
+                    'location'     => 'app/Controllers/Auth.php:132',
+                    'message'      => 'auth success redirect',
+                    'data'         => [
+                        'redirect'  => base_url($redirectRole . '/dashboard'),
+                        'user_id'   => $user['id'] ?? null,
+                        'role'      => $normalizedRole,
+                    ],
+                    'timestamp'    => (int) round(microtime(true) * 1000),
+                ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
+                FILE_APPEND
+            );
+            // #endregion
             return redirect()->to(base_url($redirectRole . '/dashboard'));
         }
 
+        // #region agent log
+        @file_put_contents(
+            ROOTPATH . 'debug-0646ff.log',
+            json_encode([
+                'sessionId'    => '0646ff',
+                'runId'        => 'pre-fix',
+                'hypothesisId' => 'H25',
+                'location'     => 'app/Controllers/Auth.php:150',
+                'message'      => 'auth failure redirect',
+                'data'         => [
+                    'redirect' => 'back',
+                    'error'    => 'Invalid email or password',
+                ],
+                'timestamp'    => (int) round(microtime(true) * 1000),
+            ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
+            FILE_APPEND
+        );
+        // #endregion
         return redirect()->back()->with('error', 'Invalid email or password');
     }
 
@@ -119,14 +197,54 @@ class Auth extends BaseController
      */
     public function logout()
     {
+        // #region agent log
+        @file_put_contents(
+            ROOTPATH . 'debug-0646ff.log',
+            json_encode([
+                'sessionId'    => '0646ff',
+                'runId'        => 'pre-fix',
+                'hypothesisId' => 'H13',
+                'location'     => 'app/Controllers/Auth.php:123',
+                'message'      => 'logout start session state',
+                'data'         => [
+                    'logged_in_before' => (bool) session()->get('logged_in'),
+                    'user_id_before'   => session()->get('user_id') ?: null,
+                    'role_before'      => session()->get('role') ?: null,
+                ],
+                'timestamp'    => (int) round(microtime(true) * 1000),
+            ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
+            FILE_APPEND
+        );
+        // #endregion
         // ── LOG THE LOGOUT HERE (Before destroying session) ──
         $this->logModel->addLog("User Logged Out");
         // ─────────────────────────────────────────────────────────────
 
         session()->destroy();
+        // #region agent log
+        @file_put_contents(
+            ROOTPATH . 'debug-0646ff.log',
+            json_encode([
+                'sessionId'    => '0646ff',
+                'runId'        => 'pre-fix',
+                'hypothesisId' => 'H14',
+                'location'     => 'app/Controllers/Auth.php:147',
+                'message'      => 'logout complete redirecting',
+                'data'         => [
+                    'redirect'        => '/login',
+                    'logged_in_after' => (bool) session()->get('logged_in'),
+                ],
+                'timestamp'    => (int) round(microtime(true) * 1000),
+            ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
+            FILE_APPEND
+        );
+        // #endregion
         
         $this->response->deleteCookie('remember_email');
-        
-        return redirect()->to('/login');
+
+        return redirect()->to('/login')
+            ->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->setHeader('Pragma', 'no-cache')
+            ->setHeader('Expires', '0');
     }
 }

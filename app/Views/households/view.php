@@ -23,6 +23,13 @@ foreach ($residents as $r) {
             <a href="<?= base_url('households') ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-arrow-left me-2"></i> Back to Directory</a>
             <a href="<?= base_url('households/edit/'.$household['id']) ?>" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" style="border: 1px solid var(--border);"><i class="fas fa-edit me-2"></i> Edit Household</a>
             <a href="<?= base_url('resident/create?household_id='.$household['id']) ?>" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm"><i class="fas fa-user-plus me-2"></i> Add Member</a>
+            <button
+                type="button"
+                class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm delete-household-view"
+                data-id="<?= esc($household['id']) ?>"
+                data-no="<?= esc($household['household_no'], 'attr') ?>"
+                title="Delete Household"
+            ><i class="fas fa-trash me-2"></i> Delete</button>
         </div>
     </div>
 
@@ -137,15 +144,6 @@ foreach ($residents as $r) {
                                     <?php endif; ?>
                                     <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-eye"></i></a>
                                     <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-pen"></i></a>
-                                    <?php if (!$isHead): ?>
-                                        <button type="button"
-                                                class="ds-action-btn ab-rose remove-member-btn"
-                                                title="Remove from Household"
-                                                data-id="<?= $r['id'] ?>"
-                                                data-name="<?= esc($fullName, 'attr') ?>">
-                                            <i class="fas fa-user-minus"></i>
-                                        </button>
-                                    <?php endif; ?>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -219,44 +217,5 @@ function setAsHead(residentId) {
         alert('A network error occurred.');
     });
 }
-
-// ── Remove individual member from household ──────────────────────────
-$(document).on('click', '.remove-member-btn', function () {
-    var residentId = $(this).data('id');
-    var name       = $(this).data('name');
-
-    if (!confirm('Remove "' + name + '" from this household?\n\nThe resident record will be kept — they will just be unlinked from this household.')) {
-        return;
-    }
-
-    var $vars     = $('#js-variables');
-    var csrfToken = $vars.data('csrf-token');
-    var csrfHash  = $vars.data('csrf-hash');
-    var baseUrl   = $vars.data('base-url');
-    var payload   = {};
-    payload[csrfToken] = csrfHash;
-
-    $.ajax({
-        url:      baseUrl + 'households/remove-member/' + residentId,
-        type:     'POST',
-        data:     payload,
-        dataType: 'json',
-        success: function (res) {
-            if (res.csrf_hash) {
-                $vars.data('csrf-hash', res.csrf_hash);
-                $('input[name="' + csrfToken + '"]').val(res.csrf_hash);
-            }
-            if (res.status === 'success') {
-                $('#member-row-' + residentId).fadeOut(300, function () { $(this).remove(); });
-                HouseholdView.showToast('success', res.message);
-            } else {
-                alert(res.message || 'Could not remove member.');
-            }
-        },
-        error: function () {
-            alert('A network error occurred. Please try again.');
-        }
-    });
-});
 </script>
 <?= $this->endSection() ?>

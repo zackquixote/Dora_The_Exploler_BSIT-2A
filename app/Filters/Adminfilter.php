@@ -20,6 +20,21 @@ class AdminFilter implements FilterInterface
     {
         // Not logged in at all → login page
         if (! session()->get('logged_in')) {
+            // #region agent log
+            @file_put_contents(
+                ROOTPATH . 'debug-0646ff.log',
+                json_encode([
+                    'sessionId'    => '0646ff',
+                    'runId'        => 'pre-fix',
+                    'hypothesisId' => 'H28',
+                    'location'     => 'app/Filters/AdminFilter.php:24',
+                    'message'      => 'admin filter unauthenticated redirect',
+                    'data'         => ['path' => $request->getUri()->getPath()],
+                    'timestamp'    => (int) round(microtime(true) * 1000),
+                ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
+                FILE_APPEND
+            );
+            // #endregion
             $json = $this->jsonUnauthorizedResponse($request);
             if ($json !== null) {
                 return $json;
@@ -30,6 +45,24 @@ class AdminFilter implements FilterInterface
 
         // Logged in but wrong role → their own dashboard
         if (strtolower((string) (session()->get('role') ?? '')) !== 'admin') {
+            // #region agent log
+            @file_put_contents(
+                ROOTPATH . 'debug-0646ff.log',
+                json_encode([
+                    'sessionId'    => '0646ff',
+                    'runId'        => 'pre-fix',
+                    'hypothesisId' => 'H29',
+                    'location'     => 'app/Filters/AdminFilter.php:47',
+                    'message'      => 'admin filter role mismatch redirect',
+                    'data'         => [
+                        'path'         => $request->getUri()->getPath(),
+                        'session_role' => strtolower((string) (session()->get('role') ?? '')),
+                    ],
+                    'timestamp'    => (int) round(microtime(true) * 1000),
+                ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
+                FILE_APPEND
+            );
+            // #endregion
             $json = $this->jsonForbiddenResponse(
                 $request,
                 'Access denied. Admins only.',

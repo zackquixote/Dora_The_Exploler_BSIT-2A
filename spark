@@ -81,4 +81,37 @@ $paths = new Config\Paths();
 // LOAD THE FRAMEWORK BOOTSTRAP FILE
 require $paths->systemDirectory . '/Boot.php';
 
+// #region agent log
+$__dbgIncomingEnv = $_ENV['CI_ENVIRONMENT'] ?? $_SERVER['CI_ENVIRONMENT'] ?? getenv('CI_ENVIRONMENT') ?: null;
+// #endregion
+if (true) {
+    $_ENV['CI_ENVIRONMENT'] = 'development';
+    $_SERVER['CI_ENVIRONMENT'] = 'development';
+    putenv('CI_ENVIRONMENT=development');
+}
+
+// #region agent log
+$__dbgEnv = $_ENV['CI_ENVIRONMENT'] ?? $_SERVER['CI_ENVIRONMENT'] ?? getenv('CI_ENVIRONMENT') ?: 'production';
+$__dbgBootPath = $paths->appDirectory . '/Config/Boot/' . $__dbgEnv . '.php';
+@file_put_contents(
+    __DIR__ . '/debug-0646ff.log',
+    json_encode([
+        'sessionId'    => '0646ff',
+        'runId'        => 'pre-fix',
+        'hypothesisId' => 'H7',
+        'location'     => 'spark:87',
+        'message'      => 'spark bootstrap environment resolved',
+        'data'         => [
+            'sapi'           => PHP_SAPI,
+            'incomingEnv'    => $__dbgIncomingEnv,
+            'env'            => $__dbgEnv,
+            'bootFile'       => $__dbgBootPath,
+            'bootFileExists' => is_file($__dbgBootPath),
+        ],
+        'timestamp'    => (int) round(microtime(true) * 1000),
+    ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
+    FILE_APPEND
+);
+// #endregion
+
 exit(CodeIgniter\Boot::bootSpark($paths));

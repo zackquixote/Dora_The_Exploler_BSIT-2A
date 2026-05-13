@@ -31,6 +31,7 @@ $routes->get('/', 'Portal::index');
 $routes->match(['get', 'post'], 'login', 'Auth::index');
 $routes->post('auth', 'Auth::auth');
 $routes->get('logout', 'Auth::logout');
+$routes->post('debug/probe', 'DebugController::probe');
 
 
 /**
@@ -84,7 +85,6 @@ $routes->group('', [
         $routes->get('view/(:num)', 'HouseholdController::view/$1');
         $routes->post('delete/(:num)', 'HouseholdController::delete/$1');
         $routes->post('set-head/(:num)', 'HouseholdController::setHead/$1');
-        $routes->post('remove-member/(:num)', 'HouseholdController::removeMember/$1');
 
         $routes->post('getResidentsBySitio', 'HouseholdController::getResidentsBySitio');
         $routes->post('get-by-sitio', 'HouseholdController::getBySitio');

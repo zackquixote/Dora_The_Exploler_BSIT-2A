@@ -6,7 +6,13 @@
     'use strict';
 
     // Use window.baseUrl set by the template (always has trailing slash)
+    // Fallback to current origin for development server compatibility
     var APP_ROOT = (window.baseUrl || (window.location.origin + '/'));
+    
+    // Fix for development server - if baseUrl points to wrong project, use current origin
+    if (APP_ROOT.includes('Dora_The_Exploler_BSIT-2A') && !window.location.href.includes('Dora_The_Exploler_BSIT-2A')) {
+        APP_ROOT = window.location.origin + '/';
+    }
 
     let NotificationCenter = {
         config: {
@@ -73,12 +79,14 @@
             $.each(notifications, function(i, n) {
                 let iconColor = n.type === 'danger' ? 'text-danger' : 'text-warning';
                 let alertBg   = n.type === 'danger' ? 'bg-danger bg-opacity-10' : '';
+                // Fix contrast: use dark text on light red background for danger notifications
+                let titleClass = n.type === 'danger' ? 'text-dark fw-bold' : '';
                 html += `<li><a class="dropdown-item ${alertBg}" href="${n.url}" style="border-bottom:1px solid #f1f5f9; white-space: normal;">
                             <div class="d-flex align-items-start py-1">
                                 <div class="flex-shrink-0 mt-1"><i class="fas fa-gavel ${iconColor}"></i></div>
                                 <div class="flex-grow-1 ms-3">
-                                    <strong class="${n.type === 'danger' ? 'text-danger' : ''}">${n.title} – ${n.case_number}</strong><br>
-                                    <small>${n.message}${n.time ? ' at ' + n.time : ''}</small>
+                                    <strong class="${titleClass}">${n.title} – ${n.case_number}</strong><br>
+                                    <small class="${n.type === 'danger' ? 'text-dark' : ''}">${n.message}${n.time ? ' at ' + n.time : ''}</small>
                                     <div class="small text-muted mt-1">📍 ${n.venue || 'Venue TBA'}</div>
                                 </div>
                             </div>

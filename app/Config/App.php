@@ -17,8 +17,58 @@ class App extends BaseConfig
      * E.g., http://example.com/
      */
     // Overridden per machine in `.env` as `app.baseURL`. Must end with `/`.
-    // Typical XAMPP (this folder under htdocs): http://localhost/Dora_The_Exploler_BSIT-2A/public/
-    public string $baseURL = 'http://localhost/Dora_The_Exploler_BSIT-2A/public/';
+    // Dynamic baseURL detection for development environments
+    public string $baseURL;
+
+    public function __construct()
+    {
+        parent::__construct();
+        
+        // Check if running under development server (php spark serve)
+        $isDevServer = $this->isRunningOnDevelopmentServer();
+        
+        if ($isDevServer && ENVIRONMENT === 'development') {
+            // Generate dynamic baseURL for development server
+            $this->baseURL = $this->generateDevelopmentBaseURL();
+        } else {
+            // Use configured baseURL for production/non-development contexts
+            $this->baseURL = 'http://localhost/Dora_The_Exploler_BSIT-2A/public/';
+        }
+    }
+
+    /**
+     * Detect if running under CodeIgniter's built-in development server
+     */
+    private function isRunningOnDevelopmentServer(): bool
+    {
+        // Check if PHP built-in server is being used
+        if (isset($_SERVER['SERVER_SOFTWARE']) && 
+            strpos($_SERVER['SERVER_SOFTWARE'], 'PHP') !== false &&
+            strpos($_SERVER['SERVER_SOFTWARE'], 'Development Server') !== false) {
+            return true;
+        }
+        
+        // Alternative check: development server typically runs on non-standard ports
+        if (isset($_SERVER['SERVER_PORT']) && 
+            $_SERVER['SERVER_PORT'] != '80' && 
+            $_SERVER['SERVER_PORT'] != '443' &&
+            isset($_SERVER['HTTP_HOST'])) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Generate dynamic baseURL for development server
+     */
+    private function generateDevelopmentBaseURL(): string
+    {
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
+        
+        return $protocol . '://' . $host . '/';
+    }
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.

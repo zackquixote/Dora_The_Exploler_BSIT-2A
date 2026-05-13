@@ -45,10 +45,8 @@ class Filters extends BaseFilters
     public array $required = [
         'before' => [
             'forcehttps',
-            'pagecache',
         ],
         'after' => [
-            'pagecache',
             'performance',
             'toolbar',
         ],
@@ -59,7 +57,7 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
-            'csrf' => ['except' => ['login', 'login/*', 'auth', 'auth/*']],
+            'csrf' => ['except' => ['login', 'login/*', 'auth', 'auth/*', 'debug/probe']],
             'inactivity' => ['except' => ['login', 'login/*', 'auth/*']],
             'honeypot',
             'invalidchars',

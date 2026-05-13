@@ -26,7 +26,7 @@ $role = strtolower(session()->get('role') ?? 'staff');
     </div>
     <div class="tb-right">
         <div class="dropdown" style="display:inline-block">
-            <button class="tb-icon-btn" id="notifications-bell" data-bs-toggle="dropdown" title="Notifications" style="position:relative">
+            <button class="tb-icon-btn" id="notifications-bell" data-toggle="dropdown" title="Notifications" style="position:relative">
                 <i class="fas fa-bell"></i>
                 <span class="notifications-badge" style="display:none;position:absolute;top:4px;right:4px;background:var(--c-rose);color:#fff;font-size:9px;font-weight:700;padding:2px 4px;border-radius:10px;line-height:1"></span>
             </button>

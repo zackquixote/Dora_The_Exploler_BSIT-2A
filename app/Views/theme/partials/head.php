@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>BMIS | <?= isset($title) ? esc($title) : 'Dashboard' ?></title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
+    <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
+
     <!-- Design System -->
     <link rel="stylesheet" href="<?= base_url('assets/css/bmis-design-system.css') ?>">
 

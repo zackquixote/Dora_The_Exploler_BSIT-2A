@@ -505,6 +505,7 @@ public function delete($id)
     }
 
     /**
+
      * AJAX – Remove (unlink) a single resident from their household without deleting them.
      */
     public function removeMember($residentId)

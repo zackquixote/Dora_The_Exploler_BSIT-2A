@@ -17,6 +17,21 @@ use CodeIgniter\Database\Config;
 class Database extends Config
 {
     /**
+     * Resolve env value reliably across Apache/CLI contexts.
+     */
+    private function resolveEnv(string $key, $default = null)
+    {
+        $value = env($key);
+        if ($value === null || $value === '') {
+            $value = getenv($key);
+        }
+        if ($value === false || $value === null || $value === '') {
+            $value = $_ENV[$key] ?? $_SERVER[$key] ?? $default;
+        }
+        return $value;
+    }
+
+    /**
      * The directory that holds the Migrations and Seeds directories.
      */
     public string $filesPath = APPPATH . 'Database' . DIRECTORY_SEPARATOR;
@@ -36,14 +51,45 @@ class Database extends Config
     {
         parent::__construct();
 
+        $resolvedHostname = (string) $this->resolveEnv('database.default.hostname', 'localhost');
+        $resolvedUsername = (string) $this->resolveEnv('database.default.username', 'root');
+        $resolvedPassword = (string) $this->resolveEnv('database.default.password', '');
+        $resolvedDatabase = (string) $this->resolveEnv('database.default.database', '');
+        $resolvedDriver   = (string) $this->resolveEnv('database.default.DBDriver', 'MySQLi');
+        $resolvedPort     = (int) $this->resolveEnv('database.default.port', 3306);
+
+        // #region agent log
+        @file_put_contents(
+            ROOTPATH . 'debug-0646ff.log',
+            json_encode([
+                'sessionId'    => '0646ff',
+                'runId'        => 'pre-fix',
+                'hypothesisId' => 'H20',
+                'location'     => 'app/Config/Database.php:63',
+                'message'      => 'database env resolution',
+                'data'         => [
+                    'sapi'             => PHP_SAPI,
+                    'env_hostname'     => $resolvedHostname,
+                    'env_username'     => $resolvedUsername,
+                    'env_database'     => $resolvedDatabase,
+                    'env_driver'       => $resolvedDriver,
+                    'env_port'         => $resolvedPort,
+                    'database_is_empty'=> ($resolvedDatabase === ''),
+                ],
+                'timestamp'    => (int) round(microtime(true) * 1000),
+            ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
+            FILE_APPEND
+        );
+        // #endregion
+
         // Initialize the default configuration with dynamic values.
         $this->default = [
             'DSN'      => '',
-            'hostname' => getenv('database.default.hostname') ?: 'localhost',
-            'username' => getenv('database.default.username') ?: 'root',
-            'password' => getenv('database.default.password') ?: '',
-            'database' => getenv('database.default.database') ?: '',
-            'DBDriver' => getenv('database.default.DBDriver') ?: 'MySQLi',
+            'hostname' => $resolvedHostname,
+            'username' => $resolvedUsername,
+            'password' => $resolvedPassword,
+            'database' => $resolvedDatabase,
+            'DBDriver' => $resolvedDriver,
             'DBPrefix' => '',
             'pConnect' => false,
             'DBDebug'  => (ENVIRONMENT !== 'production'),
@@ -56,7 +102,7 @@ class Database extends Config
             'compress' => false,
             'strictOn' => false,
             'failover' => [],
-            'port'     => (int) getenv('database.default.port') ?: 3306, // Explicitly casting to integer
+            'port'     => $resolvedPort,
         ];
 
         // If running in a testing environment, use the 'tests' connection group
