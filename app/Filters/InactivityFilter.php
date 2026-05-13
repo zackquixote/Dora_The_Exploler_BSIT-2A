@@ -8,6 +8,8 @@ use CodeIgniter\Filters\FilterInterface;
 
 class InactivityFilter implements FilterInterface
 {
+    use SendsJsonWhenUnauthorized;
+
     public function before(RequestInterface $request, $arguments = null)
     {
         $session = session();
@@ -20,10 +22,15 @@ class InactivityFilter implements FilterInterface
 
             if ($lastActivity !== null && (time() - $lastActivity) > $timeout) {
                 $session->destroy();
+                $json = $this->jsonUnauthorizedResponse($request, 'Session expired due to inactivity.');
+                if ($json !== null) {
+                    return $json;
+                }
+
                 return redirect()->to('/login')->with('error', 'Session expired due to inactivity.');
-            } else {
-                $session->set('last_activity', time());
             }
+
+            $session->set('last_activity', time());
         }
     }
 

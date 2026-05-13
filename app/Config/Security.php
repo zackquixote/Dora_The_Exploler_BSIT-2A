@@ -16,7 +16,9 @@ class Security extends BaseConfig
      * @var string 'cookie' or 'session'
      */
     public string $csrfProtection = 'cookie';
-    public bool $cookieSecure = true;
+
+    /** HTTPS only; must be false on http://localhost or CSRF/session cookies fail. */
+    public bool $cookieSecure = (ENVIRONMENT === 'production');
 
     /**
      * --------------------------------------------------------------------------

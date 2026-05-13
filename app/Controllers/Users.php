@@ -185,10 +185,19 @@ class Users extends BaseController
 
     public function save()
     {
-        $email = $this->request->getPost('email');
+        $email = trim((string) $this->request->getPost('email'));
+        $wantsJson = $this->request->isAJAX() || $this->requestExpectsJsonResponse();
 
         $exists = $this->userModel->where('email', $email)->first();
         if ($exists) {
+            if ($wantsJson) {
+                return $this->response->setJSON([
+                    'status'    => 'error',
+                    'message'   => 'Email already exists. Please use a different email.',
+                    'csrf_hash' => csrf_hash(),
+                ]);
+            }
+
             return redirect()->back()->with('error', 'Email already exists. Please use a different email.');
         }
 
@@ -202,8 +211,25 @@ class Users extends BaseController
         ];
 
         if ($this->userModel->insert($data)) {
+            if ($wantsJson) {
+                return $this->response->setJSON([
+                    'status'    => 'success',
+                    'message'   => 'User added successfully',
+                    'csrf_hash' => csrf_hash(),
+                ]);
+            }
+
             return redirect()->to('/admin/users')->with('success', 'User added successfully');
         }
+
+        if ($wantsJson) {
+            return $this->response->setJSON([
+                'status'    => 'error',
+                'message'   => 'Failed to add user',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
         return redirect()->back()->with('error', 'Failed to add user');
     }
 }

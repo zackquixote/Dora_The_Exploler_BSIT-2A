@@ -6,6 +6,11 @@ namespace App\Validation;
  * CustomRules – project-specific validation rules.
  *
  * Register in app/Config/Validation.php under $ruleSets.
+ *
+ * CI4 calls rules in two ways:
+ *   - No param:   $set->rule($value, &$error)
+ *   - With param: $set->rule($value, $param, $data, &$error, $field)
+ * So the second argument must accept both string (error ref) and string (param).
  */
 class CustomRules
 {
@@ -14,7 +19,7 @@ class CustomRules
      *
      * Usage: 'birthdate' => 'required|valid_date|valid_birthdate'
      */
-    public function valid_birthdate(string $value, string $params = '', array $data = [], ?string &$error = null): bool
+    public function valid_birthdate(string $value, ?string &$error = null): bool
     {
         $ts = strtotime($value);
 
@@ -41,7 +46,7 @@ class CustomRules
      *
      * Usage: 'incident_date' => 'required|valid_date|not_future_date'
      */
-    public function not_future_date(string $value, string $params = '', array $data = [], ?string &$error = null): bool
+    public function not_future_date(string $value, ?string &$error = null): bool
     {
         $ts = strtotime($value);
 
@@ -64,7 +69,7 @@ class CustomRules
      *
      * Usage: 'occupation' => 'permit_empty|not_numeric_only'
      */
-    public function not_numeric_only(string $value, string $params = '', array $data = [], ?string &$error = null): bool
+    public function not_numeric_only(string $value, ?string &$error = null): bool
     {
         if (trim($value) !== '' && ctype_digit(str_replace([' ', '-', '.'], '', $value))) {
             $error = 'This field cannot contain numbers only.';
@@ -78,7 +83,7 @@ class CustomRules
      *
      * Usage: 'purpose' => 'required|not_blank'
      */
-    public function not_blank(string $value, string $params = '', array $data = [], ?string &$error = null): bool
+    public function not_blank(string $value, ?string &$error = null): bool
     {
         if (trim($value) === '') {
             $error = 'This field cannot be blank or contain only spaces.';

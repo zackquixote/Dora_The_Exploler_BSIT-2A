@@ -23,9 +23,10 @@ class Resident extends BaseController
 
     private function requireLogin()
     {
-        if (!session()->get('logged_in')) {
-            return redirect()->to('/login');
+        if (! session()->get('logged_in')) {
+            return $this->respondLoginRequired();
         }
+
         return null;
     }
 
@@ -96,7 +97,7 @@ class Resident extends BaseController
         $rules = [
             'first_name'      => 'required|min_length[2]|max_length[100]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
             'last_name'       => 'required|min_length[2]|max_length[100]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
-            'birthdate'       => 'required|valid_date|before_now_date',
+            'birthdate'       => 'required|valid_date|valid_birthdate',
             'sex'             => 'required|in_list[male,female]',
             'sitio'           => 'required|max_length[100]',
             'contact_number'  => 'permit_empty|regex_match[/^[\d\+\-\s\(\)]+$/]|min_length[7]|max_length[20]',
@@ -192,7 +193,7 @@ class Resident extends BaseController
         $rules = [
             'first_name'      => 'required|min_length[2]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
             'last_name'       => 'required|min_length[2]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
-            'birthdate'       => 'required|valid_date|before_now_date',
+            'birthdate'       => 'required|valid_date|valid_birthdate',
             'sex'             => 'required|in_list[male,female]',
             'sitio'           => 'required|max_length[100]',
             'contact_number'  => 'permit_empty|regex_match[/^[\d\+\-\s\(\)]+$/]|min_length[7]|max_length[20]',
@@ -327,8 +328,6 @@ class Resident extends BaseController
             ->where('bp.resident_id', $id)
             ->orderBy('br.incident_date', 'DESC')
             ->get()->getResultArray();
-
-        $transferHistory = $this->transferHistoryModel->getByResident((int)$id);
 
         return view('residents/view', [
             'resident'       => $resident,

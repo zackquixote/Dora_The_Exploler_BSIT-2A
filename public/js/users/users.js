@@ -1,6 +1,22 @@
 // public/js/users/users.js
 
- $(document).ready(function() {
+$(document).ready(function() {
+    function redirectIfSessionExpired(xhr) {
+        if (!xhr || (xhr.status !== 401 && xhr.status !== 403)) {
+            return false;
+        }
+        try {
+            var body = xhr.responseJSON || JSON.parse(xhr.responseText || '{}');
+            if (body.redirect) {
+                window.location.href = body.redirect;
+                return true;
+            }
+        } catch (e) { /* ignore */ }
+        var base = (window.baseUrl || '').replace(/\/+$/, '');
+        window.location.href = base ? (base + '/login') : '/login';
+        return true;
+    }
+
     // 1. GLOBAL VARIABLES (Set by PHP in the View)
     // We rely on the View to pass 'baseUrl', 'csrfName', and 'csrfHash'
     
@@ -11,11 +27,15 @@
         "ajax": {
             "url": window.baseUrl + "/fetchRecords", // Use window.baseUrl
             "type": "POST",
+            "headers": { "Accept": "application/json" },
             "data": function(d) {
                 // Add CSRF Token dynamically
                 d[window.csrfName] = window.csrfHash;
             },
             "error": function(xhr, error, thrown) {
+                if (redirectIfSessionExpired(xhr)) {
+                    return;
+                }
                 console.log("Ajax error:", error);
                 console.log("Response:", xhr.responseText);
                 // Optional: Show a toast error here
@@ -63,9 +83,11 @@
         $.ajax({
             url: window.baseUrl + '/save',
             method: 'POST',
+            headers: { Accept: 'application/json' },
             data: $(this).serialize() + '&' + window.csrfName + '=' + window.csrfHash,
             dataType: 'json',
             success: function (response) {
+                refreshCsrf(response);
                 if (response.status === 'success') {
                     $('#AddNewModal').modal('hide');
                     $('#addUserForm')[0].reset();
@@ -75,7 +97,10 @@
                     showToast('error', response.message);
                 }
             },
-            error: function () {
+            error: function (xhr) {
+                if (redirectIfSessionExpired(xhr)) {
+                    return;
+                }
                 showToast('error', 'An error occurred.');
             }
         });
@@ -84,18 +109,30 @@
     // 5. EDIT USER (CLICK)
     $(document).on('click', '.edit-btn', function() {
         var userId = $(this).data('id');
-        $.get(window.baseUrl + '/edit/' + userId, function(response) {
-            refreshCsrf(response);
-            if (response.data) {
-                $('#editUserForm #name').val(response.data.name);
-                $('#editUserForm #userId').val(response.data.id);
-                $('#editUserForm #email').val(response.data.email);
-                $('#editUserForm #password').val('');
-                $('#editUserForm #role').val(response.data.role);
-                $('#editUserForm #status').val(response.data.status);
-                $('#editUserForm #phone').val(response.data.phone || '');
-                $('#editUserOverlay').addClass('show');
-            } else {
+        $.ajax({
+            url: window.baseUrl + '/edit/' + userId,
+            method: 'GET',
+            headers: { Accept: 'application/json' },
+            dataType: 'json',
+            success: function(response) {
+                refreshCsrf(response);
+                if (response.data) {
+                    $('#editUserForm #name').val(response.data.name);
+                    $('#editUserForm #userId').val(response.data.id);
+                    $('#editUserForm #email').val(response.data.email);
+                    $('#editUserForm #password').val('');
+                    $('#editUserForm #role').val(response.data.role);
+                    $('#editUserForm #status').val(response.data.status);
+                    $('#editUserForm #phone').val(response.data.phone || '');
+                    $('#editUserOverlay').addClass('show');
+                } else {
+                    alert('Error fetching user data');
+                }
+            },
+            error: function(xhr) {
+                if (redirectIfSessionExpired(xhr)) {
+                    return;
+                }
                 alert('Error fetching user data');
             }
         });
@@ -107,6 +144,7 @@
         $.ajax({
             url: window.baseUrl + '/update',
             method: 'POST',
+            headers: { Accept: 'application/json' },
             data: $(this).serialize() + '&' + window.csrfName + '=' + window.csrfHash,
             dataType: 'json',
             success: function (response) {
@@ -120,6 +158,9 @@
                 }
             },
             error: function (xhr) {
+                if (redirectIfSessionExpired(xhr)) {
+                    return;
+                }
                 console.error(xhr.responseText);
                 alert('Error updating');
             }
@@ -133,7 +174,9 @@
             $.ajax({
                 url: window.baseUrl + '/delete/' + userId,
                 method: 'POST',
+                headers: { Accept: 'application/json' },
                 data: { [window.csrfName]: window.csrfHash },
+                dataType: 'json',
                 success: function (response) {
                     refreshCsrf(response);
                     if (response.success) {
@@ -143,7 +186,10 @@
                         alert(response.message || 'Failed to delete.');
                     }
                 },
-                error: function () {
+                error: function (xhr) {
+                    if (redirectIfSessionExpired(xhr)) {
+                        return;
+                    }
                     alert('Something went wrong while deleting.');
                 }
             });

@@ -74,13 +74,17 @@ class Auth extends BaseController
 
         if ($user && password_verify($password, $user['password'])) {
             $normalizedRole = strtolower((string) ($user['role'] ?? 'staff'));
-            
+
+            // New session ID after authentication (mitigates session fixation)
+            session()->regenerate(true);
+
             session()->set([
                 'logged_in' => true,
                 'user_id'   => $user['id'],
                 'role'      => $normalizedRole,
                 'email'     => $user['email'],
-                'name'      => $user['name']
+                'name'      => $user['name'],
+                'last_activity' => time(),
             ]);
 
             // ── LOG THE LOGIN HERE ────────────────────────────────

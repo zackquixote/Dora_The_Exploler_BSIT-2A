@@ -8,9 +8,16 @@ use CodeIgniter\Filters\FilterInterface;
 
 class LoggedInFilter implements FilterInterface
 {
+    use SendsJsonWhenUnauthorized;
+
     public function before(RequestInterface $request, $arguments = null)
     {
-        if (!session()->get('logged_in')) {
+        if (! session()->get('logged_in')) {
+            $json = $this->jsonUnauthorizedResponse($request);
+            if ($json !== null) {
+                return $json;
+            }
+
             return redirect()->to('/login')->with('error', 'Please log in to continue.');
         }
     }

@@ -128,7 +128,7 @@
                         ?>
                         <tr>
                             <td class="mono"><?= $r['id'] ?></td>
-                            <td><img src="<?= $profileImg ?>" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid var(--border)"></td>
+                            <td><img src="<?= $profileImg ?>" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid var(--border)" onerror="this.onerror=null;this.src='<?= base_url('assets/img/default.png') ?>'"></td>
                             <td><strong class="font-serif" style="font-size:14px;letter-spacing:-0.01em;"><?= esc($r['first_name']) ?> <?= esc($r['last_name']) ?></strong></td>
                             <td><?= ucfirst($r['sex']) ?></td>
                             <td><?= $r['age'] ?? '—' ?></td>

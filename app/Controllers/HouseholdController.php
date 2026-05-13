@@ -56,9 +56,10 @@ class HouseholdController extends BaseController
      */
     private function requireLogin()
     {
-        if (!session()->get('logged_in')) {
-            return redirect()->to('/login');
+        if (! session()->get('logged_in')) {
+            return $this->respondLoginRequired();
         }
+
         return null;
     }
 
@@ -465,7 +466,9 @@ public function delete($id)
      */
     public function setHead($residentId)
     {
-        if ($r = $this->requireLogin()) return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized', 'csrf_hash' => csrf_hash()]);
+        if ($r = $this->requireLogin()) {
+            return $r;
+        }
 
         $resident = $this->residentModel->find($residentId);
         if (!$resident || !$resident['household_id']) {
@@ -507,7 +510,7 @@ public function delete($id)
     public function removeMember($residentId)
     {
         if ($r = $this->requireLogin()) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized', 'csrf_hash' => csrf_hash()]);
+            return $r;
         }
 
         $resident = $this->residentModel->find($residentId);

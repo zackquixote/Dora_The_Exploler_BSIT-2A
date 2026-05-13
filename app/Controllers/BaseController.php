@@ -57,5 +57,34 @@ abstract class BaseController extends Controller
 
         // E.g.: $this->session = service('session');
     }
-    
+
+    /**
+     * True when the client should receive JSON auth errors (matches filter behavior).
+     */
+    protected function requestExpectsJsonResponse(): bool
+    {
+        if (strtolower($this->request->getHeaderLine('X-Requested-With')) === 'xmlhttprequest') {
+            return true;
+        }
+
+        return str_contains(strtolower($this->request->getHeaderLine('Accept')), 'application/json');
+    }
+
+    /**
+     * @return \CodeIgniter\HTTP\RedirectResponse|\CodeIgniter\HTTP\ResponseInterface
+     */
+    protected function respondLoginRequired(string $message = 'Please log in to continue.')
+    {
+        helper('url');
+
+        if ($this->requestExpectsJsonResponse()) {
+            return $this->response->setStatusCode(401)->setJSON([
+                'status'   => 'error',
+                'message'  => $message,
+                'redirect' => site_url('login'),
+            ]);
+        }
+
+        return redirect()->to('/login')->with('error', $message);
+    }
 }

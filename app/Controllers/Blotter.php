@@ -624,9 +624,13 @@ public function printSummon($caseId, $hearingId)
  */
 public function getUpcomingNotifications()
 {
-    // Check authentication
-    if (!session()->get('logged_in')) {
-        return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+    // Defense in depth (route filter should already enforce this)
+    if (! session()->get('logged_in')) {
+        return $this->response->setStatusCode(401)->setJSON([
+            'status'   => 'error',
+            'message'  => 'Unauthorized',
+            'redirect' => site_url('login'),
+        ]);
     }
 
     $days = $this->request->getGet('days') ?? 3;

@@ -16,7 +16,9 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    public string $baseURL = 'http://localhost:8080/';
+    // Overridden per machine in `.env` as `app.baseURL`. Must end with `/`.
+    // Typical XAMPP (this folder under htdocs): http://localhost/Dora_The_Exploler_BSIT-2A/public/
+    public string $baseURL = 'http://localhost/Dora_The_Exploler_BSIT-2A/public/';
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
