@@ -222,6 +222,10 @@ class Resident extends BaseController
                 if ($result === false) {
                     return $this->response->setJSON(['status' => 'error', 'errors' => $this->residentModel->errors()]);
                 }
+                
+                $fullName = $data['first_name'] . ' ' . $data['last_name'];
+                $this->logModel->addLog('Updated Resident ' . $fullName);
+                
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             } catch (\Exception $e) {
                 if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
@@ -248,6 +252,10 @@ class Resident extends BaseController
             if ($result === false) {
                 return redirect()->back()->withInput()->with('errors', $this->residentModel->errors());
             }
+
+            $fullName = $data['first_name'] . ' ' . $data['last_name'];
+            $this->logModel->addLog('Updated Resident ' . $fullName);
+
             return redirect()->to(base_url('resident'))->with('success', 'Resident updated successfully.');
         } catch (\Exception $e) {
             if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
@@ -275,11 +283,13 @@ class Resident extends BaseController
             unlink(FCPATH . 'uploads/' . $resident['profile_picture']);
         }
 
+        $fullName = $resident['first_name'] . ' ' . $resident['last_name'];
         $deleted = $this->residentModel->delete($id);
 
         // Support both: AJAX (DataTables) and normal form POST
         if ($this->request->isAJAX()) {
             if ($deleted) {
+                $this->logModel->addLog('Deleted Resident ' . $fullName);
                 return $this->response->setJSON([
                     'status'    => 'success',
                     'message'   => 'Resident deleted successfully.',
@@ -290,6 +300,7 @@ class Resident extends BaseController
         }
 
         if ($deleted) {
+            $this->logModel->addLog('Deleted Resident ' . $fullName);
             return redirect()->to(base_url('resident'))->with('success', 'Resident deleted successfully.');
         }
         return redirect()->back()->with('error', 'Delete failed');
