@@ -14,9 +14,12 @@
                 <div style="font-size:13px;color:var(--ink-muted);margin-top:2px;font-weight:700">Manage and issue barangay certificates and clearances</div>
             </div>
         </div>
-        <a href="<?= base_url('certificate/create') ?>" class="ds-btn ds-btn-primary" style="height:40px;padding:0 20px;border-radius:20px;box-shadow:0 4px 12px rgba(var(--c-blue-rgb), 0.3)">
-            <i class="fas fa-plus"></i> Issue Certificate
-        </a>
+        <div style="display:flex;gap:10px">
+            <a href="<?= base_url('certificate/bulk-create') ?>" class="ds-btn ds-btn-ghost" style="height:40px;padding:0 20px;border-radius:20px;background:var(--white)"><i class="fas fa-users"></i> Bulk Issue</a>
+            <a href="<?= base_url('certificate/create') ?>" class="ds-btn ds-btn-primary" style="height:40px;padding:0 20px;border-radius:20px;box-shadow:0 4px 12px rgba(var(--c-blue-rgb), 0.3)">
+                <i class="fas fa-plus"></i> Issue Certificate
+            </a>
+        </div>
     </div>
 
     <?php if (session()->getFlashdata('success')): ?>

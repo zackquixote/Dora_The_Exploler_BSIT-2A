@@ -55,6 +55,9 @@
         <a href="<?= base_url('blotter') ?>" class="sb-link <?= $isActive('blotter') ?>">
             <i class="fas fa-gavel"></i> Blotter
         </a>
+        <a href="<?= base_url('archive') ?>" class="sb-link <?= $isActive('archive') ?>">
+            <i class="fas fa-trash-restore"></i> Archive
+        </a>
 
         <?php if ($role === 'admin'): ?>
         <div class="sb-header">System</div>

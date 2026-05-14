@@ -16,6 +16,8 @@ class HouseholdModel extends Model
 {
     protected $table      = 'households';
     protected $primaryKey = 'id';
+    protected $useSoftDeletes = true;
+    protected $deletedField  = 'deleted_at';
 
     // Allowed for mass assignment (do NOT include 'created_at')
     protected $allowedFields = [

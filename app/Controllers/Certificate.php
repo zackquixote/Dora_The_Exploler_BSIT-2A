@@ -236,4 +236,148 @@ class Certificate extends BaseController
 
         return redirect()->to('certificate')->with('success', 'Certificate deleted successfully.');
     }
+
+    /**
+     * Show the "Bulk Create Certificate" Form
+     */
+    public function bulkCreate()
+    {
+        $residentModel = new ResidentModel();
+        $data = [
+            'residents' => $residentModel->where('status', 'active')->orderBy('last_name', 'ASC')->findAll(),
+            'types'     => CertificateModel::getTypes()
+        ];
+        return view('certificate/bulk_create', $data);
+    }
+
+    /**
+     * Handle Bulk Form Submission → Save to DB → Redirect to Bulk Print
+     */
+    public function bulkStore()
+    {
+        $residentIds = $this->request->getPost('resident_ids');
+        $type        = trim((string) $this->request->getPost('certificate_type'));
+        $purpose     = trim((string) $this->request->getPost('purpose'));
+
+        if (empty($residentIds) || !is_array($residentIds) || !$type || !$purpose) {
+            return redirect()->back()->with('error', 'Missing required information (residents, type, and purpose).');
+        }
+
+        if (!in_array($type, CertificateModel::getTypes())) {
+            return redirect()->back()->with('error', 'Invalid certificate type.');
+        }
+
+        $createdBy = session()->get('user_id') ?? 1;
+        $insertedIds = [];
+
+        foreach ($residentIds as $resId) {
+            $certId = false;
+            $certNumber = '';
+
+            for ($attempt = 0; $attempt < 3; $attempt++) {
+                $certNumber = $this->certModel->generateCertificateNumber($type);
+                try {
+                    $certId = $this->certModel->insert([
+                        'certificate_number' => $certNumber,
+                        'resident_id'        => $resId,
+                        'certificate_type'   => $type,
+                        'purpose'            => $purpose,
+                        'created_by'         => $createdBy,
+                    ]);
+
+                    if ($certId) {
+                        break;
+                    }
+                } catch (\Throwable $e) {
+                    if (stripos($e->getMessage(), 'Duplicate entry') === false) {
+                        break; // Not a duplicate entry error, stop retrying
+                    }
+                }
+            }
+
+            if ($certId) {
+                $insertedIds[] = $certId;
+            }
+        }
+
+        if (!empty($insertedIds)) {
+            $count = count($insertedIds);
+            $this->logModel->addLog("Generated {$count} {$type}(s) in bulk");
+            
+            // Pass the IDs to the bulk print view via flashdata
+            return redirect()->to('certificate/bulk-print')->with('bulk_print_ids', $insertedIds)->with('success', "Successfully generated {$count} certificates.");
+        }
+
+        return redirect()->back()->with('error', 'Failed to generate certificates.');
+    }
+
+    /**
+     * Display the Bulk Printable View
+     */
+    public function bulkPrint()
+    {
+        $ids = session()->getFlashdata('bulk_print_ids');
+
+        if (empty($ids) || !is_array($ids)) {
+            return redirect()->to('certificate')->with('error', 'No certificates selected for bulk printing.');
+        }
+
+        // We need to pass flashdata again in case they refresh? No, let them print once or go back.
+        // Actually, let's keep the ids in flashdata for one more request just in case of reload.
+        session()->setFlashdata('bulk_print_ids', $ids);
+
+        $certificates = [];
+        $contents = [];
+
+        foreach ($ids as $id) {
+            $cert = $this->certModel->getCertificateForPrint($id);
+            if ($cert) {
+                $content = $cert['template_content'] ?? '';
+                if (!empty($content)) {
+                    $fullName = trim(($cert['first_name'] ?? '') . ' ' . ($cert['last_name'] ?? ''));
+
+                    $replacements = [
+                        '{resident_name}'  => $fullName,
+                        '{first_name}'     => $cert['first_name']     ?? '',
+                        '{last_name}'      => $cert['last_name']      ?? '',
+                        '{middle_name}'    => $cert['middle_name']    ?? '',
+                        '{age}'            => $cert['age']            ?? '',
+                        '{civil_status}'   => $cert['civil_status']   ?? '',
+                        '{gender}'         => $cert['gender']         ?? '',
+                        '{address}'        => $cert['address']        ?? '',
+                        '{purpose}'        => $cert['purpose']        ?? '',
+                        '{ctrl_number}'    => esc($cert['certificate_number']),
+                        '{date_today}'     => date('F d, Y'),
+                        '{date_issued}'    => date('F d, Y', strtotime($cert['created_at'])),
+                        '{valid_until}'    => date('F d, Y', strtotime($cert['created_at'] . ' +1 year')),
+                        '{year}'           => date('Y'),
+                        '{barangay_name}'  => $cert['barangay_name']  ?? '',
+                        '{municipality}'   => $cert['municipality']   ?? '',
+                        '{province}'       => $cert['province']       ?? '',
+                        '{captain_name}'   => $cert['captain_name']   ?? '',
+                        '{secretary_name}' => $cert['secretary_name'] ?? '',
+                        '{treasurer_name}' => $cert['treasurer_name'] ?? '',
+                    ];
+
+                    $content = str_replace(
+                        array_keys($replacements),
+                        array_values($replacements),
+                        $content
+                    );
+                }
+                $certificates[] = $cert;
+                $contents[$id] = $content;
+            }
+        }
+
+        if (empty($certificates)) {
+            return redirect()->to('certificate')->with('error', 'Could not load certificates for printing.');
+        }
+
+        return view('certificate/bulk_print_view', [
+            'certificates' => $certificates,
+            'contents'     => $contents,
+            'settings'     => $this->certModel->getBarangaySettings(),
+        ]);
+    }
 }

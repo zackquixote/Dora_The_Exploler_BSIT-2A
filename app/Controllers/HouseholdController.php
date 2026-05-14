@@ -95,7 +95,7 @@ class HouseholdController extends BaseController
 
         $selectedPurok = $this->request->getGet('purok') ?? 'all';
 
-        $builder = $this->db->table('households')->select('*');
+        $builder = $this->db->table('households')->select('*')->where('deleted_at IS NULL');
         if ($selectedPurok !== 'all') {
             $builder->where('sitio', $selectedPurok);
         }

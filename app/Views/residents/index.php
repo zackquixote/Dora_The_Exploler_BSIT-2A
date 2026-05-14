@@ -15,6 +15,7 @@
             </div>
         </div>
         <div style="display:flex;gap:10px">
+            <a href="<?= base_url('resident/bulk-upload') ?>" class="ds-btn ds-btn-ghost" style="height:40px;padding:0 20px;border-radius:20px;background:var(--white)"><i class="fas fa-file-upload"></i> Bulk Upload</a>
             <a href="<?= base_url('resident/exportCsv' . (($selectedPurok ?? 'all') !== 'all' ? '?purok='.urlencode($selectedPurok) : '')) ?>" class="ds-btn ds-btn-ghost" style="height:40px;padding:0 20px;border-radius:20px;background:var(--white)"><i class="fas fa-file-csv"></i> Export CSV</a>
             <a href="<?= base_url('resident/create') ?>" class="ds-btn ds-btn-primary" style="height:40px;padding:0 20px;border-radius:20px;box-shadow:0 4px 12px rgba(var(--c-blue-rgb), 0.3)">
                 <i class="fas fa-plus"></i> Add Resident

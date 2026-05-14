@@ -55,6 +55,9 @@ $routes->group('', [
     $routes->get('resident', 'Resident::index');
     $routes->get('residents', 'Resident::index');
     $routes->get('resident/exportCsv', 'Resident::exportCsv');
+    $routes->get('resident/bulk-upload', 'Resident::bulkUpload');
+    $routes->post('resident/process-bulk-upload', 'Resident::processBulkUpload');
+    $routes->get('resident/download-template', 'Resident::downloadTemplate');
     $routes->match(['get', 'post'], 'resident/create', 'Resident::create');
     $routes->post('resident/store', 'Resident::store');
     $routes->match(['get', 'post'], 'resident/edit/(:num)', 'Resident::edit/$1');
@@ -102,6 +105,9 @@ $routes->group('', [
     $routes->get('certificate', 'Certificate::index');
     $routes->get('certificate/create', 'Certificate::create');
     $routes->post('certificate/store', 'Certificate::store');
+    $routes->get('certificate/bulk-create', 'Certificate::bulkCreate');
+    $routes->post('certificate/bulk-store', 'Certificate::bulkStore');
+    $routes->get('certificate/bulk-print', 'Certificate::bulkPrint');
     $routes->get('certificate/print/(:num)', 'Certificate::print_view/$1');
     $routes->get('certificate/edit/(:num)', 'Certificate::edit/$1');
     $routes->match(['post', 'put'], 'certificate/update/(:num)', 'Certificate::update/$1');
@@ -146,6 +152,19 @@ $routes->post('blotter/hearing/add/(:num)', 'Blotter::addHearing/$1');
 $routes->post('blotter/hearing/update/(:num)', 'Blotter::updateHearing/$1');
 $routes->post('blotter/hearing/delete/(:num)', 'Blotter::deleteHearing/$1');
 $routes->get('blotter/print/(:num)', 'Blotter::printCase/$1');
+
+    /**
+     * --------------------------------------------------------------------
+     * Archive Routes
+     * --------------------------------------------------------------------
+     */
+    $routes->group('archive', function ($routes) {
+        $routes->get('/', 'Archive::index');
+        $routes->get('restoreResident/(:num)', 'Archive::restoreResident/$1');
+        $routes->get('forceDeleteResident/(:num)', 'Archive::forceDeleteResident/$1');
+        $routes->get('restoreHousehold/(:num)', 'Archive::restoreHousehold/$1');
+        $routes->get('forceDeleteHousehold/(:num)', 'Archive::forceDeleteHousehold/$1');
+    });
 
     /**
      * --------------------------------------------------------------------

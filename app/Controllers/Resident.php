@@ -714,4 +714,153 @@ class Resident extends BaseController
         fclose($file);
         exit;
     }
+
+    // ── Bulk Upload ────────────────────────────────────────────────────
+    public function bulkUpload()
+    {
+        if ($r = $this->requireLogin()) return $r;
+
+        return view('residents/bulk_upload', [
+            'title' => 'Bulk Upload Residents',
+        ]);
+    }
+
+    public function processBulkUpload()
+    {
+        if ($r = $this->requireLogin()) return $r;
+
+        $file = $this->request->getFile('csv_file');
+
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()->with('error', 'Please select a valid CSV file to upload.');
+        }
+
+        if ($file->getExtension() !== 'csv' && $file->getClientMimeType() !== 'text/csv' && $file->getClientMimeType() !== 'application/vnd.ms-excel') {
+            return redirect()->back()->with('error', 'Only CSV files are allowed.');
+        }
+
+        $filePath = $file->getTempName();
+        $fileHandle = fopen($filePath, 'r');
+        
+        // Read header
+        $header = fgetcsv($fileHandle);
+        if (!$header) {
+            return redirect()->back()->with('error', 'The uploaded file is empty or invalid.');
+        }
+        
+        $insertedCount = 0;
+        $skippedCount = 0;
+        $errors = [];
+        $row = 2; // starting from row 2 (after header)
+
+        while (($data = fgetcsv($fileHandle, 1000, ",")) !== FALSE) {
+            // Check if row matches header length, or at least has the required minimum fields (first, last, birthdate, sex)
+            if (count($data) < 4) {
+                $skippedCount++;
+                $errors[] = "Row $row: Missing columns. Expected at least 4.";
+                $row++;
+                continue;
+            }
+
+            $firstName = trim($data[0] ?? '');
+            $lastName = trim($data[1] ?? '');
+            $middleName = trim($data[2] ?? '');
+            $birthdate = trim($data[3] ?? '');
+            $sex = strtolower(trim($data[4] ?? ''));
+            $civilStatus = strtolower(trim($data[5] ?? 'single'));
+            $contactNumber = trim($data[6] ?? '');
+            $occupation = trim($data[7] ?? '');
+            $sitio = trim($data[8] ?? '');
+
+            // Basic validation for required fields
+            if (empty($firstName) || empty($lastName) || empty($birthdate) || empty($sex)) {
+                $skippedCount++;
+                $errors[] = "Row $row: Missing required fields (First Name, Last Name, Birthdate, or Sex).";
+                $row++;
+                continue;
+            }
+
+            // Check duplicate
+            $duplicateCheck = $this->db->table('residents')
+                ->where('LOWER(first_name)', strtolower($firstName))
+                ->where('LOWER(last_name)', strtolower($lastName))
+                ->where('birthdate', $birthdate)
+                ->where('deleted_at IS NULL')
+                ->countAllResults();
+
+            if ($duplicateCheck > 0) {
+                $skippedCount++;
+                $errors[] = "Row $row: Duplicate resident ($firstName $lastName) found. Skipped.";
+                $row++;
+                continue;
+            }
+
+            // Auto-compute senior
+            $isSenior = (date('Y') - date('Y', strtotime($birthdate))) >= 60 ? 1 : 0;
+
+            $insertData = [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'middle_name' => empty($middleName) ? null : $middleName,
+                'birthdate' => $birthdate,
+                'sex' => in_array($sex, ['male', 'female']) ? $sex : 'male',
+                'civil_status' => in_array($civilStatus, ['single', 'married', 'widowed', 'separated']) ? $civilStatus : 'single',
+                'contact_number' => empty($contactNumber) ? null : $contactNumber,
+                'occupation' => empty($occupation) ? null : $occupation,
+                'sitio' => $sitio,
+                'status' => 'active',
+                'is_senior_citizen' => $isSenior,
+                'registered_by' => session()->get('user_id') ?? 1,
+            ];
+
+            try {
+                if ($this->residentModel->insert($insertData)) {
+                    $insertedCount++;
+                } else {
+                    $skippedCount++;
+                    $errors[] = "Row $row: Database error on insert.";
+                }
+            } catch (\Exception $e) {
+                $skippedCount++;
+                $errors[] = "Row $row: " . $e->getMessage();
+            }
+
+            $row++;
+        }
+
+        fclose($fileHandle);
+
+        $this->logModel->addLog("Bulk Uploaded Residents: $insertedCount inserted, $skippedCount skipped.");
+
+        $message = "Upload complete! $insertedCount residents inserted. $skippedCount skipped.";
+        if (count($errors) > 0) {
+            return redirect()->to(base_url('resident/bulk-upload'))->with('success', $message)->with('bulk_errors', $errors);
+        }
+
+        return redirect()->to(base_url('resident/bulk-upload'))->with('success', $message);
+    }
+
+    public function downloadTemplate()
+    {
+        if ($r = $this->requireLogin()) return $r;
+
+        $filename = 'Resident_Bulk_Upload_Template.csv';
+
+        header("Content-Description: File Transfer");
+        header("Content-Disposition: attachment; filename=$filename");
+        header("Content-Type: text/csv; charset=UTF-8");
+
+        $file = fopen('php://output', 'w');
+
+        // Note: Keep it simple: only required and standard fields.
+        $header = ['First Name', 'Last Name', 'Middle Name', 'Birthdate (YYYY-MM-DD)', 'Sex (Male/Female)', 'Civil Status (Single/Married/Widowed/Separated)', 'Contact Number', 'Occupation', 'Purok/Sitio'];
+        fputcsv($file, $header);
+        
+        // Add a dummy row for reference
+        $sample = ['Juan', 'Dela Cruz', 'Perez', '1990-01-01', 'Male', 'Married', '09123456789', 'Farmer', 'Purok Malipayon'];
+        fputcsv($file, $sample);
+
+        fclose($file);
+        exit;
+    }
 }
