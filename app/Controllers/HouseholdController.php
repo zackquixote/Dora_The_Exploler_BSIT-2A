@@ -71,7 +71,8 @@ class HouseholdController extends BaseController
     private function generateHouseholdNo()
     {
         $year = date('Y');
-        $last = $this->householdModel->like('household_no', "HH-{$year}-%", 'after')
+        $last = $this->householdModel->withDeleted()
+                                     ->like('household_no', "HH-{$year}-%", 'after')
                                      ->orderBy('id', 'DESC')
                                      ->first();
 
@@ -565,6 +566,7 @@ public function delete($id)
             $residents = $this->db->table('residents')
                 ->select('id, first_name, middle_name, last_name, sex, sitio as resident_sitio')
                 ->where('deleted_at', null)
+                ->where('household_id', null) // Only residents not assigned to a household
                 ->groupStart()
                     ->where('sitio', $sitio)
                     ->orWhere('sitio', null)

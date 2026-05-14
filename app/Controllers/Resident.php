@@ -402,7 +402,7 @@ class Resident extends BaseController
         // Use the URL param if explicitly set, otherwise default to the household's sitio
         $filterPurok = $this->request->getGet('filter_purok') ?? $householdSitio;
 
-        $filterStatus  = $this->request->getGet('filter_status') ?? '';
+        $filterStatus  = $this->request->getGet('filter_status') ?? 'no_household';
 
         $builder = $this->db->table('residents')
             ->select('residents.id, residents.first_name, residents.last_name, residents.sitio, residents.household_id, residents.profile_picture, residents.relationship_to_head')

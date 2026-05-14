@@ -55,8 +55,8 @@
                     <div>
                         <label class="ds-input-label">Show Only</label>
                         <select name="filter_status" id="filter_status" class="ds-select">
-                            <option value="">All Residents</option>
-                            <option value="no_household" <?= (($_GET['filter_status'] ?? '') == 'no_household') ? 'selected' : '' ?>>Without a Household</option>
+                            <option value="all">All Residents</option>
+                            <option value="no_household" <?= (($_GET['filter_status'] ?? 'no_household') == 'no_household') ? 'selected' : '' ?>>Without a Household</option>
                         </select>
                     </div>
                     <div>
