@@ -126,7 +126,8 @@ $(document).ready(function() {
                     $('#editUserForm #phone').val(response.data.phone || '');
                     $('#editUserOverlay').addClass('show');
                 } else {
-                    alert('Error fetching user data');
+                    var errorMsg = response.message || 'Error fetching user data';
+                    alert(errorMsg);
                 }
             },
             error: function(xhr) {

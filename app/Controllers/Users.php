@@ -118,15 +118,22 @@ class Users extends BaseController
 
     public function edit($id = null)
     {
-        if (!$this->request->isAJAX()) return $this->response->setStatusCode(404);
+        // Relax isAJAX check to allow requests that accept JSON (some environments strip X-Requested-With)
+        $isAjaxOrJson = $this->request->isAJAX() || (strpos($this->request->getHeaderLine('Accept'), 'application/json') !== false);
+        if (!$isAjaxOrJson) return $this->response->setStatusCode(404);
 
-        $user = $this->userModel->find($id);
-        if ($user) {
-            $user['role'] = strtolower((string) ($user['role'] ?? 'staff'));
-            $user['status'] = strtolower((string) ($user['status'] ?? 'active'));
-            return $this->response->setJSON(['status' => 'success', 'data' => $user, 'csrf_hash' => csrf_hash()]);
-        } else {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'User not found', 'csrf_hash' => csrf_hash()]);
+        try {
+            $user = $this->userModel->find($id);
+            if ($user) {
+                $user['role'] = strtolower((string) ($user['role'] ?? 'staff'));
+                $user['status'] = strtolower((string) ($user['status'] ?? 'active'));
+                return $this->response->setJSON(['status' => 'success', 'data' => $user, 'csrf_hash' => csrf_hash()]);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'User not found', 'csrf_hash' => csrf_hash()]);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error fetching user data: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage(), 'csrf_hash' => csrf_hash()]);
         }
     }
 
