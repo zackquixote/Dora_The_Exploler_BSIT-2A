@@ -108,6 +108,7 @@ $statusBadge = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','deceased'
 
                 <!-- Action Buttons -->
                 <div style="border-top:.5px solid var(--border);padding:12px 18px;display:flex;flex-direction:column;gap:6px">
+                    <a href="<?= base_url('id/print/' . $resident['id']) ?>" target="_blank" class="ds-quick-btn qb-teal" style="justify-content:center;width:100%"><i class="fas fa-id-card"></i> Generate ID Card</a>
                     <a href="#" onclick="printProfile();return false;" class="ds-quick-btn qb-blue" style="justify-content:center;width:100%"><i class="fas fa-print"></i> Print Profile</a>
                     <a href="#" onclick="generateCertificate();return false;" class="ds-quick-btn qb-violet" style="justify-content:center;width:100%"><i class="fas fa-file-alt"></i> Generate Certificate</a>
                     <a href="<?= base_url('resident') ?>" class="ds-quick-btn qb-slate" style="justify-content:center;width:100%"><i class="fas fa-arrow-left"></i> Back to List</a>

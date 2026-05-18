@@ -1,21 +1,7 @@
 // public/js/users/users.js
 
 $(document).ready(function() {
-    function redirectIfSessionExpired(xhr) {
-        if (!xhr || (xhr.status !== 401 && xhr.status !== 403)) {
-            return false;
-        }
-        try {
-            var body = xhr.responseJSON || JSON.parse(xhr.responseText || '{}');
-            if (body.redirect) {
-                window.location.href = body.redirect;
-                return true;
-            }
-        } catch (e) { /* ignore */ }
-        var base = (window.baseUrl || '').replace(/\/+$/, '');
-        window.location.href = base ? (base + '/login') : '/login';
-        return true;
-    }
+
 
     // 1. GLOBAL VARIABLES (Set by PHP in the View)
     // We rely on the View to pass 'baseUrl', 'csrfName', and 'csrfHash'
@@ -56,26 +42,6 @@ $(document).ready(function() {
         "pageLength": 10
     });
 
-    // 3. HELPER FUNCTION (Toast)
-    // Assuming toastr is loaded in your template. If not, use alert().
-    function showToast(type, message) {
-        if (typeof toastr !== 'undefined') {
-            if (type === 'success') {
-                toastr.success(message, 'Success');
-            } else {
-                toastr.error(message, 'Error');
-            }
-        } else {
-            alert(type + ': ' + message);
-        }
-    }
-
-    function refreshCsrf(response) {
-        if (response && response.csrf_hash) {
-            window.csrfHash = response.csrf_hash;
-            $('input[name="' + window.csrfName + '"]').val(response.csrf_hash);
-        }
-    }
 
     // 4. ADD USER
     $('#addUserForm').on('submit', function (e) {

@@ -5,20 +5,26 @@ namespace App\Controllers;
 use App\Models\ResidentModel;
 use App\Models\HouseholdModel;
 use App\Models\LogModel;
+use App\Models\CertificateModel;
+use App\Models\BlotterPartyModel;
 
 class Resident extends BaseController
 {
     protected $residentModel;
     protected $householdModel;
     protected $logModel;
+    protected $certificateModel;
+    protected $blotterPartyModel;
     protected $db;
 
     public function __construct()
     {
-        $this->residentModel  = new ResidentModel();
-        $this->householdModel = new HouseholdModel();
-        $this->logModel       = new LogModel();
-        $this->db             = \Config\Database::connect();
+        $this->residentModel     = new ResidentModel();
+        $this->householdModel    = new HouseholdModel();
+        $this->logModel          = new LogModel();
+        $this->certificateModel  = new CertificateModel();
+        $this->blotterPartyModel = new BlotterPartyModel();
+        $this->db                = \Config\Database::connect();
     }
 
     private function requireLogin()
@@ -37,35 +43,8 @@ class Resident extends BaseController
 
         $selectedPurok = $this->request->getGet('purok') ?? 'all';
 
-        $builder = $this->db->table('residents')
-            ->select('residents.*, households.household_no, TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) as age')
-            ->join('households', 'households.id = residents.household_id', 'left')
-            ->where('residents.deleted_at IS NULL');
-
-        if ($selectedPurok !== 'all') {
-            if ($selectedPurok === 'Unassigned') {
-                $builder->groupStart()
-                    ->where('residents.sitio', null)
-                    ->orWhere('residents.sitio', '')
-                    ->groupEnd();
-            } else {
-                $builder->where('residents.sitio', $selectedPurok);
-            }
-        }
-
-        $residents = $builder->orderBy('residents.id', 'DESC')->get()->getResultArray();
-
-        $allResidents = $this->db->table('residents')
-            ->select('sitio')
-            ->where('deleted_at IS NULL')
-            ->get()
-            ->getResultArray();
-
-        $purokCounts = [];
-        foreach ($allResidents as $r) {
-            $sitio = !empty($r['sitio']) ? $r['sitio'] : 'Unassigned';
-            $purokCounts[$sitio] = ($purokCounts[$sitio] ?? 0) + 1;
-        }
+        $residents = $this->residentModel->getResidentsWithHousehold($selectedPurok);
+        $purokCounts = $this->residentModel->getPurokCounts();
 
         return view('residents/index', [
             'title'         => 'Residents',
@@ -94,15 +73,7 @@ class Resident extends BaseController
     {
         if ($r = $this->requireLogin()) return $r;
 
-        $rules = [
-            'first_name'      => 'required|min_length[2]|max_length[100]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
-            'last_name'       => 'required|min_length[2]|max_length[100]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
-            'birthdate'       => 'required|valid_date|valid_birthdate',
-            'sex'             => 'required|in_list[male,female]',
-            'sitio'           => 'required|max_length[100]',
-            'contact_number'  => 'permit_empty|regex_match[/^[\d\+\-\s\(\)]+$/]|min_length[7]|max_length[20]',
-            'profile_picture' => 'permit_empty|is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
-        ];
+        $rules = $this->getValidationRules();
 
         log_message('debug', 'Resident Store Called - POST Data: ' . json_encode($this->request->getPost()));
 
@@ -190,15 +161,7 @@ class Resident extends BaseController
     {
         if ($r = $this->requireLogin()) return $r;
 
-        $rules = [
-            'first_name'      => 'required|min_length[2]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
-            'last_name'       => 'required|min_length[2]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
-            'birthdate'       => 'required|valid_date|valid_birthdate',
-            'sex'             => 'required|in_list[male,female]',
-            'sitio'           => 'required|max_length[100]',
-            'contact_number'  => 'permit_empty|regex_match[/^[\d\+\-\s\(\)]+$/]|min_length[7]|max_length[20]',
-            'profile_picture' => 'permit_empty|is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
-        ];
+        $rules = $this->getValidationRules();
 
         if ($this->request->isAJAX()) {
             if (!$this->validate($rules)) {
@@ -222,9 +185,17 @@ class Resident extends BaseController
                 if ($result === false) {
                     return $this->response->setJSON(['status' => 'error', 'errors' => $this->residentModel->errors()]);
                 }
+                $changes = [];
+                foreach ($data as $key => $newValue) {
+                    $oldValue = $resident[$key] ?? null;
+                    if ($oldValue != $newValue && $key !== 'updated_at') {
+                        $changes[] = "$key (" . ($oldValue ?: 'empty') . " -> " . ($newValue ?: 'empty') . ")";
+                    }
+                }
+                $changeStr = !empty($changes) ? ". Changes: " . implode(', ', $changes) : "";
                 
                 $fullName = $data['first_name'] . ' ' . $data['last_name'];
-                $this->logModel->addLog('Updated Resident ' . $fullName);
+                $this->logModel->addLog('Updated Resident ' . $fullName . $changeStr);
                 
                 return $this->response->setJSON(['status' => 'success', 'redirect' => base_url('resident')]);
             } catch (\Exception $e) {
@@ -252,9 +223,17 @@ class Resident extends BaseController
             if ($result === false) {
                 return redirect()->back()->withInput()->with('errors', $this->residentModel->errors());
             }
+            $changes = [];
+            foreach ($data as $key => $newValue) {
+                $oldValue = $resident[$key] ?? null;
+                if ($oldValue != $newValue && $key !== 'updated_at') {
+                    $changes[] = "$key (" . ($oldValue ?: 'empty') . " -> " . ($newValue ?: 'empty') . ")";
+                }
+            }
+            $changeStr = !empty($changes) ? ". Changes: " . implode(', ', $changes) : "";
 
             $fullName = $data['first_name'] . ' ' . $data['last_name'];
-            $this->logModel->addLog('Updated Resident ' . $fullName);
+            $this->logModel->addLog('Updated Resident ' . $fullName . $changeStr);
 
             return redirect()->to(base_url('resident'))->with('success', 'Resident updated successfully.');
         } catch (\Exception $e) {
@@ -315,30 +294,14 @@ class Resident extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Missing resident ID');
         }
 
-        $resident = $this->db->table('residents r')
-            ->select('r.*, h.household_no, h.street_address as household_address, TIMESTAMPDIFF(YEAR, r.birthdate, CURDATE()) as age')
-            ->join('households h', 'h.id = r.household_id', 'left')
-            ->where('r.id', $id)
-            ->where('r.deleted_at IS NULL')
-            ->get()
-            ->getRowArray();
+        $resident = $this->residentModel->getDetailsWithHousehold($id);
 
         if (!$resident) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Resident not found');
         }
 
-        $certificates = $this->db->table('certificates')
-            ->select('id, certificate_number, certificate_type, created_at, purpose')
-            ->where('resident_id', $id)
-            ->orderBy('created_at', 'DESC')
-            ->get()->getResultArray();
-
-        $blotterHistory = $this->db->table('blotter_parties bp')
-            ->select('br.id, br.case_number, br.incident_type, br.incident_date, br.status, bp.role')
-            ->join('blotter_records br', 'br.id = bp.blotter_id')
-            ->where('bp.resident_id', $id)
-            ->orderBy('br.incident_date', 'DESC')
-            ->get()->getResultArray();
+        $certificates = $this->certificateModel->getByResidentId($id);
+        $blotterHistory = $this->blotterPartyModel->getHistoryByResident($id);
 
         return view('residents/view', [
             'resident'       => $resident,
@@ -404,28 +367,7 @@ class Resident extends BaseController
 
         $filterStatus  = $this->request->getGet('filter_status') ?? 'no_household';
 
-        $builder = $this->db->table('residents')
-            ->select('residents.id, residents.first_name, residents.last_name, residents.sitio, residents.household_id, residents.profile_picture, residents.relationship_to_head')
-            ->where('residents.deleted_at IS NULL')
-            ->where('residents.status', 'active');
-
-        if (!empty($keyword)) {
-            $builder->groupStart()
-                ->like('residents.first_name', $keyword)
-                ->orLike('residents.last_name', $keyword)
-                ->groupEnd();
-        }
-        if (!empty($filterPurok)) {
-            $builder->where('residents.sitio', $filterPurok);
-        }
-        if (!empty($filterHouseId)) {
-            $builder->where('residents.household_id', $filterHouseId);
-        }
-        if ($filterStatus === 'no_household') {
-            $builder->where('residents.household_id', null);
-        }
-
-        $residents = $builder->orderBy('residents.last_name', 'ASC')->get()->getResultArray();
+        $residents = $this->residentModel->searchForAssignment($keyword, $filterPurok, $filterHouseId, $filterStatus);
 
         return view('households/resident_assign_search', [
             'residents'      => $residents,
@@ -456,6 +398,8 @@ class Resident extends BaseController
         $household      = $this->householdModel->find($targetHouseholdId);
         $headResidentId = $household['head_resident_id'] ?? null;
 
+        $this->db->transStart();
+
         $count = 0;
         foreach ($selectedResidents as $residentId) {
             $relationship = ($headResidentId && (int)$residentId === (int)$headResidentId)
@@ -470,6 +414,12 @@ class Resident extends BaseController
             $count++;
         }
 
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === false) {
+            return redirect()->back()->with('error', 'Failed to assign residents to household.');
+        }
+
         $this->logModel->addLog("Assigned {$count} resident(s) to household #{$targetHouseholdId}");
 
         return redirect()->to(base_url('households/view/' . $targetHouseholdId))
@@ -477,6 +427,18 @@ class Resident extends BaseController
     }
 
     // ── Private Helpers ───────────────────────────────────────────────
+    private function getValidationRules()
+    {
+        return [
+            'first_name'      => 'required|min_length[2]|max_length[100]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
+            'last_name'       => 'required|min_length[2]|max_length[100]|regex_match[/^[a-zA-ZÀ-ÿ\s\'\-\.]+$/]',
+            'birthdate'       => 'required|valid_date|valid_birthdate',
+            'sex'             => 'required|in_list[male,female]',
+            'sitio'           => 'required|max_length[100]',
+            'contact_number'  => 'permit_empty|regex_match[/^[\d\+\-\s\(\)]+$/]|min_length[7]|max_length[20]',
+            'profile_picture' => 'permit_empty|is_image[profile_picture]|max_size[profile_picture,2048]|mime_in[profile_picture,image/jpg,image/jpeg,image/png,image/gif]',
+        ];
+    }
     private function uploadProfilePicture($file, $sitio, $currentPicture = null)
     {   
         if ($file && $file->isValid() && !$file->hasMoved()) {

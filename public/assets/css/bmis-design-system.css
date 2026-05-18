@@ -16,22 +16,20 @@
   --font: 'Plus Jakarta Sans', sans-serif;
   --mono: 'DM Mono', monospace;
   --serif: 'Plus Jakarta Sans', sans-serif;
-  --bg: #e2e8f0;
-  /* Slightly darker slate background to contrast white cards */
-  --white: #ffffff;php
-  /* Solid white for cards to contrast gently against the softer bg */
+  --bg: #f8fafc;
+  --white: rgba(255, 255, 255, 0.85);
   --ink: #0f172a;
   --ink-muted: #475569;
   --ink-soft: #94a3b8;
-  --border: rgba(15, 23, 42, .06);
+  --border: rgba(15, 23, 42, .08);
   --border-input: rgba(15, 23, 42, .12);
-  --r: 16px;
-  --r-sm: 10px;
-  --r-icon: 12px;
-  --r-md: 14px;
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, .02);
-  --shadow-md: 0 10px 30px -10px rgba(15, 23, 42, .08);
-  --shadow-lg: 0 20px 40px -20px rgba(15, 23, 42, .15);
+  --r: 20px;
+  --r-sm: 12px;
+  --r-icon: 14px;
+  --r-md: 16px;
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, .05), 0 2px 4px -1px rgba(0, 0, 0, .03);
+  --shadow-md: 0 10px 20px -5px rgba(15, 23, 42, .08), 0 4px 6px -2px rgba(15, 23, 42, .04);
+  --shadow-lg: 0 25px 50px -12px rgba(15, 23, 42, .15);
   --ease: cubic-bezier(.4, 0, .2, 1);
   --ease-spring: cubic-bezier(.175, .885, .32, 1.275);
   /* Modern Palette */
@@ -55,11 +53,16 @@
 
 body {
   font-family: var(--font);
-  background: var(--bg);
-  background-image: radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.04), transparent 25%), radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.04), transparent 25%);
+  background-color: var(--bg);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(244, 63, 94, 0.12) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(56, 189, 248, 0.12) 0px, transparent 50%);
+  background-attachment: fixed;
   color: var(--ink);
-  font-size: 13.5px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -383,16 +386,16 @@ body {
 /* ─── PRIMARY STAT CARD ────────────────────── */
 .ds-stat {
   background: var(--white);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: var(--r);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 18px 20px 0;
+  padding: 20px 22px 0;
   transition: transform .4s var(--ease-spring), box-shadow .4s var(--ease-spring);
 }
 
@@ -634,10 +637,10 @@ body {
 /* ─── WHITE CARD ───────────────────────────── */
 .ds-card {
   background: var(--white);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border-radius: var(--r);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.9);
   box-shadow: var(--shadow-md);
   overflow: hidden;
   transition: transform .3s var(--ease), box-shadow .3s var(--ease);

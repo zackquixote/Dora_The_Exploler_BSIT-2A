@@ -16,12 +16,6 @@ $(function () {
         $('#' + id).modal('hide');
     }
 
-    function refreshCsrf(newHash) {
-        if (!newHash) return;
-        window.blotterConfig.csrfHash = newHash;
-        $('input[name="' + window.blotterConfig.csrfToken + '"]').val(newHash);
-    }
-
     // ── Open hearing modal (Add button) ───────────────────────────────
     $(document).on('click', '#open-hearing-modal-btn', function () {
         // Reset form to Add mode
@@ -82,7 +76,7 @@ $(function () {
         $('input[name="' + window.blotterConfig.csrfToken + '"]').val(window.blotterConfig.csrfHash);
 
         $.post(form.attr('action'), form.serialize(), function (resp) {
-            refreshCsrf(resp.csrf_hash);
+            if (resp.csrf_hash) refreshCsrf(resp);
             if (resp.status === 'success') {
                 hideModal('addHearingModal');
                 location.reload();
@@ -125,7 +119,7 @@ $(function () {
             data:     data,
             dataType: 'json',
             success: function (resp) {
-                refreshCsrf(resp.csrf_hash);
+                if (resp.csrf_hash) refreshCsrf(resp);
                 if (resp.status === 'success') {
                     location.reload();
                 } else {

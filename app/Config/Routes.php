@@ -31,6 +31,27 @@ $routes->get('/', 'Portal::index');
 $routes->match(['get', 'post'], 'login', 'Auth::index');
 $routes->post('auth', 'Auth::auth');
 $routes->get('logout', 'Auth::logout');
+$routes->match(['get', 'post'], 'portal/login', 'ResidentPortalAuth::login');
+$routes->match(['get', 'post'], 'portal/register', 'ResidentPortalAuth::register');
+$routes->get('portal/logout', 'ResidentPortalAuth::logout');
+$routes->get('portal/setup', 'ResidentPortalAuth::forceSetup');
+$routes->get('portal/migrate', 'ResidentPortalAuth::migrateDB');
+
+// Authenticated Resident Portal routes — protected by portalAuth filter
+$routes->group('portal', ['filter' => 'portalAuth'], function ($routes) {
+    $routes->get('home', 'Portal::home');
+    $routes->get('file-blotter', 'Portal::fileBlotter');
+    $routes->post('blotter/submit', 'Portal::submitBlotter');
+    $routes->get('facilities', 'Portal::facilities');
+    $routes->post('facilities/book', 'Portal::bookFacility');
+    $routes->post('facilities/cancel/(:num)', 'Portal::cancelBooking/$1');
+    $routes->get('my-id', 'Portal::myId');
+    $routes->get('my-cases', 'Portal::myCases');
+    $routes->get('profile', 'Portal::profile');
+    $routes->post('profile/update', 'Portal::updateProfile');
+});
+
+$routes->get('verify/(:num)/(:segment)', 'IdGenerator::verify/$1/$2', ['filter' => 'throttle:5,1']);
 $routes->post('debug/probe', 'DebugController::probe');
 
 
@@ -43,7 +64,7 @@ $routes->post('debug/probe', 'DebugController::probe');
  */
 $routes->group('', [
     'namespace' => 'App\Controllers',
-    'filter'    => 'loggedIn',
+    'filter'    => ['loggedIn', 'role:admin,staff'],
 ], function ($routes) {
 
     /**
@@ -64,6 +85,7 @@ $routes->group('', [
     $routes->match(['post', 'put'], 'resident/update/(:num)', 'Resident::update/$1');
     $routes->get('resident/view/(:num)', 'Resident::view/$1');
     $routes->post('resident/delete/(:num)', 'Resident::delete/$1');
+    $routes->get('id/print/(:num)', 'IdGenerator::print/$1');
 
     $routes->get('resident/getHouseholdsBySitio', 'Resident::getHouseholdsBySitio');
     $routes->get('resident/activity/(:num)', 'Resident::activity/$1');
@@ -176,11 +198,123 @@ $routes->get('blotter/print/(:num)', 'Blotter::printCase/$1');
 
     /**
      * --------------------------------------------------------------------
+     * Document Management API (Phase 1.1)
+     * --------------------------------------------------------------------
+     * JSON endpoints for uploads/versioning/downloads.
+     */
+    $routes->group('api', function ($routes) {
+        // Per-entity attachments
+        $routes->get('entities/(:segment)/(:num)/documents', 'Api\EntityDocuments::index/$1/$2');
+        $routes->post('entities/(:segment)/(:num)/documents', 'Api\EntityDocuments::upload/$1/$2');
+        $routes->post('entities/(:segment)/(:num)/documents/(:num)/detach', 'Api\EntityDocuments::detach/$1/$2/$3');
+
+        // Document actions (by document row id)
+        $routes->get('documents/(:num)', 'Api\Documents::show/$1');
+        $routes->get('documents/(:num)/versions', 'Api\Documents::versions/$1');
+        $routes->post('documents/(:num)/versions', 'Api\Documents::uploadVersion/$1');
+        $routes->get('documents/(:num)/download', 'Api\Documents::download/$1');
+        $routes->post('documents/(:num)', 'Api\Documents::update/$1');
+        $routes->post('documents/(:num)/delete', 'Api\Documents::delete/$1');
+
+        // Phase 1.2 - Business Permit Renewals pipeline
+        $routes->get('business-permits/(:num)/renewals', 'Api\PermitRenewals::listByBusiness/$1');
+        $routes->post('business-permits/(:num)/renewals', 'Api\PermitRenewals::create/$1');
+        $routes->get('permit-renewals/(:num)', 'Api\PermitRenewals::show/$1');
+        $routes->post('permit-renewals/(:num)/pay', 'Api\PermitRenewals::pay/$1');
+        $routes->post('permit-renewals/(:num)/approve', 'Api\PermitRenewals::approve/$1');
+        $routes->post('permit-renewals/(:num)/mark-printed', 'Api\PermitRenewals::markPrinted/$1');
+
+        // Phase 1.3 - Events QR check-in + attendance + certificates
+        $routes->get('events/(:num)/participants', 'Api\EventParticipants::list/$1');
+        $routes->post('events/(:num)/participants', 'Api\EventParticipants::register/$1');
+        $routes->get('event-participants/(:num)/qr', 'Api\EventParticipants::qr/$1');
+        $routes->post('event-participants/(:num)/check-in', 'Api\EventParticipants::checkIn/$1');
+        $routes->post('event-participants/(:num)/check-out', 'Api\EventParticipants::checkOut/$1');
+        $routes->post('event-participants/(:num)/certificate', 'Api\EventParticipants::generateCertificate/$1');
+        $routes->get('event-participants/(:num)/certificate/download', 'Api\EventParticipants::downloadCertificate/$1');
+
+        // Phase 1.4 - Health Records (CRUD + vaccination editor)
+        $routes->get('health-records', 'Api\HealthRecords::index');
+        $routes->post('health-records', 'Api\HealthRecords::create');
+        $routes->get('health-records/(:num)', 'Api\HealthRecords::show/$1');
+        $routes->post('health-records/(:num)', 'Api\HealthRecords::update/$1');
+        $routes->post('health-records/(:num)/delete', 'Api\HealthRecords::delete/$1');
+        $routes->get('health-records/(:num)/vaccinations', 'Api\HealthRecords::listVaccinations/$1');
+        $routes->post('health-records/(:num)/vaccinations', 'Api\HealthRecords::addVaccination/$1');
+        $routes->post('health-records/(:num)/vaccinations/(:num)/update', 'Api\HealthRecords::updateVaccination/$1/$2');
+        $routes->post('health-records/(:num)/vaccinations/(:num)/delete', 'Api\HealthRecords::deleteVaccination/$1/$2');
+    });
+
+    // Printable view (admin/staff area)
+    $routes->get('permit-renewals/print/(:num)', 'PermitRenewals::print/$1');
+
+    // QR scan endpoint (admin/staff area)
+    $routes->get('events/checkin/(:num)/(:segment)', 'EventCheckIn::scan/$1/$2');
+
+
+
+    /**
+     * --------------------------------------------------------------------
      * System Logs
      * --------------------------------------------------------------------
      * View audit trails and user activity logs across the application.
      */
 $routes->get('logs', 'Logs::log');
+});
+
+/**
+ * --------------------------------------------------------------------
+ * QR Code Verification (Public Access)
+ * --------------------------------------------------------------------
+ */
+$routes->get('verify/certificate/(:num)/(:segment)', 'AdvancedFeatures::verifyQR/certificate/$1/$2');
+$routes->get('verify/resident/(:num)/(:segment)', 'AdvancedFeatures::verifyQR/resident/$1/$2');
+
+/**
+ * --------------------------------------------------------------------
+ * Advanced Features Routes
+ * --------------------------------------------------------------------
+ * Accessible by authenticated users with specific roles
+ */
+$routes->group('advanced', ['filter' => 'loggedIn'], function ($routes) {
+    
+    // Shared Advanced Features (Admin, Staff, Resident)
+    $routes->group('', ['filter' => 'role:admin,staff,resident'], function ($routes) {
+        $routes->match(['get', 'post'], 'qr-generator', 'AdvancedFeatures::qrGenerator');
+        $routes->match(['get', 'post'], 'report-emergency', 'AdvancedFeatures::reportEmergency');
+        $routes->match(['get', 'post'], 'register-business', 'AdvancedFeatures::registerBusiness');
+        $routes->get('events', 'AdvancedFeatures::events');
+        $routes->match(['get', 'post'], 'create-event', 'AdvancedFeatures::createEvent');
+    });
+
+    // Admin & Staff Advanced Features
+    $routes->group('', ['filter' => 'role:admin,staff'], function ($routes) {
+        $routes->get('emergency', 'AdvancedFeatures::emergency');
+        $routes->get('business', 'AdvancedFeatures::business');
+        $routes->get('health-records', 'AdvancedFeatures::healthRecords');
+        $routes->get('api/health-records/search', 'AdvancedFeatures::apiSearchHealthRecords');
+        $routes->get('api/business/search', 'AdvancedFeatures::apiSearchBusiness');
+        $routes->get('api/emergency/active', 'AdvancedFeatures::apiActiveEmergencies');
+        $routes->get('api/events/list', 'AdvancedFeatures::apiEventsList');
+    });
+
+    // Strictly Admin Only
+    $routes->group('', ['filter' => 'role:admin'], function ($routes) {
+        $routes->get('analytics', 'AdvancedFeatures::analytics');
+        $routes->get('notifications', 'AdvancedFeatures::notifications');
+        $routes->match(['get', 'post'], 'send-notification', 'AdvancedFeatures::sendBulkNotification');
+        $routes->get('gmail', 'AdvancedFeatures::gmail');
+        $routes->get('gmail/connect', 'AdvancedFeatures::gmailConnect');
+        $routes->get('gmail/callback', 'AdvancedFeatures::gmailCallback');
+        $routes->get('test-notifications', 'AdvancedFeatures::testNotifications');
+        $routes->post('test-notifications/send', 'AdvancedFeatures::sendTestNotifications');
+        $routes->get('documents', 'AdvancedFeatures::documents');
+        $routes->match(['get', 'post'], 'upload-document', 'AdvancedFeatures::uploadDocument');
+        $routes->get('reports', 'AdvancedFeatures::reports');
+        $routes->get('export', 'AdvancedFeatures::exportData');
+        $routes->get('system-health', 'AdvancedFeatures::systemHealth');
+        $routes->get('api/analytics/kpis', 'AdvancedFeatures::apiAnalyticsKpis');
+    });
 });
 
 
@@ -221,6 +355,9 @@ $routes->group('admin', [
     $routes->get('certificateTypes/edit/(:num)', 'CertificateTypes::edit/$1');
     $routes->post('certificateTypes/update/(:num)', 'CertificateTypes::update/$1');
     $routes->post('certificateTypes/delete/(:num)', 'CertificateTypes::delete/$1');
+
+    // Audit Logs (new, from audit_logs table)
+    $routes->get('audit-logs', 'AuditLogs::index');
 
 
     /**

@@ -17,6 +17,7 @@
 <script defer src="<?= base_url('js/blotter/notifications.js') ?>?v=<?= time() ?>"></script>
 
 <!-- BMIS Core (mobile toggle, CSRF, search, dark mode, shortcuts) -->
+<script defer src="<?= base_url('js/theme/bmis-utils.js') ?>?v=<?= time() ?>"></script>
 <script defer src="<?= base_url('js/theme/bmis-core.js') ?>?v=<?= time() ?>"></script>
 
 <!-- Flash data for toastr (requires PHP, kept inline) -->

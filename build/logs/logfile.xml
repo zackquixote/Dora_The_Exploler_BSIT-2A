@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="App\Controllers\AdvancedFeaturesTest" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php" tests="4" assertions="0" errors="4" failures="0" skipped="0" time="0.000000">
+    <testcase name="testApiSearchHealthRecords" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php" line="19" class="App\Controllers\AdvancedFeaturesTest" classname="App.Controllers.AdvancedFeaturesTest" assertions="0" time="0.000000">
+      <error type="CodeIgniter\Exceptions\CriticalError">App\Controllers\AdvancedFeaturesTest::testApiSearchHealthRecords&#13;
+CodeIgniter\Exceptions\CriticalError: The required PHP extension "sqlite3" is not loaded. Install and enable it to use "SQLite3" driver.
+&#13;
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:182
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:59
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Config.php:84
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:82
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:59
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\CIUnitTestCase.php:251
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php:16</error>
+    </testcase>
+    <testcase name="testApiSearchBusiness" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php" line="29" class="App\Controllers\AdvancedFeaturesTest" classname="App.Controllers.AdvancedFeaturesTest" assertions="0" time="0.000000">
+      <error type="CodeIgniter\Exceptions\CriticalError">App\Controllers\AdvancedFeaturesTest::testApiSearchBusiness&#13;
+CodeIgniter\Exceptions\CriticalError: The required PHP extension "sqlite3" is not loaded. Install and enable it to use "SQLite3" driver.
+&#13;
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:182
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:59
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Config.php:84
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:82
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:59
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\CIUnitTestCase.php:251
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php:16</error>
+    </testcase>
+    <testcase name="testApiActiveEmergencies" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php" line="39" class="App\Controllers\AdvancedFeaturesTest" classname="App.Controllers.AdvancedFeaturesTest" assertions="0" time="0.000000">
+      <error type="CodeIgniter\Exceptions\CriticalError">App\Controllers\AdvancedFeaturesTest::testApiActiveEmergencies&#13;
+CodeIgniter\Exceptions\CriticalError: The required PHP extension "sqlite3" is not loaded. Install and enable it to use "SQLite3" driver.
+&#13;
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:182
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:59
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Config.php:84
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:82
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:59
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\CIUnitTestCase.php:251
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php:16</error>
+    </testcase>
+    <testcase name="testApiEventsList" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php" line="49" class="App\Controllers\AdvancedFeaturesTest" classname="App.Controllers.AdvancedFeaturesTest" assertions="0" time="0.000000">
+      <error type="CodeIgniter\Exceptions\CriticalError">App\Controllers\AdvancedFeaturesTest::testApiEventsList&#13;
+CodeIgniter\Exceptions\CriticalError: The required PHP extension "sqlite3" is not loaded. Install and enable it to use "SQLite3" driver.
+&#13;
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:182
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:59
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Config.php:84
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:82
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:59
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\CIUnitTestCase.php:251
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php:16</error>
+    </testcase>
+  </testsuite>
+</testsuites>

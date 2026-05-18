@@ -56,4 +56,16 @@ class BlotterPartyModel extends Model
     {
         return $this->insert($data);
     }
+
+    /**
+     * Get blotter history for a specific resident.
+     */
+    public function getHistoryByResident(int $residentId)
+    {
+        return $this->select('blotter_records.id, blotter_records.case_number, blotter_records.incident_type, blotter_records.incident_date, blotter_records.status, blotter_parties.role')
+            ->join('blotter_records', 'blotter_records.id = blotter_parties.blotter_id')
+            ->where('blotter_parties.resident_id', $residentId)
+            ->orderBy('blotter_records.incident_date', 'DESC')
+            ->findAll();
+    }
 }

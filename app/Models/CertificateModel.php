@@ -158,4 +158,15 @@ class CertificateModel extends Model
             ->get()
             ->getRowArray() ?: null;
     }
+
+    /**
+     * Get all certificates issued to a specific resident.
+     */
+    public function getByResidentId(int $residentId): array
+    {
+        return $this->select('id, certificate_number, certificate_type, created_at, purpose')
+            ->where('resident_id', $residentId)
+            ->orderBy('created_at', 'DESC')
+            ->findAll();
+    }
 }

@@ -37,6 +37,7 @@ $municipality = $settings['municipality']  ?? 'Municipality';
         </a>
         <div>
             <a href="<?= base_url('login') ?>" class="ds-btn ds-btn-teal"><i class="fas fa-sign-in-alt"></i> Staff Login</a>
+            <a href="<?= base_url('portal/login') ?>" class="ds-btn ds-btn-blue"><i class="fas fa-user"></i> Resident Login</a>
         </div>
     </nav>
 

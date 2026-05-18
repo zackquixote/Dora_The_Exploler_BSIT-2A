@@ -57,17 +57,54 @@
         </a>
      
         <?php if ($role === 'admin'): ?>
+        <div class="sb-header">Advanced</div>
+        <a href="<?= base_url('advanced/analytics') ?>" class="sb-link <?= $isActive('analytics') ?>">
+            <i class="fas fa-chart-line"></i> Analytics
+        </a>
+        <a href="<?= base_url('advanced/business') ?>" class="sb-link <?= ($seg1 === 'advanced' && $seg2 === 'business') ? 'active' : '' ?>">
+            <i class="fas fa-store"></i> Businesses
+        </a>
+        <a href="<?= base_url('advanced/events') ?>" class="sb-link <?= ($seg1 === 'advanced' && $seg2 === 'events') ? 'active' : '' ?>">
+            <i class="fas fa-calendar-alt"></i> Events
+        </a>
+        <a href="<?= base_url('advanced/health-records') ?>" class="sb-link <?= ($seg1 === 'advanced' && $seg2 === 'health-records') ? 'active' : '' ?>">
+            <i class="fas fa-heartbeat"></i> Health Records
+        </a>
+        <a href="<?= base_url('advanced/emergency') ?>" class="sb-link <?= ($seg1 === 'advanced' && $seg2 === 'emergency') ? 'active' : '' ?>">
+            <i class="fas fa-ambulance"></i> Emergency
+        </a>
+        <a href="<?= base_url('advanced/notifications') ?>" class="sb-link <?= ($seg1 === 'advanced' && $seg2 === 'notifications') ? 'active' : '' ?>">
+            <i class="fas fa-bell"></i> Notifications
+        </a>
+        <a href="<?= base_url('advanced/gmail') ?>" class="sb-link <?= ($seg1 === 'advanced' && $seg2 === 'gmail') ? 'active' : '' ?>">
+            <i class="fas fa-envelope"></i> Gmail
+        </a>
+        <a href="<?= base_url('advanced/test-notifications') ?>" class="sb-link <?= ($seg1 === 'advanced' && $seg2 === 'test-notifications') ? 'active' : '' ?>">
+            <i class="fas fa-paper-plane"></i> Test Notifications
+        </a>
+        <a href="<?= base_url('advanced/documents') ?>" class="sb-link <?= ($seg1 === 'advanced' && $seg2 === 'documents') ? 'active' : '' ?>">
+            <i class="fas fa-folder-open"></i> Documents
+        </a>
+        <a href="<?= base_url('advanced/reports') ?>" class="sb-link <?= ($seg1 === 'advanced' && $seg2 === 'reports') ? 'active' : '' ?>">
+            <i class="fas fa-file-alt"></i> Reports
+        </a>
+        <?php endif; ?>
+
+        <?php if ($role === 'admin'): ?>
         <div class="sb-header">System</div>
         <a href="<?= base_url('admin/users') ?>" class="sb-link <?= $isActive('users') ?>">
             <i class="fas fa-user-lock"></i> User Accounts
         </a>
+        <a href="<?= base_url('admin/audit-logs') ?>" class="sb-link <?= ($seg1 === 'admin' && $seg2 === 'audit-logs') ? 'active' : '' ?>">
+            <i class="fas fa-clipboard-list"></i> Audit Logs
+        </a>
         <a href="<?= base_url('logs') ?>" class="sb-link <?= $isActive('log') ?>">
             <i class="fas fa-history"></i> Activity Logs
         </a>
-        <?php endif; ?>
-
+        <a href="<?= base_url('archive') ?>" class="sb-link <?= $isActive('archive') ?>">
+            <i class="fas fa-trash-restore"></i> Recycle Bin
+        </a>
         <hr class="sb-divider">
-        <?php if ($role === 'admin'): ?>
         <a href="<?= base_url('admin/settings') ?>" class="sb-link">
             <i class="fas fa-cog"></i> Settings
         </a>

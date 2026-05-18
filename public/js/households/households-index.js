@@ -9,43 +9,7 @@ var HouseholdIndex = (function() {
     var CSRF_HASH = '';
     
     // Private methods
-    function showToast(type, msg) {
-        var bgColor = type === 'success' ? '#d4edda' : '#f8d7da';
-        var textColor = type === 'success' ? '#155724' : '#721c24';
-        var borderColor = type === 'success' ? '#c3e6cb' : '#f5c6cb';
-        
-        var $toast = jQuery('<div>')
-            .css({
-                'position': 'fixed',
-                'bottom': '24px',
-                'right': '24px',
-                'z-index': '9999',
-                'background': bgColor,
-                'border': '1px solid ' + borderColor,
-                'border-radius': '8px',
-                'padding': '14px 20px',
-                'font-size': '14px',
-                'color': textColor,
-                'box-shadow': '0 4px 12px rgba(0,0,0,0.15)',
-                'font-weight': '500',
-                'max-width': '340px'
-            })
-            .text(msg)
-            .appendTo('body');
-            
-        setTimeout(function () {
-            $toast.fadeOut(400, function () { 
-                jQuery(this).remove(); 
-            });
-        }, 3500);
-    }
-    
-    function updateCSRFToken(newHash) {
-        if (newHash) {
-            CSRF_HASH = newHash;
-            jQuery('input[name="' + CSRF_TOKEN + '"]').val(newHash);
-        }
-    }
+
     
     function initSearch() {
         jQuery('#hhSearch').on('input', function () {
@@ -95,10 +59,10 @@ var HouseholdIndex = (function() {
                             jQuery(this).remove(); 
                         });
                         showToast('success', res.message);
-                        updateCSRFToken(res.csrf_hash);
+                        if (res.csrf_hash) refreshCsrf(res);
                     } else {
                         showToast('error', res.message);
-                        updateCSRFToken(res.csrf_hash);
+                        if (res.csrf_hash) refreshCsrf(res);
                         $btn.html('<i class="fas fa-trash"></i>').prop('disabled', false);
                     }
                 },

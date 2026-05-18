@@ -19,24 +19,30 @@ class Filters extends BaseFilters
      * @var array<string, class-string|list<class-string>>
      */
     public array $aliases = [
-        'csrf'          => CSRF::class,
-        'toolbar'       => DebugToolbar::class,
-        'honeypot'      => Honeypot::class,
-        'invalidchars'  => InvalidChars::class,
-        'secureheaders' => SecureHeaders::class,
-        'role'          => \App\Filters\RoleFilter::class,
-        'cors'          => Cors::class,
-        'forcehttps'    => ForceHTTPS::class,
-        'pagecache'     => PageCache::class,
-        'performance'   => PerformanceMetrics::class,
-        'inactivity'    => \App\Filters\InactivityFilter::class,
-        'rolefilter'    => \App\Filters\RoleFilter::class,
-        'csp'           => \App\Filters\CspFilter::class,
+        'csrf'            => CSRF::class,
+        'toolbar'         => DebugToolbar::class,
+        'honeypot'        => Honeypot::class,
+        'invalidchars'    => InvalidChars::class,
+        'secureheaders'   => SecureHeaders::class,
+        'role'            => \App\Filters\RoleFilter::class,
+        'throttle'        => \App\Filters\ThrottleFilter::class,
+        'cors'            => Cors::class,
+        'forcehttps'      => ForceHTTPS::class,
+        'pagecache'       => PageCache::class,
+        'performance'     => PerformanceMetrics::class,
+        'inactivity'      => \App\Filters\InactivityFilter::class,
+        'rolefilter'      => \App\Filters\RoleFilter::class,
+        'csp'             => \App\Filters\CspFilter::class,
+        'securityHeaders' => \App\Filters\SecurityHeaders::class,
 
         // Role-based route guards
-        'adminOnly'     => \App\Filters\AdminFilter::class,
-        'staffOnly'     => \App\Filters\StaffFilter::class,
-        'loggedIn'      => \App\Filters\LoggedInFilter::class,
+        'adminOnly'       => \App\Filters\AdminFilter::class,
+        'staffOnly'       => \App\Filters\StaffFilter::class,
+        'loggedIn'        => \App\Filters\LoggedInFilter::class,
+        'portalAuth'      => \App\Filters\PortalAuthFilter::class,
+
+        // Permission-based route guard (Phase 1A groundwork)
+        'perm'            => \App\Filters\PermissionFilter::class,
     ];
 
     /**
@@ -66,6 +72,7 @@ class Filters extends BaseFilters
             'csp',
             'honeypot',
             'secureheaders',
+            'securityHeaders',
         ],
     ];
 

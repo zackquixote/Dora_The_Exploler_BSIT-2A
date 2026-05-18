@@ -203,7 +203,10 @@ class HouseholdController extends BaseController
             'house_type'       => $this->request->getPost('house_type'),
         ];
 
-        if ($this->householdModel->insert($data)) {
+        $this->db->transStart();
+
+        $insertSuccess = $this->householdModel->insert($data);
+        if ($insertSuccess) {
             $householdId = $this->householdModel->getInsertID();
             $membersData = $this->request->getPost('household_members_data');
             $members     = json_decode($membersData, true) ?? [];
@@ -223,16 +226,20 @@ class HouseholdController extends BaseController
                 ];
                 if ($this->residentModel->update($memberId, $updateData)) $memberCount++;
             }
-
-            $message = "Household {$householdNo} added successfully";
-            if ($memberCount > 0) $message .= " with {$memberCount} member(s)";
-
-            $this->logModel->addLog("Created Household {$householdNo}" . ($memberCount > 0 ? " with {$memberCount} member(s)" : ''), 'household');
-
-            return redirect()->to('/households')->with('success', $message);
         }
 
-        return redirect()->back()->withInput()->with('error', 'Failed to add household. Please try again.');
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === false || !$insertSuccess) {
+            return redirect()->back()->withInput()->with('error', 'Failed to add household. Please try again.');
+        }
+
+        $message = "Household {$householdNo} added successfully";
+        if (isset($memberCount) && $memberCount > 0) $message .= " with {$memberCount} member(s)";
+
+        $this->logModel->addLog("Created Household {$householdNo}" . ((isset($memberCount) && $memberCount > 0) ? " with {$memberCount} member(s)" : ''), 'household');
+
+        return redirect()->to('/households')->with('success', $message);
     }
 
     /**
@@ -304,7 +311,10 @@ class HouseholdController extends BaseController
             'house_type'       => $this->request->getPost('house_type'),
         ];
 
-        if ($this->householdModel->update($id, $data)) {
+        $this->db->transStart();
+
+        $updateSuccess = $this->householdModel->update($id, $data);
+        if ($updateSuccess) {
             $headId      = $this->request->getPost('head_resident_id');
             $membersData = $this->request->getPost('household_members_data');
             $members     = json_decode($membersData, true) ?? [];
@@ -334,13 +344,26 @@ class HouseholdController extends BaseController
                 }
                 if ($this->residentModel->update($memberId, $updateData)) $memberCount++;
             }
-
-            $this->logModel->addLog("Updated Household {$data['household_no']} with {$memberCount} active member(s)", 'household');
-
-            return redirect()->to('/households')->with('success', "Household updated successfully with {$memberCount} active member(s)");
         }
 
-        return redirect()->back()->with('error', 'Failed to update household');
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === false || !$updateSuccess) {
+            return redirect()->back()->with('error', 'Failed to update household');
+        }
+
+        $changes = [];
+        foreach ($data as $key => $newValue) {
+            $oldValue = $household[$key] ?? null;
+            if ($oldValue != $newValue && $key !== 'updated_at') {
+                $changes[] = "$key (" . ($oldValue ?: 'empty') . " -> " . ($newValue ?: 'empty') . ")";
+            }
+        }
+        $changeStr = !empty($changes) ? ". Changes: " . implode(', ', $changes) : "";
+
+        $this->logModel->addLog("Updated Household {$data['household_no']} with {$memberCount} active member(s)" . $changeStr, 'household');
+
+        return redirect()->to('/households')->with('success', "Household updated successfully with {$memberCount} active member(s)");
     }
 
     /**

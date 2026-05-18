@@ -69,28 +69,5 @@ $(document).ready(function () {
         });
     }
 
-    // ============================================
-    // TOAST HELPER
-    // ============================================
 
-    function showToast(type, message) {
-        var bgClass = type === 'success' ? 'bg-success' : (type === 'info' ? 'bg-info' : 'bg-danger');
-
-        var html =
-            '<div class="toast align-items-center text-white ' + bgClass + ' border-0 position-fixed" ' +
-            'style="top:20px;right:20px;z-index:9999;" ' +
-            'role="alert" aria-live="assertive" aria-atomic="true" ' +
-            'data-autohide="true" data-delay="2000">' +
-            '<div class="d-flex">' +
-            '<div class="toast-body">' + message + '</div>' +
-            '<button type="button" class="btn-close btn-close-white me-2 m-auto" ' +
-            'data-bs-dismiss="toast" aria-label="Close"></button>' +
-            '</div></div>';
-
-        $('.toast').remove();
-        $('body').append(html);
-        $('.toast').toast('show');
-
-        setTimeout(function () { $('.toast').remove(); }, 2500);
-    }
 });

@@ -1,0 +1,1 @@
+{"version":1,"defects":{"App\\Controllers\\AdvancedFeaturesTest::testApiSearchHealthRecords":8,"App\\Controllers\\AdvancedFeaturesTest::testApiSearchBusiness":8,"App\\Controllers\\AdvancedFeaturesTest::testApiActiveEmergencies":8,"App\\Controllers\\AdvancedFeaturesTest::testApiEventsList":8},"times":[]}

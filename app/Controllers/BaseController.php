@@ -31,6 +31,13 @@ abstract class BaseController extends Controller
     protected $request;
 
     /**
+     * Instance of the main Response object.
+     *
+     * @var ResponseInterface
+     */
+    protected $response;
+
+    /**
      * An array of helpers to be loaded automatically upon
      * class instantiation. These helpers will be available
      * to all other controllers that extend BaseController.
@@ -86,5 +93,41 @@ abstract class BaseController extends Controller
         }
 
         return redirect()->to('/login')->with('error', $message);
+    }
+
+    /**
+     * Standard JSON response wrapper (Phase 1A groundwork).
+     *
+     * Consistent schema for AJAX/API endpoints:
+     * - success: boolean
+     * - message: string|null
+     * - data: mixed
+     * - csrf_hash/csrf_name: for forms that need token refresh
+     */
+    protected function jsonResponse(
+        bool $success,
+        $data = null,
+        string $message = '',
+        int $statusCode = 200
+    ): ResponseInterface {
+        return $this->response
+            ->setStatusCode($statusCode)
+            ->setJSON([
+                'success'   => $success,
+                'message'   => $message,
+                'data'      => $data,
+                'csrf_name' => csrf_token(),
+                'csrf_hash' => csrf_hash(),
+            ]);
+    }
+
+    protected function jsonSuccess($data = null, string $message = ''): ResponseInterface
+    {
+        return $this->jsonResponse(true, $data, $message, 200);
+    }
+
+    protected function jsonError(string $message, int $statusCode = 400, $data = null): ResponseInterface
+    {
+        return $this->jsonResponse(false, $data, $message, $statusCode);
     }
 }

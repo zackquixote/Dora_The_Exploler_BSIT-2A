@@ -55,7 +55,7 @@ $(document).ready(function() {
             type: 'GET',
             dataType: 'json',
             success: function(res) {
-                if (res.csrf_hash) refreshCsrf(res.csrf_hash);
+                if (res.csrf_hash) refreshCsrf(res);
                 if (res.status === 'success') {
                     $('#householdNo').val(res.household_no);
                     checkHouseholdNumber(res.household_no);
@@ -74,7 +74,7 @@ $(document).ready(function() {
             data: { household_no: hhNo },
             dataType: 'json',
             success: function(res) {
-                if (res.csrf_hash) refreshCsrf(res.csrf_hash);
+                if (res.csrf_hash) refreshCsrf(res);
                 $field.removeClass('is-valid is-invalid');
                 if (res.exists) {
                     $field.addClass('is-invalid');
@@ -133,7 +133,7 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(res) {
                 $('#loadingAlert, #membersLoadingAlert').hide();
-                if (res.csrf_hash) refreshCsrf(res.csrf_hash);
+                if (res.csrf_hash) refreshCsrf(res);
                 
                 if (res.status === 'success' && res.residents && res.residents.length > 0) {
                     allResidents = res.residents;
@@ -264,13 +264,6 @@ $(document).ready(function() {
     
     function updateHiddenField() {
         $('#householdMembersData').val(JSON.stringify(selectedMembers));
-    }
-    
-    function refreshCsrf(newHash) {
-        if (newHash) {
-            CSRF_HASH = newHash;
-            $('input[name="' + CSRF_TOKEN_NAME + '"]').val(newHash);
-        }
     }
     
     // ------------------- Form Validation -------------------

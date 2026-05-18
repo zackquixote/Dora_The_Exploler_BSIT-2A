@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\LogModel;
+use App\Services\AuditService;
 
 /**
  * Auth Controller
@@ -16,6 +17,7 @@ use App\Models\LogModel;
  * - auth(): Processes login credentials, sets session, and logs the action.
  * - logout(): Destroys session, clears cookies, and logs the logout.
  * 
+ * 
  * DEPENDENCIES:
  * - UserModel for database authentication
  * - LogModel for recording login/logout activities
@@ -25,10 +27,12 @@ use App\Models\LogModel;
 class Auth extends BaseController
 {
     protected $logModel;
+    protected AuditService $auditService;
 
     public function __construct()
     {
         $this->logModel = new LogModel();
+        $this->auditService = new AuditService();
     }
 
   /**
@@ -60,6 +64,9 @@ class Auth extends BaseController
     // Already logged in – redirect to role dashboard
     if (session()->get('logged_in')) {
         $redirectRole = strtolower(session()->get('role'));
+        if ($redirectRole === 'resident') {
+            return redirect()->to(base_url('portal/home'));
+        }
         return redirect()->to(base_url($redirectRole . '/dashboard'));
     }
 
@@ -130,6 +137,7 @@ class Auth extends BaseController
 
             // ── LOG THE LOGIN HERE ────────────────────────────────
             $this->logModel->addLog("User Logged In");
+            $this->auditService->log('login', 'user', (int) ($user['id'] ?? 0));
             // ─────────────────────────────────────────────────────────────
 
             if ($remember) {
@@ -218,6 +226,7 @@ class Auth extends BaseController
         // #endregion
         // ── LOG THE LOGOUT HERE (Before destroying session) ──
         $this->logModel->addLog("User Logged Out");
+        $this->auditService->log('logout', 'user', (int) (session()->get('user_id') ?? 0));
         // ─────────────────────────────────────────────────────────────
 
         session()->destroy();
