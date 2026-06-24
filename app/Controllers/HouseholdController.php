@@ -146,6 +146,7 @@ class HouseholdController extends BaseController
             'totalHouseholds' => $totalHouseholds,
             'totalResidents'  => $totalResidents,
             'avgPerHousehold' => $avgPerHousehold,
+            'purokList'       => ResidentModel::getPurokList(),
         ]);
     }
 
@@ -163,6 +164,7 @@ class HouseholdController extends BaseController
         return view('households/create', [
             'title'                => 'Add Household',
             'generatedHouseholdNo' => $generatedHouseholdNo,
+            'purokList'            => ResidentModel::getPurokList(),
         ]);
     }
 
@@ -272,6 +274,7 @@ class HouseholdController extends BaseController
             'household'      => $household,
             'residentCount'  => $residentCount,
             'currentMembers' => $currentMembers,
+            'purokList'      => ResidentModel::getPurokList(),
         ]);
     }
 

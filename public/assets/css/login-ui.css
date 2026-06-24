@@ -1,0 +1,182 @@
+/* Shared UI enhancements for Admin + Resident login pages */
+
+:root {
+  --login-card-max: 460px;
+  --login-radius: 18px;
+  --login-ring: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.login-page {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(1200px 600px at 20% 10%, rgba(37,99,235,.10), transparent 55%),
+              radial-gradient(900px 500px at 90% 30%, rgba(20,184,166,.10), transparent 60%),
+              var(--bg);
+  font-family: var(--font);
+  color: var(--ink);
+  padding: 24px;
+}
+
+.login-wrap {
+  width: 100%;
+  max-width: var(--login-card-max);
+  animation: loginFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+@keyframes loginFadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-card {
+  background: var(--white);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: var(--login-radius);
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.08);
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.login-banner {
+  height: 128px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.login-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Readability overlay */
+  background:
+    linear-gradient(180deg, rgba(2,6,23,.55) 0%, rgba(2,6,23,.35) 55%, rgba(2,6,23,0) 100%),
+    linear-gradient(90deg, rgba(2,6,23,.25) 0%, rgba(2,6,23,0) 55%);
+}
+
+.login-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 60px rgba(2, 6, 23, 0.10);
+}
+
+.login-head {
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.login-title {
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.login-subtitle {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+
+.login-body {
+  padding: 22px;
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.login-alert {
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.login-alert-success {
+  background: var(--c-teal-bg);
+  color: var(--c-teal);
+  border-color: rgba(20,184,166,.25);
+}
+
+.login-alert-error {
+  background: var(--c-rose-bg);
+  color: var(--c-rose);
+  border-color: rgba(239,68,68,.22);
+}
+
+/* Better focus state */
+.login-card .ds-input:focus,
+.login-card .ds-select:focus {
+  outline: none;
+  box-shadow: var(--login-ring);
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
+/* File input */
+.login-card input[type="file"].ds-input {
+  padding: 6px 12px;
+}
+
+/* Upload section */
+.login-details {
+  margin-top: 16px;
+}
+
+.login-details > summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--c-blue);
+  user-select: none;
+  list-style: none;
+}
+.login-details > summary::-webkit-details-marker { display:none; }
+
+.login-details-panel {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.02);
+}
+
+.login-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .login-banner { height: 104px; }
+  .login-grid-2 { grid-template-columns: 1fr; }
+  .login-head { padding: 18px 18px 16px; }
+  .login-body { padding: 18px; }
+}
+
+/* Micro-interactions */
+.login-card .ds-btn {
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+.login-card .ds-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.10);
+}
+.login-card .ds-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}

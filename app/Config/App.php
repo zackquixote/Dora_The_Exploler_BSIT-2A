@@ -18,7 +18,7 @@ class App extends BaseConfig
      */
     // Overridden per machine in `.env` as `app.baseURL`. Must end with `/`.
     // Dynamic baseURL detection for development environments
-    public string $baseURL;
+    public string $baseURL = 'http://localhost/Dora_The_Exploler_BSIT-2A/public/';
 
     public function __construct()
     {

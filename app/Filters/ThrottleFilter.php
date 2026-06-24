@@ -22,7 +22,10 @@ class ThrottleFilter implements FilterInterface
 
         $ip   = $request->getIPAddress() ?: 'unknown';
         $path = $request->getUri()->getPath();
-        $key  = $ip . '_' . md5($path);
+        
+        // Clean IP address of reserved cache key characters (e.g. colons in IPv6 ::1)
+        $cleanIp = str_replace(['{', '}', '(', ')', '/', '\\', '@', ':'], '_', $ip);
+        $key  = $cleanIp . '_' . md5($path);
 
         /** @var \CodeIgniter\Throttle\Throttler $throttler */
         $throttler = service('throttler');

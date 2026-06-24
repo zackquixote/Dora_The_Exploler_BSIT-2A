@@ -146,4 +146,17 @@ class ResidentModel extends Model
 
         return $builder->orderBy('residents.last_name', 'ASC')->findAll();
     }
+
+    /**
+     * Get the list of puroks from the puroks table.
+     *
+     * @return array
+     */
+    public static function getPurokList()
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('puroks');
+        $result = $builder->select('name')->orderBy('name', 'ASC')->get()->getResultArray();
+        return array_column($result, 'name');
+    }
 }

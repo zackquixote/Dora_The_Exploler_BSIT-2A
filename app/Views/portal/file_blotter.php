@@ -7,21 +7,9 @@
         <p class="af-subtitle">Formally file a complaint or report an incident to the Barangay Peace and Order Committee (Lupon).</p>
     </div>
 
-    <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success af-alert">
-            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if (session()->getFlashdata('error')): ?>
-        <div class="alert alert-danger af-alert">
-            <i class="fas fa-exclamation-circle"></i> <?= session()->getFlashdata('error') ?>
-        </div>
-    <?php endif; ?>
-
     <div class="af-card-grid" style="grid-template-columns: 1fr; max-width: 800px; margin: 0 auto;">
         <div class="af-stat-card" style="align-items: stretch; text-align: left; padding: 30px;">
-            <form action="<?= base_url('portal/blotter/submit') ?>" method="POST" id="blotterForm">
+            <form action="<?= base_url('portal/blotter/submit') ?>" method="POST" id="blotterForm" aria-label="Incident Report Submission Form">
                 <?= csrf_field() ?>
                 
                 <h3 style="font-size: 1.2rem; margin-bottom: 20px; color: var(--c-navy); border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Incident Details</h3>
@@ -29,8 +17,8 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="af-form-group">
-                            <label class="af-label">Incident Type *</label>
-                            <select name="incident_type" class="af-input" required>
+                            <label for="incident_type" class="af-label">Incident Type *</label>
+                            <select id="incident_type" name="incident_type" class="af-input" required>
                                 <option value="">Select Type</option>
                                 <option value="Theft / Robbery">Theft / Robbery</option>
                                 <option value="Physical Injury">Physical Injury</option>
@@ -45,20 +33,20 @@
                     
                     <div class="col-md-6">
                         <div class="af-form-group">
-                            <label class="af-label">Date & Time of Incident *</label>
-                            <input type="datetime-local" name="incident_date" class="af-input" required max="<?= date('Y-m-d\TH:i') ?>">
+                            <label for="incident_date" class="af-label">Date & Time of Incident *</label>
+                            <input type="datetime-local" id="incident_date" name="incident_date" class="af-input" required max="<?= date('Y-m-d\TH:i') ?>">
                         </div>
                     </div>
                 </div>
 
                 <div class="af-form-group" style="margin-top: 15px;">
-                    <label class="af-label">Exact Location of Incident *</label>
-                    <input type="text" name="incident_location" class="af-input" placeholder="e.g. Near the basketball court, Purok 2" required>
+                    <label for="incident_location" class="af-label">Exact Location of Incident *</label>
+                    <input type="text" id="incident_location" name="incident_location" class="af-input" placeholder="e.g. Near the basketball court, Purok 2" required>
                 </div>
 
                 <div class="af-form-group" style="margin-top: 15px;">
-                    <label class="af-label">Detailed Description *</label>
-                    <textarea name="details" class="af-input" rows="5" placeholder="Please describe exactly what happened in detail..." required></textarea>
+                    <label for="details" class="af-label">Detailed Description *</label>
+                    <textarea id="details" name="details" class="af-input" rows="5" placeholder="Please describe exactly what happened in detail..." required></textarea>
                 </div>
 
                 <h3 style="font-size: 1.2rem; margin-top: 30px; margin-bottom: 20px; color: var(--c-navy); border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Respondent Information (Person Being Complained)</h3>
@@ -66,14 +54,14 @@
                 <div class="row g-3">
                     <div class="col-md-12">
                         <div class="af-form-group">
-                            <label class="af-label">Name of Respondent *</label>
-                            <input type="text" name="respondent_name" class="af-input" placeholder="Full name of the person you are complaining against" required>
+                            <label for="respondent_name" class="af-label">Name of Respondent *</label>
+                            <input type="text" id="respondent_name" name="respondent_name" class="af-input" placeholder="Full name of the person you are complaining against" required>
                         </div>
                     </div>
                     <div class="col-md-12">
                         <div class="af-form-group" style="margin-top: 15px;">
-                            <label class="af-label">Address of Respondent (if known)</label>
-                            <input type="text" name="respondent_address" class="af-input" placeholder="Address of the respondent">
+                            <label for="respondent_address" class="af-label">Address of Respondent (if known)</label>
+                            <input type="text" id="respondent_address" name="respondent_address" class="af-input" placeholder="Address of the respondent">
                         </div>
                     </div>
                 </div>

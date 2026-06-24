@@ -3,18 +3,173 @@
 
 <div class="bmis-content">
 
+<style>
+/* Premium Welcome Banner Upgrades */
+.welcome-banner-premium {
+    background: linear-gradient(135deg, #1b3a6b 0%, #0c1c38 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 10px 30px rgba(12, 28, 56, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    position: relative;
+    overflow: hidden;
+    padding: 24px 32px !important;
+    border-radius: 16px !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+}
+
+/* Background animated light blobs */
+.welcome-banner-premium .banner-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.15;
+    z-index: 1;
+    pointer-events: none;
+    animation: pulseBlob 8s infinite alternate;
+}
+
+.welcome-banner-premium .blob-1 {
+    width: 150px;
+    height: 150px;
+    background: #0f766e;
+    top: -50px;
+    right: 150px;
+}
+
+.welcome-banner-premium .blob-2 {
+    width: 200px;
+    height: 200px;
+    background: #3b82f6;
+    bottom: -80px;
+    left: 200px;
+    animation-delay: 4s;
+}
+
+@keyframes pulseBlob {
+    0% { transform: scale(1) translate(0, 0); opacity: 0.12; }
+    100% { transform: scale(1.3) translate(20px, 10px); opacity: 0.20; }
+}
+
+/* Dynamic Greeting Icon */
+.greeting-icon-wrapper {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    animation: floatIcon 4s ease-in-out infinite;
+}
+
+.greeting-icon-wrapper.morning {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.25);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15);
+}
+
+.greeting-icon-wrapper.afternoon {
+    color: #fb923c;
+    background: rgba(251, 146, 60, 0.1);
+    border-color: rgba(251, 146, 60, 0.25);
+    box-shadow: 0 8px 20px rgba(251, 146, 60, 0.15);
+}
+
+.greeting-icon-wrapper.evening {
+    color: #a5b4fc;
+    background: rgba(165, 180, 252, 0.1);
+    border-color: rgba(165, 180, 252, 0.25);
+    box-shadow: 0 8px 20px rgba(165, 180, 252, 0.15);
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+/* User Role Badge */
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(15, 118, 110, 0.15);
+    border: 1px solid rgba(15, 118, 110, 0.3);
+    color: var(--c-teal-light);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Glassmorphism Datetime Card */
+.glass-datetime-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 16px 22px !important;
+    border-radius: 14px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.live-clock-display {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    letter-spacing: -0.5px;
+    font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+</style>
+
+<div class="bmis-content">
+
     <!-- PREMIUM WELCOME BANNER -->
-    <div class="ds-welcome-banner">
-        <div>
-            <h2><span id="dynamicGreeting">Welcome</span>, <strong>Staff</strong>!</h2>
-            <p style="font-size: 14.5px; opacity: 0.9; margin-top: 4px;">Monitor key metrics, resolve cases, and assist the community efficiently.</p>
-        </div>
-        <div class="ds-datetime" style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-            <div style="font-size: 12px; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font); font-weight: 600;">
-                <i class="fas fa-calendar-day" style="margin-right: 4px;"></i> <span id="liveDate"><?= date('l, F j, Y') ?></span>
+    <div class="ds-welcome-banner welcome-banner-premium">
+        <!-- Floating decorative ambient light blobs -->
+        <div class="banner-blob blob-1"></div>
+        <div class="banner-blob blob-2"></div>
+        
+        <div style="display: flex; align-items: center; gap: 20px; position: relative; z-index: 2;">
+            <div class="greeting-icon-wrapper" id="greetingIcon">
+                <i class="fas fa-sun"></i>
             </div>
-            <div style="font-size: 28px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.5px;">
-                <i class="far fa-clock" style="font-size: 22px; opacity: 0.7; margin-right: 6px;"></i><span id="liveTime"><?= date('h:i:s A') ?></span>
+            <div>
+                <div class="user-badge">
+                    <i class="fas fa-user-shield"></i> BARANGAY STAFF
+                </div>
+                <h2 style="font-size: 24px; font-weight: 800; color: #FFFFFF; margin: 6px 0 0; letter-spacing: -0.02em;">
+                    <span id="dynamicGreeting">Welcome</span>, <strong>Staff</strong>!
+                </h2>
+                <p id="greetingMessage" style="font-size: 14px; opacity: 0.9; margin-top: 4px; margin-bottom: 0; color: rgba(255,255,255,0.85);">
+                    Monitor key metrics, resolve cases, and assist the community efficiently.
+                </p>
+            </div>
+        </div>
+        
+        <div class="ds-datetime glass-datetime-card" style="position: relative; z-index: 2;">
+            <div style="font-size: 11px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--font); font-weight: 700; display: flex; align-items: center; gap: 6px; color: var(--accent-light);">
+                <i class="fas fa-calendar-day"></i> <span id="liveDate"><?= date('l, F j, Y') ?></span>
+            </div>
+            <div class="live-clock-display">
+                <i class="far fa-clock" style="opacity: 0.8;"></i> <span id="liveTime"><?= date('h:i:s A') ?></span>
             </div>
         </div>
     </div>
@@ -187,13 +342,36 @@ const DASHBOARD_DATA = {
     purokValues: <?= json_encode(array_column($purokCounts ?? [], 'count')) ?>
 };
 
-// Dynamic Greeting
+// Dynamic Greeting & Theme Upgrade
 var hr = new Date().getHours();
-var greeting = "Good evening 🌙";
-if (hr < 12) greeting = "Good morning 🌅";
-else if (hr < 18) greeting = "Good afternoon ☀️";
+var greetingText = "Good evening";
+var iconClass = "fas fa-moon";
+var iconTheme = "evening";
+var welcomeMsg = "Wrapping up the day's tasks? Here's your current overview.";
+
+if (hr < 12) {
+    greetingText = "Good morning";
+    iconClass = "fas fa-sun";
+    iconTheme = "morning";
+    welcomeMsg = "Ready for a productive day? Here is your morning update.";
+} else if (hr < 18) {
+    greetingText = "Good afternoon";
+    iconClass = "fas fa-cloud-sun";
+    iconTheme = "afternoon";
+    welcomeMsg = "Keep up the great work! Monitor your community metrics below.";
+}
+
 var greetingEl = document.getElementById('dynamicGreeting');
-if (greetingEl) greetingEl.innerText = greeting;
+if (greetingEl) greetingEl.innerText = greetingText;
+
+var msgEl = document.getElementById('greetingMessage');
+if (msgEl) msgEl.innerText = welcomeMsg;
+
+var iconEl = document.getElementById('greetingIcon');
+if (iconEl) {
+    iconEl.className = "greeting-icon-wrapper " + iconTheme;
+    iconEl.innerHTML = '<i class="' + iconClass + '"></i>';
+}
 
 // Live Clock Logic for Welcome Banner
 setInterval(function() {

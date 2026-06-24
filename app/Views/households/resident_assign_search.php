@@ -41,7 +41,7 @@
                         <label class="ds-input-label">Filter by Purok</label>
                         <select name="filter_purok" id="filter_purok" class="ds-select">
                             <option value="">All Puroks</option>
-                            <?php foreach (['Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um'] as $p): ?>
+                            <?php foreach ($purokList as $p): ?>
                                 <option value="<?= $p ?>" <?= ($filterPurok == $p) ? 'selected' : '' ?>><?= $p ?></option>
                             <?php endforeach; ?>
                         </select>

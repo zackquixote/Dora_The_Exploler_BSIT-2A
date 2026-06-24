@@ -1,5 +1,6 @@
 <?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
+<?php $validationErrors = session()->getFlashdata('errors') ?? []; ?>
 
 <div class="bmis-content">
 
@@ -32,20 +33,27 @@
                     <div>
                         <label class="ds-input-label">Household Number <span style="color:var(--c-rose)">*</span></label>
                         <div style="display:flex;gap:4px">
-                            <input type="text" name="household_no" id="householdNo" class="ds-input" value="<?= old('household_no', $generatedHouseholdNo ?? '') ?>" placeholder="e.g., HH-2024-001" style="flex:1">
+                            <input type="text" name="household_no" id="householdNo" class="ds-input <?= isset($validationErrors['household_no']) ? 'ds-input-invalid' : '' ?>" value="<?= old('household_no', $generatedHouseholdNo ?? '') ?>" placeholder="e.g., HH-2024-001" style="flex:1">
                             <button type="button" class="ds-action-btn ab-blue" id="generateHouseholdNo" title="Generate"><i class="fas fa-sync-alt"></i></button>
                             <button type="button" class="ds-action-btn" id="checkHouseholdNo" title="Check" style="background:var(--c-teal-bg);color:var(--c-teal)"><i class="fas fa-check"></i></button>
                         </div>
+                        <?php if (isset($validationErrors['household_no'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['household_no']) ?></div>
+                        <?php else: ?>
                         <div style="font-size:10px;color:var(--ink-soft);margin-top:4px" id="householdNoFeedback">Auto-generated unique number</div>
+                        <?php endif; ?>
                     </div>
                     <div>
                         <label class="ds-input-label">Purok / Sitio <span style="color:var(--c-rose)">*</span></label>
-                        <select name="sitio" id="sitioSelect" class="ds-select" required>
+                        <select name="sitio" id="sitioSelect" class="ds-select <?= isset($validationErrors['sitio']) ? 'ds-select-invalid' : '' ?>" required>
                             <option value="">Select Purok</option>
-                            <?php foreach (['Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um'] as $s): ?>
+                            <?php foreach ($purokList as $s): ?>
                                 <option value="<?= $s ?>" <?= old('sitio') == $s ? 'selected' : '' ?>><?= $s ?></option>
                             <?php endforeach; ?>
                         </select>
+                        <?php if (isset($validationErrors['sitio'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['sitio']) ?></div>
+                        <?php endif; ?>
                     </div>
                     <div>
                         <label class="ds-input-label">House Type</label>

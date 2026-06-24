@@ -3,18 +3,20 @@ namespace App\Services;
 
 use App\Models\ResidentModel;
 use App\Exceptions\ResidentNotFoundException;
-use CodeIgniter\I18n\Time;
+use App\Services\TokenService;
 
 class IdCardService
 {
-    protected ResidentModel $residentModel;
+    protected ?ResidentModel $residentModel = null;
     protected ?string $encryptionKey = null;
     protected ?string $jwtSecret = null;
-    public function __construct()
+    protected TokenService $tokenService;
+    public function __construct(?ResidentModel $residentModel = null, ?TokenService $tokenService = null)
     {
-        $this->residentModel = new ResidentModel();
-        $this->encryptionKey = env('ENCRYPTION_KEY') ?? '';
+        $this->residentModel = $residentModel;
+        $this->encryptionKey = env('ENCRYPTION_KEY') ?? env('encryption.key') ?? '';
         $this->jwtSecret = env('JWT_SECRET') ?? '';
+        $this->tokenService = $tokenService ?? new TokenService($this->jwtSecret, $this->encryptionKey);
     }
 
     /**
@@ -22,58 +24,63 @@ class IdCardService
      */
     public function getResident(int $id): array
     {
-        $cacheKey = 'resident_' . $id;
+        $cacheKey = $this->makeCacheKey('resident_' . $id);
         $cached = cache()->get($cacheKey);
         if ($cached) {
             return $cached;
         }
-        $resident = $this->residentModel->getDetailsWithHousehold($id);
-        if (!$resident) {
+
+        $resident = ($this->residentModel ??= new ResidentModel())->getDetailsWithHousehold($id);
+        if (! $resident) {
             throw new ResidentNotFoundException("Resident with ID {$id} not found");
         }
+
         cache()->save($cacheKey, $resident, 300); // cache for 5 minutes
         return $resident;
     }
 
     /**
+     * Build a cache key that strips reserved characters.
+     */
+    protected function makeCacheKey(string $key): string
+    {
+        return preg_replace('/[{}()\/\\@:]/', '_', $key);
+    }
+
+    /**
      * Generate signed token for verification URL.
      */
+    
     /**
      * Generate a signed JWT for QR verification.
      */
     public function generateJwtToken(int $residentId, int $ttl = 900): string
     {
-        $header = base64_encode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
-        $now = time();
-        $payload = base64_encode(json_encode([
-            'sub' => $residentId,
-            'iat' => $now,
-            'exp' => $now + $ttl
-        ]));
-        $signature = hash_hmac('sha256', "$header.$payload", $this->jwtSecret, true);
-        $jwt = "$header.$payload." . rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
-        return $jwt;
+        return $this->tokenService->generateJwtToken($residentId, $ttl);
     }
 
     /**
      * Validate a JWT and return true if valid and not expired.
      */
-    public function validateJwtToken(string $jwt): bool
+    public function validateJwtToken(string $jwt, ?int $residentId = null): bool
     {
-        $parts = explode('.', $jwt);
-        if (count($parts) !== 3) {
-            return false;
-        }
-        [$header, $payload, $signature] = $parts;
-        $expectedSig = rtrim(strtr(base64_encode(hash_hmac('sha256', "$header.$payload", $this->jwtSecret, true)), '+/', '-_'), '=');
-        if (!hash_equals($expectedSig, $signature)) {
-            return false;
-        }
-        $data = json_decode(base64_decode($payload), true);
-        if (!isset($data['exp']) || $data['exp'] < time()) {
-            return false;
-        }
-        return true;
+        return $this->tokenService->validateJwtToken($jwt, $residentId);
+    }
+
+    /**
+     * Base64 URL-safe encode.
+     */
+    protected function base64UrlEncode(string $data): string
+    {
+        return $this->tokenService->base64UrlEncode($data);
+    }
+
+    /**
+     * Base64 URL-safe decode.
+     */
+    protected function base64UrlDecode(string $data): string
+    {
+        return $this->tokenService->base64UrlDecode($data);
     }
 
     /**
@@ -81,13 +88,16 @@ class IdCardService
      */
     public function validateToken(int $residentId, string $token, int $maxAge = 900): bool
     {
-        $payload = json_encode([
-            'id' => $residentId,
-            'ts' => time()
-        ]);
-        $expected = hash_hmac('sha256', $payload, $this->encryptionKey);
-        // Simple check – timestamp freshness is not enforced here for brevity
-        return hash_equals($expected, $token);
+        return $this->tokenService->validateHmacToken($residentId, $token, $maxAge);
+    }
+
+    /**
+     * Generate an HMAC-based token containing resident id and timestamp.
+     * Format: base64url(json_payload).base64url(signature)
+     */
+    public function generateHmacToken(int $residentId): string
+    {
+        return $this->tokenService->generateHmacToken($residentId);
     }
 
     /**

@@ -22,6 +22,7 @@ class BlotterModel extends Model
         'purok',
         'details',
         'status',
+        'source',
         'action_taken',
         'created_by',
         'updated_by'

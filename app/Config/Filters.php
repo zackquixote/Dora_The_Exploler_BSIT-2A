@@ -64,15 +64,16 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             'csrf' => ['except' => ['login', 'login/*', 'auth', 'auth/*', 'debug/probe']],
-            'inactivity' => ['except' => ['login', 'login/*', 'auth/*']],
-            'honeypot',
+            // Inactivity filter only for authenticated routes to reduce overhead
+            'inactivity' => ['except' => ['login', 'login/*', 'auth/*', '/', 'portal', 'portal/login', 'portal/register']],
+            // Honeypot only on forms, not all requests
+            // 'honeypot',
             'invalidchars',
         ],
         'after' => [
-            'csp',
-            'honeypot',
-            'secureheaders',
-            'securityHeaders',
+            // Reduced global filters for better performance
+            'secureheaders' => ['except' => ['debug/*', 'system-monitor/*']],
+            'securityHeaders' => ['except' => ['debug/*', 'system-monitor/*']],
         ],
     ];
 

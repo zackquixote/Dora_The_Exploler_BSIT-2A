@@ -1,53 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="App\Controllers\AdvancedFeaturesTest" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php" tests="4" assertions="0" errors="4" failures="0" skipped="0" time="0.000000">
-    <testcase name="testApiSearchHealthRecords" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php" line="19" class="App\Controllers\AdvancedFeaturesTest" classname="App.Controllers.AdvancedFeaturesTest" assertions="0" time="0.000000">
-      <error type="CodeIgniter\Exceptions\CriticalError">App\Controllers\AdvancedFeaturesTest::testApiSearchHealthRecords&#13;
-CodeIgniter\Exceptions\CriticalError: The required PHP extension "sqlite3" is not loaded. Install and enable it to use "SQLite3" driver.
-&#13;
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:182
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:59
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Config.php:84
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:82
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:59
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\CIUnitTestCase.php:251
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php:16</error>
-    </testcase>
-    <testcase name="testApiSearchBusiness" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php" line="29" class="App\Controllers\AdvancedFeaturesTest" classname="App.Controllers.AdvancedFeaturesTest" assertions="0" time="0.000000">
-      <error type="CodeIgniter\Exceptions\CriticalError">App\Controllers\AdvancedFeaturesTest::testApiSearchBusiness&#13;
-CodeIgniter\Exceptions\CriticalError: The required PHP extension "sqlite3" is not loaded. Install and enable it to use "SQLite3" driver.
-&#13;
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:182
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:59
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Config.php:84
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:82
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:59
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\CIUnitTestCase.php:251
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php:16</error>
-    </testcase>
-    <testcase name="testApiActiveEmergencies" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php" line="39" class="App\Controllers\AdvancedFeaturesTest" classname="App.Controllers.AdvancedFeaturesTest" assertions="0" time="0.000000">
-      <error type="CodeIgniter\Exceptions\CriticalError">App\Controllers\AdvancedFeaturesTest::testApiActiveEmergencies&#13;
-CodeIgniter\Exceptions\CriticalError: The required PHP extension "sqlite3" is not loaded. Install and enable it to use "SQLite3" driver.
-&#13;
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:182
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:59
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Config.php:84
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:82
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:59
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\CIUnitTestCase.php:251
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php:16</error>
-    </testcase>
-    <testcase name="testApiEventsList" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php" line="49" class="App\Controllers\AdvancedFeaturesTest" classname="App.Controllers.AdvancedFeaturesTest" assertions="0" time="0.000000">
-      <error type="CodeIgniter\Exceptions\CriticalError">App\Controllers\AdvancedFeaturesTest::testApiEventsList&#13;
-CodeIgniter\Exceptions\CriticalError: The required PHP extension "sqlite3" is not loaded. Install and enable it to use "SQLite3" driver.
-&#13;
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:182
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:59
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Config.php:84
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:82
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\DatabaseTestTrait.php:59
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Test\CIUnitTestCase.php:251
-C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\app\Controllers\AdvancedFeaturesTest.php:16</error>
-    </testcase>
+  <testsuite name="CLI Arguments" tests="9" assertions="16" errors="0" failures="0" skipped="0" time="0.587009">
+    <testsuite name="HealthTest" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\HealthTest.php" tests="2" assertions="3" errors="0" failures="0" skipped="0" time="0.520374">
+      <testcase name="testIsDefinedAppPath" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\HealthTest.php" line="12" class="HealthTest" classname="HealthTest" assertions="1" time="0.444340"/>
+      <testcase name="testBaseUrlHasBeenSet" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\HealthTest.php" line="17" class="HealthTest" classname="HealthTest" assertions="2" time="0.076035"/>
+    </testsuite>
+    <testsuite name="IdCardServiceTest" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\IdCardServiceTest.php" tests="2" assertions="4" errors="0" failures="0" skipped="0" time="0.044467">
+      <testcase name="testGetQrUrlContainsResidentAndJwt" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\IdCardServiceTest.php" line="12" class="IdCardServiceTest" classname="IdCardServiceTest" assertions="3" time="0.040863"/>
+      <testcase name="testValidateTokenDelegatesToTokenService" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\IdCardServiceTest.php" line="29" class="IdCardServiceTest" classname="IdCardServiceTest" assertions="1" time="0.003604"/>
+    </testsuite>
+    <testsuite name="TokenServiceTest" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\TokenServiceTest.php" tests="5" assertions="9" errors="0" failures="0" skipped="0" time="0.022168">
+      <testcase name="testGenerateAndValidateHmacToken" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\TokenServiceTest.php" line="11" class="TokenServiceTest" classname="TokenServiceTest" assertions="2" time="0.008277"/>
+      <testcase name="testTamperedHmacFails" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\TokenServiceTest.php" line="22" class="TokenServiceTest" classname="TokenServiceTest" assertions="2" time="0.005447"/>
+      <testcase name="testGenerateAndValidateJwtToken" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\TokenServiceTest.php" line="37" class="TokenServiceTest" classname="TokenServiceTest" assertions="2" time="0.002737"/>
+      <testcase name="testJwtSubjectMismatchFails" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\TokenServiceTest.php" line="45" class="TokenServiceTest" classname="TokenServiceTest" assertions="1" time="0.002650"/>
+      <testcase name="testTamperedJwtFails" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\TokenServiceTest.php" line="53" class="TokenServiceTest" classname="TokenServiceTest" assertions="2" time="0.003056"/>
+    </testsuite>
   </testsuite>
 </testsuites>

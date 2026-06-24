@@ -209,21 +209,21 @@ $sc = match($status) {
 </div>
 
 <!-- Add Hearing Modal -->
-<div class="modal fade" id="addHearingModal" tabindex="-1" role="dialog">
+<div class="modal fade" id="addHearingModal" tabindex="-1" role="dialog" aria-labelledby="addHearingModalTitle" aria-modal="true" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content shadow border-0" style="border-radius:var(--r)">
-            <form id="hearing-form" action="<?= base_url('blotter/hearing/add/' . $case['id']) ?>" method="POST">
+            <form id="hearing-form" action="<?= base_url('blotter/hearing/add/' . $case['id']) ?>" method="POST" aria-labelledby="addHearingModalTitle">
                 <?= csrf_field() ?>
                 <div style="padding:16px 20px;border-bottom:.5px solid var(--border)">
-                    <h5 style="font-size:14px;font-weight:700;color:var(--ink);margin:0"><i class="fas fa-gavel" style="margin-right:6px;color:var(--c-teal)"></i> Add Hearing</h5>
+                    <h5 id="addHearingModalTitle" style="font-size:14px;font-weight:700;color:var(--ink);margin:0"><i class="fas fa-gavel" style="margin-right:6px;color:var(--c-teal)"></i> Add Hearing</h5>
                 </div>
                 <div style="padding:16px 20px">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-                        <div><label class="ds-input-label">Date *</label><input type="date" name="hearing_date" class="ds-input" required></div>
-                        <div><label class="ds-input-label">Time</label><input type="time" name="hearing_time" class="ds-input"></div>
+                        <div><label for="hearing_date" class="ds-input-label">Date *</label><input type="date" id="hearing_date" name="hearing_date" class="ds-input" required min="<?= date('Y-m-d') ?>"></div>
+                        <div><label for="hearing_time" class="ds-input-label">Time</label><input type="time" id="hearing_time" name="hearing_time" class="ds-input"></div>
                     </div>
-                    <div style="margin-bottom:10px"><label class="ds-input-label">Venue</label><input type="text" name="venue" class="ds-input" placeholder="e.g., Barangay Hall"></div>
-                    <div style="margin-bottom:10px"><label class="ds-input-label">Presiding Officer</label>
+                    <div style="margin-bottom:10px"><label for="venue" class="ds-input-label">Venue</label><input type="text" id="venue" name="venue" class="ds-input" placeholder="e.g., Barangay Hall"></div>
+                    <div style="margin-bottom:10px"><label for="presiding-officer-select" class="ds-input-label">Presiding Officer</label>
                         <select name="presiding_officer" id="presiding-officer-select" class="ds-select">
                             <option value="">— Select Official —</option>
                             <?php foreach ($officials as $off): ?>
@@ -233,10 +233,10 @@ $sc = match($status) {
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div style="margin-bottom:10px"><label class="ds-input-label">Status</label>
-                        <select name="status" class="ds-select"><option>Scheduled</option><option>In Progress</option><option>Completed</option><option>Cancelled</option></select>
+                    <div style="margin-bottom:10px"><label for="hearing-status" class="ds-input-label">Status</label>
+                        <select name="status" id="hearing-status" class="ds-select"><option>Scheduled</option><option>In Progress</option><option>Completed</option><option>Cancelled</option></select>
                     </div>
-                    <div><label class="ds-input-label">Notes</label><textarea name="notes" class="ds-input" rows="3" style="resize:vertical" placeholder="Details..."></textarea></div>
+                    <div><label for="notes" class="ds-input-label">Notes</label><textarea id="notes" name="notes" class="ds-input" rows="3" style="resize:vertical" placeholder="Details..."></textarea></div>
                     <input type="hidden" name="hearing_id" id="hearing-id">
                 </div>
                 <div style="padding:12px 20px;border-top:.5px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
@@ -249,15 +249,15 @@ $sc = match($status) {
 </div>
 
 <!-- Delete Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalTitle" aria-modal="true" aria-hidden="true">
     <div class="modal-dialog"><div class="modal-content shadow border-0" style="border-radius:var(--r)">
         <div style="padding:20px;text-align:center">
             <div style="width:48px;height:48px;border-radius:50%;background:var(--c-rose-bg);color:var(--c-rose);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:18px"><i class="fas fa-trash-alt"></i></div>
-            <h5 style="font-size:14px;font-weight:700;color:var(--ink)">Confirm Delete</h5>
+            <h5 id="deleteModalTitle" style="font-size:14px;font-weight:700;color:var(--ink)">Confirm Delete</h5>
             <p style="font-size:12px;color:var(--ink-muted)">Delete <strong id="delete-case-ref"></strong>?</p>
             <div style="display:flex;justify-content:center;gap:8px;margin-top:16px">
                 <button class="ds-btn ds-btn-ghost" id="cancel-delete-btn">Cancel</button>
-                <form id="delete-form" method="POST" action=""><?= csrf_field() ?><button type="submit" class="ds-btn ds-btn-rose">Delete</button></form>
+                <form id="delete-form" method="POST" action="" aria-labelledby="deleteModalTitle"><?= csrf_field() ?><button type="submit" class="ds-btn ds-btn-rose">Delete</button></form>
             </div>
         </div>
     </div></div>

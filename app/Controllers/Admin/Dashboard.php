@@ -122,6 +122,25 @@ class Dashboard extends BaseController
             FROM residents WHERE deleted_at IS NULL AND birthdate IS NOT NULL
         ")->getRowArray();
 
+        // --- Portal Usage Stats (NEW) ---
+        $thisMonth = date('Y-m');
+        try {
+            $portalActiveAccounts  = $db->table('resident_accounts')->where('status', 'active')->countAllResults();
+            $portalPendingAccounts = $db->table('resident_accounts')->where('status', 'pending')->countAllResults();
+            $portalCertsThisMonth  = $db->table('certificate_requests')
+                ->where('DATE_FORMAT(created_at, "%Y-%m")', $thisMonth)
+                ->countAllResults();
+            $portalBlottersThisMonth = $db->table('blotter_records')
+                ->where('source', 'Online')
+                ->where('DATE_FORMAT(created_at, "%Y-%m")', $thisMonth)
+                ->countAllResults();
+            $portalBookingsThisMonth = $db->table('facility_bookings')
+                ->where('DATE_FORMAT(created_at, "%Y-%m")', $thisMonth)
+                ->countAllResults();
+        } catch (\Throwable $e) {
+            $portalActiveAccounts = $portalPendingAccounts = $portalCertsThisMonth = $portalBlottersThisMonth = $portalBookingsThisMonth = 0;
+        }
+
         return view('Admin/dashboard', [
             'title'           => 'Admin Dashboard',
             // existing
@@ -151,6 +170,12 @@ class Dashboard extends BaseController
             'casesByPurok'     => $casesByPurok,
             'recentCases'      => $recentCases,
             'ageDistribution'  => $ageDistribution,
+            // portal usage stats
+            'portalActiveAccounts'   => $portalActiveAccounts,
+            'portalPendingAccounts'  => $portalPendingAccounts,
+            'portalCertsThisMonth'   => $portalCertsThisMonth,
+            'portalBlottersThisMonth'=> $portalBlottersThisMonth,
+            'portalBookingsThisMonth'=> $portalBookingsThisMonth,
         ]);
     }
 

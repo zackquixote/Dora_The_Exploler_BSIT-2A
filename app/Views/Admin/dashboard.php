@@ -3,18 +3,173 @@
 
 <div class="bmis-content">
 
+<style>
+/* Premium Welcome Banner Upgrades */
+.welcome-banner-premium {
+    background: linear-gradient(135deg, #1b3a6b 0%, #0c1c38 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 10px 30px rgba(12, 28, 56, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    position: relative;
+    overflow: hidden;
+    padding: 24px 32px !important;
+    border-radius: 16px !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+}
+
+/* Background animated light blobs */
+.welcome-banner-premium .banner-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.15;
+    z-index: 1;
+    pointer-events: none;
+    animation: pulseBlob 8s infinite alternate;
+}
+
+.welcome-banner-premium .blob-1 {
+    width: 150px;
+    height: 150px;
+    background: #c49a00;
+    top: -50px;
+    right: 150px;
+}
+
+.welcome-banner-premium .blob-2 {
+    width: 200px;
+    height: 200px;
+    background: #3b82f6;
+    bottom: -80px;
+    left: 200px;
+    animation-delay: 4s;
+}
+
+@keyframes pulseBlob {
+    0% { transform: scale(1) translate(0, 0); opacity: 0.12; }
+    100% { transform: scale(1.3) translate(20px, 10px); opacity: 0.20; }
+}
+
+/* Dynamic Greeting Icon */
+.greeting-icon-wrapper {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    animation: floatIcon 4s ease-in-out infinite;
+}
+
+.greeting-icon-wrapper.morning {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.25);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15);
+}
+
+.greeting-icon-wrapper.afternoon {
+    color: #fb923c;
+    background: rgba(251, 146, 60, 0.1);
+    border-color: rgba(251, 146, 60, 0.25);
+    box-shadow: 0 8px 20px rgba(251, 146, 60, 0.15);
+}
+
+.greeting-icon-wrapper.evening {
+    color: #a5b4fc;
+    background: rgba(165, 180, 252, 0.1);
+    border-color: rgba(165, 180, 252, 0.25);
+    box-shadow: 0 8px 20px rgba(165, 180, 252, 0.15);
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+/* User Role Badge */
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(196, 154, 0, 0.15);
+    border: 1px solid rgba(196, 154, 0, 0.3);
+    color: var(--accent-light);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Glassmorphism Datetime Card */
+.glass-datetime-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 16px 22px !important;
+    border-radius: 14px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.live-clock-display {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    letter-spacing: -0.5px;
+    font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+</style>
+
+<div class="bmis-content">
+
     <!-- PREMIUM WELCOME BANNER -->
-    <div class="ds-welcome-banner">
-        <div>
-            <h2><span id="dynamicGreeting">Welcome</span>, <strong>Admin</strong>!</h2>
-            <p style="font-size: 14.5px; opacity: 0.9; margin-top: 4px;">Monitor key metrics, resolve cases, and manage your community efficiently.</p>
-        </div>
-        <div class="ds-datetime" style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-            <div style="font-size: 12px; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font); font-weight: 600;">
-                <i class="fas fa-calendar-day" style="margin-right: 4px;"></i> <span id="liveDate"><?= date('l, F j, Y') ?></span>
+    <div class="ds-welcome-banner welcome-banner-premium">
+        <!-- Floating decorative ambient light blobs -->
+        <div class="banner-blob blob-1"></div>
+        <div class="banner-blob blob-2"></div>
+        
+        <div style="display: flex; align-items: center; gap: 20px; position: relative; z-index: 2;">
+            <div class="greeting-icon-wrapper" id="greetingIcon">
+                <i class="fas fa-sun"></i>
             </div>
-            <div style="font-size: 28px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.5px;">
-                <i class="far fa-clock" style="font-size: 22px; opacity: 0.7; margin-right: 6px;"></i><span id="liveTime"><?= date('h:i:s A') ?></span>
+            <div>
+                <div class="user-badge">
+                    <i class="fas fa-shield-alt"></i> SYSTEM ADMINISTRATOR
+                </div>
+                <h2 style="font-size: 24px; font-weight: 800; color: #FFFFFF; margin: 6px 0 0; letter-spacing: -0.02em;">
+                    <span id="dynamicGreeting">Welcome</span>, <strong>Admin</strong>!
+                </h2>
+                <p id="greetingMessage" style="font-size: 14px; opacity: 0.9; margin-top: 4px; margin-bottom: 0; color: rgba(255,255,255,0.85);">
+                    Monitor key metrics, resolve cases, and manage your community efficiently.
+                </p>
+            </div>
+        </div>
+        
+        <div class="ds-datetime glass-datetime-card" style="position: relative; z-index: 2;">
+            <div style="font-size: 11px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--font); font-weight: 700; display: flex; align-items: center; gap: 6px; color: var(--accent-light);">
+                <i class="fas fa-calendar-day"></i> <span id="liveDate"><?= date('l, F j, Y') ?></span>
+            </div>
+            <div class="live-clock-display">
+                <i class="far fa-clock" style="opacity: 0.8;"></i> <span id="liveTime"><?= date('h:i:s A') ?></span>
             </div>
         </div>
     </div>
@@ -70,6 +225,57 @@
             <div class="ds-stat-label">Blotter Cases</div>
             <a href="<?= base_url('blotter') ?>" class="ds-stat-footer ft-rose">
                 <i class="fas fa-arrow-right"></i> View Records
+            </a>
+        </div>
+    </div>
+
+    <!-- ── PORTAL USAGE STATS ── -->
+    <div class="ds-section-label" style="margin: 20px 0 10px;">
+        <i class="fas fa-globe" style="margin-right:6px;color:#4f46e5"></i> Portal Activity — This Month
+    </div>
+    <div class="ds-grid-4" style="margin-bottom:8px">
+        <div class="ds-stat" style="border-left:4px solid #4f46e5">
+            <div class="ds-stat-top">
+                <div class="ds-stat-icon" style="background:rgba(79,70,229,0.1);color:#4f46e5"><i class="fas fa-users-cog"></i></div>
+                <span class="ds-stat-trend" style="color:#10b981;font-size:11px">+<?= $portalPendingAccounts ?? 0 ?> pending</span>
+            </div>
+            <div class="ds-stat-num"><?= $portalActiveAccounts ?? 0 ?></div>
+            <div class="ds-stat-label">Active Portal Accounts</div>
+            <a href="<?= base_url('admin/portal-accounts') ?>" class="ds-stat-footer" style="color:#4f46e5">
+                <i class="fas fa-arrow-right"></i> Manage Accounts
+            </a>
+        </div>
+        <div class="ds-stat" style="border-left:4px solid #8b5cf6">
+            <div class="ds-stat-top">
+                <div class="ds-stat-icon" style="background:rgba(139,92,246,0.1);color:#8b5cf6"><i class="fas fa-file-signature"></i></div>
+                <span class="ds-stat-trend" style="color:var(--ink-muted)">online</span>
+            </div>
+            <div class="ds-stat-num"><?= $portalCertsThisMonth ?? 0 ?></div>
+            <div class="ds-stat-label">Certificate Requests</div>
+            <a href="<?= base_url('admin/online-requests') ?>" class="ds-stat-footer" style="color:#8b5cf6">
+                <i class="fas fa-arrow-right"></i> Review Requests
+            </a>
+        </div>
+        <div class="ds-stat" style="border-left:4px solid #f59e0b">
+            <div class="ds-stat-top">
+                <div class="ds-stat-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b"><i class="fas fa-balance-scale"></i></div>
+                <span class="ds-stat-trend" style="color:var(--ink-muted)">online</span>
+            </div>
+            <div class="ds-stat-num"><?= $portalBlottersThisMonth ?? 0 ?></div>
+            <div class="ds-stat-label">Online Blotters Filed</div>
+            <a href="<?= base_url('admin/online-requests') ?>" class="ds-stat-footer" style="color:#f59e0b">
+                <i class="fas fa-arrow-right"></i> View Reports
+            </a>
+        </div>
+        <div class="ds-stat" style="border-left:4px solid #0ea5e9">
+            <div class="ds-stat-top">
+                <div class="ds-stat-icon" style="background:rgba(14,165,233,0.1);color:#0ea5e9"><i class="fas fa-building"></i></div>
+                <span class="ds-stat-trend" style="color:var(--ink-muted)">bookings</span>
+            </div>
+            <div class="ds-stat-num"><?= $portalBookingsThisMonth ?? 0 ?></div>
+            <div class="ds-stat-label">Facility Bookings</div>
+            <a href="<?= base_url('admin/facility-bookings') ?>" class="ds-stat-footer" style="color:#0ea5e9">
+                <i class="fas fa-arrow-right"></i> Manage Bookings
             </a>
         </div>
     </div>
@@ -268,9 +474,41 @@
         </div>
     </div>
 
-    <!-- ROW 6 · TABLES -->
-    <div class="ds-section-label">Records</div>
-    <div class="ds-grid-2">
+    <!-- ROW 6 · CASE ANALYTICS -->
+    <div class="ds-section-label">Case Analytics</div>
+    <div class="ds-grid-2" style="margin-bottom:16px">
+        <div class="ds-card">
+            <div class="ds-card-head">
+                <div class="ds-card-title"><i class="fas fa-chart-pie"></i> Case Status Breakdown</div>
+                <a href="<?= base_url('blotter') ?>" style="font-size:11px;font-weight:700;color:var(--c-blue);text-decoration:none">View All</a>
+            </div>
+            <div class="ds-card-body" style="display:flex;align-items:center;gap:20px">
+                <div style="width:160px;height:160px;flex-shrink:0"><canvas id="blotterStatusChart"></canvas></div>
+                <div style="flex:1">
+                    <?php
+                    $statusGroups = [
+                        ['label'=>'Pending',    'color'=>'#f59e0b'],
+                        ['label'=>'For Hearing','color'=>'#3b82f6'],
+                        ['label'=>'Settled',    'color'=>'#14b8a6'],
+                        ['label'=>'Dismissed',  'color'=>'#9ca3af'],
+                        ['label'=>'Unsettled',  'color'=>'#f43f5e'],
+                        ['label'=>'Referred',   'color'=>'#8b5cf6'],
+                    ];
+                    $dbInner = \Config\Database::connect();
+                    foreach ($statusGroups as $sg):
+                        $cnt = $dbInner->table('blotter_records')->where('status', $sg['label'])->countAllResults();
+                        if ($cnt == 0) continue;
+                        $pct = ($blotterCount??1) > 0 ? round(($cnt/($blotterCount??1))*100) : 0;
+                    ?>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+                        <div style="width:10px;height:10px;border-radius:50%;background:<?= $sg['color'] ?>;flex-shrink:0"></div>
+                        <div style="flex:1;font-size:11px;font-weight:600;color:var(--ink)"><?= $sg['label'] ?></div>
+                        <div style="font-size:11px;font-weight:700;color:var(--ink)"><?= $cnt ?> <span style="font-weight:400;color:var(--ink-muted)">(<?= $pct ?>%)</span></div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
         <div class="ds-card">
             <div class="ds-card-head">
                 <div class="ds-card-title"><i class="fas fa-calendar-alt"></i> Upcoming Hearings</div>
@@ -287,19 +525,17 @@
                             <td><?= esc($h['venue'] ?? 'Main Hall') ?></td>
                         </tr>
                         <?php endforeach; else: ?>
-                        <tr>
-                            <td colspan="3" style="text-align:center;padding:32px 16px;color:var(--ink-soft);">
-                                <i class="fas fa-calendar-check" style="font-size:32px;opacity:0.25;margin-bottom:12px;display:block;"></i>
-                                <div style="font-weight:600;">You're all caught up!</div>
-                                <div style="font-size:11px;opacity:0.7;">No hearings scheduled.</div>
-                            </td>
-                        </tr>
+                        <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--ink-soft)">No hearings scheduled.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
+    </div>
 
+    <!-- ROW 7 · TABLES -->
+    <div class="ds-section-label">Records</div>
+    <div class="ds-grid-2">
         <div class="ds-card">
             <div class="ds-card-head">
                 <div class="ds-card-title"><i class="fas fa-shield-alt"></i> Recent Cases</div>
@@ -330,6 +566,43 @@
                                 <i class="fas fa-folder-open" style="font-size:32px;opacity:0.25;margin-bottom:12px;display:block;"></i>
                                 <div style="font-weight:600;">No cases filed</div>
                                 <div style="font-size:11px;opacity:0.7;">Recent cases will appear here.</div>
+                            </td>
+                        </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="ds-card">
+            <div class="ds-card-head">
+                <div class="ds-card-title"><i class="fas fa-file-invoice"></i> Recent Certificates</div>
+                <a href="<?= base_url('certificate') ?>" style="font-size:11px;font-weight:700;color:var(--c-blue);text-decoration:none">View All</a>
+            </div>
+            <div class="ds-card-body p0">
+                <?php
+                $db = \Config\Database::connect();
+                $recentCerts = $db->table('certificates')
+                    ->select('certificates.certificate_number, certificates.certificate_type, certificates.created_at, residents.first_name, residents.last_name')
+                    ->join('residents', 'residents.id = certificates.resident_id', 'left')
+                    ->orderBy('certificates.id', 'DESC')
+                    ->limit(5)
+                    ->get()->getResultArray();
+                ?>
+                <table class="ds-table">
+                    <thead><tr><th>Cert No.</th><th>Type</th><th>Resident</th></tr></thead>
+                    <tbody>
+                        <?php if (!empty($recentCerts)): foreach ($recentCerts as $rc2): ?>
+                        <tr>
+                            <td class="mono"><strong><?= esc($rc2['certificate_number']) ?></strong></td>
+                            <td style="font-size:10.5px"><?= esc($rc2['certificate_type']) ?></td>
+                            <td><?= esc(trim(($rc2['first_name'] ?? '') . ' ' . ($rc2['last_name'] ?? ''))) ?: '—' ?></td>
+                        </tr>
+                        <?php endforeach; else: ?>
+                        <tr>
+                            <td colspan="3" style="text-align:center;padding:32px 16px;color:var(--ink-soft);">
+                                <i class="fas fa-file-alt" style="font-size:32px;opacity:0.25;margin-bottom:12px;display:block;"></i>
+                                <div style="font-weight:600;">No certificates issued</div>
                             </td>
                         </tr>
                         <?php endif; ?>
@@ -406,7 +679,19 @@ const DASHBOARD_DATA = {
     civilLabels: <?= json_encode(array_column($civilStatusData ?? [], 'civil_status')) ?>,
     civilValues: <?= json_encode(array_column($civilStatusData ?? [], 'count')) ?>,
     ageLabels: ['0-17', '18-30', '31-45', '46-59', '60+'],
-    ageValues: [<?= (int)($ageDistribution['minors'] ?? 0) ?>, <?= (int)($ageDistribution['young_adults'] ?? 0) ?>, <?= (int)($ageDistribution['adults'] ?? 0) ?>, <?= (int)($ageDistribution['middle_aged'] ?? 0) ?>, <?= (int)($ageDistribution['seniors'] ?? 0) ?>]
+    ageValues: [<?= (int)($ageDistribution['minors'] ?? 0) ?>, <?= (int)($ageDistribution['young_adults'] ?? 0) ?>, <?= (int)($ageDistribution['adults'] ?? 0) ?>, <?= (int)($ageDistribution['middle_aged'] ?? 0) ?>, <?= (int)($ageDistribution['seniors'] ?? 0) ?>],
+    blotterStatusLabels: ['Pending','For Hearing','Settled','Dismissed','Unsettled','Referred'],
+    blotterStatusValues: [
+        <?php $dbJs = \Config\Database::connect(); echo
+            $dbJs->table('blotter_records')->where('status','Pending')->countAllResults() . ',' .
+            $dbJs->table('blotter_records')->where('status','For Hearing')->countAllResults() . ',' .
+            $dbJs->table('blotter_records')->where('status','Settled')->countAllResults() . ',' .
+            $dbJs->table('blotter_records')->where('status','Dismissed')->countAllResults() . ',' .
+            $dbJs->table('blotter_records')->where('status','Unsettled')->countAllResults() . ',' .
+            $dbJs->table('blotter_records')->where('status','Referred')->countAllResults();
+        ?>
+    ],
+    blotterStatusColors: ['#f59e0b','#3b82f6','#14b8a6','#9ca3af','#f43f5e','#8b5cf6']
 };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
@@ -429,12 +714,36 @@ if (statsSelector) {
     });
 }
 
-// Dynamic Greeting
+// Dynamic Greeting & Theme Upgrade
 var hr = new Date().getHours();
-var greeting = "Good evening 🌙";
-if (hr < 12) greeting = "Good morning 🌅";
-else if (hr < 18) greeting = "Good afternoon ☀️";
-document.getElementById('dynamicGreeting').innerText = greeting;
+var greetingText = "Good evening";
+var iconClass = "fas fa-moon";
+var iconTheme = "evening";
+var welcomeMsg = "Wrapping up the day's tasks? Here's your current overview.";
+
+if (hr < 12) {
+    greetingText = "Good morning";
+    iconClass = "fas fa-sun";
+    iconTheme = "morning";
+    welcomeMsg = "Ready for a productive day? Here is your morning update.";
+} else if (hr < 18) {
+    greetingText = "Good afternoon";
+    iconClass = "fas fa-cloud-sun";
+    iconTheme = "afternoon";
+    welcomeMsg = "Keep up the great work! Monitor your community metrics below.";
+}
+
+var greetingEl = document.getElementById('dynamicGreeting');
+if (greetingEl) greetingEl.innerText = greetingText;
+
+var msgEl = document.getElementById('greetingMessage');
+if (msgEl) msgEl.innerText = welcomeMsg;
+
+var iconEl = document.getElementById('greetingIcon');
+if (iconEl) {
+    iconEl.className = "greeting-icon-wrapper " + iconTheme;
+    iconEl.innerHTML = '<i class="' + iconClass + '"></i>';
+}
 
 // Live Clock Logic for Welcome Banner
 setInterval(function() {

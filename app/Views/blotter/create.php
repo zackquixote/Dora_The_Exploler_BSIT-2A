@@ -91,13 +91,13 @@
                     </div>
                     <div>
                         <label class="ds-input-label">Date of Incident <span style="color:var(--c-rose)">*</span></label>
-                        <input type="date" name="incident_date" class="ds-input" required value="<?= old('incident_date') ?>">
+                        <input type="date" name="incident_date" class="ds-input" required max="<?= date('Y-m-d') ?>" value="<?= old('incident_date') ?>">
                     </div>
                     <div>
                         <label class="ds-input-label">Purok / Sitio</label>
                         <select name="purok" class="ds-select">
                             <option value="">Select Purok</option>
-                            <?php foreach (['Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um'] as $p): ?>
+                            <?php foreach ($purokList as $p): ?>
                                 <option value="<?= $p ?>" <?= old('purok') == $p ? 'selected' : '' ?>><?= $p ?></option>
                             <?php endforeach; ?>
                         </select>

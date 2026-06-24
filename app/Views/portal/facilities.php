@@ -7,18 +7,6 @@
         <p class="af-subtitle">Reserve venues, vehicles, or equipment for your events and needs.</p>
     </div>
 
-    <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success af-alert">
-            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if (session()->getFlashdata('error')): ?>
-        <div class="alert alert-danger af-alert">
-            <i class="fas fa-exclamation-circle"></i> <?= session()->getFlashdata('error') ?>
-        </div>
-    <?php endif; ?>
-
     <div class="row" style="margin-top: 30px;">
         <!-- Left Column: Booking Form -->
         <div class="col-md-5">
@@ -27,12 +15,12 @@
                     <i class="fas fa-calendar-plus" style="color: var(--c-blue); margin-right: 8px;"></i> Request a Booking
                 </h3>
 
-                <form action="<?= base_url('portal/facilities/book') ?>" method="POST" id="bookingForm">
+                <form action="<?= base_url('portal/facilities/book') ?>" method="POST" id="bookingForm" aria-label="Facility Booking Form">
                     <?= csrf_field() ?>
                     
                     <div class="af-form-group">
-                        <label class="af-label">Select Facility *</label>
-                        <select name="facility_id" class="af-input" required>
+                        <label for="facility_id" class="af-label">Select Facility *</label>
+                        <select id="facility_id" name="facility_id" class="af-input" required>
                             <option value="">Choose a facility...</option>
                             <?php foreach ($facilities as $f): ?>
                                 <option value="<?= $f['id'] ?>"><?= esc($f['name']) ?> (<?= esc($f['type']) ?>)</option>
@@ -44,23 +32,23 @@
                     </div>
 
                     <div class="row g-2" style="margin-top: 15px;">
-                        <div class="col-6">
+                        <div class="col-12 col-sm-6">
                             <div class="af-form-group">
-                                <label class="af-label">Start Time *</label>
-                                <input type="datetime-local" name="start_datetime" class="af-input" required min="<?= date('Y-m-d\TH:i') ?>">
+                                <label for="start_datetime" class="af-label">Start Time *</label>
+                                <input type="datetime-local" id="start_datetime" name="start_datetime" class="af-input" required min="<?= date('Y-m-d\TH:i') ?>">
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-12 col-sm-6">
                             <div class="af-form-group">
-                                <label class="af-label">End Time *</label>
-                                <input type="datetime-local" name="end_datetime" class="af-input" required min="<?= date('Y-m-d\TH:i') ?>">
+                                <label for="end_datetime" class="af-label">End Time *</label>
+                                <input type="datetime-local" id="end_datetime" name="end_datetime" class="af-input" required min="<?= date('Y-m-d\TH:i') ?>">
                             </div>
                         </div>
                     </div>
 
                     <div class="af-form-group" style="margin-top: 15px;">
-                        <label class="af-label">Purpose of Booking *</label>
-                        <textarea name="purpose" class="af-input" rows="3" placeholder="Why do you need to reserve this facility?" required></textarea>
+                        <label for="purpose" class="af-label">Purpose of Booking *</label>
+                        <textarea id="purpose" name="purpose" class="af-input" rows="3" placeholder="Why do you need to reserve this facility?" required></textarea>
                     </div>
 
                     <button type="submit" class="af-btn" style="width: 100%; margin-top: 20px;" id="submitBtn">
@@ -70,8 +58,16 @@
             </div>
         </div>
 
-        <!-- Right Column: My Bookings -->
+        <!-- Right Column: Availability Calendar & My Bookings -->
         <div class="col-md-7">
+            <!-- Facility Availability Calendar -->
+            <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--c-navy); margin-bottom: 20px;">
+                <i class="fas fa-calendar-alt" style="color: var(--c-blue); margin-right: 8px;"></i> Availability Calendar
+            </h3>
+            <div class="af-card" style="padding: 20px; margin-bottom: 30px;">
+                <div id="calendar"></div>
+            </div>
+
             <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--c-navy); margin-bottom: 20px;">
                 <i class="fas fa-history" style="color: var(--c-blue); margin-right: 8px;"></i> My Bookings
             </h3>
@@ -139,6 +135,28 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
         btn.style.opacity = '0.7';
         btn.style.pointerEvents = 'none';
+    });
+</script>
+
+<!-- FullCalendar Integration -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            height: 'auto',
+            events: '<?= base_url("portal/facilities/calendar-data") ?>',
+            eventClick: function(info) {
+                alert('Facility: ' + info.event.title + '\nFrom: ' + info.event.start.toLocaleString() + (info.event.end ? '\nTo: ' + info.event.end.toLocaleString() : ''));
+            }
+        });
+        calendar.render();
     });
 </script>
 

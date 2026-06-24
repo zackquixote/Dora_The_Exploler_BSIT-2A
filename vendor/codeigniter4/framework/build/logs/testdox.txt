@@ -1,0 +1,14 @@
+Health
+ [x] Is defined app path
+ [ ] Base url has been set
+
+Id Card Service
+ [ ] Get qr url contains resident and jwt
+ [ ] Validate token delegates to token service
+
+Token Service
+ [x] Generate and validate hmac token
+ [x] Tampered hmac fails
+ [x] Generate and validate jwt token
+ [x] Tampered jwt fails
+

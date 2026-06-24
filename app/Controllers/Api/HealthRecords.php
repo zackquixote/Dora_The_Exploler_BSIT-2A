@@ -5,7 +5,6 @@ namespace App\Controllers\Api;
 use App\Controllers\BaseController;
 use App\Models\HealthRecordModel;
 use App\Models\ResidentModel;
-use App\Services\AuditService;
 
 /**
  * Phase 1.4 - Health Records (CRUD + Vaccination Editor)
@@ -14,13 +13,11 @@ class HealthRecords extends BaseController
 {
     protected HealthRecordModel $health;
     protected ResidentModel $residents;
-    protected AuditService $audit;
 
     public function __construct()
     {
         $this->health    = new HealthRecordModel();
         $this->residents = new ResidentModel();
-        $this->audit     = new AuditService();
     }
 
     /**
@@ -122,7 +119,6 @@ class HealthRecords extends BaseController
 
         $id = (int) $this->health->getInsertID();
         $row = $this->health->find($id);
-        $this->audit->log('create', 'health_record', $id, null, $row);
 
         return $this->jsonSuccess(['health_record' => $row], 'Health record created');
     }
@@ -155,7 +151,6 @@ class HealthRecords extends BaseController
         }
 
         $updated = $this->health->find($id);
-        $this->audit->log('update', 'health_record', $id, $row, $updated);
 
         return $this->jsonSuccess(['health_record' => $updated], 'Health record updated');
     }
@@ -172,7 +167,6 @@ class HealthRecords extends BaseController
         }
 
         $this->health->delete($id);
-        $this->audit->log('delete', 'health_record', $id, $row, null);
 
         return $this->jsonSuccess(['deleted' => true], 'Health record deleted');
     }
@@ -234,7 +228,6 @@ class HealthRecords extends BaseController
         $old = $row;
         $this->health->update($id, ['vaccination_records' => json_encode($vaccinations)]);
         $updated = $this->health->find($id);
-        $this->audit->log('vaccination_add', 'health_record', $id, $old, $updated);
 
         return $this->jsonSuccess([
             'vaccinations' => $vaccinations,
@@ -277,7 +270,6 @@ class HealthRecords extends BaseController
         $old = $row;
         $this->health->update($id, ['vaccination_records' => json_encode($vaccinations)]);
         $updated = $this->health->find($id);
-        $this->audit->log('vaccination_update', 'health_record', $id, $old, $updated);
 
         return $this->jsonSuccess(['vaccinations' => $vaccinations], 'Vaccination updated');
     }
@@ -302,7 +294,6 @@ class HealthRecords extends BaseController
         $old = $row;
         $this->health->update($id, ['vaccination_records' => json_encode($vaccinations)]);
         $updated = $this->health->find($id);
-        $this->audit->log('vaccination_delete', 'health_record', $id, $old, $updated);
 
         return $this->jsonSuccess(['vaccinations' => $vaccinations], 'Vaccination deleted');
     }

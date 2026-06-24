@@ -93,7 +93,10 @@ class Blotter extends BaseController
             ->get()
             ->getResultArray();
 
-        return view('blotter/index', ['blotters' => $blotterRows]);
+        return view('blotter/index', [
+            'blotters'  => $blotterRows,
+            'purokList' => ResidentModel::getPurokList(),
+        ]);
     }
 
     /**
@@ -111,7 +114,10 @@ class Blotter extends BaseController
             ->orderBy('last_name', 'ASC')
             ->findAll();
 
-        return view('blotter/create', ['residents' => $residents]);
+        return view('blotter/create', [
+            'residents' => $residents,
+            'purokList' => ResidentModel::getPurokList(),
+        ]);
     }
 
     /**
@@ -128,12 +134,17 @@ class Blotter extends BaseController
             'incident_type'    => 'required',
             'incident_date'    => 'required|valid_date',
             'incident_location'=> 'permit_empty|max_length[255]',
-            'purok'            => 'permit_empty|max_length[50]',
+            'purok'            => 'permit_empty|max_length[255]',
             'details'          => 'required',
         ];
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $incidentDate = $this->request->getPost('incident_date');
+        if ($incidentDate && strtotime($incidentDate) > time()) {
+            return redirect()->back()->withInput()->with('error', 'Incident date cannot be in the future.');
         }
 
         // 2. Extract parties from POST – we expect arrays:
@@ -219,6 +230,9 @@ class Blotter extends BaseController
             // 6. Commit and log
             $db->transCommit();
             $this->logModel->addLog("Created blotter case {$caseNumber}");
+            
+            // Audit log
+            $blotterData = $this->blotterModel->find($blotterId);
 
             return redirect()->to('blotter')->with('success', "Case {$caseNumber} recorded successfully.");
         } catch (\Exception $e) {
@@ -294,6 +308,7 @@ class Blotter extends BaseController
             'case'      => $case,
             'residents' => $residents,
             'parties'   => $parties,
+            'purokList' => ResidentModel::getPurokList(),
         ]);
     }
 
@@ -316,12 +331,18 @@ class Blotter extends BaseController
         'incident_type'     => 'required|max_length[50]',
         'incident_date'     => 'required|valid_date',
         'incident_location' => 'permit_empty|max_length[255]',
+        'purok'             => 'permit_empty|max_length[255]',
         'details'           => 'required',
         'status'            => 'required|in_list[Pending,Investigating,Ongoing,For Hearing,Settled,Dismissed,Referred,Unsettled]',
     ];
 
     if (!$this->validate($rules)) {
         return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+    }
+
+    $incidentDate = $this->request->getPost('incident_date');
+    if ($incidentDate && strtotime($incidentDate) > time()) {
+        return redirect()->back()->withInput()->with('error', 'Incident date cannot be in the future.');
     }
 
     // Capture status before update for timeline
@@ -458,6 +479,11 @@ public function addHearing($blotterId)
         return $this->response->setJSON(['status' => 'error', 'errors' => $this->validator->getErrors(), 'csrf_hash' => csrf_hash()]);
     }
 
+    $hearingDate = $this->request->getPost('hearing_date');
+    if ($hearingDate && strtotime($hearingDate) < strtotime(date('Y-m-d'))) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Hearing date cannot be in the past.', 'csrf_hash' => csrf_hash()]);
+    }
+
     $data = [
         'blotter_id'         => $blotterId,
         'hearing_date'       => $this->request->getPost('hearing_date'),
@@ -471,6 +497,44 @@ public function addHearing($blotterId)
 
     if ($this->hearingModel->insert($data)) {
         $this->logModel->addLog("Added hearing for case {$case['case_number']}");
+
+        // ── Notify blotter parties who have portal accounts ──────────
+        try {
+            $db = \Config\Database::connect();
+            $parties = $db->table('blotter_parties bp')
+                ->select('bp.resident_id, r.first_name, r.last_name')
+                ->join('residents r', 'r.id = bp.resident_id', 'left')
+                ->where('bp.blotter_id', $blotterId)
+                ->whereIn('bp.role', ['complainant', 'respondent'])
+                ->where('bp.resident_id IS NOT NULL')
+                ->get()->getResultArray();
+
+            $notifModel = new \App\Models\NotificationModel();
+            $hearingDateFormatted = date('F d, Y', strtotime($data['hearing_date']));
+            $hearingTimeFormatted = !empty($data['hearing_time']) ? ' at ' . date('h:i A', strtotime($data['hearing_time'])) : '';
+
+            foreach ($parties as $party) {
+                // Check if resident has an active portal account
+                $account = $db->table('resident_accounts')
+                    ->where('resident_id', $party['resident_id'])
+                    ->where('status', 'active')
+                    ->get()->getRowArray();
+
+                if ($account) {
+                    $notifModel->insert([
+                        'resident_id' => $party['resident_id'],
+                        'type'        => 'blotter',
+                        'title'       => 'Hearing Scheduled — Case #' . $case['case_number'],
+                        'message'     => 'A hearing has been scheduled for your case on ' . $hearingDateFormatted . $hearingTimeFormatted . ($data['venue'] ? ' at ' . $data['venue'] : '') . '. Please be present.',
+                        'status'      => 'sent',
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Notification failure should not block the main action
+        }
+        // ── End notification ─────────────────────────────────────────
+
         return $this->response->setJSON(['status' => 'success', 'message' => 'Hearing added.', 'csrf_hash' => csrf_hash()]);
     }
 
@@ -485,6 +549,11 @@ public function updateHearing($hearingId)
     $hearing = $this->hearingModel->find($hearingId);
     if (!$hearing) {
         return $this->response->setJSON(['status' => 'error', 'message' => 'Hearing not found.', 'csrf_hash' => csrf_hash()]);
+    }
+
+    $hearingDate = $this->request->getPost('hearing_date');
+    if ($hearingDate && strtotime($hearingDate) < strtotime(date('Y-m-d'))) {
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Hearing date cannot be in the past.', 'csrf_hash' => csrf_hash()]);
     }
 
     $data = [

@@ -51,6 +51,7 @@ class Resident extends BaseController
             'residents'     => $residents,
             'purokCounts'   => $purokCounts,
             'selectedPurok' => $selectedPurok,
+            'purokList'     => ResidentModel::getPurokList(),
         ]);
     }
 
@@ -65,6 +66,7 @@ class Resident extends BaseController
             'title'                => 'Add Resident',
             'households'           => $households,
             'preselectedHousehold' => $this->request->getGet('household_id'),
+            'purokList'            => ResidentModel::getPurokList(),
         ]);
     }
 
@@ -80,6 +82,10 @@ class Resident extends BaseController
         if ($this->request->isAJAX()) {
             if (!$this->validate($rules)) {
                 return $this->response->setJSON(['status' => 'error', 'errors' => $this->validator->getErrors()]);
+            }
+            $birthdate = $this->request->getPost('birthdate');
+            if ($birthdate && strtotime($birthdate) > time()) {
+                return $this->response->setJSON(['status' => 'error', 'errors' => ['birthdate' => 'Birthdate cannot be in the future.']]);
             }
             $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
             $data       = $this->prepareResidentData($this->request->getPost(), $profilePic);
@@ -109,6 +115,10 @@ class Resident extends BaseController
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+        $birthdate = $this->request->getPost('birthdate');
+        if ($birthdate && strtotime($birthdate) > time()) {
+            return redirect()->back()->withInput()->with('errors', ['birthdate' => 'Birthdate cannot be in the future.']);
         }
 
         $profilePic = $this->uploadProfilePicture($this->request->getFile('profile_picture'), $this->request->getPost('sitio'));
@@ -153,6 +163,7 @@ class Resident extends BaseController
             'title'      => 'Edit Resident',
             'resident'   => $resident,
             'households' => $households,
+            'purokList'  => ResidentModel::getPurokList(),
         ]);
     }
 
@@ -166,6 +177,10 @@ class Resident extends BaseController
         if ($this->request->isAJAX()) {
             if (!$this->validate($rules)) {
                 return $this->response->setJSON(['status' => 'error', 'errors' => $this->validator->getErrors()]);
+            }
+            $birthdate = $this->request->getPost('birthdate');
+            if ($birthdate && strtotime($birthdate) > time()) {
+                return $this->response->setJSON(['status' => 'error', 'errors' => ['birthdate' => 'Birthdate cannot be in the future.']]);
             }
 
             $resident = $this->residentModel->find($id);
@@ -208,6 +223,10 @@ class Resident extends BaseController
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+        $birthdate = $this->request->getPost('birthdate');
+        if ($birthdate && strtotime($birthdate) > time()) {
+            return redirect()->back()->withInput()->with('errors', ['birthdate' => 'Birthdate cannot be in the future.']);
         }
 
         $resident   = $this->residentModel->find($id);
@@ -257,6 +276,18 @@ class Resident extends BaseController
             return redirect()->back()->with('error', 'Resident not found');
         }
 
+        // Pre-deletion checks for foreign keys
+        $blotterPartyModel = new \App\Models\BlotterPartyModel();
+        $officialModel     = new \App\Models\OfficialModel();
+
+        if ($blotterPartyModel->where('resident_id', $id)->first() || $officialModel->where('resident_id', $id)->first()) {
+            $msg = 'Cannot delete resident. They are currently involved in a blotter case or assigned as an official.';
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['status' => 'error', 'message' => $msg]);
+            }
+            return redirect()->back()->with('error', $msg);
+        }
+
         // Delete stored profile photo (if any)
         if (!empty($resident['profile_picture']) && file_exists(FCPATH . 'uploads/' . $resident['profile_picture'])) {
             unlink(FCPATH . 'uploads/' . $resident['profile_picture']);
@@ -302,11 +333,15 @@ class Resident extends BaseController
 
         $certificates = $this->certificateModel->getByResidentId($id);
         $blotterHistory = $this->blotterPartyModel->getHistoryByResident($id);
+        
+        $portalAccountModel = new \App\Models\ResidentAccountModel();
+        $portalAccount = $portalAccountModel->where('resident_id', $id)->first();
 
         return view('residents/view', [
             'resident'       => $resident,
             'certificates'   => $certificates,
             'blotterHistory' => $blotterHistory,
+            'portalAccount'  => $portalAccount,
         ]);    }
 
     // ── Households by Sitio (AJAX) ────────────────────────────────────
@@ -378,6 +413,7 @@ class Resident extends BaseController
             'filterPurok'    => $filterPurok,
             'filterHouseId'  => $filterHouseId,
             'filterStatus'   => $filterStatus,
+            'purokList'      => ResidentModel::getPurokList(),
         ]);
     }
 

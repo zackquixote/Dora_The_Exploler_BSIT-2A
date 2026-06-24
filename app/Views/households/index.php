@@ -19,11 +19,7 @@
         </a>
     </div>
 
-    <?php if (session()->getFlashdata('success')): ?>
-        <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:14px 20px;border-radius:var(--r-md);margin-bottom:24px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;border:1px solid rgba(var(--c-teal-rgb), 0.2)">
-            <i class="fas fa-check-circle" style="font-size:16px"></i> <?= esc(session()->getFlashdata('success')) ?>
-        </div>
-    <?php endif; ?>
+
 
     <!-- STAT CARDS -->
     <div class="ds-grid-3">
@@ -42,7 +38,7 @@
                 </div>
                 <select id="purokFilter" class="ds-select" style="width:auto;min-width:160px" onchange="location.href='<?= base_url('households') ?>?purok='+encodeURIComponent(this.value)">
                     <option value="all" <?= ($selectedPurok ?? 'all') == 'all' ? 'selected' : '' ?>>All Puroks</option>
-                    <?php foreach (['Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um'] as $p): ?>
+                    <?php foreach ($purokList as $p): ?>
                         <option value="<?= $p ?>" <?= ($selectedPurok ?? '') == $p ? 'selected' : '' ?>><?= $p ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -56,14 +52,19 @@
             <div class="ds-card-title"><i class="fas fa-list"></i> Full Household List</div>
         </div>
         <div class="ds-card-body p0">
+            <?php if (empty($households)): ?>
+                <div class="ds-empty-state" style="border:none; margin:0; padding:80px 20px;">
+                    <i class="fas fa-home ds-empty-icon" style="color:var(--c-teal-soft); font-size:64px;"></i>
+                    <h4 class="ds-empty-title">No Households Found</h4>
+                    <p class="ds-empty-text">It looks like there are no households yet, or none match your search criteria.</p>
+                    <a href="<?= base_url('households/create') ?>" class="ds-btn ds-btn-teal"><i class="fas fa-plus"></i> Add New Household</a>
+                </div>
+            <?php else: ?>
             <div style="overflow-x:auto">
                 <table class="ds-table" id="hhTable">
                     <thead><tr><th>Household No</th><th>Head of Family</th><th>Sitio</th><th>Address</th><th>Members</th><th>Actions</th></tr></thead>
                     <tbody>
-
-                        <?php if (empty($households)): ?>
-                            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--ink-soft)"><i class="fas fa-home" style="font-size:20px;opacity:.3;display:block;margin-bottom:8px"></i>No households found.</td></tr>
-                        <?php else: foreach ($households as $h):
+                        <?php foreach ($households as $h):
                             $count = $h['resident_count'];
                             $bc = 'ds-badge-gray'; $bt = 'Low';
                             if ($count >= 4 && $count < 7) { $bc = 'ds-badge-blue'; $bt = 'Medium'; }
@@ -71,21 +72,21 @@
                             if ($count >= 10) { $bc = 'ds-badge-rose'; $bt = 'Crowded'; }
                         ?>
                         <tr>
-                            <td><a href="<?= base_url('households/view/'.$h['id']) ?>" style="color:var(--c-teal);font-weight:700;text-decoration:none;font-family:var(--mono);font-size:11.5px"><?= esc($h['household_no']) ?></a></td>
-                            <td>
+                            <td data-label="HH No"><a href="<?= base_url('households/view/'.$h['id']) ?>" style="color:var(--c-teal);font-weight:700;text-decoration:none;font-family:var(--mono);font-size:11.5px"><?= esc($h['household_no']) ?></a></td>
+                            <td data-label="Head">
                                 <div style="display:flex;align-items:center;gap:10px">
                                     <img src="<?= base_url($h['head_photo']) ?>" 
                                          style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid var(--border)">
                                     <strong><?= esc($h['head_name']) ?></strong>
                                 </div>
                             </td>
-                            <td style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--ink-muted)"><?= esc($h['sitio']) ?></td>
-                            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<?= esc($h['address'] ?: $h['street_address']) ?>"><?= esc($h['address'] ?: $h['street_address']) ?></td>
-                            <td>
+                            <td data-label="Sitio" style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--ink-muted)"><?= esc($h['sitio']) ?></td>
+                            <td data-label="Address" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<?= esc($h['address'] ?: $h['street_address']) ?>"><?= esc($h['address'] ?: $h['street_address']) ?></td>
+                            <td data-label="Members">
                                 <span class="ds-badge <?= $bc ?> resident-count"><?= $count ?></span>
                                 <span style="font-size:10px;color:var(--ink-soft)"><?= $bt ?></span>
                             </td>
-                            <td style="white-space:nowrap">
+                            <td data-label="Actions" style="white-space:nowrap">
                                 <a href="<?= base_url('households/view/'.$h['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-eye"></i></a>
                                 <a href="<?= base_url('households/edit/'.$h['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-pen"></i></a>
                                 <button
@@ -97,10 +98,11 @@
                                 ><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>
-                        <?php endforeach; endif; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

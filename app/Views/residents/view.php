@@ -144,11 +144,13 @@ $statusBadge = ['active'=>'ds-badge-teal','inactive'=>'ds-badge-gray','deceased'
                                 ['Citizenship', $resident['citizenship'] ?? '—'],
                                 ['Contact No.', $resident['contact_number'] ?? '—'],
                                 ['Registered On', date('M d, Y', strtotime($resident['created_at']))],
+                                ['Portal Account', !empty($portalAccount) ? '<span class="ds-badge ds-badge-teal">Active</span>' : '<span class="ds-badge ds-badge-gray">None</span>'],
+                                ['Portal Email', !empty($portalAccount['email']) ? $portalAccount['email'] : '—'],
                             ];
                             foreach ($details as $d): ?>
                             <div class="rv-detail-row">
                                 <div class="rv-detail-lbl"><?= $d[0] ?></div>
-                                <div class="rv-detail-val"><?= esc($d[1]) ?></div>
+                                <div class="rv-detail-val"><?= $d[0] === 'Portal Account' ? $d[1] : esc($d[1]) ?></div>
                             </div>
                             <?php endforeach; ?>
                             <div class="rv-detail-row" style="grid-column:1/-1">

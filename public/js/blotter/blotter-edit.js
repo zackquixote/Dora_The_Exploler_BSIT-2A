@@ -28,6 +28,7 @@
                     .then(data => callback(data))
                     .catch(() => callback());
             },
+            
             shouldLoad: function (query) { return query.length >= 1; },
             render: {
                 no_results: function () {

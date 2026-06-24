@@ -158,11 +158,11 @@ foreach ($residents as $r) {
 </div>
 
 <!-- Add Member Modal -->
-<div class="modal fade" id="addMemberModal" tabindex="-1" role="dialog">
+<div class="modal fade" id="addMemberModal" tabindex="-1" role="dialog" aria-labelledby="addMemberModalTitle" aria-modal="true" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content shadow border-0" style="border-radius:var(--r)">
             <div style="padding:20px 24px;border-bottom:.5px solid var(--border)">
-                <h5 style="font-size:14px;font-weight:700;color:var(--ink);margin:0">Add Member to Household</h5>
+                <h5 id="addMemberModalTitle" style="font-size:14px;font-weight:700;color:var(--ink);margin:0">Add Member to Household</h5>
             </div>
             <div style="padding:20px 24px">
                 <p style="color:var(--ink-muted);text-align:center;margin-bottom:16px;font-size:12px">Choose an option:</p>

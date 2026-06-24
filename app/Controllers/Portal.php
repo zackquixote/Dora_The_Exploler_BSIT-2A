@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\BarangaySettingsModel;
 use App\Models\ResidentAccountModel;
+use App\Models\CertificateRequestModel;
+use App\Models\CertificateModel;
 
 /**
  * ------------------------------------------------ --------------------
@@ -22,9 +24,40 @@ class Portal extends BaseController
     {
         $settingsModel = new BarangaySettingsModel();
         $settings = $settingsModel->first();
+
+        $db = \Config\Database::connect();
+        
+        $stats = [
+            'residents' => 0,
+            'accounts'  => 0
+        ];
+        $upcomingEvents = [];
+        $announcements = [];
+
+        try {
+            $stats['residents'] = $db->table('residents')->where('deleted_at', null)->countAllResults();
+            $stats['accounts']  = $db->table('resident_accounts')->where('status', 'active')->countAllResults();
+
+            // Fetch latest 3 announcements
+            $announcements = $db->table('announcements')
+                ->orderBy('is_pinned', 'DESC')
+                ->orderBy('created_at', 'DESC')
+                ->limit(3)
+                ->get()->getResultArray();
+
+            // Fetch upcoming events
+            $upcomingEvents = $db->table('events')
+                ->where('event_date >=', date('Y-m-d'))
+                ->orderBy('event_date', 'ASC')
+                ->limit(3)
+                ->get()->getResultArray();
+        } catch (\Throwable $e) {}
         
         return view('portal/index', [
-            'settings' => $settings
+            'settings'       => $settings,
+            'stats'          => $stats,
+            'announcements'  => $announcements,
+            'upcomingEvents' => $upcomingEvents,
         ]);
     }
 
@@ -101,13 +134,49 @@ class Portal extends BaseController
             // Table may not exist yet
         }
 
+        // 3. Certificate requests
+        try {
+            $certRequests = $db->table('certificate_requests cr')
+                ->select('cr.id, cr.certificate_type, cr.status, cr.created_at, cr.purpose')
+                ->where('cr.resident_id', $residentId)
+                ->orderBy('cr.created_at', 'DESC')
+                ->limit(10)
+                ->get()->getResultArray();
+
+            foreach ($certRequests as $cr) {
+                $activities[] = [
+                    'type'   => 'certificate_request',
+                    'icon'   => 'fas fa-file-signature',
+                    'color'  => '#8b5cf6',
+                    'title'  => 'Document Request',
+                    'desc'   => $cr['certificate_type'] . ' — ' . $cr['purpose'],
+                    'status' => $cr['status'],
+                    'date'   => $cr['created_at'],
+                ];
+            }
+        } catch (\Throwable $e) {
+            // Table may not exist yet
+        }
+
         usort($activities, fn($a, $b) => strtotime($b['date']) - strtotime($a['date']));
         $activities = array_slice($activities, 0, 8);
+
+        // Fetch Announcements
+        try {
+            $announcements = $db->table('announcements')
+                ->orderBy('is_pinned', 'DESC')
+                ->orderBy('created_at', 'DESC')
+                ->limit(5)
+                ->get()->getResultArray();
+        } catch (\Throwable $e) {
+            $announcements = [];
+        }
 
         return view('portal/home', [
             'resident'   => $resident,
             'account'    => $account,
             'activities' => $activities,
+            'announcements' => $announcements,
         ]);
     }
 
@@ -165,6 +234,7 @@ class Portal extends BaseController
                 'purok'             => $resident ? $resident['sitio'] : null,
                 'details'           => $this->request->getPost('details'),
                 'status'            => 'Pending',
+                'source'            => 'Online',
                 'created_by'        => session()->get('user_id') ?? 1,
             ]);
 
@@ -218,10 +288,11 @@ class Portal extends BaseController
 
                 $c['respondent_name'] = $respondent['outsider_name'] ?? 'N/A';
 
-                // Get hearing count
-                $c['hearing_count'] = $db->table('blotter_hearings')
+                // Get hearings for timeline
+                $c['hearings'] = $db->table('blotter_hearings')
                     ->where('blotter_id', $c['id'])
-                    ->countAllResults();
+                    ->orderBy('scheduled_at', 'ASC')
+                    ->get()->getResultArray();
             }
         } catch (\Throwable $e) {
             // Tables may not exist
@@ -309,6 +380,26 @@ class Portal extends BaseController
         ]);
 
         return redirect()->to('portal/facilities')->with('success', 'Booking request submitted successfully! Please wait for admin approval.');
+    }
+
+    public function facilityCalendarData()
+    {
+        $db = \Config\Database::connect();
+        // Fetch only approved bookings
+        $bookings = $db->table('facility_bookings')
+            ->select('facility_bookings.start_datetime as start, facility_bookings.end_datetime as end, facilities.name as title')
+            ->join('facilities', 'facilities.id = facility_bookings.facility_id', 'left')
+            ->where('facility_bookings.status', 'Approved')
+            ->get()->getResultArray();
+
+        // Format for FullCalendar
+        foreach ($bookings as &$b) {
+            $b['backgroundColor'] = '#10b981'; // green for approved
+            $b['borderColor'] = '#059669';
+            $b['textColor'] = '#ffffff';
+        }
+
+        return $this->response->setJSON($bookings);
     }
 
     public function cancelBooking($bookingId)
@@ -405,5 +496,118 @@ class Portal extends BaseController
         }
 
         return redirect()->to('portal/profile')->with('success', 'Profile updated successfully!');
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  Online Certificate Requests
+    // ─────────────────────────────────────────────────────────
+
+    public function myCertificates()
+    {
+        $residentId = session()->get('resident_id');
+        $requestModel = new CertificateRequestModel();
+        
+        $requests = $requestModel->where('resident_id', $residentId)
+                                 ->orderBy('created_at', 'DESC')
+                                 ->findAll();
+
+        return view('portal/my_certificates', [
+            'requests' => $requests,
+        ]);
+    }
+
+    public function requestCertificate()
+    {
+        $types = CertificateModel::getTypes();
+        return view('portal/request_certificate', [
+            'types' => $types,
+        ]);
+    }
+
+    public function submitCertificateRequest()
+    {
+        $rules = [
+            'certificate_type' => 'required',
+            'purpose'          => 'required',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('error', 'Please fill all required fields correctly.');
+        }
+
+        $type = $this->request->getPost('certificate_type');
+        if (!in_array($type, CertificateModel::getTypes())) {
+            return redirect()->back()->withInput()->with('error', 'Invalid certificate type.');
+        }
+
+        $requestModel = new CertificateRequestModel();
+        $requestModel->insert([
+            'resident_id'      => session()->get('resident_id'),
+            'certificate_type' => $type,
+            'purpose'          => $this->request->getPost('purpose'),
+            'status'           => 'Pending',
+        ]);
+
+        return redirect()->to('portal/certificates')->with('success', 'Certificate request submitted successfully! You can track its status here.');
+    }
+
+    public function cancelCertificateRequest($requestId)
+    {
+        $requestModel = new CertificateRequestModel();
+        $request = $requestModel->find($requestId);
+
+        if (!$request || $request['resident_id'] != session()->get('resident_id')) {
+            return redirect()->to('portal/certificates')->with('error', 'Request not found.');
+        }
+
+        if ($request['status'] !== 'Pending') {
+            return redirect()->to('portal/certificates')->with('error', 'Only pending requests can be cancelled.');
+        }
+
+        $requestModel->update($requestId, ['status' => 'Cancelled']);
+
+        return redirect()->to('portal/certificates')->with('success', 'Certificate request cancelled.');
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  Notifications
+    // ─────────────────────────────────────────────────────────
+
+    public function notifications()
+    {
+        $residentId = session()->get('resident_id');
+        $notifModel = new \App\Models\NotificationModel();
+
+        $notifications = [];
+        try {
+            $notifications = $notifModel->where('recipient_type', 'resident')
+                ->where('recipient_id', $residentId)
+                ->orderBy('created_at', 'DESC')
+                ->findAll();
+        } catch (\Throwable $e) {
+            // Table may not exist yet
+        }
+
+        return view('portal/notifications', [
+            'notifications' => $notifications,
+        ]);
+    }
+
+    public function markNotificationsRead()
+    {
+        $residentId = session()->get('resident_id');
+        $notifModel = new \App\Models\NotificationModel();
+
+        try {
+            $notifModel->where('recipient_type', 'resident')
+                ->where('recipient_id', $residentId)
+                ->where('status', 'sent')
+                ->set(['status' => 'read'])
+                ->update();
+        } catch (\Throwable $e) {
+            // Ignore if table doesn't exist
+        }
+
+        return redirect()->to('portal/notifications')->with('success', 'All notifications marked as read.');
     }
 }

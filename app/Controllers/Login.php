@@ -27,7 +27,23 @@ class Login extends BaseController
      */
     public function index()
     {
-        return view('login'); // your login view filename
+        // Keep this controller compatible with the main login view which expects
+        // `$settings` (barangay name/municipality/province/logo).
+        $settingsModel = new \App\Models\BarangaySettingsModel();
+        $settings = $settingsModel->first();
+
+        if (!$settings) {
+            $settings = [
+                'barangay_name' => 'Barangay',
+                'municipality'  => 'Municipality',
+                'province'      => 'Province',
+                'logo'          => '',
+            ];
+        }
+
+        return view('login', [
+            'settings' => $settings,
+        ]);
     }
 
     public function auth()

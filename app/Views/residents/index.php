@@ -23,17 +23,7 @@
         </div>
     </div>
 
-    <!-- Flash messages -->
-    <?php if (session()->getFlashdata('success')): ?>
-        <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:14px 20px;border-radius:var(--r-md);margin-bottom:24px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;border:1px solid rgba(var(--c-teal-rgb), 0.2)">
-            <i class="fas fa-check-circle" style="font-size:16px"></i> <?= session()->getFlashdata('success') ?>
-        </div>
-    <?php endif; ?>
-    <?php if (session()->getFlashdata('error')): ?>
-        <div style="background:var(--c-rose-bg);color:var(--c-rose);padding:14px 20px;border-radius:var(--r-md);margin-bottom:24px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;border:1px solid rgba(var(--c-rose-rgb), 0.2)">
-            <i class="fas fa-exclamation-circle" style="font-size:16px"></i> <?= session()->getFlashdata('error') ?>
-        </div>
-    <?php endif; ?>
+
 
     <!-- STAT CARDS -->
     <div class="ds-grid-4">
@@ -80,9 +70,10 @@
                     <label class="ds-input-label">Purok / Sitio</label>
                     <select id="filterPurok" class="ds-select">
                         <option value="all" <?= ($selectedPurok ?? 'all') == 'all' ? 'selected' : '' ?>>All Puroks</option>
-                        <?php foreach (['Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um','Unassigned'] as $p): ?>
+                        <?php foreach ($purokList as $p): ?>
                             <option value="<?= $p ?>" <?= ($selectedPurok ?? '') == $p ? 'selected' : '' ?>><?= $p ?></option>
                         <?php endforeach; ?>
+                        <option value="Unassigned" <?= ($selectedPurok ?? '') == 'Unassigned' ? 'selected' : '' ?>>Unassigned</option>
                     </select>
                 </div>
                 <div>
@@ -102,21 +93,29 @@
             <div class="ds-card-title"><i class="fas fa-list"></i> Full Resident List</div>
         </div>
         <div class="ds-card-body p0">
+            <?php if (empty($residents)): ?>
+                <div class="ds-empty-state" style="border:none; margin:0; padding:80px 20px;">
+                    <i class="fas fa-users ds-empty-icon" style="color:var(--c-blue-soft); font-size:64px;"></i>
+                    <h4 class="ds-empty-title">No Residents Found</h4>
+                    <p class="ds-empty-text">It looks like there are no residents yet, or none match your search filters.</p>
+                    <a href="<?= base_url('resident/create') ?>" class="ds-btn ds-btn-primary"><i class="fas fa-plus"></i> Add New Resident</a>
+                </div>
+            <?php else: ?>
             <div style="overflow-x:auto">
                 <table class="ds-table" id="residentsTable">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Photo</th>
-                            <th>Full Name</th>
-                            <th>Sex</th>
-                            <th>Age</th>
-                            <th>Civil Status</th>
-                            <th>Purok / Sitio</th>
-                            <th>Household No.</th>
-                            <th>Occupation</th>
-                            <th>Flags</th>
-                            <th>Actions</th>
+                            <th data-col="id">ID</th>
+                            <th data-col="photo">Photo</th>
+                            <th data-col="name">Full Name</th>
+                            <th data-col="sex">Sex</th>
+                            <th data-col="age">Age</th>
+                            <th data-col="civil">Civil Status</th>
+                            <th data-col="sitio">Purok / Sitio</th>
+                            <th data-col="household">Household No.</th>
+                            <th data-col="occupation">Occupation</th>
+                            <th data-col="flags">Flags</th>
+                            <th data-col="actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -128,17 +127,17 @@
                             if (!empty($r['is_voter'])) $flags[] = '<span class="ds-badge ds-badge-blue">Voter</span>';
                         ?>
                         <tr>
-                            <td class="mono"><?= $r['id'] ?></td>
-                            <td><img src="<?= $profileImg ?>" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid var(--border)" onerror="this.onerror=null;this.src='<?= base_url('assets/img/default.png') ?>'"></td>
-                            <td><strong class="font-serif" style="font-size:14px;letter-spacing:-0.01em;"><?= esc($r['first_name']) ?> <?= esc($r['last_name']) ?></strong></td>
-                            <td><?= ucfirst($r['sex']) ?></td>
-                            <td><?= $r['age'] ?? '—' ?></td>
-                            <td><?= esc($r['civil_status'] ?? '—') ?></td>
-                            <td style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--ink-muted)"><?= esc($r['sitio'] ?? 'Unassigned') ?></td>
-                            <td class="mono"><?= esc($r['household_no'] ?? '—') ?></td>
-                            <td><?= esc($r['occupation'] ?? '—') ?></td>
-                            <td><?= implode(' ', $flags) ?: '—' ?></td>
-                            <td style="white-space:nowrap">
+                            <td data-label="ID" class="mono"><?= $r['id'] ?></td>
+                            <td data-label="Photo"><img src="<?= $profileImg ?>" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid var(--border)" onerror="this.onerror=null;this.src='<?= base_url('assets/img/default.png') ?>'"></td>
+                            <td data-label="Name"><strong class="font-serif" style="font-size:14px;letter-spacing:-0.01em;"><?= esc($r['first_name']) ?> <?= esc($r['last_name']) ?></strong></td>
+                            <td data-label="Sex"><?= ucfirst($r['sex']) ?></td>
+                            <td data-label="Age"><?= $r['age'] ?? '—' ?></td>
+                            <td data-label="Civil Status"><?= esc($r['civil_status'] ?? '—') ?></td>
+                            <td data-label="Purok" style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--ink-muted)"><?= esc($r['sitio'] ?? 'Unassigned') ?></td>
+                            <td data-label="Household" class="mono"><?= esc($r['household_no'] ?? '—') ?></td>
+                            <td data-label="Occupation"><?= esc($r['occupation'] ?? '—') ?></td>
+                            <td data-label="Flags"><?= implode(' ', $flags) ?: '—' ?></td>
+                            <td data-label="Actions" style="white-space:nowrap">
                                 <a href="<?= base_url('resident/view/'.$r['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-eye"></i></a>
                                 <a href="<?= base_url('resident/edit/'.$r['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-edit"></i></a>
                                 <button
@@ -154,6 +153,7 @@
                     </tbody>
                 </table>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 

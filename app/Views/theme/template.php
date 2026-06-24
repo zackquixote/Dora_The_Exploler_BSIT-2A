@@ -9,10 +9,13 @@
         }
     </script>
 
+    <a href="#main-content" class="skip-link">Skip to Content</a>
+
     <?= $this->include('theme/navbar') ?>
     <?= $this->include('theme/sidebar') ?>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-    <main class="bmis-main">
+    <main class="bmis-main" id="main-content" tabindex="-1">
         <?= $this->renderSection('content') ?>
     </main>
 

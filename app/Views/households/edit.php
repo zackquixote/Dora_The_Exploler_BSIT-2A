@@ -1,5 +1,6 @@
 <?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
+<?php $validationErrors = session()->getFlashdata('errors') ?? []; ?>
 
 <div class="bmis-content">
 
@@ -37,12 +38,15 @@
                     </div>
                     <div>
                         <label class="ds-input-label">Purok / Sitio <span style="color:var(--c-rose)">*</span></label>
-                        <select name="sitio" id="sitioSelect" class="ds-select" required>
+                        <select name="sitio" id="sitioSelect" class="ds-select <?= isset($validationErrors['sitio']) ? 'ds-select-invalid' : '' ?>" required>
                             <option value="">Select Purok</option>
-                            <?php foreach (['Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um'] as $s): ?>
+                            <?php foreach ($purokList as $s): ?>
                                 <option value="<?= $s ?>" <?= ($household['sitio']??'')==$s?'selected':'' ?>><?= $s ?></option>
                             <?php endforeach; ?>
                         </select>
+                        <?php if (isset($validationErrors['sitio'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['sitio']) ?></div>
+                        <?php endif; ?>
                     </div>
                     <div>
                         <label class="ds-input-label">House Type</label>

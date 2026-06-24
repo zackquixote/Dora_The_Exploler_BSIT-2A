@@ -11,11 +11,14 @@ $(function () {
     function showModal(id) {
         $('#' + id).modal('show');
     }
-
+//si ronel agi 
+    //tani ma change na ang schedule
     function hideModal(id) {
         $('#' + id).modal('hide');
-    }
-
+    }    
+    // ── CSRF token refresh ───────────────────────────────────────────
+    // After each AJAX response, if a new CSRF token is provided, update it in the forms to ensure subsequent requests remain valid.
+    //woah political aware sa kuno pero dds 
     // ── Open hearing modal (Add button) ───────────────────────────────
     $(document).on('click', '#open-hearing-modal-btn', function () {
         // Reset form to Add mode

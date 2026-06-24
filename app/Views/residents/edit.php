@@ -1,5 +1,6 @@
 <?= $this->extend('theme/template') ?>
 <?= $this->section('content') ?>
+<?php $validationErrors = session()->getFlashdata('errors') ?? []; ?>
 
 <div class="bmis-content">
 
@@ -35,56 +36,83 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
                     <div>
                         <label class="ds-input-label">First Name <span style="color:var(--c-rose)">*</span></label>
-                        <input type="text" name="first_name" class="ds-input name-only" value="<?= old('first_name', $resident['first_name']) ?>" required>
+                        <input type="text" name="first_name" class="ds-input name-only <?= isset($validationErrors['first_name']) ? 'ds-input-invalid' : '' ?>" value="<?= old('first_name', $resident['first_name']) ?>" required>
+                        <?php if (isset($validationErrors['first_name'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['first_name']) ?></div>
+                        <?php endif; ?>
                     </div>
                     <div>
                         <label class="ds-input-label">Middle Name</label>
-                        <input type="text" name="middle_name" class="ds-input name-only" value="<?= old('middle_name', $resident['middle_name'] ?? '') ?>">
+                        <input type="text" name="middle_name" class="ds-input name-only <?= isset($validationErrors['middle_name']) ? 'ds-input-invalid' : '' ?>" value="<?= old('middle_name', $resident['middle_name'] ?? '') ?>">
+                        <?php if (isset($validationErrors['middle_name'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['middle_name']) ?></div>
+                        <?php endif; ?>
                     </div>
                     <div>
                         <label class="ds-input-label">Last Name <span style="color:var(--c-rose)">*</span></label>
-                        <input type="text" name="last_name" class="ds-input name-only" value="<?= old('last_name', $resident['last_name']) ?>" required>
+                        <input type="text" name="last_name" class="ds-input name-only <?= isset($validationErrors['last_name']) ? 'ds-input-invalid' : '' ?>" value="<?= old('last_name', $resident['last_name']) ?>" required>
+                        <?php if (isset($validationErrors['last_name'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['last_name']) ?></div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
                     <div>
                         <label class="ds-input-label">Gender <span style="color:var(--c-rose)">*</span></label>
-                        <select name="sex" class="ds-select" required>
+                        <select name="sex" class="ds-select <?= isset($validationErrors['sex']) ? 'ds-select-invalid' : '' ?>" required>
                             <option value="">Select Gender</option>
                             <option value="male" <?= old('sex', $resident['sex'] ?? '') === 'male' ? 'selected' : '' ?>>Male</option>
                             <option value="female" <?= old('sex', $resident['sex'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
                         </select>
+                        <?php if (isset($validationErrors['sex'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['sex']) ?></div>
+                        <?php endif; ?>
                     </div>
                     <div>
                         <label class="ds-input-label">Birthdate <span style="color:var(--c-rose)">*</span></label>
-                        <input type="date" name="birthdate" class="ds-input" value="<?= old('birthdate', $resident['birthdate']) ?>" required>
+                        <input type="date" name="birthdate" class="ds-input <?= isset($validationErrors['birthdate']) ? 'ds-input-invalid' : '' ?>" max="<?= date('Y-m-d') ?>" value="<?= old('birthdate', $resident['birthdate']) ?>" required>
+                        <?php if (isset($validationErrors['birthdate'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['birthdate']) ?></div>
+                        <?php endif; ?>
                     </div>
                     <div>
                         <label class="ds-input-label">Civil Status</label>
-                        <select name="civil_status" class="ds-select">
+                        <select name="civil_status" class="ds-select <?= isset($validationErrors['civil_status']) ? 'ds-select-invalid' : '' ?>">
                             <option value="">Select Status</option>
                             <?php foreach (['single' => 'Single','married' => 'Married','widowed' => 'Widowed','separated' => 'Separated'] as $val => $label): ?>
                                 <option value="<?= $val ?>" <?= old('civil_status', $resident['civil_status'] ?? '') === $val ? 'selected' : '' ?>><?= $label ?></option>
                             <?php endforeach; ?>
                         </select>
+                        <?php if (isset($validationErrors['civil_status'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['civil_status']) ?></div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
                     <div>
                         <label class="ds-input-label">Contact Number</label>
-                        <input type="text" name="contact_number" class="ds-input phone-only" value="<?= old('contact_number', $resident['contact_number'] ?? '') ?>" placeholder="e.g. 09123456789" maxlength="20">
+                        <input type="text" name="contact_number" class="ds-input phone-only <?= isset($validationErrors['contact_number']) ? 'ds-input-invalid' : '' ?>" value="<?= old('contact_number', $resident['contact_number'] ?? '') ?>" placeholder="e.g. 09123456789" maxlength="20">
+                        <?php if (isset($validationErrors['contact_number'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['contact_number']) ?></div>
+                        <?php endif; ?>
                     </div>
                     <div>
                         <label class="ds-input-label">Occupation</label>
-                        <input type="text" name="occupation" class="ds-input" value="<?= old('occupation', $resident['occupation'] ?? '') ?>">
+                        <input type="text" name="occupation" class="ds-input <?= isset($validationErrors['occupation']) ? 'ds-input-invalid' : '' ?>" value="<?= old('occupation', $resident['occupation'] ?? '') ?>">
+                        <?php if (isset($validationErrors['occupation'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['occupation']) ?></div>
+                        <?php endif; ?>
                     </div>
                     <div>
                         <label class="ds-input-label">Citizenship</label>
-                        <input type="text" name="citizenship" class="ds-input" value="<?= old('citizenship', $resident['citizenship'] ?? 'Filipino') ?>">
+                        <input type="text" name="citizenship" class="ds-input <?= isset($validationErrors['citizenship']) ? 'ds-input-invalid' : '' ?>" value="<?= old('citizenship', $resident['citizenship'] ?? 'Filipino') ?>">
+                        <?php if (isset($validationErrors['citizenship'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['citizenship']) ?></div>
+                        <?php endif; ?>
                     </div>
                     <div style="grid-column: 1 / -1">
                         <label class="ds-input-label">Profile Picture</label>
-                        <div class="ds-photo-upload" id="photoDropZone">
+                        <div class="ds-photo-upload <?= isset($validationErrors['profile_picture']) ? 'ds-input-invalid' : '' ?>" id="photoDropZone">
                             <div id="photoPreviewWrap">
                                 <?php if (!empty($resident['profile_picture'])): ?>
                                     <img src="<?= base_url('uploads/' . $resident['profile_picture']) ?>" class="ds-photo-preview" id="photoPreview">
@@ -102,6 +130,9 @@
                             <input type="file" name="profile_picture" id="profile_picture" accept="image/*" style="display:none">
                             <button type="button" class="ds-btn ds-btn-ghost" id="photoBrowseBtn" style="height:32px;font-size:11px"><i class="fas fa-upload"></i> Browse</button>
                         </div>
+                        <?php if (isset($validationErrors['profile_picture'])): ?>
+                            <div class="ds-error-feedback"><i class="fas fa-exclamation-circle"></i> <?= esc($validationErrors['profile_picture']) ?></div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -118,7 +149,7 @@
                         <label class="ds-input-label">Sitio / Zone <span style="color:var(--c-rose)">*</span></label>
                         <select name="sitio" id="sitioSelect" class="ds-select" required>
                             <option value="">Select Sitio</option>
-                            <?php foreach (['Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um'] as $s): ?>
+                            <?php foreach ($purokList as $s): ?>
                                 <option value="<?= $s ?>" <?= old('sitio', $resident['sitio'] ?? '') === $s ? 'selected' : '' ?>><?= $s ?></option>
                             <?php endforeach; ?>
                         </select>

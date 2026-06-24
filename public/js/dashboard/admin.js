@@ -155,6 +155,47 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // ── Blotter Status Donut ──
+    const blotterStatusEl = document.getElementById('blotterStatusChart');
+    if (blotterStatusEl && DASHBOARD_DATA.blotterStatusLabels) {
+        const hasData = DASHBOARD_DATA.blotterStatusValues.some(v => v > 0);
+        new Chart(blotterStatusEl, {
+            type: 'doughnut',
+            data: {
+                labels: DASHBOARD_DATA.blotterStatusLabels,
+                datasets: [{
+                    data: hasData ? DASHBOARD_DATA.blotterStatusValues : [1],
+                    backgroundColor: hasData ? DASHBOARD_DATA.blotterStatusColors : ['#e2e8f0'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 6,
+                    cutout: '68%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15,23,42,0.88)',
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(ctx) {
+                                if (!hasData) return 'No cases yet';
+                                var total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                var pct = total > 0 ? Math.round((ctx.parsed / total) * 100) : 0;
+                                return ' ' + ctx.label + ': ' + ctx.parsed + ' (' + pct + '%)';
+                            }
+                        }
+                    }
+                },
+                animation: { animateScale: true, animateRotate: true }
+            }
+        });
+    }
+
     // ── AJAX Case Filtering ──
     const caseFilter = document.getElementById('caseOverviewFilter');
     if (caseFilter) {

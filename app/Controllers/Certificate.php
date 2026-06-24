@@ -114,6 +114,7 @@ class Certificate extends BaseController
         if ($certId) {
             $name = $resident['first_name'] . ' ' . $resident['last_name'];
             $this->logModel->addLog("Generated {$type} ({$certNumber}) for {$name}");
+
             return redirect()->to('certificate/print/' . $certId);
         }
 
@@ -216,6 +217,7 @@ class Certificate extends BaseController
 
         $this->logModel->addLog('Updated certificate #' . $cert['certificate_number']);
 
+
         return redirect()->to('certificate/print/' . $id)
             ->with('success', 'Certificate updated successfully.');
     }
@@ -233,6 +235,7 @@ class Certificate extends BaseController
 
         $this->certModel->delete($id);
         $this->logModel->addLog('Deleted certificate #' . $cert['certificate_number']);
+
 
         return redirect()->to('certificate')->with('success', 'Certificate deleted successfully.');
     }
@@ -303,6 +306,10 @@ class Certificate extends BaseController
         if (!empty($insertedIds)) {
             $count = count($insertedIds);
             $this->logModel->addLog("Generated {$count} {$type}(s) in bulk");
+            
+            foreach ($insertedIds as $cid) {
+
+            }
             
             // Pass the IDs to the bulk print view via flashdata
             return redirect()->to('certificate/bulk-print')->with('bulk_print_ids', $insertedIds)->with('success', "Successfully generated {$count} certificates.");

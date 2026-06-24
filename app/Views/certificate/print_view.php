@@ -143,11 +143,20 @@ $certNumber   = $cert['certificate_number'] ?? '';
             </div>
         </div>
 
-        <!-- Footer with Certificate Number -->
-        <div class="footer-band">
+        <!-- Footer with Certificate Number + QR Code -->
+        <div class="footer-band" style="display:flex;align-items:center;justify-content:space-between">
             <span class="doc-no">Cert No.: <?= esc($certNumber ?: '_______') ?></span>
             <span>Not valid without official dry seal</span>
-            <span class="doc-no">CTC No.: __________</span>
+            <div style="display:flex;align-items:center;gap:8px">
+                <div style="text-align:center">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=<?= urlencode('BMIS-CERT:' . ($certNumber ?: 'N/A') . '|TYPE:' . ($cert['certificate_type'] ?? '') . '|DATE:' . date('Y-m-d', strtotime($cert['created_at'] ?? 'now'))) ?>"
+                         alt="QR Code"
+                         style="width:64px;height:64px;border:2px solid #b8962e;border-radius:4px;display:block"
+                         onerror="this.style.display='none'">
+                    <span style="font-family:'Cinzel',serif;font-size:5.5pt;color:#b8962e;letter-spacing:0.04em;display:block;margin-top:2px">Scan to Verify</span>
+                </div>
+                <span class="doc-no">CTC No.: __________</span>
+            </div>
         </div>
 
     </div><!-- /content-wrap -->

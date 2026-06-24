@@ -6,21 +6,18 @@ use App\Controllers\BaseController;
 use App\Models\BusinessPermitModel;
 use App\Models\PaymentModel;
 use App\Models\PermitRenewalModel;
-use App\Services\AuditService;
 
 class PermitRenewals extends BaseController
 {
     protected BusinessPermitModel $businessPermits;
     protected PermitRenewalModel $renewals;
     protected PaymentModel $payments;
-    protected AuditService $audit;
 
     public function __construct()
     {
         $this->businessPermits = new BusinessPermitModel();
         $this->renewals        = new PermitRenewalModel();
         $this->payments        = new PaymentModel();
-        $this->audit           = new AuditService();
     }
 
     /**
@@ -88,7 +85,6 @@ class PermitRenewals extends BaseController
         $id = (int) $this->renewals->getInsertID();
         $renewal = $this->renewals->find($id);
 
-        $this->audit->log('create', 'permit_renewal', $id, null, $renewal);
 
         return $this->jsonSuccess(['renewal' => $renewal], 'Renewal created');
     }
@@ -175,7 +171,6 @@ class PermitRenewals extends BaseController
         ]);
 
         $updated = $this->renewals->find($id);
-        $this->audit->log('paid', 'permit_renewal', $id, $renewal, $updated);
 
         return $this->jsonSuccess([
             'renewal' => $updated,
@@ -227,7 +222,6 @@ class PermitRenewals extends BaseController
         ]);
 
         $updated = $this->renewals->find($id);
-        $this->audit->log('approved', 'permit_renewal', $id, $renewal, $updated);
 
         return $this->jsonSuccess([
             'renewal'        => $updated,
@@ -264,7 +258,6 @@ class PermitRenewals extends BaseController
         ]);
 
         $updated = $this->renewals->find($id);
-        $this->audit->log('printed', 'permit_renewal', $id, $renewal, $updated);
 
         return $this->jsonSuccess(['renewal' => $updated], 'Marked as printed');
     }

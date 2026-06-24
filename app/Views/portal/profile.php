@@ -7,18 +7,6 @@
         <p class="af-subtitle">View and update your personal information and account settings.</p>
     </div>
 
-    <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success af-alert" style="display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-weight: 600;">
-            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if (session()->getFlashdata('error')): ?>
-        <div class="alert alert-danger af-alert" style="display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-weight: 600;">
-            <i class="fas fa-exclamation-circle"></i> <?= session()->getFlashdata('error') ?>
-        </div>
-    <?php endif; ?>
-
     <div class="row" style="gap: 24px 0;">
         <!-- Left Column: Read-Only Info -->
         <div class="col-md-5">
@@ -70,7 +58,7 @@
 
         <!-- Right Column: Editable Fields -->
         <div class="col-md-7">
-            <form action="<?= base_url('portal/profile/update') ?>" method="POST">
+            <form action="<?= base_url('portal/profile/update') ?>" method="POST" aria-label="Profile Contact and Security Form">
                 <?= csrf_field() ?>
 
                 <!-- Contact Information -->
@@ -80,22 +68,22 @@
                     </h3>
 
                     <div class="af-form-group">
-                        <label class="af-label">Mobile Number</label>
-                        <input type="text" name="contact_number" class="af-input" 
+                        <label for="contact_number" class="af-label">Mobile Number</label>
+                        <input type="text" id="contact_number" name="contact_number" class="af-input" 
                                value="<?= esc($resident['contact_number'] ?? '') ?>" 
                                placeholder="e.g. 09123456789">
                     </div>
 
                     <div class="af-form-group" style="margin-top: 14px;">
-                        <label class="af-label">Email Address</label>
-                        <input type="email" name="email" class="af-input" 
+                        <label for="email" class="af-label">Email Address</label>
+                        <input type="email" id="email" name="email" class="af-input" 
                                value="<?= esc($account['email'] ?? '') ?>" 
                                placeholder="e.g. juan@email.com">
                     </div>
 
                     <div class="af-form-group" style="margin-top: 14px;">
-                        <label class="af-label">Account Phone</label>
-                        <input type="text" name="phone" class="af-input" 
+                        <label for="phone" class="af-label">Account Phone</label>
+                        <input type="text" id="phone" name="phone" class="af-input" 
                                value="<?= esc($account['phone'] ?? '') ?>" 
                                placeholder="Phone linked to your portal account">
                     </div>
@@ -109,13 +97,13 @@
                     </h3>
 
                     <div class="af-form-group">
-                        <label class="af-label">New Password</label>
-                        <input type="password" name="new_password" class="af-input" placeholder="Leave blank to keep current password" minlength="6">
+                        <label for="new_password" class="af-label">New Password</label>
+                        <input type="password" id="new_password" name="new_password" class="af-input" placeholder="Leave blank to keep current password" minlength="6">
                     </div>
 
                     <div class="af-form-group" style="margin-top: 14px;">
-                        <label class="af-label">Confirm New Password</label>
-                        <input type="password" name="confirm_password" class="af-input" placeholder="Re-enter new password">
+                        <label for="confirm_password" class="af-label">Confirm New Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="af-input" placeholder="Re-enter new password">
                     </div>
                 </div>
 

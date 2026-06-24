@@ -18,18 +18,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
     /* ─── Mobile Sidebar Toggle ─────────────────────────────────── */
     const sidebar = document.getElementById('mainSidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
     const sidebarLinks = document.querySelectorAll('#mainSidebar .sb-link');
-    // #region agent log
-    fetch('http://127.0.0.1:7249/ingest/d1d75b02-5b55-464a-9858-e2796691b14a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0646ff'},body:JSON.stringify({sessionId:'0646ff',runId:'pre-fix',hypothesisId:'H1',location:'public/js/theme/bmis-core.js:15',message:'sidebar init state',data:{hasSidebar:!!sidebar,windowWidth:window.innerWidth,linkCount:sidebarLinks.length,sidebarClasses:sidebar?sidebar.className:''},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-    if (window.innerWidth <= 768 && sidebar) {
-        const toggler = document.createElement('button');
-        toggler.innerHTML = '<i class="fas fa-bars"></i>';
-        toggler.className = 'tb-icon-btn';
-        toggler.style.cssText = 'position:fixed;top:10px;left:10px;z-index:1050;';
-        toggler.onclick = () => sidebar.classList.toggle('open');
-        document.body.appendChild(toggler);
+
+    function openSidebar() {
+        if (sidebar) sidebar.classList.add('open');
+        if (sidebarBackdrop) sidebarBackdrop.classList.add('active');
+        document.body.classList.add('sidebar-open');
     }
+
+    function closeSidebar() {
+        if (sidebar) sidebar.classList.remove('open');
+        if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
+    }
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', openSidebar);
+    }
+    if (sidebarClose) {
+        sidebarClose.addEventListener('click', closeSidebar);
+    }
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener('click', closeSidebar);
+    }
+
+    // Auto-close sidebar on link click (mobile only)
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                closeSidebar();
+            }
+        });
+    });
     if (sidebar) {
         ['resident', 'logs', 'logout'].forEach((key) => {
             const link = document.querySelector(`#mainSidebar .sb-link[href*="${key}"]`);
@@ -197,6 +220,21 @@ $(document).on('submit', 'form[data-confirm]', function(e) {
     });
 });
 
+/* ─── Form Submission Loading State ─────────────────────────────── */
+$(document).on('submit', 'form', function(e) {
+    // If it has data-confirm and hasn't been confirmed yet, let the handler above deal with it
+    if ($(this).attr('data-confirm')) return;
+
+    // Otherwise, find the submit button and show loading state
+    const $btn = $(this).find('button[type="submit"]');
+    if ($btn.length && !$btn.prop('disabled')) {
+        $btn.prop('disabled', true);
+        const originalText = $btn.html();
+        $btn.data('original-text', originalText);
+        $btn.html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+    }
+});
+
 /* ─── Global Search Logic ───────────────────────────────────────── */
 (function() {
     const $searchInput = $('#globalSearchInput');
@@ -310,8 +348,4 @@ window.addEventListener('pageshow', function(e) {
 });
 // #endregion
 
-// #region agent log
-window.addEventListener('error', function(e) {
-    fetch('http://127.0.0.1:7249/ingest/d1d75b02-5b55-464a-9858-e2796691b14a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0646ff'},body:JSON.stringify({sessionId:'0646ff',runId:'pre-fix',hypothesisId:'H5',location:'public/js/theme/bmis-core.js:179',message:'window error',data:{message:e.message||null,filename:e.filename||null,lineno:e.lineno||null,colno:e.colno||null},timestamp:Date.now()})}).catch(()=>{});
-});
-// #endregion
+

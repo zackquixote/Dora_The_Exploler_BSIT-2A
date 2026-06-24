@@ -94,7 +94,7 @@ CREATE TABLE `blotter_records` (
   `incident_type` varchar(50) NOT NULL,
   `incident_date` date NOT NULL,
   `incident_location` varchar(255) DEFAULT NULL,
-  `purok` enum('Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um') DEFAULT NULL,
+  `purok` varchar(255) DEFAULT NULL,
   `details` text NOT NULL,
   `status` enum('Pending','Investigating','Ongoing','For Hearing','Settled','Dismissed','Referred','Unsettled') DEFAULT 'Pending',
   `action_taken` text DEFAULT NULL,
@@ -177,7 +177,7 @@ CREATE TABLE `households` (
   `street_address` varchar(255) DEFAULT NULL,
   `head_resident_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `sitio` enum('Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um') DEFAULT NULL,
+  `sitio` varchar(255) DEFAULT NULL,
   `house_type` enum('Concrete','Semi-Concrete','Wood','Light Materials') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -263,7 +263,7 @@ CREATE TABLE `residents` (
   `birthdate` date NOT NULL,
   `sex` enum('male','female') NOT NULL,
   `civil_status` enum('single','married','widowed','separated') NOT NULL DEFAULT 'single',
-  `sitio` enum('Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um') DEFAULT NULL,
+  `sitio` varchar(255) DEFAULT NULL,
   `contact_number` varchar(20) DEFAULT NULL,
   `occupation` varchar(100) DEFAULT NULL,
   `citizenship` varchar(100) DEFAULT NULL,
@@ -606,8 +606,7 @@ ALTER TABLE `blotter_timeline`
 --
 ALTER TABLE `certificates`
   ADD CONSTRAINT `fk_cert_createdby` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `fk_cert_resident` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_certificates_resident` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_cert_resident` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `households`

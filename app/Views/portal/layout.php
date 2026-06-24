@@ -11,6 +11,7 @@
     <!-- Theme CSS -->
     <link rel="stylesheet" href="<?= base_url('assets/css/bmis-design-system.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/advanced-features.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/adminlte/plugins/toastr/toastr.min.css') ?>">
     <style>
         body {
             background-color: var(--bg);
@@ -189,6 +190,7 @@
     </style>
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to Content</a>
 
     <?php
         // Determine active nav item from the current URL path
@@ -223,31 +225,53 @@
             <li><a href="<?= base_url('portal/facilities') ?>" class="<?= (strpos($currentPath, 'portal/facilities') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-building"></i> Facilities
             </a></li>
+            <li><a href="<?= base_url('portal/certificates') ?>" class="<?= (strpos($currentPath, 'portal/certificates') !== false) ? 'active' : '' ?>">
+                <i class="fas fa-file-alt"></i> Certificates
+            </a></li>
             <li><a href="<?= base_url('portal/my-id') ?>" class="<?= (strpos($currentPath, 'portal/my-id') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-id-card"></i> My ID
             </a></li>
-            <li><a href="<?= base_url('advanced/events') ?>" class="<?= (strpos($currentPath, 'advanced/events') !== false) ? 'active' : '' ?>">
+            <li><a href="<?= base_url('portal/events') ?>" class="<?= (strpos($currentPath, 'portal/events') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-calendar-alt"></i> Events
             </a></li>
             <li><a href="<?= base_url('portal/profile') ?>" class="<?= (strpos($currentPath, 'portal/profile') !== false) ? 'active' : '' ?>">
                 <i class="fas fa-user-cog"></i> Profile
             </a></li>
+
             <li><a href="<?= base_url('advanced/report-emergency') ?>" class="<?= (strpos($currentPath, 'report-emergency') !== false) ? 'active' : '' ?>" style="color: #ef4444;">
                 <i class="fas fa-ambulance"></i> Emergency
             </a></li>
         </ul>
 
         <div class="portal-actions">
+            <a href="<?= base_url('portal/notifications') ?>" style="position:relative; color:var(--ink-muted); font-size:18px; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(15,23,42,0.05)'; this.style.color='var(--ink)'" onmouseout="this.style.background='transparent'; this.style.color='var(--ink-muted)'">
+                <i class="fas fa-bell"></i>
+                <?php
+                    $notifModel = new \App\Models\NotificationModel();
+                    $unreadCount = 0;
+                    try {
+                        $unreadCount = $notifModel->where('recipient_type', 'resident')
+                            ->where('recipient_id', session()->get('resident_id'))
+                            ->where('status', 'sent')
+                            ->countAllResults();
+                    } catch (\Throwable $e) {}
+                ?>
+                <?php if ($unreadCount > 0): ?>
+                    <span style="position:absolute; top:2px; right:2px; background:#ef4444; color:white; font-size:9px; font-weight:800; padding:2px 5px; border-radius:10px; line-height:1; border:2px solid white;"><?= $unreadCount > 9 ? '9+' : $unreadCount ?></span>
+                <?php endif; ?>
+            </a>
             <a href="<?= base_url('portal/logout') ?>" class="portal-logout">
                 <i class="fas fa-sign-out-alt"></i> <span>Sign Out</span>
             </a>
         </div>
     </nav>
 
-    <main class="portal-main">
+    <main class="portal-main" id="main-content" tabindex="-1">
         <?= $this->renderSection('content') ?>
     </main>
 
+    <script src="<?= base_url('assets/adminlte/plugins/jquery/jquery.min.js') ?>"></script>
+    <script src="<?= base_url('assets/adminlte/plugins/toastr/toastr.min.js') ?>"></script>
     <script>
         // Mobile menu toggle
         document.getElementById('portalMenuToggle').addEventListener('click', function() {
@@ -262,6 +286,16 @@
                 document.getElementById('portalNav').classList.remove('open');
                 document.querySelector('#portalMenuToggle i').className = 'fas fa-bars';
             });
+        });
+
+        // Flash data for toastr
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php if (session()->getFlashdata('success')): ?>
+                toastr.success('<?= esc(session()->getFlashdata('success')) ?>');
+            <?php endif; ?>
+            <?php if (session()->getFlashdata('error')): ?>
+                toastr.error('<?= esc(session()->getFlashdata('error')) ?>');
+            <?php endif; ?>
         });
     </script>
 

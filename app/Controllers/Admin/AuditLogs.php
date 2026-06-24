@@ -3,14 +3,17 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
-use App\Models\AuditLogModel;
+use App\Models\LogModel;
 use App\Models\UserModel;
 
 class AuditLogs extends BaseController
 {
     public function index()
     {
-        $model = new AuditLogModel();
+        // NOTE:
+        // The legacy audit_logs/audit_logs table was removed in favor of tbl_logs.
+        // This controller now reads from tbl_logs so the page does not break.
+        $model = new LogModel();
 
         $date    = $this->request->getGet('date');
         $userId  = $this->request->getGet('user_id');
@@ -21,25 +24,27 @@ class AuditLogs extends BaseController
         $perPage = 50;
 
         $builder = $model->builder();
-        $builder->orderBy('created_at', 'DESC');
+        // TIMELOG stores full datetime string; use it for ordering
+        $builder->orderBy('TIMELOG', 'DESC');
 
         if (!empty($date)) {
-            $builder->where('DATE(created_at)', $date);
+            $builder->where('DATELOG', $date);
         }
         if (!empty($userId)) {
-            $builder->where('user_id', (int) $userId);
+            $builder->where('USERID', (string) ((int) $userId));
         }
         if (!empty($entity)) {
-            $builder->where('entity', $entity);
+            $builder->where('identifier', $entity);
         }
         if (!empty($action)) {
-            $builder->where('action', $action);
+            // match either exact or "contains" depending on how logs are written
+            $builder->like('ACTION', $action);
         }
         if (!empty($keyword)) {
             $builder->groupStart()
-                ->like('entity', $keyword)
-                ->orLike('action', $keyword)
-                ->orLike('ip_address', $keyword)
+                ->like('identifier', $keyword)
+                ->orLike('ACTION', $keyword)
+                ->orLike('user_ip_address', $keyword)
                 ->groupEnd();
         }
 
@@ -47,7 +52,19 @@ class AuditLogs extends BaseController
         $totalPages = max(1, (int)ceil($totalCount / $perPage));
         $offset     = ($page - 1) * $perPage;
 
-        $rows = $builder->limit($perPage, $offset)->get()->getResultArray();
+        $raw = $builder->limit($perPage, $offset)->get()->getResultArray();
+
+        // Map tbl_logs columns into the view's expected keys
+        $rows = array_map(static function (array $r): array {
+            return [
+                'created_at' => $r['TIMELOG'] ?? '',
+                'user_id'    => $r['USERID'] ?? '',
+                'action'     => $r['ACTION'] ?? '',
+                'entity'     => $r['identifier'] ?? '',
+                'entity_id'  => '',
+                'ip_address' => $r['user_ip_address'] ?? '',
+            ];
+        }, $raw);
 
         // User list for filter dropdown
         $users = (new UserModel())

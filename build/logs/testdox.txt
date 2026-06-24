@@ -1,6 +1,15 @@
-Advanced Features (App\Controllers\AdvancedFeatures)
- [ ] Api search health records
- [ ] Api search business
- [ ] Api active emergencies
- [ ] Api events list
+Health
+ [x] Is defined app path
+ [x] Base url has been set
+
+Id Card Service
+ [x] Get qr url contains resident and jwt
+ [x] Validate token delegates to token service
+
+Token Service
+ [x] Generate and validate hmac token
+ [x] Tampered hmac fails
+ [x] Generate and validate jwt token
+ [x] Jwt subject mismatch fails
+ [x] Tampered jwt fails
 

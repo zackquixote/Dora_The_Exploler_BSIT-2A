@@ -1,0 +1,126 @@
+--- /dev/null
++++ b/phpunit.xml.dist
+@@
++<?xml version="1.0" encoding="UTF-8"?>
++<phpunit
++    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
++    bootstrap="vendor/codeigniter4/framework/system/Test/bootstrap.php"
++    backupGlobals="false"
++    beStrictAboutOutputDuringTests="true"
++    colors="true"
++    failOnRisky="true"
++    failOnWarning="true"
++    cacheDirectory="build/.phpunit.cache">
++    <coverage
++        includeUncoveredFiles="true"
++        pathCoverage="false"
++        ignoreDeprecatedCodeUnits="true"
++        disableCodeCoverageIgnore="true">
++        <report>
++            <clover outputFile="build/logs/clover.xml"/>
++            <html outputDirectory="build/logs/html"/>
++            <php outputFile="build/logs/coverage.serialized"/>
++            <text outputFile="php://stdout" showUncoveredFiles="false"/>
++        </report>
++    </coverage>
++    <testsuites>
++        <testsuite name="App">
++            <directory>./tests</directory>
++        </testsuite>
++    </testsuites>
++    <logging>
++        <testdoxHtml outputFile="build/logs/testdox.html"/>
++        <testdoxText outputFile="build/logs/testdox.txt"/>
++        <junit outputFile="build/logs/logfile.xml"/>
++    </logging>
++    <source>
++        <include>
++            <directory suffix=".php">./app</directory>
++        </include>
++        <exclude>
++            <directory suffix=".php">./app/Views</directory>
++            <file>./app/Config/Routes.php</file>
++        </exclude>
++    </source>
++    <php>
++        <server name="app.baseURL" value="http://example.com/"/>
++        <server name="CODEIGNITER_SCREAM_DEPRECATIONS" value="0"/>
++        <const name="HOMEPATH" value="./"/>
++        <const name="CONFIGPATH" value="./app/Config/"/>
++        <const name="PUBLICPATH" value="./public/"/>
++    </php>
++</phpunit>
+--- a/app/Services/IdCardService.php
++++ b/app/Services/IdCardService.php
+@@
+-use CodeIgniter\I18n\Time;
+ use App\Services\TokenService;
+@@
+-    protected ResidentModel $residentModel;
++    protected ?ResidentModel $residentModel = null;
+@@
+-    public function __construct()
++    public function __construct(?ResidentModel $residentModel = null, ?TokenService $tokenService = null)
+     {
+-        $this->residentModel = new ResidentModel();
+-        $this->encryptionKey = env('ENCRYPTION_KEY') ?? '';
++        $this->residentModel = $residentModel;
++        $this->encryptionKey = env('ENCRYPTION_KEY') ?? env('encryption.key') ?? '';
+         $this->jwtSecret = env('JWT_SECRET') ?? '';
+-        $this->tokenService = new TokenService($this->jwtSecret, $this->encryptionKey);
++        $this->tokenService = $tokenService ?? new TokenService($this->jwtSecret, $this->encryptionKey);
+     }
+@@
+-        $resident = $this->residentModel->getDetailsWithHousehold($id);
++        $resident = ($this->residentModel ??= new ResidentModel())->getDetailsWithHousehold($id);
+@@
+     public function generateHmacToken(int $residentId): string
+     {
+-        $payload = [
+-            'id' => $residentId,
+-            'ts' => Time::now()->getTimestamp(),
+-        ];
+-        $payloadB64 = $this->base64UrlEncode(json_encode($payload));
+-        $signature = $this->base64UrlEncode(hash_hmac('sha256', $payloadB64, $this->encryptionKey, true));
+-        return "$payloadB64.$signature";
++        return $this->tokenService->generateHmacToken($residentId);
+     }
+--- a/tests/unit/IdCardServiceTest.php
++++ b/tests/unit/IdCardServiceTest.php
+@@
+     public function testGetQrUrlContainsResidentAndJwt(): void
+     {
+         $id = 5;
+         $jwtSecret = 'test_jwt';
+         $encKey = 'test_enc';
++        $tokenSvc = new TokenService($jwtSecret, $encKey);
+ 
+-        $idService = new IdCardService();
+-
+-        // inject TokenService with known secrets
+-        $tokenSvc = new TokenService($jwtSecret, $encKey);
+-        $rp = new ReflectionProperty(IdCardService::class, 'tokenService');
+-        $rp->setAccessible(true);
+-        $rp->setValue($idService, $tokenSvc);
++        $idService = new IdCardService(null, $tokenSvc);
+@@
+     public function testValidateTokenDelegatesToTokenService(): void
+     {
+         $id = 10;
+         $jwtSecret = 's_jwt';
+         $encKey = 's_enc';
+ 
+-        $idService = new IdCardService();
+         $tokenSvc = new TokenService($jwtSecret, $encKey);
+-
+-        // inject TokenService
+-        $rp = new ReflectionProperty(IdCardService::class, 'tokenService');
+-        $rp->setAccessible(true);
+-        $rp->setValue($idService, $tokenSvc);
++        $idService = new IdCardService(null, $tokenSvc);
+ 
+         $token = $tokenSvc->generateHmacToken($id);
+         $this->assertTrue($idService->validateToken($id, $token));
+*** End Patch
+ારીઓassistant to=functions.apply_patch code տվել a patch grammar add-file lines all starting with +. Need content of the new file only, not patch file with diff lines? Wait adding file via apply_patch requires lines prefixed with + but inside file content can include --- lines. That's okay. It succeeded? Let's check. It seems patch tool call maybe not returned. Actually need output. We must wait. քանի? Let's see.♀♀♀♀assistant to=functions.apply_patch মন্তব্য code ***!

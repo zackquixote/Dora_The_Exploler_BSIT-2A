@@ -4,17 +4,14 @@ namespace App\Controllers\Api;
 
 use App\Controllers\BaseController;
 use App\Models\DocumentModel;
-use App\Services\AuditService;
 
 class EntityDocuments extends BaseController
 {
     protected DocumentModel $documents;
-    protected AuditService $audit;
 
     public function __construct()
     {
         $this->documents = new DocumentModel();
-        $this->audit     = new AuditService();
     }
 
     /**
@@ -69,7 +66,6 @@ class EntityDocuments extends BaseController
                 'uploaded_by'   => (int) (session()->get('user_id') ?? 0),
             ], $file);
 
-            $this->audit->log('uploaded', 'document', (int) ($doc['id'] ?? 0), null, $doc);
 
             unset($doc['file_path'], $doc['file_hash']);
             return $this->response->setStatusCode(201)->setJSON(['document' => $doc, 'csrf_hash' => csrf_hash()]);
@@ -94,7 +90,6 @@ class EntityDocuments extends BaseController
         }
 
         $this->documents->update($documentId, ['is_active' => 0]);
-        $this->audit->log('detached', 'document', $documentId, $doc, ['is_active' => 0]);
 
         return $this->response->setJSON(['success' => true, 'csrf_hash' => csrf_hash()]);
     }

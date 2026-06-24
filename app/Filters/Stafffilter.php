@@ -20,21 +20,6 @@ class StaffFilter implements FilterInterface
     {
         // Not logged in → login page
         if (! session()->get('logged_in')) {
-            // #region agent log
-            @file_put_contents(
-                ROOTPATH . 'debug-0646ff.log',
-                json_encode([
-                    'sessionId'    => '0646ff',
-                    'runId'        => 'pre-fix',
-                    'hypothesisId' => 'H30',
-                    'location'     => 'app/Filters/StaffFilter.php:24',
-                    'message'      => 'staff filter unauthenticated redirect',
-                    'data'         => ['path' => $request->getUri()->getPath()],
-                    'timestamp'    => (int) round(microtime(true) * 1000),
-                ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
-                FILE_APPEND
-            );
-            // #endregion
             $json = $this->jsonUnauthorizedResponse($request);
             if ($json !== null) {
                 return $json;
@@ -45,24 +30,6 @@ class StaffFilter implements FilterInterface
 
         // Logged in but wrong role → their own dashboard
         if (strtolower((string) (session()->get('role') ?? '')) !== 'staff') {
-            // #region agent log
-            @file_put_contents(
-                ROOTPATH . 'debug-0646ff.log',
-                json_encode([
-                    'sessionId'    => '0646ff',
-                    'runId'        => 'pre-fix',
-                    'hypothesisId' => 'H31',
-                    'location'     => 'app/Filters/StaffFilter.php:47',
-                    'message'      => 'staff filter role mismatch redirect',
-                    'data'         => [
-                        'path'         => $request->getUri()->getPath(),
-                        'session_role' => strtolower((string) (session()->get('role') ?? '')),
-                    ],
-                    'timestamp'    => (int) round(microtime(true) * 1000),
-                ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
-                FILE_APPEND
-            );
-            // #endregion
             $json = $this->jsonForbiddenResponse(
                 $request,
                 'Access denied. Staff only.',

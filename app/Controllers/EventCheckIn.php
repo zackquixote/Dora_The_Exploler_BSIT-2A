@@ -6,7 +6,6 @@ use App\Controllers\BaseController;
 use App\Models\EventModel;
 use App\Models\EventParticipantModel;
 use App\Models\ResidentModel;
-use App\Services\AuditService;
 
 /**
  * Phase 1.3 - QR Scan endpoint (staff/admin)
@@ -17,7 +16,6 @@ class EventCheckIn extends BaseController
     protected EventModel $events;
     protected EventParticipantModel $participants;
     protected ResidentModel $residents;
-    protected AuditService $audit;
     protected string $secretKey;
 
     public function __construct()
@@ -25,7 +23,6 @@ class EventCheckIn extends BaseController
         $this->events       = new EventModel();
         $this->participants = new EventParticipantModel();
         $this->residents    = new ResidentModel();
-        $this->audit        = new AuditService();
         $this->secretKey    = env('QR_SECRET_KEY', 'default_secret_key_change_this');
     }
 
@@ -59,7 +56,6 @@ class EventCheckIn extends BaseController
                 'checked_in_by'     => (int) (session()->get('user_id') ?? 0),
             ]);
             $updated = $this->participants->find($participantId);
-            $this->audit->log('check_in', 'event_participant', $participantId, $old, $updated);
             $participant = $updated ?? $participant;
         }
 

@@ -49,7 +49,7 @@ class IdGenerator extends BaseController
          }
 
          // Validate JWT if provided
-         if ($jwt && !$this->service->validateJwtToken($jwt)) {
+        if ($jwt && !$this->service->validateJwtToken($jwt, (int) $id)) {
              return view('id_generator/verify', [
                  'title'   => 'Verification Failed',
                  'status'  => 'error',

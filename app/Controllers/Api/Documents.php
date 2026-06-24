@@ -4,18 +4,15 @@ namespace App\Controllers\Api;
 
 use App\Controllers\BaseController;
 use App\Models\DocumentModel;
-use App\Services\AuditService;
 use CodeIgniter\Exceptions\PageNotFoundException;
 
 class Documents extends BaseController
 {
     protected DocumentModel $documents;
-    protected AuditService $audit;
 
     public function __construct()
     {
         $this->documents = new DocumentModel();
-        $this->audit     = new AuditService();
     }
 
     /**
@@ -96,7 +93,6 @@ class Documents extends BaseController
                 'uploaded_by'    => (int) (session()->get('user_id') ?? 0),
             ], $file);
 
-            $this->audit->log('new_version', 'document', (int) ($newDoc['id'] ?? 0), $doc, $newDoc);
 
             unset($newDoc['file_path'], $newDoc['file_hash']);
             return $this->response->setStatusCode(201)->setJSON(['document' => $newDoc, 'csrf_hash' => csrf_hash()]);
@@ -126,7 +122,6 @@ class Documents extends BaseController
 
         // Audit downloads only for staff/admin to reduce log noise (optional)
         if ($this->canWrite()) {
-            $this->audit->log('download', 'document', (int) $doc['id']);
         }
 
         return $this->response->download($path, null);
@@ -160,7 +155,6 @@ class Documents extends BaseController
         $this->documents->update($id, $allowed);
         $updated = $this->documents->find($id);
 
-        $this->audit->log('update', 'document', $id, $doc, $updated);
 
         unset($updated['file_path'], $updated['file_hash']);
         return $this->response->setJSON(['document' => $updated, 'csrf_hash' => csrf_hash()]);
@@ -182,7 +176,6 @@ class Documents extends BaseController
         }
 
         $this->documents->update($id, ['is_active' => 0]);
-        $this->audit->log('delete', 'document', $id, $doc, ['is_active' => 0]);
 
         return $this->response->setJSON(['success' => true, 'csrf_hash' => csrf_hash()]);
     }

@@ -20,8 +20,7 @@ $province     = $settings['province']      ?? 'Province';
   
   <!-- Design System -->
   <link rel="stylesheet" href="<?= base_url('assets/css/bmis-design-system.css') ?>">
-
-  <style>
+    <style>
     body {
         margin: 0;
         min-height: 100vh;
@@ -29,12 +28,11 @@ $province     = $settings['province']      ?? 'Province';
         align-items: center;
         justify-content: center;
         background-color: var(--c-navy);
-        background-image: linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.85)), url('<?= base_url("assets/img/wowow.jpg") ?>');
+        background-image: linear-gradient(rgba(15, 23, 42, 0.5), rgba(15, 23, 42, 0.7)), url('<?= base_url("assets/img/wowow.jpg") ?>');
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
         font-family: var(--font);
-        color: #f8fafc;
     }
     .login-wrapper {
         width: 100%;
@@ -47,35 +45,6 @@ $province     = $settings['province']      ?? 'Province';
     @keyframes fadeUp {
         to { opacity: 1; transform: translateY(0); }
     }
-    .ds-card.glass-card {
-        background: rgba(15, 23, 42, 0.65) !important;
-        backdrop-filter: blur(24px) !important;
-        -webkit-backdrop-filter: blur(24px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-    }
-    .glass-card .ds-input-label {
-        color: rgba(255, 255, 255, 0.85) !important;
-    }
-    .glass-card .ds-input {
-        background: rgba(255, 255, 255, 0.08) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        color: #fff !important;
-    }
-    .glass-card .ds-input:focus {
-        background: rgba(255, 255, 255, 0.12) !important;
-        border-color: var(--c-teal) !important;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
-    }
-    .glass-card .ds-input::placeholder {
-        color: rgba(255, 255, 255, 0.3) !important;
-    }
-    .glass-card i.fas {
-        color: rgba(255, 255, 255, 0.5) !important;
-    }
-    .glass-card label[for="remember"] {
-        color: rgba(255, 255, 255, 0.75) !important;
-    }
     .logo-container {
         text-align: center;
         margin-bottom: 24px;
@@ -85,20 +54,23 @@ $province     = $settings['province']      ?? 'Province';
         height: 80px;
         border-radius: 50%;
         border: 3px solid var(--white);
-        box-shadow: var(--shadow);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         margin-bottom: 16px;
         object-fit: cover;
     }
     .portal-title {
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 800;
         color: #ffffff;
         margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
     .portal-subtitle {
-        font-size: 13.5px;
-        color: rgba(255, 255, 255, 0.75);
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.9);
         margin-top: 4px;
+        font-weight: 500;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
     .flash-error {
         background: var(--c-rose-bg);
@@ -115,12 +87,17 @@ $province     = $settings['province']      ?? 'Province';
     .login-footer {
         text-align: center;
         margin-top: 24px;
-        font-size: 11.5px;
-        color: rgba(255, 255, 255, 0.6);
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.8);
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
     .login-footer a {
-        color: var(--c-blue);
-        text-decoration: none;
+        color: #fff;
+        text-decoration: underline;
+        opacity: 0.9;
+    }
+    .login-footer a:hover {
+        opacity: 1;
     }
   </style>
 </head>
@@ -129,8 +106,8 @@ $province     = $settings['province']      ?? 'Province';
   <div class="login-wrapper">
     <div class="logo-container">
       <div style="display: flex; justify-content: center; gap: 16px; margin-bottom: 16px;">
-        <img src="<?= base_url('assets/img/ilog.png') ?>" alt="Logo 1" style="margin-bottom: 0; border: 3px solid rgba(255, 255, 255, 0.8);">
-        <img src="<?= base_url('assets/img/tabu.jpg') ?>" alt="Logo 2" style="margin-bottom: 0; border: 3px solid rgba(255, 255, 255, 0.8);">
+        <img src="<?= base_url('assets/img/ilog.png') ?>" alt="Logo 1">
+        <img src="<?= base_url('assets/img/tabu.jpg') ?>" alt="Logo 2">
       </div>
       <h1 class="portal-title"><?= esc($barangay) ?>, <?= esc($municipality) ?></h1>
       <div class="portal-subtitle">Smart Governance Portal</div>
@@ -143,7 +120,7 @@ $province     = $settings['province']      ?? 'Province';
       </div>
     <?php endif; ?>
 
-    <div class="ds-card glass-card">
+    <div class="ds-card shadow-lg" style="border-radius:16px;overflow:hidden;border:none">
       <form id="loginForm" action="<?= base_url('/auth') ?>" method="post" autocomplete="off">
         <?= csrf_field() ?>
         

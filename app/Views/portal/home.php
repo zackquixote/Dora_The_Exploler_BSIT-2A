@@ -3,18 +3,7 @@
 
 <div class="af-container">
 
-    <!-- Flash Messages -->
-    <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success af-alert" style="display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-weight: 600; animation: slideDown 0.3s ease;">
-            <i class="fas fa-check-circle" style="font-size: 18px;"></i> <?= session()->getFlashdata('success') ?>
-        </div>
-    <?php endif; ?>
 
-    <?php if (session()->getFlashdata('error')): ?>
-        <div class="alert alert-danger af-alert" style="display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-weight: 600; animation: slideDown 0.3s ease;">
-            <i class="fas fa-exclamation-circle" style="font-size: 18px;"></i> <?= session()->getFlashdata('error') ?>
-        </div>
-    <?php endif; ?>
 
     <!-- Welcome Header -->
     <div style="margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
@@ -33,6 +22,37 @@
             </div>
         </div>
     </div>
+
+    <!-- Announcements Section -->
+    <?php if (!empty($announcements)): ?>
+    <div style="margin-bottom:32px;">
+        <h3 class="ds-section-label" style="font-size: 12px; margin-bottom: 12px;">Barangay Announcements</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <?php foreach ($announcements as $ann): ?>
+                <div style="background:white;border-radius:12px;border:1px solid var(--border);padding:20px;box-shadow:var(--shadow-sm);display:flex;gap:20px;align-items:flex-start;">
+                    <?php if (!empty($ann['image_url'])): ?>
+                        <div style="width:120px;height:120px;border-radius:8px;overflow:hidden;flex-shrink:0;">
+                            <img src="<?= base_url(esc($ann['image_url'])) ?>" alt="Announcement Image" style="width:100%;height:100%;object-fit:cover;">
+                        </div>
+                    <?php endif; ?>
+                    <div style="flex:1;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                            <h4 style="margin:0;font-size:18px;font-weight:700;color:var(--ink);"><?= esc($ann['title']) ?></h4>
+                            <?php if ($ann['is_pinned']): ?>
+                                <span class="ds-badge ds-badge-amber" style="font-size:10px;padding:2px 6px;"><i class="fas fa-thumbtack"></i> Pinned</span>
+                            <?php endif; ?>
+                        </div>
+                        <div style="font-size:12px;color:var(--ink-muted);margin-bottom:12px;">
+                            <i class="fas fa-clock" style="margin-right:4px;"></i> <?= date('F d, Y \a\t h:i A', strtotime($ann['created_at'])) ?>
+                        </div>
+                        <p style="margin:0;font-size:14px;color:var(--ink);line-height:1.6;white-space:pre-wrap;"><?= esc($ann['body']) ?></p>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
 
     <!-- Quick Actions Grid -->
     <h3 class="ds-section-label" style="font-size: 12px; margin-bottom: 16px;">Quick Services</h3>
@@ -57,6 +77,17 @@
                 </div>
                 <h4 style="font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 8px;">My Digital ID</h4>
                 <p style="font-size: 13px; color: var(--ink-muted); margin: 0;">View or print your PVC-ready Digital Barangay ID.</p>
+            </div>
+        </a>
+
+        <!-- Request Certificate -->
+        <a href="<?= base_url('portal/certificates/request') ?>" style="text-decoration: none;" class="af-card">
+            <div class="af-card-body" style="text-align: center; padding: 32px 24px;">
+                <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(139,92,246,0.12); color: #8b5cf6; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px;">
+                    <i class="fas fa-file-signature"></i>
+                </div>
+                <h4 style="font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 8px;">Request Certificate</h4>
+                <p style="font-size: 13px; color: var(--ink-muted); margin: 0;">Online request for Clearances, Indigency, and more.</p>
             </div>
         </a>
 
@@ -94,7 +125,7 @@
         </a>
 
         <!-- Community Events -->
-        <a href="<?= base_url('advanced/events') ?>" style="text-decoration: none;" class="af-card theme-event">
+        <a href="<?= base_url('portal/events') ?>" style="text-decoration: none;" class="af-card theme-event">
             <div class="af-card-body" style="text-align: center; padding: 32px 24px;">
                 <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(16,185,129,0.12); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px;">
                     <i class="fas fa-calendar-alt"></i>

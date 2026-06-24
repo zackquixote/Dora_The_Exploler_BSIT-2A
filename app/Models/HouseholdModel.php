@@ -32,18 +32,10 @@ class HouseholdModel extends Model
     // Timestamps are not used because we don't supply 'created_at'
     protected $useTimestamps = false;
 
-    protected $allowedSitios = [
-        'Purok Malipayon',
-        'Purok Masagana',
-        'Purok Cory',
-        'Purok Kawayan',
-        'Purok Pagla-um',
-    ];
-
     protected $validationRules = [
         'household_no' => 'required|min_length[3]|max_length[50]',
         'address'      => 'required|max_length[255]',
-        'sitio'        => 'required|in_list[Purok Malipayon,Purok Masagana,Purok Cory,Purok Kawayan,Purok Pagla-um]',
+        'sitio'        => 'required|max_length[255]',
         'house_type'   => 'permit_empty|in_list[Concrete,Semi-Concrete,Wood,Light Materials]'
     ];
 

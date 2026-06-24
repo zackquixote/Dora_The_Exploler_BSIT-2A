@@ -7,11 +7,12 @@
         <p class="af-subtitle">Track the status of your filed incident reports and blotter cases.</p>
     </div>
 
-    <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success af-alert" style="display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-weight: 600;">
-            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
-        </div>
-    <?php endif; ?>
+    <style>
+        .cases-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 768px) {
+            .cases-grid { grid-template-columns: 1fr; gap: 8px; }
+        }
+    </style>
 
     <?php if (empty($cases)): ?>
         <div class="af-card" style="text-align: center; padding: 60px 40px;">
@@ -80,7 +81,7 @@
 
                     <!-- Card Body -->
                     <div style="padding: 20px 24px;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="cases-grid">
                             <div>
                                 <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ink-muted); letter-spacing: 0.5px; margin-bottom: 4px;">Incident Type</div>
                                 <div style="font-size: 14px; font-weight: 600; color: var(--ink);"><?= esc($case['incident_type']) ?></div>
@@ -106,10 +107,41 @@
                             </div>
                         <?php endif; ?>
 
-                        <?php if (!empty($case['hearing_count']) && $case['hearing_count'] > 0): ?>
-                            <div style="margin-top: 14px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: #3b82f6; font-weight: 600;">
-                                <i class="fas fa-calendar-check"></i>
-                                <?= $case['hearing_count'] ?> hearing<?= $case['hearing_count'] > 1 ? 's' : '' ?> scheduled
+                        <?php if (!empty($case['hearings'])): ?>
+                            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border);">
+                                <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--ink); letter-spacing: 0.5px; margin-bottom: 16px;">Case Timeline</div>
+                                
+                                <div style="position: relative; padding-left: 16px; border-left: 2px solid var(--border); margin-left: 8px;">
+                                    
+                                    <!-- Filed -->
+                                    <div style="position: relative; margin-bottom: 20px;">
+                                        <div style="position: absolute; left: -21px; top: 2px; width: 10px; height: 10px; border-radius: 50%; background: var(--c-blue); border: 2px solid white;"></div>
+                                        <div style="font-size: 13px; font-weight: 700; color: var(--ink);">Case Filed</div>
+                                        <div style="font-size: 12px; color: var(--ink-muted);"><?= date('M d, Y h:i A', strtotime($case['created_at'])) ?></div>
+                                    </div>
+
+                                    <!-- Hearings -->
+                                    <?php foreach ($case['hearings'] as $index => $hearing): ?>
+                                        <div style="position: relative; margin-bottom: <?= ($index === count($case['hearings']) - 1 && $case['status'] !== 'Resolved' && $case['status'] !== 'Dismissed') ? '0' : '20px' ?>;">
+                                            <div style="position: absolute; left: -21px; top: 2px; width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; border: 2px solid white;"></div>
+                                            <div style="font-size: 13px; font-weight: 700; color: var(--ink);">Hearing Scheduled</div>
+                                            <div style="font-size: 12px; color: var(--ink-muted);"><i class="fas fa-calendar-alt" style="margin-right: 4px;"></i> <?= date('M d, Y h:i A', strtotime($hearing['scheduled_at'])) ?></div>
+                                            <?php if (!empty($hearing['notes'])): ?>
+                                                <div style="font-size: 12px; color: var(--ink-soft); margin-top: 4px; padding: 8px; background: rgba(245,158,11,0.05); border-radius: 6px; border-left: 2px solid #f59e0b;">
+                                                    <?= esc($hearing['notes']) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+
+                                    <!-- Resolved/Dismissed -->
+                                    <?php if ($case['status'] === 'Resolved' || $case['status'] === 'Settled' || $case['status'] === 'Dismissed'): ?>
+                                        <div style="position: relative;">
+                                            <div style="position: absolute; left: -21px; top: 2px; width: 10px; height: 10px; border-radius: 50%; background: <?= $case['status'] === 'Dismissed' ? '#ef4444' : '#10b981' ?>; border: 2px solid white;"></div>
+                                            <div style="font-size: 13px; font-weight: 700; color: var(--ink);">Case <?= esc($case['status']) ?></div>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         <?php endif; ?>
                     </div>

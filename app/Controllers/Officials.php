@@ -126,7 +126,7 @@ class Officials extends BaseController
             $photo = 'officials/' . $newName;
         }
 
-        $this->officialModel->insert([
+        $data = [
             'resident_id'    => $residentId,
             'position'       => $this->request->getPost('position'),
             'full_name'      => $fullName,
@@ -135,7 +135,9 @@ class Officials extends BaseController
             'is_active'      => 1,
             'term_start'     => $this->request->getPost('term_start') ?: null,
             'term_end'       => $this->request->getPost('term_end') ?: null,
-        ]);
+        ];
+
+        $this->officialModel->insert($data);
 
         $this->logModel->addLog("Added official: {$fullName} as " . $this->request->getPost('position'));
 
@@ -212,7 +214,7 @@ class Officials extends BaseController
             $photo = 'officials/' . $newName;
         }
 
-        $this->officialModel->update($id, [
+        $data = [
             'resident_id'    => $residentId,
             'position'       => $this->request->getPost('position'),
             'full_name'      => $fullName,
@@ -221,7 +223,9 @@ class Officials extends BaseController
             'is_active'      => (int) $this->request->getPost('is_active'),
             'term_start'     => $this->request->getPost('term_start') ?: null,
             'term_end'       => $this->request->getPost('term_end') ?: null,
-        ]);
+        ];
+
+        $this->officialModel->update($id, $data);
 
         $this->logModel->addLog("Updated official: {$fullName}");
 

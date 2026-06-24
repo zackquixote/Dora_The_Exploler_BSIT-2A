@@ -51,12 +51,23 @@
         </style>
     </head>
     <body>
-        <h2>Advanced Features (App\Controllers\AdvancedFeatures)</h2>
+        <h2>Health</h2>
         <ul>
-            <li class="defect">Api search health records</li>
-            <li class="defect">Api search business</li>
-            <li class="defect">Api active emergencies</li>
-            <li class="defect">Api events list</li>
+            <li class="success">Is defined app path</li>
+            <li class="success">Base url has been set</li>
+        </ul>
+        <h2>Id Card Service</h2>
+        <ul>
+            <li class="success">Get qr url contains resident and jwt</li>
+            <li class="success">Validate token delegates to token service</li>
+        </ul>
+        <h2>Token Service</h2>
+        <ul>
+            <li class="success">Generate and validate hmac token</li>
+            <li class="success">Tampered hmac fails</li>
+            <li class="success">Generate and validate jwt token</li>
+            <li class="success">Jwt subject mismatch fails</li>
+            <li class="success">Tampered jwt fails</li>
         </ul>
     </body>
 </html>

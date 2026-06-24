@@ -22,11 +22,7 @@
         </div>
     </div>
 
-    <?php if (session()->getFlashdata('success')): ?>
-        <div style="background:var(--c-teal-bg);color:var(--c-teal);padding:14px 20px;border-radius:var(--r-md);margin-bottom:24px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;border:1px solid rgba(var(--c-teal-rgb), 0.2)">
-            <i class="fas fa-check-circle" style="font-size:16px"></i> <?= esc(session()->getFlashdata('success')) ?>
-        </div>
-    <?php endif; ?>
+
 
     <!-- FILTER BAR -->
     <div class="ds-card" style="margin-bottom:14px">
@@ -51,7 +47,7 @@
                 <div><label class="ds-input-label">Purok</label>
                     <select id="filterPurok" class="ds-select">
                         <option value="">All Puroks</option>
-                        <?php foreach(['Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um'] as $p): ?>
+                        <?php foreach($purokList as $p): ?>
                             <option value="<?= $p ?>"><?= $p ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -67,13 +63,19 @@
             <div class="ds-card-title"><i class="fas fa-list"></i> Official Case Roster</div>
         </div>
         <div class="ds-card-body p0">
+            <?php if (empty($blotters)): ?>
+                <div class="ds-empty-state" style="border:none; margin:0; padding:80px 20px;">
+                    <i class="fas fa-gavel ds-empty-icon" style="color:var(--c-rose-soft); font-size:64px;"></i>
+                    <h4 class="ds-empty-title">No Cases Found</h4>
+                    <p class="ds-empty-text">There are no blotter records or incidents matching your current search criteria.</p>
+                    <a href="<?= base_url('blotter/create') ?>" class="ds-btn ds-btn-primary"><i class="fas fa-plus"></i> Add New Case</a>
+                </div>
+            <?php else: ?>
             <div style="overflow-x:auto">
                 <table class="ds-table" id="blotterTable">
                     <thead><tr><th>Case No.</th><th>Date</th><th>Purok</th><th>Complainant</th><th>Respondent</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody>
-                        <?php if (empty($blotters)): ?>
-                            <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--ink-soft)">No blotter records found.</td></tr>
-                        <?php else: foreach($blotters as $b):
+                        <?php foreach($blotters as $b):
                             $sc = match($b['status']) {
                                 'Pending'=>'ds-badge-amber','Settled'=>'ds-badge-teal','Dismissed'=>'ds-badge-gray',
                                 'For Hearing'=>'ds-badge-blue','Unsettled'=>'ds-badge-rose','Referred'=>'ds-badge-violet',
@@ -81,14 +83,14 @@
                             };
                         ?>
                         <tr data-status="<?= $b['status'] ?>" data-purok="<?= $b['purok'] ?? '' ?>">
-                            <td class="mono"><strong><?= esc($b['case_number']) ?></strong></td>
-                            <td><?= date('Y-m-d', strtotime($b['incident_date'])) ?></td>
-                            <td style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--ink-muted)"><?= esc($b['purok'] ?? '-') ?></td>
-                            <td><?= esc($b['complainant_name'] ?? 'N/A') ?></td>
-                            <td><?= esc($b['respondent_name'] ?? 'N/A') ?></td>
-                            <td><?= esc($b['incident_type']) ?></td>
-                            <td><span class="ds-badge <?= $sc ?>"><?= esc($b['status']) ?></span></td>
-                            <td style="white-space:nowrap">
+                            <td data-label="Case No" class="mono"><strong><?= esc($b['case_number']) ?></strong></td>
+                            <td data-label="Date"><?= date('Y-m-d', strtotime($b['incident_date'])) ?></td>
+                            <td data-label="Purok" style="font-size:10.5px;font-weight:700;text-transform:uppercase;color:var(--ink-muted)"><?= esc($b['purok'] ?? '-') ?></td>
+                            <td data-label="Complainant"><?= esc($b['complainant_name'] ?? 'N/A') ?></td>
+                            <td data-label="Respondent"><?= esc($b['respondent_name'] ?? 'N/A') ?></td>
+                            <td data-label="Type"><?= esc($b['incident_type']) ?></td>
+                            <td data-label="Status"><span class="ds-badge <?= $sc ?>"><?= esc($b['status']) ?></span></td>
+                            <td data-label="Actions" style="white-space:nowrap">
                                 <a href="<?= base_url('blotter/view/'.$b['id']) ?>" class="ds-action-btn ab-blue" title="View"><i class="fas fa-folder-open"></i></a>
                                 <a href="<?= base_url('blotter/edit/'.$b['id']) ?>" class="ds-action-btn ab-amber" title="Edit"><i class="fas fa-edit"></i></a>
                                 <form action="<?= base_url('blotter/delete/'.$b['id']) ?>" method="POST" style="display:inline-block" data-confirm="Delete Case <?= esc($b['case_number']) ?>?">
@@ -97,10 +99,11 @@
                                 </form>
                             </td>
                         </tr>
-                        <?php endforeach; endif; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

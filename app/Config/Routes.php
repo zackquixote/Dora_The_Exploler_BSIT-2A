@@ -28,14 +28,32 @@ $routes->addPlaceholder('segment', '[^/]+');
  * Handles the main portal access, login processing, and logout.
  */
 $routes->get('/', 'Portal::index');
-$routes->match(['get', 'post'], 'login', 'Auth::index');
-$routes->post('auth', 'Auth::auth');
+$routes->match(['get', 'post'], 'login', 'Auth::index', ['filter' => 'throttle:3,1']);
+$routes->post('auth', 'Auth::auth', ['filter' => 'throttle:3,1']);
 $routes->get('logout', 'Auth::logout');
-$routes->match(['get', 'post'], 'portal/login', 'ResidentPortalAuth::login');
+$routes->match(['get', 'post'], 'portal/login', 'ResidentPortalAuth::login', ['filter' => 'throttle:5,1']);
 $routes->match(['get', 'post'], 'portal/register', 'ResidentPortalAuth::register');
+$routes->get('portal/verification-status', 'ResidentPortalAuth::verificationStatus');
+$routes->match(['get', 'post'], 'portal/resubmit-verification', 'ResidentPortalAuth::resubmitVerification');
+$routes->match(['get', 'post'], 'portal/verify-otp', 'ResidentPortalAuth::verifyOtp', ['filter' => 'throttle:5,1']);
+$routes->post('portal/resend-otp', 'ResidentPortalAuth::resendOtp', ['filter' => 'throttle:3,1']);
+$routes->match(['get', 'post'], 'portal/forgot-password', 'ResidentPortalAuth::forgotPassword');
+$routes->match(['get', 'post'], 'portal/reset-password', 'ResidentPortalAuth::resetPassword');
 $routes->get('portal/logout', 'ResidentPortalAuth::logout');
 $routes->get('portal/setup', 'ResidentPortalAuth::forceSetup');
 $routes->get('portal/migrate', 'ResidentPortalAuth::migrateDB');
+$routes->post('debug/probe', 'Debug::probe');
+
+// System Performance Monitor (Admin only)
+$routes->group('system-monitor', ['filter' => 'role:admin'], function ($routes) {
+    $routes->get('/', 'SystemMonitor::index');
+    $routes->get('metrics', 'SystemMonitor::getMetrics');
+    $routes->post('clear-cache', 'SystemMonitor::clearCache');
+    $routes->post('optimize-database', 'SystemMonitor::optimizeDatabase');
+});
+
+// QR Check-in endpoint — accessible by logged-in admins/staff
+$routes->get('events/checkin/(:num)/(:segment)', 'EventCheckIn::scan/$1/$2', ['filter' => 'loggedIn']);
 
 // Authenticated Resident Portal routes — protected by portalAuth filter
 $routes->group('portal', ['filter' => 'portalAuth'], function ($routes) {
@@ -43,16 +61,27 @@ $routes->group('portal', ['filter' => 'portalAuth'], function ($routes) {
     $routes->get('file-blotter', 'Portal::fileBlotter');
     $routes->post('blotter/submit', 'Portal::submitBlotter');
     $routes->get('facilities', 'Portal::facilities');
+    $routes->get('facilities/calendar-data', 'Portal::facilityCalendarData');
     $routes->post('facilities/book', 'Portal::bookFacility');
     $routes->post('facilities/cancel/(:num)', 'Portal::cancelBooking/$1');
     $routes->get('my-id', 'Portal::myId');
     $routes->get('my-cases', 'Portal::myCases');
+    $routes->get('certificates', 'Portal::myCertificates');
+    $routes->get('certificates/request', 'Portal::requestCertificate');
+    $routes->post('certificates/request', 'Portal::submitCertificateRequest');
+    $routes->post('certificates/cancel/(:num)', 'Portal::cancelCertificateRequest/$1');
+    $routes->get('notifications', 'Portal::notifications');
+    $routes->post('notifications/read', 'Portal::markNotificationsRead');
     $routes->get('profile', 'Portal::profile');
     $routes->post('profile/update', 'Portal::updateProfile');
+    // Events
+    $routes->get('events', 'PortalEvents::index');
+    $routes->post('events/register/(:num)', 'PortalEvents::register/$1');
+    $routes->get('events/ticket/(:num)', 'PortalEvents::ticket/$1');
+    $routes->post('events/cancel/(:num)', 'PortalEvents::cancel/$1');
 });
 
 $routes->get('verify/(:num)/(:segment)', 'IdGenerator::verify/$1/$2', ['filter' => 'throttle:5,1']);
-$routes->post('debug/probe', 'DebugController::probe');
 
 
 /**
@@ -303,6 +332,11 @@ $routes->group('advanced', ['filter' => 'loggedIn'], function ($routes) {
         $routes->get('analytics', 'AdvancedFeatures::analytics');
         $routes->get('notifications', 'AdvancedFeatures::notifications');
         $routes->match(['get', 'post'], 'send-notification', 'AdvancedFeatures::sendBulkNotification');
+        $routes->post('get-recipient-count', 'AdvancedFeatures::getRecipientCount');
+        $routes->get('load-template/(:num)', 'AdvancedFeatures::loadTemplate/$1');
+        $routes->get('load-draft/(:num)', 'AdvancedFeatures::loadDraft/$1');
+        $routes->post('delete-draft/(:num)', 'AdvancedFeatures::deleteDraft/$1');
+        $routes->get('search-residents', 'AdvancedFeatures::searchResidents');
         $routes->get('gmail', 'AdvancedFeatures::gmail');
         $routes->get('gmail/connect', 'AdvancedFeatures::gmailConnect');
         $routes->get('gmail/callback', 'AdvancedFeatures::gmailCallback');
@@ -355,9 +389,39 @@ $routes->group('admin', [
     $routes->get('certificateTypes/edit/(:num)', 'CertificateTypes::edit/$1');
     $routes->post('certificateTypes/update/(:num)', 'CertificateTypes::update/$1');
     $routes->post('certificateTypes/delete/(:num)', 'CertificateTypes::delete/$1');
+    // Announcements
+    $routes->get('announcements', 'Announcements::index');
+    $routes->match(['get', 'post'], 'announcements/create', 'Announcements::create');
+    $routes->post('announcements/delete/(:num)', 'Announcements::delete/$1');
 
-    // Audit Logs (new, from audit_logs table)
-    $routes->get('audit-logs', 'AuditLogs::index');
+    // Portal Accounts Approval
+    $routes->get('portal-accounts', 'PortalAccounts::index');
+    $routes->get('portal-accounts/verification/(:num)', 'PortalAccounts::viewVerification/$1');
+    $routes->post('portal-accounts/request-resubmission/(:num)', 'PortalAccounts::requestResubmission/$1');
+    $routes->get('portal-accounts/file/(:num)', 'PortalAccounts::viewFile/$1');
+    $routes->post('portal-accounts/approve/(:num)', 'PortalAccounts::approve/$1');
+    $routes->post('portal-accounts/reject/(:num)', 'PortalAccounts::reject/$1');
+    $routes->post('portal-accounts/suspend/(:num)', 'PortalAccounts::suspend/$1');
+    $routes->post('portal-accounts/reactivate/(:num)', 'PortalAccounts::reactivate/$1');
+    $routes->post('portal-accounts/reset-password/(:num)', 'PortalAccounts::resetPassword/$1');
+
+    // Online Requests (Portal Certificates & Blotters)
+    $routes->get('online-requests', 'OnlineRequests::index');
+    $routes->post('online-requests/approve-certificate/(:num)', 'OnlineRequests::approveCertificate/$1');
+    $routes->post('online-requests/reject-certificate/(:num)', 'OnlineRequests::rejectCertificate/$1');
+    $routes->post('online-requests/acknowledge-blotter/(:num)', 'OnlineRequests::acknowledgeBlotter/$1');
+
+    // Facility Bookings
+    $routes->get('facility-bookings', 'FacilityBookings::index');
+    $routes->post('facility-bookings/approve/(:num)', 'FacilityBookings::approve/$1');
+    $routes->post('facility-bookings/reject/(:num)', 'FacilityBookings::reject/$1');
+
+    // Events Management
+    $routes->get('events', 'Events::index');
+    $routes->get('events/create', 'Events::create');
+    $routes->post('events/store', 'Events::store');
+    $routes->get('events/view/(:num)', 'Events::view/$1');
+    $routes->post('events/cancel/(:num)', 'Events::cancel/$1');
 
 
     /**

@@ -7,7 +7,6 @@ use App\Models\DocumentModel;
 use App\Models\EventModel;
 use App\Models\EventParticipantModel;
 use App\Models\ResidentModel;
-use App\Services\AuditService;
 use App\Services\PdfService;
 
 /**
@@ -20,7 +19,6 @@ class EventParticipants extends BaseController
     protected ResidentModel $residents;
     protected DocumentModel $documents;
     protected PdfService $pdf;
-    protected AuditService $audit;
     protected string $secretKey;
 
     public function __construct()
@@ -30,7 +28,6 @@ class EventParticipants extends BaseController
         $this->residents    = new ResidentModel();
         $this->documents    = new DocumentModel();
         $this->pdf          = new PdfService();
-        $this->audit        = new AuditService();
         $this->secretKey    = env('QR_SECRET_KEY', 'default_secret_key_change_this');
     }
 
@@ -125,7 +122,6 @@ class EventParticipants extends BaseController
         $participant = $this->participants->find($participantId);
         $qrData = base_url("events/checkin/{$participantId}/{$token}");
 
-        $this->audit->log('register', 'event_participant', $participantId, null, $participant);
 
         return $this->jsonSuccess([
             'event'       => $event,
@@ -198,7 +194,6 @@ class EventParticipants extends BaseController
         ]);
 
         $updated = $this->participants->find($participantId);
-        $this->audit->log('check_in', 'event_participant', $participantId, $old, $updated);
 
         return $this->jsonSuccess(['participant' => $updated], 'Checked in');
     }
@@ -231,7 +226,6 @@ class EventParticipants extends BaseController
         ]);
 
         $updated = $this->participants->find($participantId);
-        $this->audit->log('check_out', 'event_participant', $participantId, $old, $updated);
 
         return $this->jsonSuccess(['participant' => $updated], 'Checked out');
     }
@@ -296,7 +290,6 @@ class EventParticipants extends BaseController
         ]);
 
         $updated = $this->participants->find($participantId);
-        $this->audit->log('certificate_generated', 'event_participant', $participantId, $participant, $updated);
 
         return $this->jsonSuccess([
             'participant' => $updated,

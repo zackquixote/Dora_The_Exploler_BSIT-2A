@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="8" assertions="10" errors="3" failures="0" skipped="0" time="0.570195">
+    <testsuite name="HealthTest" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\HealthTest.php" tests="2" assertions="2" errors="1" failures="0" skipped="0" time="0.450759">
+      <testcase name="testIsDefinedAppPath" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\HealthTest.php" line="12" class="HealthTest" classname="HealthTest" assertions="1" time="0.301938"/>
+      <testcase name="testBaseUrlHasBeenSet" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\HealthTest.php" line="17" class="HealthTest" classname="HealthTest" assertions="1" time="0.148822">
+        <error type="Error">HealthTest::testBaseUrlHasBeenSet&#13;
+Error: Typed property Config\App::$baseURL must not be accessed before initialization
+&#13;
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\HealthTest.php:45</error>
+      </testcase>
+    </testsuite>
+    <testsuite name="IdCardServiceTest" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\IdCardServiceTest.php" tests="2" assertions="0" errors="2" failures="0" skipped="0" time="0.097903">
+      <testcase name="testGetQrUrlContainsResidentAndJwt" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\IdCardServiceTest.php" line="12" class="IdCardServiceTest" classname="IdCardServiceTest" assertions="0" time="0.066380">
+        <error type="CodeIgniter\Exceptions\CriticalError">IdCardServiceTest::testGetQrUrlContainsResidentAndJwt&#13;
+CodeIgniter\Exceptions\CriticalError: The required PHP extension "sqlite3" is not loaded. Install and enable it to use "SQLite3" driver.
+&#13;
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:182
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:59
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Config.php:84
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Model.php:155
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\app\Services\IdCardService.php:17
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\IdCardServiceTest.php:18</error>
+      </testcase>
+      <testcase name="testValidateTokenDelegatesToTokenService" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\IdCardServiceTest.php" line="35" class="IdCardServiceTest" classname="IdCardServiceTest" assertions="0" time="0.031522">
+        <error type="CodeIgniter\Exceptions\CriticalError">IdCardServiceTest::testValidateTokenDelegatesToTokenService&#13;
+CodeIgniter\Exceptions\CriticalError: The required PHP extension "sqlite3" is not loaded. Install and enable it to use "SQLite3" driver.
+&#13;
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:182
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Database.php:59
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Database\Config.php:84
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\vendor\codeigniter4\framework\system\Model.php:155
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\app\Services\IdCardService.php:17
+C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\IdCardServiceTest.php:41</error>
+      </testcase>
+    </testsuite>
+    <testsuite name="TokenServiceTest" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\TokenServiceTest.php" tests="4" assertions="8" errors="0" failures="0" skipped="0" time="0.021532">
+      <testcase name="testGenerateAndValidateHmacToken" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\TokenServiceTest.php" line="11" class="TokenServiceTest" classname="TokenServiceTest" assertions="2" time="0.009024"/>
+      <testcase name="testTamperedHmacFails" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\TokenServiceTest.php" line="22" class="TokenServiceTest" classname="TokenServiceTest" assertions="2" time="0.007762"/>
+      <testcase name="testGenerateAndValidateJwtToken" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\TokenServiceTest.php" line="37" class="TokenServiceTest" classname="TokenServiceTest" assertions="2" time="0.002491"/>
+      <testcase name="testTamperedJwtFails" file="C:\xampp\htdocs\Dora_The_Exploler_BSIT-2A\tests\unit\TokenServiceTest.php" line="45" class="TokenServiceTest" classname="TokenServiceTest" assertions="2" time="0.002256"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

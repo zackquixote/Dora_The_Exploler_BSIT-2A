@@ -94,7 +94,7 @@ CREATE TABLE `blotter_records` (
   `incident_type` varchar(50) NOT NULL,
   `incident_date` date NOT NULL,
   `incident_location` varchar(255) DEFAULT NULL,
-  `purok` enum('Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um') DEFAULT NULL,
+  `purok` varchar(255) DEFAULT NULL,
   `details` text NOT NULL,
   `status` enum('Pending','Investigating','Ongoing','For Hearing','Settled','Dismissed','Referred','Unsettled') DEFAULT 'Pending',
   `action_taken` text DEFAULT NULL,
@@ -184,7 +184,7 @@ CREATE TABLE `households` (
   `street_address` varchar(255) DEFAULT NULL,
   `head_resident_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `sitio` enum('Purok Malipayon','Purok Masagana','Purok Cory','Purok Kawayan','Purok Pagla-um') DEFAULT NULL,
+  `sitio` varchar(255) DEFAULT NULL,
   `house_type` enum('Concrete','Semi-Concrete','Wood','Light Materials') DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
